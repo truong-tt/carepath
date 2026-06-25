@@ -117,7 +117,7 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         learning_rate=args.learning_rate,
         logging_steps=10,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=max(50, args.max_steps // 5),
         save_steps=max(50, args.max_steps // 5),
         save_total_limit=2,
