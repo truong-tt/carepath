@@ -1,0 +1,171 @@
+Metadata-Version: 2.4
+Name: hopegait
+Version: 0.1.0
+Summary: HopeGait MVP backend: Vietnamese medical ASR correction and SOAP-note drafting.
+Requires-Python: <3.14,>=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn[standard]>=0.30.0
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: huggingface-hub>=0.24.0
+Requires-Dist: sherpa-onnx>=1.10.0
+Requires-Dist: soundfile>=0.12.0
+Requires-Dist: numpy>=1.24.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
+Provides-Extra: training
+Requires-Dist: accelerate>=0.33.0; extra == "training"
+Requires-Dist: bitsandbytes>=0.43.0; extra == "training"
+Requires-Dist: datasets[audio]>=2.20.0; extra == "training"
+Requires-Dist: evaluate>=0.4.2; extra == "training"
+Requires-Dist: jiwer>=3.0.4; extra == "training"
+Requires-Dist: peft>=0.12.0; extra == "training"
+Requires-Dist: sentencepiece>=0.2.0; extra == "training"
+Requires-Dist: torch>=2.3.0; extra == "training"
+Requires-Dist: transformers>=4.44.0; extra == "training"
+Requires-Dist: trl>=0.9.6; extra == "training"
+
+# HopeGait
+
+HopeGait is a backend-first MVP for Vietnamese medical staff:
+
+1. Upload an audio clip.
+2. Transcribe it with Gipformer ONNX ASR.
+3. Correct ASR/code-switching errors with retrieval-assisted GEC.
+4. Generate a draft Vietnamese SOAP note for clinician review.
+
+The MVP is intentionally designed so demo success does not depend on a trained GEC model. Training is a gated upgrade path: the trained model must beat raw Gipformer and the LLM/RAG baseline before it is used in the app.
+
+## Project Shape
+
+- `apps/api/hopegait`: FastAPI runtime backend.
+- `data/medical_lexicon.json`: editable Vietnamese/English medical lexicon seed.
+- `scripts/create_gec_pairs.py`: Colab-friendly ViMedCSS to `raw_asr -> gold_text` data creation.
+- `scripts/evaluate_corrections.py`: baseline metric reporting.
+- `notebooks/HopeGait_GEC_Colab.ipynb`: training/evaluation notebook skeleton.
+- `tests`: dependency-light unit tests.
+
+## Python Version
+
+Use Python 3.11, 3.12, or 3.13. Gipformer declares Python 3.9-3.13 support; this project blocks Python 3.14 in `pyproject.toml` to avoid unsupported ML wheels.
+
+## Local API Setup
+
+Recommended first run:
+
+```powershell
+.\scripts\setup_local.ps1
+.\scripts\run_api.ps1
+```
+
+The setup script requires Python 3.11-3.13 and defaults to `py -3.12`.
+If Python 3.12 is installed at a custom path:
+
+```powershell
+.\scripts\setup_local.ps1 -Python "C:\Path\To\python.exe"
+```
+
+Manual equivalent:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+Copy-Item .env.local.example .env
+python scripts/smoke_backend.py
+uvicorn hopegait.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000
+```
+
+If your machine only has the Windows Store `python.exe`, install Python 3.12 first.
+
+## First Backend Smoke Test
+
+Run this before testing real audio:
+
+```powershell
+python scripts/smoke_backend.py
+```
+
+The smoke test forces `ASR_PROVIDER=mock`, `ALLOW_MOCK_ASR=true`, and
+`LLM_PROVIDER=offline` for that process. It validates:
+
+1. `GET /api/v1/health`
+2. `POST /api/v1/corrections`
+3. `POST /api/v1/soap-notes` with a generated WAV file
+
+Do not debug Gipformer until this smoke test passes.
+
+## Enabling Real Gipformer ASR
+
+After the mock/offline backend passes:
+
+```powershell
+Copy-Item .env.example .env -Force
+.\scripts\run_api.ps1
+```
+
+The first real ASR request downloads Gipformer ONNX artifacts from Hugging Face.
+
+## Demo API
+
+Health:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
+```
+
+Audio to SOAP:
+
+```powershell
+curl.exe -X POST http://127.0.0.1:8000/api/v1/soap-notes `
+  -F "audio=@C:\path\to\demo.wav" `
+  -F "encounter_context=Phòng khám nội tổng quát"
+```
+
+Correction-only debugging:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/corrections `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{"raw_transcript":"bệnh nhân đau ngực spo2 chín mươi tám phần trăm"}'
+```
+
+## Runtime Modes
+
+- `ASR_PROVIDER=gipformer`: real Gipformer ONNX inference.
+- `ASR_PROVIDER=mock` and `ALLOW_MOCK_ASR=true`: frontend/debug fallback only.
+- `LLM_PROVIDER=offline`: deterministic local fallback for development.
+- `LLM_PROVIDER=openai_compatible`: calls `/chat/completions` at `LLM_BASE_URL`.
+
+The API always sets `review_required: true` because the SOAP note is a draft clinical document.
+
+## GEC Methodology
+
+Do not train directly on clean ViMedCSS text. First create GEC pairs:
+
+```text
+Gipformer ASR hypothesis -> ViMedCSS gold segment_text
+```
+
+Then compare:
+
+1. Raw Gipformer.
+2. LLM/RAG correction.
+3. Trained QLoRA GEC model.
+
+The trained GEC model is accepted only if validation and hard split metrics improve, especially code-switched term recall/F1 and number/unit preservation.
+
+## Colab Training
+
+Open `notebooks/HopeGait_GEC_Colab.ipynb` in Google Colab. It defaults to:
+
+- Model: `Qwen/Qwen3-4B-Instruct-2507`
+- OOM fallback: `Qwen/Qwen2.5-3B-Instruct`
+- Quantization: 4-bit QLoRA
+- Dataset: `tensorxt/ViMedCSS`
+
+The notebook is structured to produce metrics before training and to keep train/validation/test/hard splits frozen.

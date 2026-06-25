@@ -1,0 +1,215 @@
+{
+  "terms": [
+    {
+      "term": "SpO2",
+      "category": "vital_sign",
+      "vietnamese": "độ bão hòa oxy",
+      "aliases": ["spo2", "saturation", "oxy máu"]
+    },
+    {
+      "term": "ECG",
+      "category": "test",
+      "vietnamese": "điện tâm đồ",
+      "aliases": ["ekg", "electrocardiogram"]
+    },
+    {
+      "term": "HbA1c",
+      "category": "biomarker",
+      "vietnamese": "đường huyết trung bình",
+      "aliases": ["hba1c", "a1c"]
+    },
+    {
+      "term": "glucose",
+      "category": "biomarker",
+      "vietnamese": "đường huyết",
+      "aliases": ["blood sugar", "đường máu"]
+    },
+    {
+      "term": "insulin",
+      "category": "medication",
+      "vietnamese": "insulin",
+      "aliases": ["in-su-lin"]
+    },
+    {
+      "term": "metformin",
+      "category": "medication",
+      "vietnamese": "metformin",
+      "aliases": ["met for min", "mét-pho-min"]
+    },
+    {
+      "term": "hypertension",
+      "category": "condition",
+      "vietnamese": "tăng huyết áp",
+      "aliases": ["cao huyết áp", "high blood pressure"]
+    },
+    {
+      "term": "diabetes mellitus",
+      "category": "condition",
+      "vietnamese": "đái tháo đường",
+      "aliases": ["tiểu đường", "diabetes"]
+    },
+    {
+      "term": "COPD",
+      "category": "condition",
+      "vietnamese": "bệnh phổi tắc nghẽn mạn tính",
+      "aliases": ["copd", "bệnh phổi tắc nghẽn"]
+    },
+    {
+      "term": "asthma",
+      "category": "condition",
+      "vietnamese": "hen phế quản",
+      "aliases": ["hen suyễn"]
+    },
+    {
+      "term": "BMI",
+      "category": "biometric",
+      "vietnamese": "chỉ số khối cơ thể",
+      "aliases": ["body mass index"]
+    },
+    {
+      "term": "creatinine",
+      "category": "biomarker",
+      "vietnamese": "creatinin",
+      "aliases": ["creatinin"]
+    },
+    {
+      "term": "eGFR",
+      "category": "biomarker",
+      "vietnamese": "mức lọc cầu thận ước tính",
+      "aliases": ["egfr", "gfr"]
+    },
+    {
+      "term": "CRP",
+      "category": "biomarker",
+      "vietnamese": "protein phản ứng C",
+      "aliases": ["c reactive protein"]
+    },
+    {
+      "term": "WBC",
+      "category": "biomarker",
+      "vietnamese": "bạch cầu",
+      "aliases": ["white blood cell", "leukocyte"]
+    },
+    {
+      "term": "hemoglobin",
+      "category": "biomarker",
+      "vietnamese": "huyết sắc tố",
+      "aliases": ["hb"]
+    },
+    {
+      "term": "platelet",
+      "category": "biomarker",
+      "vietnamese": "tiểu cầu",
+      "aliases": ["plt"]
+    },
+    {
+      "term": "sodium",
+      "category": "biomarker",
+      "vietnamese": "natri",
+      "aliases": ["na", "na+"]
+    },
+    {
+      "term": "potassium",
+      "category": "biomarker",
+      "vietnamese": "kali",
+      "aliases": ["k", "k+"]
+    },
+    {
+      "term": "ALT",
+      "category": "biomarker",
+      "vietnamese": "men gan ALT",
+      "aliases": ["sgpt"]
+    },
+    {
+      "term": "AST",
+      "category": "biomarker",
+      "vietnamese": "men gan AST",
+      "aliases": ["sgot"]
+    },
+    {
+      "term": "ultrasound",
+      "category": "test",
+      "vietnamese": "siêu âm",
+      "aliases": ["sonography"]
+    },
+    {
+      "term": "X-ray",
+      "category": "test",
+      "vietnamese": "x-quang",
+      "aliases": ["xray", "x quang"]
+    },
+    {
+      "term": "CT",
+      "category": "test",
+      "vietnamese": "chụp cắt lớp vi tính",
+      "aliases": ["ct scan", "computed tomography"]
+    },
+    {
+      "term": "MRI",
+      "category": "test",
+      "vietnamese": "chụp cộng hưởng từ",
+      "aliases": ["magnetic resonance imaging"]
+    },
+    {
+      "term": "pneumonia",
+      "category": "condition",
+      "vietnamese": "viêm phổi",
+      "aliases": ["lung infection"]
+    },
+    {
+      "term": "tachycardia",
+      "category": "finding",
+      "vietnamese": "nhịp tim nhanh",
+      "aliases": ["tim nhanh"]
+    },
+    {
+      "term": "bradycardia",
+      "category": "finding",
+      "vietnamese": "nhịp tim chậm",
+      "aliases": ["tim chậm"]
+    },
+    {
+      "term": "systolic",
+      "category": "vital_sign",
+      "vietnamese": "huyết áp tâm thu",
+      "aliases": ["tâm thu"]
+    },
+    {
+      "term": "diastolic",
+      "category": "vital_sign",
+      "vietnamese": "huyết áp tâm trương",
+      "aliases": ["tâm trương"]
+    },
+    {
+      "term": "testosterone",
+      "category": "hormone",
+      "vietnamese": "testosterone",
+      "aliases": ["testosteron"]
+    },
+    {
+      "term": "dihydrotestosterone",
+      "category": "hormone",
+      "vietnamese": "dihydrotestosterone",
+      "aliases": ["dht"]
+    },
+    {
+      "term": "Bartholin",
+      "category": "anatomy",
+      "vietnamese": "tuyến Bartholin",
+      "aliases": ["bartholins"]
+    },
+    {
+      "term": "methionine",
+      "category": "biochemistry",
+      "vietnamese": "methionin",
+      "aliases": ["methionin"]
+    },
+    {
+      "term": "glutathione",
+      "category": "biochemistry",
+      "vietnamese": "glutathion",
+      "aliases": ["glutathion"]
+    }
+  ]
+}
+
