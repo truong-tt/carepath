@@ -53,15 +53,27 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         BitsAndBytesConfig,
         TrainingArguments,
     )
+    import inspect
+
     from trl import SFTTrainer  # type: ignore
 
-    # trl >= 0.10 moved SFT-specific args into SFTConfig and renamed
-    # tokenizer -> processing_class. Fall back gracefully for older installs.
+    # trl/transformers have churned their SFT APIs across versions:
+    #   * SFT-only args (max_seq_length, dataset_text_field, packing) moved from
+    #     SFTTrainer kwargs into SFTConfig (trl >= 0.10).
+    #   * SFTTrainer's `tokenizer` kwarg was renamed to `processing_class`.
+    # Instead of guessing the version, we introspect the actual signatures and
+    # only pass kwargs each class accepts. This is robust to whatever Colab ships.
     try:
         from trl import SFTConfig  # type: ignore
-        _use_sft_config = True
+        _config_cls = SFTConfig
     except ImportError:
-        _use_sft_config = False
+        _config_cls = TrainingArguments
+
+    def _supported(cls, kwargs: dict) -> dict:
+        params = inspect.signature(cls.__init__).parameters
+        if any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params.values()):
+            return dict(kwargs)
+        return {k: v for k, v in kwargs.items() if k in params}
 
     rows = load_rows(Path(args.pairs))
     invalid = [
@@ -118,7 +130,9 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         [{"text": format_darag_training_prompt(row)} for row in validation_rows]
     )
 
-    _common_args = dict(
+    # Superset of every arg name these APIs have used; _supported() keeps only
+    # the ones the installed version actually accepts.
+    _config_kwargs = dict(
         output_dir=args.output_dir,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.per_device_train_batch_size,
@@ -132,36 +146,31 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         bf16=torch.cuda.is_available(),
         optim="paged_adamw_8bit",
         report_to="none",
+        # SFT-specific (ignored by plain TrainingArguments via _supported())
+        max_seq_length=args.max_seq_length,
+        dataset_text_field="text",
+        packing=False,
     )
+    training_args = _config_cls(**_supported(_config_cls, _config_kwargs))
 
-    if _use_sft_config:
-        training_args = SFTConfig(
-            **_common_args,
-            max_seq_length=args.max_seq_length,
-            dataset_text_field="text",
-            packing=False,
-        )
-        trainer = SFTTrainer(
-            model=model,
-            processing_class=tokenizer,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            peft_config=lora_config,
-        )
+    _trainer_kwargs = dict(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        peft_config=lora_config,
+        # only needed when SFT args were NOT consumed by the config above
+        dataset_text_field="text",
+        max_seq_length=args.max_seq_length,
+        packing=False,
+    )
+    # tokenizer kwarg was renamed processing_class; pick whichever this version has.
+    _trainer_params = inspect.signature(SFTTrainer.__init__).parameters
+    if "processing_class" in _trainer_params:
+        _trainer_kwargs["processing_class"] = tokenizer
     else:
-        training_args = TrainingArguments(**_common_args)
-        trainer = SFTTrainer(
-            model=model,
-            tokenizer=tokenizer,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            peft_config=lora_config,
-            dataset_text_field="text",
-            max_seq_length=args.max_seq_length,
-            packing=False,
-        )
+        _trainer_kwargs["tokenizer"] = tokenizer
+    trainer = SFTTrainer(**_supported(SFTTrainer, _trainer_kwargs))
     trainer.train()
     trainer.save_model(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
