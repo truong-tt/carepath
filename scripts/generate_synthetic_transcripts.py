@@ -74,8 +74,22 @@ def main() -> None:
         load_in_4bit=args.load_in_4bit,
     )
     written = 0
+    max_iterations = max(args.count * 5, 20)
+    iteration = 0
     with output_path.open("a", encoding="utf-8") as handle:
         while len(accepted_texts) < args.count:
+            iteration += 1
+            if iteration > max_iterations:
+                print(
+                    f"Warning: hit iteration cap ({max_iterations}). "
+                    f"Accepted {len(accepted_texts)}/{args.count}. Stopping.",
+                    flush=True,
+                )
+                break
+            print(
+                f"  [{len(accepted_texts)}/{args.count}] generating batch {iteration} …",
+                flush=True,
+            )
             batch_target = min(args.batch_size, args.count - len(accepted_texts))
             seed_examples = random.sample(
                 examples, min(args.examples_per_prompt, len(examples))
