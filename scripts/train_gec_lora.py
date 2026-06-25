@@ -55,6 +55,14 @@ def train(args: argparse.Namespace, model_name: str) -> None:
     )
     from trl import SFTTrainer  # type: ignore
 
+    # trl >= 0.10 moved SFT-specific args into SFTConfig and renamed
+    # tokenizer -> processing_class. Fall back gracefully for older installs.
+    try:
+        from trl import SFTConfig  # type: ignore
+        _use_sft_config = True
+    except ImportError:
+        _use_sft_config = False
+
     rows = load_rows(Path(args.pairs))
     invalid = [
         (idx, validation.errors)
@@ -110,7 +118,7 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         [{"text": format_darag_training_prompt(row)} for row in validation_rows]
     )
 
-    training_args = TrainingArguments(
+    _common_args = dict(
         output_dir=args.output_dir,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.per_device_train_batch_size,
@@ -126,17 +134,34 @@ def train(args: argparse.Namespace, model_name: str) -> None:
         report_to="none",
     )
 
-    trainer = SFTTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-        peft_config=lora_config,
-        dataset_text_field="text",
-        max_seq_length=args.max_seq_length,
-        packing=False,
-    )
+    if _use_sft_config:
+        training_args = SFTConfig(
+            **_common_args,
+            max_seq_length=args.max_seq_length,
+            dataset_text_field="text",
+            packing=False,
+        )
+        trainer = SFTTrainer(
+            model=model,
+            processing_class=tokenizer,
+            args=training_args,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            peft_config=lora_config,
+        )
+    else:
+        training_args = TrainingArguments(**_common_args)
+        trainer = SFTTrainer(
+            model=model,
+            tokenizer=tokenizer,
+            args=training_args,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            peft_config=lora_config,
+            dataset_text_field="text",
+            max_seq_length=args.max_seq_length,
+            packing=False,
+        )
     trainer.train()
     trainer.save_model(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
