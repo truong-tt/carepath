@@ -23,8 +23,8 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(repo_root / "apps" / "api"))
 
-    from hopegait.evaluation import split_terms
-    from hopegait.services.retrieval import MedicalTermRetriever
+    from carepath.evaluation import split_terms
+    from carepath.services.retrieval import MedicalTermRetriever
 
     args = parse_args()
     rows = read_jsonl(Path(args.input))

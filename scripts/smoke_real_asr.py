@@ -12,7 +12,7 @@ import httpx
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Send an audio clip through the running HopeGait API."
+        description="Send an audio clip through the running CarePath API."
     )
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     parser.add_argument("--audio", type=Path, default=None)
@@ -92,7 +92,7 @@ def _audio_path(audio: Path | None):
         yield audio
         return
 
-    with tempfile.TemporaryDirectory(prefix="hopegait_real_asr_") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="carepath_real_asr_") as temp_dir:
         path = Path(temp_dir) / "silence.wav"
         _write_silent_wav(path)
         yield path

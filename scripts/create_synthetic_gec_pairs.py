@@ -23,10 +23,10 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(repo_root / "apps" / "api"))
 
-    from hopegait.config import Settings
-    from hopegait.darag import validate_gec_pair
-    from hopegait.services.asr import build_asr_service
-    from hopegait.services.retrieval import MedicalTermRetriever
+    from carepath.config import Settings
+    from carepath.darag import validate_gec_pair
+    from carepath.services.asr import build_asr_service
+    from carepath.services.retrieval import MedicalTermRetriever
 
     args = parse_args()
     rows = read_jsonl(Path(args.input))

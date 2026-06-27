@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.darag import (
+from carepath.darag import (
     build_synthetic_generation_messages,
     duplicate_rejection_reason,
     format_darag_training_prompt,

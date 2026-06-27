@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.services.retrieval import MedicalTermRetriever, normalize_for_match
+from carepath.services.retrieval import MedicalTermRetriever, normalize_for_match
 
 
 class RetrievalTests(unittest.TestCase):

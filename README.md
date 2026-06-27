@@ -1,6 +1,6 @@
-# HopeGait
+# CarePath
 
-HopeGait is a backend-first MVP for Vietnamese medical staff:
+CarePath is a backend-first MVP for Vietnamese medical staff:
 
 1. Upload an audio clip.
 2. Transcribe it with Gipformer ONNX ASR.
@@ -11,11 +11,12 @@ The MVP is intentionally designed so demo success does not depend on a trained G
 
 ## Project Shape
 
-- `apps/api/hopegait`: FastAPI runtime backend.
+- `apps/api/carepath`: FastAPI runtime backend.
 - `data/medical_lexicon.json`: editable Vietnamese/English medical lexicon seed.
 - `scripts/create_gec_pairs.py`: Colab-friendly ViMedCSS to `raw_asr -> gold_text` data creation.
 - `scripts/evaluate_corrections.py`: baseline metric reporting.
-- `notebooks/HopeGait_GEC_Colab.ipynb`: training/evaluation notebook skeleton.
+- `apps/web`: vanilla static frontend (landing + SOAP-note tool), served by the API.
+- `notebooks/CarePath_DARAG_Colab.ipynb`: Colab training/evaluation notebook.
 - `tests`: dependency-light unit tests.
 
 ## Python Version
@@ -47,7 +48,7 @@ python -m pip install --upgrade pip
 pip install -e ".[dev]"
 Copy-Item .env.local.example .env
 python scripts/smoke_backend.py
-uvicorn hopegait.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000
+uvicorn carepath.main:app --app-dir apps/api --reload --host 127.0.0.1 --port 8000
 ```
 
 If your machine only has the Windows Store `python.exe`, install Python 3.12 first.

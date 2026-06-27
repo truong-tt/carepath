@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from hopegait.evaluation import normalize_text, split_terms
+from carepath.evaluation import normalize_text, split_terms
 
 
 DEFAULT_SYNTHETIC_MODEL = "Qwen/Qwen3-4B-Instruct-2507"

@@ -7,21 +7,21 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
-from hopegait.config import Settings, load_settings
-from hopegait.schemas import (
+from carepath.config import Settings, load_settings
+from carepath.schemas import (
     CorrectionRequest,
     CorrectionResponse,
     HealthResponse,
     SoapNoteResponse,
 )
-from hopegait.services.audio import AudioNormalizationError, normalize_audio
-from hopegait.services.asr import ASRError
-from hopegait.services.llm import LLMError
-from hopegait.services.pipeline import HopeGaitPipeline, serialize_terms
+from carepath.services.audio import AudioNormalizationError, normalize_audio
+from carepath.services.asr import ASRError
+from carepath.services.llm import LLMError
+from carepath.services.pipeline import CarePathPipeline, serialize_terms
 
 
 app = FastAPI(
-    title="HopeGait API",
+    title="CarePath API",
     version="0.1.0",
     description="Vietnamese medical ASR correction and SOAP-note drafting API.",
 )
@@ -33,8 +33,8 @@ def get_settings() -> Settings:
 
 
 @lru_cache(maxsize=1)
-def get_pipeline() -> HopeGaitPipeline:
-    return HopeGaitPipeline(get_settings())
+def get_pipeline() -> CarePathPipeline:
+    return CarePathPipeline(get_settings())
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
@@ -76,7 +76,7 @@ async def create_soap_note(
 ) -> SoapNoteResponse:
     suffix = Path(audio.filename or "audio.wav").suffix or ".wav"
     try:
-        with tempfile.TemporaryDirectory(prefix="hopegait_") as temp_dir:
+        with tempfile.TemporaryDirectory(prefix="carepath_") as temp_dir:
             temp_path = Path(temp_dir)
             uploaded_path = temp_path / f"upload{suffix}"
             normalized_path = temp_path / "normalized.wav"

@@ -1,7 +1,7 @@
 [project]
-name = "hopegait"
+name = "carepath"
 version = "0.1.0"
-description = "HopeGait MVP backend: Vietnamese medical ASR correction and SOAP-note drafting."
+description = "CarePath MVP backend: Vietnamese medical ASR correction and SOAP-note drafting."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
@@ -44,4 +44,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["apps/api"]
-include = ["hopegait*"]
+include = ["carepath*"]

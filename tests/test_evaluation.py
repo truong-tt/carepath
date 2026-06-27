@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.evaluation import (
+from carepath.evaluation import (
     extract_numbers_and_units,
     number_unit_preservation,
     overcorrection_rate,

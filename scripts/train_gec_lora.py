@@ -45,7 +45,7 @@ def train(args: argparse.Namespace, model_name: str) -> None:
 
     import torch  # type: ignore
     from datasets import Dataset  # type: ignore
-    from hopegait.darag import format_darag_training_prompt, validate_gec_pair
+    from carepath.darag import format_darag_training_prompt, validate_gec_pair
     from peft import LoraConfig, prepare_model_for_kbit_training  # type: ignore
     from transformers import (  # type: ignore
         AutoModelForCausalLM,

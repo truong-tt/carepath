@@ -8,15 +8,15 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.config import Settings
-from hopegait.services.llm import (
+from carepath.config import Settings
+from carepath.services.llm import (
     OfflineClinicalLLM,
     OpenAICompatibleLLM,
     _can_retry_without_response_format,
     extract_json_object,
     normalize_transcript_spacing,
 )
-from hopegait.services.retrieval import RetrievedTerm
+from carepath.services.retrieval import RetrievedTerm
 
 
 class LLMTests(unittest.TestCase):

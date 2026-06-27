@@ -5,11 +5,11 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from hopegait.config import Settings
-from hopegait.schemas import SoapNote
-from hopegait.services.asr import ASRService, build_asr_service
-from hopegait.services.llm import ClinicalLLM, build_llm
-from hopegait.services.retrieval import MedicalTermRetriever, RetrievedTerm
+from carepath.config import Settings
+from carepath.schemas import SoapNote
+from carepath.services.asr import ASRService, build_asr_service
+from carepath.services.llm import ClinicalLLM, build_llm
+from carepath.services.retrieval import MedicalTermRetriever, RetrievedTerm
 
 
 @dataclass(frozen=True)
@@ -22,7 +22,7 @@ class PipelineOutput:
     metadata: dict[str, object]
 
 
-class HopeGaitPipeline:
+class CarePathPipeline:
     def __init__(
         self,
         settings: Settings,

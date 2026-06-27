@@ -12,7 +12,7 @@ from typing import Any
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Create HopeGait GEC pairs by running Gipformer over ViMedCSS audio: "
+            "Create CarePath GEC pairs by running Gipformer over ViMedCSS audio: "
             "raw_asr -> gold segment_text."
         )
     )
@@ -33,9 +33,9 @@ def main() -> None:
 
     from datasets import Audio, load_dataset  # type: ignore
 
-    from hopegait.config import Settings
-    from hopegait.services.retrieval import MedicalTermRetriever
-    from hopegait.services.asr import build_asr_service
+    from carepath.config import Settings
+    from carepath.services.retrieval import MedicalTermRetriever
+    from carepath.services.asr import build_asr_service
 
     settings = Settings.from_env()
     if args.asr_provider == "mock":
@@ -72,7 +72,7 @@ def transcribe_row(asr: Any, retriever: Any, split: str, row: dict[str, Any]) ->
     array = audio["array"]
     sampling_rate = int(audio["sampling_rate"])
 
-    with tempfile.TemporaryDirectory(prefix="hopegait_pair_") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="carepath_pair_") as temp_dir:
         wav_path = Path(temp_dir) / f"{row['segment_id']}.wav"
         write_wav(wav_path, array, sampling_rate)
         result = asr.transcribe(wav_path)

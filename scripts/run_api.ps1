@@ -6,7 +6,7 @@ if (-not (Test-Path ".\.venv\Scripts\python.exe")) {
     throw "Missing .venv. Run .\scripts\setup_local.ps1 first."
 }
 
-& ".\.venv\Scripts\python.exe" -m uvicorn hopegait.main:app `
+& ".\.venv\Scripts\python.exe" -m uvicorn carepath.main:app `
     --app-dir apps/api `
     --reload `
     --host 127.0.0.1 `

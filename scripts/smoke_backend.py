@@ -25,7 +25,7 @@ def main() -> None:
             "FastAPI test dependencies are missing. Run: pip install -e \".[dev]\""
         ) from exc
 
-    from hopegait.main import app, get_pipeline, get_settings
+    from carepath.main import app, get_pipeline, get_settings
 
     get_settings.cache_clear()
     get_pipeline.cache_clear()
@@ -43,7 +43,7 @@ def main() -> None:
         "corrections",
     )
 
-    with tempfile.TemporaryDirectory(prefix="hopegait_smoke_") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="carepath_smoke_") as temp_dir:
         wav_path = Path(temp_dir) / "demo.wav"
         _write_silent_wav(wav_path)
         with wav_path.open("rb") as handle:

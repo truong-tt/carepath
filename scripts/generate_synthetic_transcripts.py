@@ -37,7 +37,7 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(repo_root / "apps" / "api"))
 
-    from hopegait.darag import (
+    from carepath.darag import (
         build_synthetic_generation_messages,
         duplicate_rejection_reason,
         parse_synthetic_transcripts,

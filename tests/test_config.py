@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.config import Settings, load_env_file
+from carepath.config import Settings, load_env_file
 
 
 class ConfigTests(unittest.TestCase):

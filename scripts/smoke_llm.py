@@ -8,7 +8,7 @@ import httpx
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Verify the running HopeGait API is using a real LLM provider."
+        description="Verify the running CarePath API is using a real LLM provider."
     )
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     parser.add_argument("--timeout", type=float, default=120.0)

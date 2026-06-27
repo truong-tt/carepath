@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
-from hopegait.services.audio import normalize_audio
+from carepath.services.audio import normalize_audio
 
 
 class AudioTests(unittest.TestCase):

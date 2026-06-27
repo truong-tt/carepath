@@ -34,7 +34,7 @@ function Invoke-Checked {
 
 Invoke-SelectedPython @(
     "-c",
-    "import sys; assert (3, 11) <= sys.version_info[:2] < (3, 14), f'HopeGait needs Python 3.11-3.13, got {sys.version}'"
+    "import sys; assert (3, 11) <= sys.version_info[:2] < (3, 14), f'CarePath needs Python 3.11-3.13, got {sys.version}'"
 )
 
 Invoke-SelectedPython @("-m", "venv", ".venv")

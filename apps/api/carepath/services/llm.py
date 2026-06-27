@@ -7,9 +7,9 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from hopegait.config import Settings
-from hopegait.schemas import SoapNote
-from hopegait.services.retrieval import RetrievedTerm
+from carepath.config import Settings
+from carepath.schemas import SoapNote
+from carepath.services.retrieval import RetrievedTerm
 
 
 class LLMError(RuntimeError):

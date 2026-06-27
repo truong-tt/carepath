@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-from hopegait.config import Settings
+from carepath.config import Settings
 
 
 class ASRError(RuntimeError):

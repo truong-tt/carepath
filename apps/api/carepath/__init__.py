@@ -1,4 +1,4 @@
-"""HopeGait API package."""
+"""CarePath API package."""
 
 __all__ = ["__version__"]
 

@@ -23,7 +23,7 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(repo_root / "apps" / "api"))
 
-    from hopegait.evaluation import average_metrics, score_correction, score_pair, split_terms
+    from carepath.evaluation import average_metrics, score_correction, score_pair, split_terms
 
     args = parse_args()
     rows = [json.loads(line) for line in Path(args.input).read_text(encoding="utf-8").splitlines()]
