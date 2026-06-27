@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CarePath · Trợ lý ghi chép y khoa AI cho bác sĩ Việt Nam</title>
+  <meta name="description" content="CarePath biến bản ghi âm buổi khám thành bệnh án SOAP nháp: phiên âm tiếng Việt, hiệu chỉnh thuật ngữ Việt-Anh và soạn nháp để bác sĩ duyệt." />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" type="image/png" href="/assets/carepath-mark.png" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CarePath · Trợ lý ghi chép y khoa AI" />
+  <meta property="og:description" content="Từ giọng nói buổi khám đến bệnh án SOAP nháp, cho bác sĩ Việt Nam duyệt." />
+  <meta property="og:image" content="/assets/carepath-logo.png" />
+
+  <!-- Self-hosted Plus Jakarta Sans (@font-face lives in styles.css) -->
+  <link rel="preload" href="/assets/fonts/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/jakarta-vietnamese.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/landing.css" />
+  <!-- Phosphor Icons (self-hosted regular weight; labels are text so layout never depends on glyphs) -->
+  <link rel="stylesheet" href="/assets/phosphor/style.css" />
+</head>
+<body class="lp">
+  <a class="lp-skip" href="#noi-dung">Bỏ qua tới nội dung</a>
+  <span id="lp-top-sentinel" aria-hidden="true"></span>
+
+  <!-- ============ NAV ============ -->
+  <header class="lp-nav" id="lpNav">
+    <div class="lp-container lp-nav-inner">
+      <a class="lp-brand" href="/" aria-label="CarePath, trang chủ">
+        <img src="/assets/carepath-mark.png" alt="" width="62" height="30" />
+        <span class="lp-brand-name"><span class="nm-care">Care</span><span class="nm-path">Path</span></span>
+      </a>
+
+      <nav class="lp-nav-links" id="lpNavLinks" aria-label="Điều hướng chính">
+        <a href="#quy-trinh">Quy trình</a>
+        <a href="#tai-lieu">Tài liệu</a>
+        <a href="#tinh-nang">Tính năng</a>
+        <a href="#an-toan">An toàn</a>
+        <a href="#cau-hoi">Câu hỏi</a>
+        <a class="lp-btn lp-btn-primary lp-btn-sm lp-nav-cta" href="/app/">
+          Dùng thử <i class="ph ph-arrow-right" aria-hidden="true"></i>
+        </a>
+      </nav>
+
+      <button class="lp-burger" id="lpBurger" aria-label="Mở menu" aria-expanded="false" aria-controls="lpNavLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="noi-dung">
+    <!-- ============ HERO (asymmetric split) ============ -->
+    <section class="lp-hero">
+      <div class="lp-container lp-hero-grid">
+        <div class="lp-hero-copy reveal-on-scroll">
+          <span class="lp-eyebrow">Trợ lý ghi chép y khoa · AI Scribe</span>
+          <h1 class="lp-h1">
+            Một buổi khám,<br />trọn bộ <span class="hl">tài liệu</span>.
+          </h1>
+          <p class="lp-lead">
+            Tải lên bản ghi âm buổi khám. CarePath soạn tài liệu cho bác sĩ,
+            điều dưỡng, bệnh nhân và người chăm sóc.
+          </p>
+          <div class="lp-hero-cta">
+            <a class="lp-btn lp-btn-primary" href="/app/">
+              Dùng thử <i class="ph ph-arrow-right" aria-hidden="true"></i>
+            </a>
+            <a class="lp-btn lp-btn-ghost" href="#quy-trinh">Xem quy trình</a>
+          </div>
+        </div>
+
+        <!-- Real SOAP card component as the product preview (not a fake screenshot) -->
+        <div class="lp-hero-visual reveal-on-scroll" aria-hidden="false">
+          <div class="lp-preview">
+            <div class="banner banner-review lp-preview-banner">
+              <i class="ph ph-warning" aria-hidden="true"></i>
+              <span>Bản nháp do AI tạo, <strong>cần bác sĩ duyệt</strong>.</span>
+            </div>
+            <div class="card soap-card lp-preview-card">
+              <div class="soap-inner">
+                <article class="soap-section" style="--accent: var(--c-s)">
+                  <div class="soap-badge">S</div>
+                  <div class="soap-body">
+                    <h3>Chủ quan <span class="muted">/ Subjective</span></h3>
+                    <div class="soap-text"><p>Bệnh nhân nam 54 tuổi, đau ngực trái khi gắng sức 3 ngày, kèm khó thở nhẹ.</p></div>
+                  </div>
+                </article>
+                <article class="soap-section" style="--accent: var(--c-o)">
+                  <div class="soap-badge">O</div>
+                  <div class="soap-body">
+                    <h3>Khách quan <span class="muted">/ Objective</span></h3>
+                    <div class="soap-text"><p>Mạch 92, HA 148/90 mmHg. Phổi trong, tim đều, không tiếng thổi.</p></div>
+                  </div>
+                </article>
+                <article class="soap-section" style="--accent: var(--c-a)">
+                  <div class="soap-badge">A</div>
+                  <div class="soap-body">
+                    <h3>Đánh giá <span class="muted">/ Assessment</span></h3>
+                    <div class="soap-text"><p>Theo dõi cơn đau thắt ngực, tăng huyết áp chưa kiểm soát.</p></div>
+                  </div>
+                </article>
+                <article class="soap-section" style="--accent: var(--c-p)">
+                  <div class="soap-badge">P</div>
+                  <div class="soap-body">
+                    <h3>Kế hoạch <span class="muted">/ Plan</span></h3>
+                    <div class="soap-text"><p>ECG, men tim. Hội chẩn tim mạch. Hẹn tái khám sau 3 ngày.</p></div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Honest principles strip (no fabricated logo wall) -->
+      <div class="lp-container">
+        <ul class="lp-strip reveal-on-scroll" aria-label="Nguyên tắc thiết kế">
+          <li><i class="ph ph-shield-check" aria-hidden="true"></i> Bác sĩ luôn là người duyệt cuối</li>
+          <li><i class="ph ph-translate" aria-hidden="true"></i> Hiểu code-switching Việt-Anh</li>
+          <li><i class="ph ph-lock-key" aria-hidden="true"></i> Bản ghi chỉ xử lý cho buổi khám</li>
+          <li><i class="ph ph-file-text" aria-hidden="true"></i> Đúng cấu trúc SOAP</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS (connected flow) ============ -->
+    <section class="lp-section" id="quy-trinh">
+      <div class="lp-container">
+        <div class="lp-section-head reveal-on-scroll">
+          <h2 class="lp-h2">Ba bước, từ âm thanh đến tài liệu</h2>
+          <p class="lp-section-sub">Mỗi bước đều minh bạch để bác sĩ kiểm soát kết quả.</p>
+        </div>
+
+        <ol class="lp-flow">
+          <li class="lp-flow-node reveal-on-scroll">
+            <span class="lp-flow-icon"><i class="ph ph-waveform" aria-hidden="true"></i></span>
+            <h3>Tải lên &amp; Phiên âm</h3>
+            <p>Tải bản ghi âm buổi khám. Gipformer ONNX chuyển giọng nói tiếng Việt thành văn bản.</p>
+          </li>
+          <li class="lp-flow-node reveal-on-scroll">
+            <span class="lp-flow-icon"><i class="ph ph-magic-wand" aria-hidden="true"></i></span>
+            <h3>Hiệu chỉnh thuật ngữ</h3>
+            <p>Truy hồi từ điển y khoa để sửa lỗi nhận dạng và thuật ngữ pha trộn Việt-Anh.</p>
+          </li>
+          <li class="lp-flow-node reveal-on-scroll">
+            <span class="lp-flow-icon"><i class="ph ph-files" aria-hidden="true"></i></span>
+            <h3>Soạn bộ tài liệu</h3>
+            <p>Tạo bệnh án SOAP cho bác sĩ, cùng bản tóm tắt và hướng dẫn cho điều dưỡng, bệnh nhân và người nhà.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ AUDIENCES -> DOCUMENTS (matrix rows) ============ -->
+    <section class="lp-section" id="tai-lieu">
+      <div class="lp-container">
+        <div class="lp-section-head reveal-on-scroll">
+          <h2 class="lp-h2">Một buổi khám, nhiều tài liệu</h2>
+          <p class="lp-section-sub">Từ một bản ghi âm, CarePath soạn tài liệu phù hợp cho từng người trong ê-kíp chăm sóc.</p>
+        </div>
+
+        <ul class="lp-aud">
+          <li class="lp-aud-row reveal-on-scroll">
+            <div class="lp-aud-who">
+              <span class="lp-aud-icon"><i class="ph ph-stethoscope" aria-hidden="true"></i></span>
+              <div>
+                <h3>Bác sĩ</h3>
+                <p>Ghi chú lâm sàng đầy đủ để chẩn đoán và điều trị.</p>
+              </div>
+            </div>
+            <div class="lp-aud-docs">
+              <span class="lp-doc-chip lp-doc-chip--live"><i class="ph ph-check" aria-hidden="true"></i>Bệnh án SOAP</span>
+              <span class="lp-doc-chip">Thư chuyển tuyến</span>
+            </div>
+          </li>
+
+          <li class="lp-aud-row reveal-on-scroll">
+            <div class="lp-aud-who">
+              <span class="lp-aud-icon"><i class="ph ph-first-aid" aria-hidden="true"></i></span>
+              <div>
+                <h3>Điều dưỡng</h3>
+                <p>Bàn giao và y lệnh rõ ràng cho ca trực.</p>
+              </div>
+            </div>
+            <div class="lp-aud-docs">
+              <span class="lp-doc-chip">Bàn giao điều dưỡng</span>
+              <span class="lp-doc-chip">Y lệnh &amp; theo dõi</span>
+            </div>
+          </li>
+
+          <li class="lp-aud-row reveal-on-scroll">
+            <div class="lp-aud-who">
+              <span class="lp-aud-icon"><i class="ph ph-user" aria-hidden="true"></i></span>
+              <div>
+                <h3>Bệnh nhân</h3>
+                <p>Tóm tắt dễ hiểu về buổi khám và cách dùng thuốc.</p>
+              </div>
+            </div>
+            <div class="lp-aud-docs">
+              <span class="lp-doc-chip">Tóm tắt sau khám</span>
+              <span class="lp-doc-chip">Hướng dẫn dùng thuốc</span>
+            </div>
+          </li>
+
+          <li class="lp-aud-row reveal-on-scroll">
+            <div class="lp-aud-who">
+              <span class="lp-aud-icon"><i class="ph ph-hand-heart" aria-hidden="true"></i></span>
+              <div>
+                <h3>Người chăm sóc</h3>
+                <p>Hướng dẫn chăm sóc và lịch nhắc tại nhà.</p>
+              </div>
+            </div>
+            <div class="lp-aud-docs">
+              <span class="lp-doc-chip">Kế hoạch chăm sóc tại nhà</span>
+              <span class="lp-doc-chip">Lịch thuốc &amp; tái khám</span>
+            </div>
+          </li>
+        </ul>
+
+        <p class="lp-aud-note reveal-on-scroll">
+          <span class="lp-doc-chip lp-doc-chip--live lp-doc-chip--mini"><i class="ph ph-check" aria-hidden="true"></i>Có trong bản demo</span>
+          <span>Bản demo hiện tạo bệnh án SOAP cho bác sĩ. Các tài liệu còn lại thuộc bộ tài liệu đầy đủ của CarePath.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES (bento) ============ -->
+    <section class="lp-section lp-section--tint" id="tinh-nang">
+      <div class="lp-container">
+        <div class="lp-section-head reveal-on-scroll">
+          <span class="lp-eyebrow">Tính năng</span>
+          <h2 class="lp-h2">Được dựng quanh thực tế phòng khám Việt Nam</h2>
+        </div>
+
+        <div class="lp-bento">
+          <!-- Lead cell with brand gradient -->
+          <article class="lp-bento-cell lp-bento-lead reveal-on-scroll">
+            <i class="ph ph-translate lp-bento-glyph" aria-hidden="true"></i>
+            <h3>Hiệu chỉnh thuật ngữ Việt-Anh</h3>
+            <p>
+              Bác sĩ Việt thường nói lẫn tiếng Anh: "BP", "ECG", "stent". CarePath
+              truy hồi từ điển y khoa để chuẩn hóa thuật ngữ thay vì đoán mò.
+            </p>
+          </article>
+
+          <!-- SOAP letters cell (visual variation via accents) -->
+          <article class="lp-bento-cell reveal-on-scroll">
+            <div class="lp-soap-keys" aria-hidden="true">
+              <span style="--accent: var(--c-s)">S</span>
+              <span style="--accent: var(--c-o)">O</span>
+              <span style="--accent: var(--c-a)">A</span>
+              <span style="--accent: var(--c-p)">P</span>
+            </div>
+            <h3>Đúng cấu trúc SOAP</h3>
+            <p>Chủ quan, Khách quan, Đánh giá, Kế hoạch, đặt đúng chỗ.</p>
+          </article>
+
+          <!-- Photo cell (real image) -->
+          <article class="lp-bento-cell lp-bento-photo reveal-on-scroll">
+            <img src="https://picsum.photos/seed/carepath-vn-clinic/640/720" alt="Buổi khám tại phòng khám" loading="lazy" width="640" height="720" />
+            <div class="lp-bento-photo-cap">
+              <h3>Hợp với nhịp làm việc</h3>
+              <p>Ghi âm trong lúc khám, dựng nháp sau buổi khám.</p>
+            </div>
+          </article>
+
+          <article class="lp-bento-cell reveal-on-scroll">
+            <i class="ph ph-list-checks lp-bento-glyph" aria-hidden="true"></i>
+            <h3>Đánh dấu thông tin thiếu</h3>
+            <p>Nếu thiếu tiền sử hay liều thuốc, CarePath nêu rõ để bác sĩ bổ sung.</p>
+          </article>
+
+          <article class="lp-bento-cell reveal-on-scroll">
+            <i class="ph ph-copy lp-bento-glyph" aria-hidden="true"></i>
+            <h3>Sao chép vào hồ sơ</h3>
+            <p>Một cú nhấp để dán bản nháp đã định dạng vào hệ thống bệnh án.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SAFETY (full-width statement) ============ -->
+    <section class="lp-safety" id="an-toan">
+      <div class="lp-container lp-safety-inner reveal-on-scroll">
+        <span class="lp-safety-icon"><i class="ph ph-shield-check" aria-hidden="true"></i></span>
+        <h2 class="lp-h2">AI hỗ trợ, bác sĩ quyết định</h2>
+        <p>
+          CarePath chỉ tạo bản nháp. Mọi kết quả đều kèm cảnh báo cần kiểm tra và
+          không được dùng cho chẩn đoán lâm sàng chính thức khi chưa có bác sĩ duyệt.
+          Bản trình diễn này không thay thế phán đoán y khoa.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ BUILT FOR VIETNAM (editorial split, the one zigzag) ============ -->
+    <section class="lp-section">
+      <div class="lp-container lp-split reveal-on-scroll">
+        <div class="lp-split-media">
+          <img src="https://picsum.photos/seed/carepath-doctor-notes/720/680" alt="Bác sĩ ghi chép sau buổi khám" loading="lazy" width="720" height="680" />
+        </div>
+        <div class="lp-split-copy">
+          <h2 class="lp-h2">Dựng cho cách bác sĩ Việt thật sự nói</h2>
+          <p>
+            Lời khám thực tế trộn tiếng Việt và tiếng Anh, đầy viết tắt và thuật ngữ.
+            CarePath bắt đầu từ một mô hình baseline đủ tốt để trình diễn, và chỉ nâng
+            cấp sang mô hình hiệu chỉnh khi nó thực sự vượt baseline.
+          </p>
+          <ul class="lp-ticks">
+            <li><i class="ph ph-check" aria-hidden="true"></i> Phiên âm tiếng Việt bằng Gipformer ONNX</li>
+            <li><i class="ph ph-check" aria-hidden="true"></i> Hiệu chỉnh có truy hồi từ điển y khoa</li>
+            <li><i class="ph ph-check" aria-hidden="true"></i> Mô hình huấn luyện phải vượt baseline trước khi dùng</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ (accordion) ============ -->
+    <section class="lp-section lp-section--tint" id="cau-hoi">
+      <div class="lp-container lp-faq-wrap">
+        <div class="lp-section-head reveal-on-scroll">
+          <h2 class="lp-h2">Câu hỏi thường gặp</h2>
+        </div>
+
+        <div class="lp-faq reveal-on-scroll">
+          <details class="lp-faq-item">
+            <summary>CarePath có thay thế bác sĩ không?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>Không. CarePath chỉ tạo bản nháp để bác sĩ rà soát, chỉnh sửa và phê duyệt. Bác sĩ luôn là người quyết định cuối cùng.</p></div>
+          </details>
+          <details class="lp-faq-item">
+            <summary>CarePath tạo những loại tài liệu nào?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>Mục tiêu là cả bộ tài liệu cho ê-kíp chăm sóc: bệnh án SOAP cho bác sĩ, bàn giao cho điều dưỡng, tóm tắt sau khám cho bệnh nhân và hướng dẫn chăm sóc cho người nhà. Bản demo hiện tập trung vào bệnh án SOAP cho bác sĩ.</p></div>
+          </details>
+          <details class="lp-faq-item">
+            <summary>Bản ghi âm được xử lý thế nào?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>Tệp âm thanh được chuẩn hóa và phiên âm để tạo bệnh án cho buổi khám đó. Đây là bản trình diễn MVP, hãy chỉ dùng dữ liệu thử nghiệm, không dùng dữ liệu bệnh nhân thật.</p></div>
+          </details>
+          <details class="lp-faq-item">
+            <summary>Hỗ trợ định dạng âm thanh nào?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>WAV, MP3, M4A, OGG và FLAC. Bạn có thể kéo thả tệp hoặc bấm để chọn từ máy.</p></div>
+          </details>
+          <details class="lp-faq-item">
+            <summary>Có xử lý được tiếng Việt lẫn tiếng Anh không?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>Có. Bước hiệu chỉnh được thiết kế cho lời khám pha trộn Việt-Anh và dùng truy hồi từ điển y khoa để chuẩn hóa thuật ngữ.</p></div>
+          </details>
+          <details class="lp-faq-item">
+            <summary>Bản nháp chính xác đến đâu?<i class="ph ph-caret-down" aria-hidden="true"></i></summary>
+            <div class="lp-faq-body"><p>Đây là bản nháp, không phải bệnh án hoàn chỉnh. Chất lượng phụ thuộc vào độ rõ của bản ghi, và mọi kết quả đều cần bác sĩ kiểm tra trước khi sử dụng.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="lp-cta">
+      <div class="lp-container lp-cta-inner reveal-on-scroll">
+        <h2 class="lp-cta-title">Thử CarePath với một bản ghi</h2>
+        <p>Tải lên một đoạn ghi âm buổi khám và xem bản nháp SOAP trong vài giây.</p>
+        <a class="lp-btn lp-btn-onaccent" href="/app/">
+          Dùng thử <i class="ph ph-arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="lp-footer">
+    <div class="lp-container lp-footer-inner">
+      <div class="lp-footer-brand">
+        <img src="/assets/carepath-mark.png" alt="" width="56" height="27" />
+        <div>
+          <span class="lp-brand-name"><span class="nm-care">Care</span><span class="nm-path">Path</span></span>
+          <p class="lp-footer-tag">Trợ lý ghi chép y khoa AI cho nhân viên y tế Việt Nam.</p>
+        </div>
+      </div>
+      <nav class="lp-footer-links" aria-label="Liên kết chân trang">
+        <a href="#quy-trinh">Quy trình</a>
+        <a href="#tinh-nang">Tính năng</a>
+        <a href="#an-toan">An toàn</a>
+        <a href="/app/">Dùng thử</a>
+      </nav>
+    </div>
+    <div class="lp-container lp-footer-base">
+      <span>CarePath · Bản demo cho nhân viên y tế Việt Nam</span>
+      <span class="lp-footer-disclaimer">Không dùng cho chẩn đoán lâm sàng chính thức.</span>
+    </div>
+  </footer>
+
+  <script src="/landing.js" defer></script>
+</body>
+</html>

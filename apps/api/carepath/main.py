@@ -6,6 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.staticfiles import StaticFiles
 
 from carepath.config import Settings, load_settings
 from carepath.schemas import (
@@ -101,4 +102,12 @@ async def create_soap_note(
         soap=output.soap,
         metadata=output.metadata,
     )
+
+
+# Serve the vanilla frontend (apps/web) same-origin so the tool page can call
+# the /api/v1 endpoints with relative paths (no CORS). Mounted last so the API
+# routes above take precedence; html=True serves index.html for / and /app/.
+WEB_DIR = Path(__file__).resolve().parents[2] / "web"
+if WEB_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
 
