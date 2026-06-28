@@ -15,6 +15,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--text-column", default="raw_asr")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument(
+        "--backend",
+        choices=["lexical", "semantic", "hybrid"],
+        default="lexical",
+        help="Retrieval backend; semantic/hybrid use the Vietnamese bi-encoder.",
+    )
+    parser.add_argument(
+        "--semantic-model",
+        default="bkai-foundation-models/vietnamese-bi-encoder",
+    )
     parser.add_argument("--output", default=None)
     return parser.parse_args()
 
@@ -24,14 +34,30 @@ def main() -> None:
     sys.path.insert(0, str(repo_root / "apps" / "api"))
 
     from carepath.evaluation import split_terms
-    from carepath.services.retrieval import MedicalTermRetriever
+    from carepath.services.retrieval import (
+        HybridTermRetriever,
+        MedicalTermRetriever,
+        SemanticTermRetriever,
+    )
 
     args = parse_args()
     rows = read_jsonl(Path(args.input))
     if args.limit:
         rows = rows[: args.limit]
 
-    retriever = MedicalTermRetriever(Path(args.lexicon), top_k=args.top_k)
+    lexicon = Path(args.lexicon)
+    lexical = MedicalTermRetriever(lexicon, top_k=args.top_k)
+    if args.backend == "lexical":
+        retriever = lexical
+    else:
+        semantic = SemanticTermRetriever(
+            lexicon, top_k=args.top_k, model_name=args.semantic_model
+        )
+        retriever = (
+            semantic
+            if args.backend == "semantic"
+            else HybridTermRetriever(lexical, semantic, top_k=args.top_k)
+        )
     details = []
     total_tp = total_fp = total_fn = 0
     for row in rows:
@@ -60,6 +86,7 @@ def main() -> None:
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
     report = {
         "n": len(rows),
+        "backend": args.backend,
         "top_k": args.top_k,
         "precision": round(precision, 4),
         "recall": round(recall, 4),

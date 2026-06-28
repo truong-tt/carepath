@@ -69,7 +69,14 @@ def validate_synthetic_transcript(row: dict[str, Any]) -> ValidationResult:
     return ValidationResult(ok=not errors, errors=errors)
 
 
-def format_darag_training_prompt(row: dict[str, Any]) -> str:
+def format_darag_inference_prompt(row: dict[str, Any]) -> str:
+    """Prompt up to (and including) the assistant header, ready for generation.
+
+    Shared by training and inference so the two never drift: training appends the
+    gold transcript + ``<|im_end|>`` (see ``format_darag_training_prompt``); at
+    inference the model generates the assistant turn from here.
+    """
+
     retrieved_terms = row.get("retrieved_terms") or row.get("gold_terms") or []
     if isinstance(retrieved_terms, str):
         retrieved_terms = split_terms(retrieved_terms)
@@ -84,6 +91,12 @@ def format_darag_training_prompt(row: dict[str, Any]) -> str:
         f"Raw ASR transcript: {row['raw_asr']}\n"
         "<|im_end|>\n"
         "<|im_start|>assistant\n"
+    )
+
+
+def format_darag_training_prompt(row: dict[str, Any]) -> str:
+    return (
+        f"{format_darag_inference_prompt(row)}"
         f"{row['gold_text']}\n"
         "<|im_end|>"
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 import uuid
 from dataclasses import dataclass
@@ -8,8 +9,10 @@ from pathlib import Path
 from carepath.config import Settings
 from carepath.schemas import SoapNote
 from carepath.services.asr import ASRService, build_asr_service
-from carepath.services.llm import ClinicalLLM, build_llm
-from carepath.services.retrieval import MedicalTermRetriever, RetrievedTerm
+from carepath.services.llm import ClinicalLLM, LLMError, build_llm
+from carepath.services.retrieval import RetrievedTerm, TermRetriever, build_retriever
+
+logger = logging.getLogger("carepath.pipeline")
 
 
 @dataclass(frozen=True)
@@ -28,14 +31,12 @@ class CarePathPipeline:
         settings: Settings,
         asr: ASRService | None = None,
         llm: ClinicalLLM | None = None,
-        retriever: MedicalTermRetriever | None = None,
+        retriever: TermRetriever | None = None,
     ):
         self.settings = settings
         self.asr = asr or build_asr_service(settings)
         self.llm = llm or build_llm(settings)
-        self.retriever = retriever or MedicalTermRetriever(
-            settings.medical_lexicon_path, top_k=settings.retrieval_top_k
-        )
+        self.retriever = retriever or build_retriever(settings)
 
     def health(self) -> dict[str, object]:
         asr_ready, asr_details = self.asr.readiness()
@@ -47,11 +48,46 @@ class CarePathPipeline:
             "details": {"asr": asr_details, "llm": llm_details},
         }
 
+    def probe_llm(self) -> dict[str, object]:
+        """Call the *primary* LLM directly, bypassing the offline fallback.
+
+        Used by preflight to surface a broken CKey link instead of letting the
+        fallback silently mask it. Never raises.
+        """
+
+        primary = getattr(self.llm, "primary", self.llm)
+        try:
+            primary.correct_transcript("kiểm tra kết nối SpO2 98 %", [])
+            return {
+                "probe": "ok",
+                "provider": getattr(primary, "provider_name", "offline"),
+            }
+        except LLMError as exc:
+            return {"probe": "failed", "error": str(exc)}
+
+    def warmup(self, probe_llm: bool = False) -> dict[str, object]:
+        """Eagerly load heavy resources (and optionally probe the live LLM).
+
+        Run before a demo so the first real request does not pay the Gipformer
+        download/model-load cost.
+        """
+
+        report: dict[str, object] = {"asr": self.asr.warmup()}
+        if probe_llm:
+            report["llm"] = self.probe_llm()
+        return report
+
     def process_audio(
         self, normalized_audio_path: Path, encounter_context: str | None = None
     ) -> PipelineOutput:
         start = time.perf_counter()
         asr_result = self.asr.transcribe(normalized_audio_path)
+        logger.info(
+            "asr done model=%s chars=%d duration_s=%s",
+            asr_result.model,
+            len(asr_result.text),
+            asr_result.metadata.get("duration_seconds"),
+        )
         output = self.process_text(asr_result.text, encounter_context)
         metadata = {
             **output.metadata,
@@ -77,12 +113,21 @@ class CarePathPipeline:
         correction = self.llm.correct_transcript(
             raw_text, retrieved_terms, encounter_context=encounter_context
         )
-        soap = self.llm.generate_soap(
+        soap_result = self.llm.generate_soap(
             correction.corrected_text,
             retrieved_terms,
             encounter_context=encounter_context,
         )
+        soap = soap_result.soap
         soap.review_required = True
+        latency_ms = int((time.perf_counter() - start) * 1000)
+        logger.info(
+            "text pipeline done gec_mode=%s soap_mode=%s terms=%d latency_ms=%d",
+            correction.provider,
+            soap_result.provider,
+            len(retrieved_terms),
+            latency_ms,
+        )
         return PipelineOutput(
             id=str(uuid.uuid4()),
             raw_transcript=raw_text,
@@ -91,8 +136,9 @@ class CarePathPipeline:
             soap=soap,
             metadata={
                 "gec_mode": correction.provider,
+                "soap_mode": soap_result.provider,
                 "llm_provider": self.settings.llm_provider,
-                "latency_ms": int((time.perf_counter() - start) * 1000),
+                "latency_ms": latency_ms,
             },
         )
 

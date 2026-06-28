@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import shutil
 import tempfile
 from functools import lru_cache
 from pathlib import Path
@@ -9,6 +8,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.staticfiles import StaticFiles
 
 from carepath.config import Settings, load_settings
+from carepath.logging_config import configure_logging
 from carepath.schemas import (
     CorrectionRequest,
     CorrectionResponse,
@@ -20,6 +20,23 @@ from carepath.services.asr import ASRError
 from carepath.services.llm import LLMError
 from carepath.services.pipeline import CarePathPipeline, serialize_terms
 
+
+configure_logging()
+
+# Upload guardrails: reject oversized or non-audio files up front with a clean
+# 400 instead of streaming junk through normalization + ASR.
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB
+ALLOWED_AUDIO_SUFFIXES = {
+    ".wav",
+    ".mp3",
+    ".m4a",
+    ".aac",
+    ".flac",
+    ".ogg",
+    ".oga",
+    ".opus",
+    ".webm",
+}
 
 app = FastAPI(
     title="CarePath API",
@@ -70,19 +87,55 @@ def correct_transcript(request: CorrectionRequest) -> CorrectionResponse:
     )
 
 
+def _validate_audio_upload(audio: UploadFile) -> str:
+    """Reject non-audio uploads early; return the suffix to use on disk."""
+
+    suffix = Path(audio.filename or "audio.wav").suffix.lower()
+    content_type = (audio.content_type or "").lower()
+    if suffix not in ALLOWED_AUDIO_SUFFIXES and not content_type.startswith("audio/"):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unsupported file type. Upload an audio file "
+                f"({', '.join(sorted(ALLOWED_AUDIO_SUFFIXES))})."
+            ),
+        )
+    return suffix or ".wav"
+
+
+def _save_upload_capped(audio: UploadFile, destination: Path, max_bytes: int) -> None:
+    """Stream the upload to disk in chunks, aborting if it exceeds ``max_bytes``."""
+
+    written = 0
+    with destination.open("wb") as handle:
+        while True:
+            chunk = audio.file.read(1024 * 1024)
+            if not chunk:
+                break
+            written += len(chunk)
+            if written > max_bytes:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Audio file too large (limit {max_bytes // (1024 * 1024)} MB).",
+                )
+            handle.write(chunk)
+
+
+# Sync ``def`` (not ``async``): the body does blocking work (ONNX ASR + the LLM
+# HTTP call), so FastAPI runs it in a threadpool and the event loop stays free to
+# serve health checks and other requests instead of freezing for the whole job.
 @app.post("/api/v1/soap-notes", response_model=SoapNoteResponse)
-async def create_soap_note(
+def create_soap_note(
     audio: UploadFile = File(...),
     encounter_context: str | None = Form(default=None),
 ) -> SoapNoteResponse:
-    suffix = Path(audio.filename or "audio.wav").suffix or ".wav"
+    suffix = _validate_audio_upload(audio)
     try:
         with tempfile.TemporaryDirectory(prefix="carepath_") as temp_dir:
             temp_path = Path(temp_dir)
             uploaded_path = temp_path / f"upload{suffix}"
             normalized_path = temp_path / "normalized.wav"
-            with uploaded_path.open("wb") as handle:
-                shutil.copyfileobj(audio.file, handle)
+            _save_upload_capped(audio, uploaded_path, MAX_UPLOAD_BYTES)
             normalize_audio(uploaded_path, normalized_path)
             output = get_pipeline().process_audio(
                 normalized_path, encounter_context=encounter_context

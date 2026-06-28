@@ -93,6 +93,25 @@ To test a real demo clip:
 python scripts/smoke_real_asr.py --audio C:\path\to\demo.wav --timeout 300
 ```
 
+## Demo Preflight
+
+Run this once **before** a live demo. Unlike the smoke test, it uses your real
+`.env`, so it validates the actual demo path: it warms up Gipformer (downloads
+and loads the ONNX model so the first real request is not slow), probes the live
+LLM connection, and runs a full end-to-end round-trip.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\preflight.py
+```
+
+Options:
+
+- `--skip-asr` skips the model download/warmup.
+- `--no-llm-probe` skips the live LLM call.
+
+A failed LLM probe is only a warning because the offline fallback keeps the demo
+serving notes; ASR warmup or round-trip failures exit non-zero.
+
 ## Demo API
 
 Health:
@@ -108,6 +127,9 @@ curl.exe -X POST http://127.0.0.1:8000/api/v1/soap-notes `
   -F "audio=@C:\path\to\demo.wav" `
   -F "encounter_context=Phòng khám nội tổng quát"
 ```
+
+Uploads must be an audio file (`wav`, `mp3`, `m4a`, `aac`, `flac`, `ogg`, `oga`,
+`opus`, `webm`) and at most 25 MB; otherwise the API returns `400` immediately.
 
 Correction-only debugging:
 
@@ -127,6 +149,12 @@ Invoke-RestMethod http://127.0.0.1:8000/api/v1/corrections `
 - `LLM_PROVIDER=openai_compatible`: calls `/chat/completions` at `LLM_BASE_URL`.
 
 The API always sets `review_required: true` because the SOAP note is a draft clinical document.
+
+- `LLM_FALLBACK_OFFLINE=true` (default): if a network LLM provider (ckey /
+  openai_compatible) fails or times out, the request is served by the offline
+  generator instead of erroring. The response metadata reports `gec_mode` and
+  `soap_mode` as `offline_fallback` so the degraded path stays visible. Set to
+  `false` to fail hard instead.
 
 ## Enabling CKey LLM
 
@@ -162,15 +190,28 @@ you want to test.
 
 ## Long Audio Clips
 
-Gipformer is run in chunks to avoid ONNX memory spikes on long WAV files.
-The default chunk size is:
+Gipformer is run in segments to avoid ONNX memory spikes on long WAV files.
+`GIPFORMER_SEGMENTATION` controls how the audio is split:
+
+- `overlap` (default): overlapping windows of `GIPFORMER_CHUNK_SECONDS` with a
+  `GIPFORMER_OVERLAP_SECONDS` (default 2 s) overlap. Adjacent transcripts are
+  merged with seam de-duplication, so a word cut at one boundary is recovered
+  whole in the neighbor instead of being split (e.g. `dihydro` + `testosterone`).
+  No extra model.
+- `vad`: split on silence using a silero VAD so cuts land in pauses, never
+  mid-word. Set `GIPFORMER_VAD_MODEL` to `repo_id:filename` (a `silero_vad.onnx`)
+  or a local path. If the VAD model/deps are unavailable it degrades to `overlap`.
+- `fixed`: legacy non-overlapping windows.
 
 ```text
 GIPFORMER_CHUNK_SECONDS=20
+GIPFORMER_SEGMENTATION=overlap
+GIPFORMER_OVERLAP_SECONDS=2
 ```
 
-Lower this value if a machine still runs out of memory; raise it only after
-testing with the real demo clip.
+Lower `GIPFORMER_CHUNK_SECONDS` if a machine still runs out of memory; raise it
+only after testing with the real demo clip. ASR metadata reports the
+`segmentation` mode used and the `segment_count`.
 
 ## GEC Methodology
 
@@ -180,13 +221,45 @@ Do not train directly on clean ViMedCSS text. First create GEC pairs:
 Gipformer ASR hypothesis -> ViMedCSS gold segment_text
 ```
 
-Then compare:
+Then compare all three predictions on the same pairs:
 
-1. Raw Gipformer.
-2. LLM/RAG correction.
-3. Trained QLoRA GEC model.
+1. Raw Gipformer (`raw_asr`).
+2. LLM/RAG correction (`corrected_text`, from `scripts/run_llm_rag_baseline.py`).
+3. Trained QLoRA GEC model (`gec_pred`, from `scripts/predict_gec.py`).
 
-The trained GEC model is accepted only if validation and hard split metrics improve, especially code-switched term recall/F1 and number/unit preservation.
+```powershell
+# 3) Run the trained adapter over the LLM/RAG output so one file has all columns
+python scripts/predict_gec.py `
+  --pairs artifacts/evaluations/ckey_rag_smoke.jsonl `
+  --adapter-dir artifacts/gec_lora/qwen3_gec `
+  --output artifacts/evaluations/darag_all_preds.jsonl
+
+# Score raw vs LLM/RAG vs trained, then gate
+python scripts/evaluate_gec_runs.py `
+  --input artifacts/evaluations/darag_all_preds.jsonl `
+  --prediction-columns raw_asr corrected_text gec_pred `
+  --output artifacts/evaluations/darag_compare.json
+
+python scripts/gate_gec.py --report artifacts/evaluations/darag_compare.json
+```
+
+The trained GEC model is accepted only when `gate_gec.py` exits `ACCEPT` — i.e. on
+the frozen validation and hard splits it matches or beats raw Gipformer and the
+LLM/RAG baseline on WER and code-switched term F1 without regressing number/unit
+preservation. `predict_gec.py`, `evaluate_gec_runs.py`, and `gate_gec.py` are the
+inference + acceptance-gate path that closes the loop after `train_gec_lora.py`.
+
+### Retrieval backend (code-switch terms)
+
+Retrieval defaults to the lexical/fuzzy matcher. To use the Vietnamese bi-encoder
+(`bkai-foundation-models/vietnamese-bi-encoder`) set `RETRIEVAL_BACKEND=semantic`
+or `hybrid` (needs the optional `sentence-transformers` + `pyvi` deps). Compare
+backends on the same pairs before switching:
+
+```powershell
+python scripts/evaluate_retrieval.py --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl --backend lexical
+python scripts/evaluate_retrieval.py --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl --backend hybrid
+```
 
 ## DARAG Pipeline
 

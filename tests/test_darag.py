@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 from carepath.darag import (
     build_synthetic_generation_messages,
     duplicate_rejection_reason,
+    format_darag_inference_prompt,
     format_darag_training_prompt,
     parse_synthetic_transcripts,
     validate_gec_pair,
@@ -55,6 +56,22 @@ class DaragTests(unittest.TestCase):
         )
         self.assertIn("SpO2", prompt)
         self.assertIn("Raw ASR transcript", prompt)
+
+    def test_inference_prompt_stops_at_assistant_header_without_gold(self) -> None:
+        row = {
+            "raw_asr": "spo2 chin muoi tam",
+            "gold_text": "SpO2 chín mươi tám",
+            "retrieved_terms": ["SpO2"],
+        }
+        inference = format_darag_inference_prompt(row)
+        # The inference prompt must end ready for generation and must NOT leak the
+        # gold transcript (which would make eval trivially perfect).
+        self.assertTrue(inference.endswith("<|im_start|>assistant\n"))
+        self.assertNotIn(row["gold_text"], inference)
+        # Training prompt is the inference prompt plus the gold answer.
+        training = format_darag_training_prompt(row)
+        self.assertTrue(training.startswith(inference))
+        self.assertIn(row["gold_text"], training)
 
     def test_parse_synthetic_transcripts_from_json_object(self) -> None:
         rows = parse_synthetic_transcripts(

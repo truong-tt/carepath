@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Protocol
 
 from carepath.config import Settings
 from carepath.schemas import SoapNote
 from carepath.services.retrieval import RetrievedTerm
+
+logger = logging.getLogger("carepath.llm")
 
 
 class LLMError(RuntimeError):
@@ -21,6 +24,12 @@ class CorrectionResult:
     corrected_text: str
     provider: str
     raw_response: str | None = None
+
+
+@dataclass(frozen=True)
+class SoapResult:
+    soap: SoapNote
+    provider: str
 
 
 class ClinicalLLM(Protocol):
@@ -40,7 +49,7 @@ class ClinicalLLM(Protocol):
         corrected_text: str,
         retrieved_terms: list[RetrievedTerm],
         encounter_context: str | None = None,
-    ) -> SoapNote:
+    ) -> "SoapResult":
         ...
 
 
@@ -85,7 +94,7 @@ class OpenAICompatibleLLM:
         corrected_text: str,
         retrieved_terms: list[RetrievedTerm],
         encounter_context: str | None = None,
-    ) -> SoapNote:
+    ) -> SoapResult:
         content = self._chat_json(
             system=SOAP_SYSTEM_PROMPT,
             user=build_soap_prompt(corrected_text, retrieved_terms, encounter_context),
@@ -93,7 +102,7 @@ class OpenAICompatibleLLM:
         parsed = extract_json_object(content)
         parsed["review_required"] = True
         parsed.setdefault("missing_information", [])
-        return SoapNote(**parsed)
+        return SoapResult(soap=SoapNote(**parsed), provider=self.provider_name)
 
     def _chat_json(self, system: str, user: str) -> str:
         if not self.settings.llm_api_key:
@@ -166,24 +175,28 @@ class OfflineClinicalLLM:
         corrected_text: str,
         retrieved_terms: list[RetrievedTerm],
         encounter_context: str | None = None,
-    ) -> SoapNote:
-        subjective = _pick_subjective(corrected_text)
-        objective = _pick_objective(corrected_text)
+    ) -> SoapResult:
+        sections = _bucket_clauses(corrected_text)
         term_text = ", ".join(item.term for item in retrieved_terms) or "không có"
-        assessment = (
-            "Bản nháp cần bác sĩ xác nhận. Thuật ngữ liên quan được phát hiện: "
-            f"{term_text}."
+
+        subjective = sections["subjective"]
+        objective = sections["objective"]
+        assessment = sections["assessment"] or (
+            "Chưa có đánh giá rõ ràng trong bản ghi. "
+            f"Thuật ngữ liên quan được phát hiện: {term_text}. Cần bác sĩ xác nhận."
         )
-        plan = (
+        plan_reminder = (
             "Bác sĩ rà soát lại bản ghi âm, xác nhận triệu chứng, dấu hiệu sinh tồn, "
             "chẩn đoán và kế hoạch điều trị trước khi lưu hồ sơ."
         )
+        plan = f"{sections['plan']}. {plan_reminder}" if sections["plan"] else plan_reminder
+
         missing = []
         if not objective:
             missing.append("Dấu hiệu sinh tồn hoặc kết quả cận lâm sàng chưa rõ.")
         if not subjective:
             missing.append("Triệu chứng/chủ quan của bệnh nhân chưa rõ.")
-        return SoapNote(
+        soap = SoapNote(
             subjective=subjective or "Chưa đủ thông tin chủ quan trong transcript.",
             objective=objective or "Chưa đủ thông tin khách quan trong transcript.",
             assessment=assessment,
@@ -191,13 +204,69 @@ class OfflineClinicalLLM:
             missing_information=missing,
             review_required=True,
         )
+        return SoapResult(soap=soap, provider="offline")
+
+
+class FallbackClinicalLLM:
+    """Wrap a network LLM so a provider failure never breaks the demo.
+
+    If the primary provider raises ``LLMError`` (timeout, auth, bad gateway,
+    malformed JSON), we transparently serve the deterministic offline generator
+    and tag the provider as ``*_offline_fallback`` so the response metadata makes
+    the degraded path visible to clinicians and operators.
+    """
+
+    def __init__(self, primary: ClinicalLLM, fallback: "OfflineClinicalLLM"):
+        self.primary = primary
+        self.fallback = fallback
+
+    def readiness(self) -> tuple[bool, dict[str, object]]:
+        ready, details = self.primary.readiness()
+        return ready, {**details, "fallback": "offline", "fallback_enabled": True}
+
+    def correct_transcript(
+        self,
+        raw_text: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> CorrectionResult:
+        try:
+            return self.primary.correct_transcript(
+                raw_text, retrieved_terms, encounter_context=encounter_context
+            )
+        except LLMError as exc:
+            logger.warning("LLM correction failed; using offline fallback: %s", exc)
+            result = self.fallback.correct_transcript(
+                raw_text, retrieved_terms, encounter_context=encounter_context
+            )
+            return replace(result, provider="offline_fallback")
+
+    def generate_soap(
+        self,
+        corrected_text: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> SoapResult:
+        try:
+            return self.primary.generate_soap(
+                corrected_text, retrieved_terms, encounter_context=encounter_context
+            )
+        except LLMError as exc:
+            logger.warning("LLM SOAP generation failed; using offline fallback: %s", exc)
+            result = self.fallback.generate_soap(
+                corrected_text, retrieved_terms, encounter_context=encounter_context
+            )
+            return replace(result, provider="offline_fallback")
 
 
 def build_llm(settings: Settings) -> ClinicalLLM:
     if settings.llm_provider in {"offline", "mock"}:
         return OfflineClinicalLLM()
     if settings.llm_provider in {"openai", "openai_compatible", "ckey"}:
-        return OpenAICompatibleLLM(settings)
+        primary = OpenAICompatibleLLM(settings)
+        if settings.llm_fallback_offline:
+            return FallbackClinicalLLM(primary, OfflineClinicalLLM())
+        return primary
     raise ValueError("LLM_PROVIDER must be 'offline', 'openai_compatible', or 'ckey'")
 
 
@@ -328,45 +397,157 @@ def _restore_term_case(text: str, term: str) -> str:
     return re.sub(rf"\b{re.escape(term)}\b", term, text, flags=re.I)
 
 
-def _pick_subjective(text: str) -> str:
-    keywords = (
-        "đau",
-        "mệt",
-        "ho",
-        "sốt",
-        "chóng mặt",
-        "buồn nôn",
-        "khó thở",
-        "tê",
-        "rát",
-        "ngứa",
-    )
-    return _sentences_matching(text, keywords)
+# Offline SOAP bucketing. Each clause is assigned to exactly one section, in
+# priority order, so a run-on dictation is split into S/O/A/P instead of being
+# dumped wholesale into Subjective. This is a heuristic safety net, not a
+# replacement for the validated clinical LLM.
+_ASSESSMENT_KEYWORDS = (
+    "chẩn đoán",
+    "nghĩ đến",
+    "nghĩ tới",
+    "nghi ngờ",
+    "hội chứng",
+    "ấn tượng",
+    "đánh giá",
+)
+_HISTORY_KEYWORDS = ("tiền sử", "tiền căn", "bệnh sử")
+_PLAN_KEYWORDS = (
+    "cho làm",
+    "chỉ định",
+    "kê đơn",
+    "kê toa",
+    "cho thuốc",
+    "cho uống",
+    "theo dõi",
+    "tái khám",
+    "chuyển",
+    "nhập viện",
+    "điều trị",
+    "dặn",
+    "hẹn",
+    "truyền",
+    "tiêm",
+    "bù dịch",
+    "hội chẩn",
+)
+_OBJECTIVE_KEYWORDS = (
+    "huyết áp",
+    "mạch",
+    "nhiệt độ",
+    "spo2",
+    "mmhg",
+    "mg/dl",
+    "bpm",
+    "lần/phút",
+    "xét nghiệm",
+    "siêu âm",
+    "x-quang",
+    "ct",
+    "mri",
+    "ecg",
+    "điện tim",
+    "khám",
+    "nghe phổi",
+    "phù",
+    "vàng da",
+    "troponin",
+    "công thức máu",
+)
+_SUBJECTIVE_KEYWORDS = (
+    "đau",
+    "mệt",
+    "ho",
+    "sốt",
+    "chóng mặt",
+    "buồn nôn",
+    "khó thở",
+    "tê",
+    "rát",
+    "ngứa",
+    "mỏi",
+    "nôn",
+    "tiêu chảy",
+    "hồi hộp",
+    "mất ngủ",
+    "sụt cân",
+    "chán ăn",
+    "than",
+)
+# A number directly followed by a clinical unit is an objective measurement.
+_MEASUREMENT = re.compile(
+    r"\d+(?:[.,]\d+)?\s*(?:%|mmhg|mg/dl|bpm|lần/phút|mmol|°c)",
+    flags=re.IGNORECASE,
+)
 
 
-def _pick_objective(text: str) -> str:
-    keywords = (
-        "huyết áp",
-        "mạch",
-        "nhiệt độ",
-        "spo2",
-        "mmhg",
-        "mg/dl",
-        "bpm",
-        "xét nghiệm",
-        "siêu âm",
-        "x-quang",
-        "ct",
-        "mri",
-    )
-    return _sentences_matching(text, keywords)
+# Raw ASR is often unpunctuated, so punctuation alone cannot segment it. We
+# insert a break before where a new clinical statement begins:
+#   - a vital sign immediately followed by a number ("huyết áp 150"), so a real
+#     measurement splits but a history phrase ("tăng huyết áp") does not; and
+#   - statement-starter verbs/markers (orders, impressions, history), curated to
+#     avoid substrings of one another so multi-word phrases stay intact.
+_VITAL_MEASUREMENT_CUE = r"(?:huyết áp|mạch|nhiệt độ|nhịp thở|spo2)\s*\d"
+_STARTER_CUES = (
+    "cho làm",
+    "chỉ định",
+    "kê đơn",
+    "kê toa",
+    "theo dõi",
+    "tái khám",
+    "nhập viện",
+    "hội chẩn",
+    "chẩn đoán",
+    "nghĩ đến",
+    "nghĩ tới",
+    "nghi ngờ",
+    "tiền sử",
+    "tiền căn",
+    "bệnh sử",
+)
+_BOUNDARY_RE = re.compile(
+    r"\s+(?=(?:"
+    + "|".join(re.escape(c) for c in sorted(_STARTER_CUES, key=len, reverse=True))
+    + r"|"
+    + _VITAL_MEASUREMENT_CUE
+    + r"))",
+    flags=re.IGNORECASE,
+)
 
 
-def _sentences_matching(text: str, keywords: tuple[str, ...]) -> str:
-    sentences = [part.strip() for part in re.split(r"(?<=[.!?。])\s+|;\s+", text)]
-    matches = [
-        sentence
-        for sentence in sentences
-        if any(keyword in sentence.lower() for keyword in keywords)
-    ]
-    return " ".join(matches)
+def _split_clauses(text: str) -> list[str]:
+    # Insert breaks before clinical cue words (handles unpunctuated ASR), then
+    # split on commas, semicolons, newlines, and sentence punctuation -- but not
+    # on a period/comma between digits (e.g. 37.5, 1,5) so numbers stay intact.
+    text = _BOUNDARY_RE.sub("\n", text)
+    parts = re.split(r"[;\n]+|,(?!\d)|(?<!\d)[.!?]+(?!\d)", text)
+    return [part.strip() for part in parts if part and part.strip()]
+
+
+def _classify_clause(clause: str) -> str:
+    lowered = clause.lower()
+    if any(kw in lowered for kw in _ASSESSMENT_KEYWORDS):
+        return "assessment"
+    if any(kw in lowered for kw in _HISTORY_KEYWORDS):
+        return "subjective"
+    if any(kw in lowered for kw in _PLAN_KEYWORDS):
+        return "plan"
+    if _MEASUREMENT.search(lowered) or any(kw in lowered for kw in _OBJECTIVE_KEYWORDS):
+        return "objective"
+    if any(kw in lowered for kw in _SUBJECTIVE_KEYWORDS):
+        return "subjective"
+    return "subjective"
+
+
+def _bucket_clauses(text: str) -> dict[str, str]:
+    buckets: dict[str, list[str]] = {
+        "subjective": [],
+        "objective": [],
+        "assessment": [],
+        "plan": [],
+    }
+    for clause in _split_clauses(text):
+        buckets[_classify_clause(clause)].append(clause)
+    return {
+        section: ". ".join(c[:1].upper() + c[1:] for c in clauses)
+        for section, clauses in buckets.items()
+    }

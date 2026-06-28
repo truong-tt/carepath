@@ -51,6 +51,10 @@ class Settings:
     gipformer_num_threads: int
     gipformer_decoding_method: str
     gipformer_chunk_seconds: float
+    gipformer_segmentation: str
+    gipformer_overlap_seconds: float
+    gipformer_max_segment_seconds: float
+    gipformer_vad_model: str | None
     llm_provider: str
     llm_base_url: str
     llm_model: str
@@ -58,6 +62,9 @@ class Settings:
     llm_timeout_seconds: float
     medical_lexicon_path: Path
     retrieval_top_k: int
+    retrieval_backend: str
+    semantic_model_name: str
+    llm_fallback_offline: bool = True
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -68,6 +75,7 @@ class Settings:
             else "https://api.openai.com/v1"
         )
         default_llm_model = "gpt-5.4" if llm_provider == "ckey" else "gpt-4.1-mini"
+        chunk_seconds = _float_env("GIPFORMER_CHUNK_SECONDS", 20.0)
         return cls(
             app_env=os.getenv("APP_ENV", "local"),
             asr_provider=os.getenv("ASR_PROVIDER", "gipformer").strip().lower(),
@@ -77,7 +85,15 @@ class Settings:
             gipformer_decoding_method=os.getenv(
                 "GIPFORMER_DECODING_METHOD", "modified_beam_search"
             ).strip(),
-            gipformer_chunk_seconds=_float_env("GIPFORMER_CHUNK_SECONDS", 20.0),
+            gipformer_chunk_seconds=chunk_seconds,
+            gipformer_segmentation=os.getenv(
+                "GIPFORMER_SEGMENTATION", "overlap"
+            ).strip().lower(),
+            gipformer_overlap_seconds=_float_env("GIPFORMER_OVERLAP_SECONDS", 2.0),
+            gipformer_max_segment_seconds=_float_env(
+                "GIPFORMER_MAX_SEGMENT_SECONDS", chunk_seconds
+            ),
+            gipformer_vad_model=os.getenv("GIPFORMER_VAD_MODEL") or None,
             llm_provider=llm_provider,
             llm_base_url=os.getenv("LLM_BASE_URL", default_llm_base_url).rstrip("/"),
             llm_model=os.getenv("LLM_MODEL", default_llm_model).strip(),
@@ -87,9 +103,14 @@ class Settings:
                 os.getenv("MEDICAL_LEXICON_PATH", "data/medical_lexicon.json")
             ),
             retrieval_top_k=_int_env("RETRIEVAL_TOP_K", 5),
+            retrieval_backend=os.getenv("RETRIEVAL_BACKEND", "lexical").strip().lower(),
+            semantic_model_name=os.getenv(
+                "SEMANTIC_MODEL_NAME", "bkai-foundation-models/vietnamese-bi-encoder"
+            ).strip(),
+            llm_fallback_offline=_bool_env("LLM_FALLBACK_OFFLINE", True),
         )
 
 
 def load_settings() -> Settings:
-    load_env_file(Path(os.getenv("HOPEGAIT_ENV_FILE", ".env")))
+    load_env_file(Path(os.getenv("CAREPATH_ENV_FILE", ".env")))
     return Settings.from_env()
