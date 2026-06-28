@@ -324,7 +324,21 @@ reported as full DARAG.
 
 ## Colab Training
 
-Open `notebooks/CarePath_DARAG_Colab.ipynb` in Google Colab. It defaults to:
+Three notebooks are provided. To save GPU units, prefer the split pair — the
+slow Gipformer ASR data prep is CPU-only, so running it on L4 wastes units:
+
+- `notebooks/CarePath_DARAG_1_dataprep_cpu.ipynb` — **CPU runtime**: builds the
+  term datastore + real Gipformer GEC pairs (the long step) and saves artifacts
+  to Google Drive (`MyDrive/carepath_artifacts`).
+- `notebooks/CarePath_DARAG_2_train_gpu.ipynb` — **L4/GPU runtime**: restores the
+  artifacts from Drive, then runs only GPU work (Qwen synthetic generation, QLoRA
+  fine-tune, adapter inference) plus short CPU glue (TTS, evaluate, gate).
+- `notebooks/CarePath_DARAG_Colab.ipynb` — the all-in-one (GPU) version if you
+  prefer a single runtime.
+
+Each notebook's run-size cell (`LIMIT_PER_SPLIT`, `SYNTH_COUNT`, `SYNTH_TTS_LIMIT`,
+`MAX_STEPS`) keeps smoke defaults; raise them for a real run. The all-in-one
+defaults to:
 
 - Model: `Qwen/Qwen3-4B-Instruct-2507`
 - OOM fallback: `Qwen/Qwen2.5-3B-Instruct`
