@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument("--datastore", default="data/medical_lexicon.json")
     parser.add_argument("--retrieval-backend", default="lexical", choices=["lexical", "semantic", "hybrid"])
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--n-best", type=int, default=1, help="paper N=5; >1 adds perturbation N-best")
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
 
@@ -52,7 +53,9 @@ def main() -> None:
 
     written = 0
     with output_path.open(mode, encoding="utf-8") as handle:
-        for pair in build_synthetic_pairs(rows, retriever=retriever, asr=asr, completed_ids=completed):
+        for pair in build_synthetic_pairs(
+            rows, retriever=retriever, asr=asr, completed_ids=completed, n_best=args.n_best
+        ):
             result = validate_gec_pair(pair)
             if not result.ok:
                 raise ValueError(f"Invalid synthetic pair {pair.get('audio_id')}: {result.errors}")

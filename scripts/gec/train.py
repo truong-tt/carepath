@@ -40,6 +40,13 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=2e-4)
     parser.add_argument("--max-seq-length", type=int, default=768)
     parser.add_argument(
+        "--seeds",
+        type=int,
+        nargs="+",
+        default=[13],
+        help="One or more seeds (paper averages 3). >1 writes <dir>/<variant>/seed-<s>.",
+    )
+    parser.add_argument(
         "--no-resume",
         dest="resume",
         action="store_false",
@@ -49,24 +56,30 @@ def main() -> None:
     args = parser.parse_args()
 
     variants = list(VARIANTS) if args.all_variants else [args.variant]
+    multi_seed = len(args.seeds) > 1
     for variant in variants:
-        output_dir = Path(args.output_dir) / variant if args.all_variants else Path(args.output_dir)
-        print(f"\n=== Training variant '{variant}' -> {output_dir} ===")
-        train(
-            TrainArgs(
-                pairs=Path(args.pairs),
-                output_dir=output_dir,
-                variant=variant,
-                base_model=args.base_model,
-                fallback_model=args.fallback_model,
-                max_steps=args.max_steps,
-                per_device_train_batch_size=args.per_device_train_batch_size,
-                gradient_accumulation_steps=args.gradient_accumulation_steps,
-                learning_rate=args.learning_rate,
-                max_seq_length=args.max_seq_length,
-                resume=args.resume,
+        variant_dir = Path(args.output_dir) / variant if args.all_variants else Path(args.output_dir)
+        for seed in args.seeds:
+            # Single seed keeps the flat layout the predict/gate steps expect;
+            # multi-seed nests each run so per-seed metrics can be averaged.
+            output_dir = variant_dir / f"seed-{seed}" if multi_seed else variant_dir
+            print(f"\n=== Training variant '{variant}' seed={seed} -> {output_dir} ===")
+            train(
+                TrainArgs(
+                    pairs=Path(args.pairs),
+                    output_dir=output_dir,
+                    variant=variant,
+                    base_model=args.base_model,
+                    fallback_model=args.fallback_model,
+                    max_steps=args.max_steps,
+                    per_device_train_batch_size=args.per_device_train_batch_size,
+                    gradient_accumulation_steps=args.gradient_accumulation_steps,
+                    learning_rate=args.learning_rate,
+                    max_seq_length=args.max_seq_length,
+                    seed=seed,
+                    resume=args.resume,
+                )
             )
-        )
 
 
 if __name__ == "__main__":

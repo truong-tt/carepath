@@ -36,6 +36,7 @@ def main() -> None:
     parser.add_argument("--asr-provider", default="gipformer", choices=["gipformer", "mock"])
     parser.add_argument("--datastore", default="data/medical_lexicon.json")
     parser.add_argument("--retrieval-backend", default="lexical", choices=["lexical", "semantic", "hybrid"])
+    parser.add_argument("--n-best", type=int, default=1, help="paper N=5; >1 adds perturbation N-best")
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
 
@@ -61,6 +62,7 @@ def main() -> None:
             asr=asr,
             limit_per_split=args.limit_per_split,
             completed_ids=completed,
+            n_best=args.n_best,
         ):
             handle.write(json.dumps(pair, ensure_ascii=False) + "\n")
             handle.flush()

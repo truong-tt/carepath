@@ -26,13 +26,18 @@ from carepath.gec.data import augment_training_pairs, read_jsonl, write_jsonl  #
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--real", required=True, help="Real GEC pairs JSONL (all splits).")
+    parser.add_argument(
+        "--real",
+        required=True,
+        nargs="+",
+        help="Real GEC pairs JSONL(s) — ViMedCSS plus optional supplementary labeled pairs.",
+    )
     parser.add_argument("--synthetic", default=None, help="Synthetic GEC pairs JSONL (train only).")
     parser.add_argument("--output", required=True)
     parser.add_argument("--nsyn-factor", type=float, default=1.0)
     args = parser.parse_args()
 
-    real = read_jsonl(Path(args.real))
+    real = [row for path in args.real for row in read_jsonl(Path(path))]
     synthetic = read_jsonl(Path(args.synthetic)) if args.synthetic else []
     merged = augment_training_pairs(real, synthetic, nsyn_factor=args.nsyn_factor)
     count = write_jsonl(Path(args.output), merged)

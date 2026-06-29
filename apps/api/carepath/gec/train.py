@@ -39,6 +39,7 @@ class TrainArgs:
     gradient_accumulation_steps: int = 8
     learning_rate: float = 2e-4
     max_seq_length: int = 768
+    seed: int = 13  # paper averages over 3 seeds; set per-run for multi-seed eval
     # Resume from the newest checkpoint in output_dir if one exists, so an
     # interrupted run (Colab disconnect, closed laptop) continues instead of
     # restarting. Set False to force a fresh run.
@@ -147,6 +148,7 @@ def _train(args: TrainArgs, model_name: str) -> None:
 
     config_kwargs = dict(
         output_dir=str(args.output_dir),
+        seed=args.seed,
         max_steps=args.max_steps,
         per_device_train_batch_size=args.per_device_train_batch_size,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -191,7 +193,8 @@ def _train(args: TrainArgs, model_name: str) -> None:
     tokenizer.save_pretrained(str(args.output_dir))
     # Record how to prompt this adapter at inference (variant -> use_retrieval).
     (args.output_dir / "darag_variant.json").write_text(
-        f'{{"variant": "{args.variant}", "use_retrieval": {str(use_retrieval).lower()}}}',
+        f'{{"variant": "{args.variant}", "use_retrieval": {str(use_retrieval).lower()}, '
+        f'"seed": {args.seed}}}',
         encoding="utf-8",
     )
     print(f"Saved {args.variant} GEC adapter to {args.output_dir}")

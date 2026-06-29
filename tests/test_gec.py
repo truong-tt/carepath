@@ -8,16 +8,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
 from carepath.gec import config
 from carepath.gec.data import (
+    LABELED_SOURCE,
     augment_training_pairs,
+    build_labeled_pairs,
     select_variant_rows,
     validate_gec_pair,
     validate_synthetic_transcript,
 )
 from carepath.gec.datastore import extract_code_switch_terms, has_vietnamese_diacritics
-from carepath.gec.evaluate import ne_f1_table, wer_report
+from carepath.gec.evaluate import (
+    aggregate_reports,
+    mean_report,
+    ne_f1_table,
+    train_error_signal,
+    wer_report,
+)
 from carepath.gec.gate import run_gate
 from carepath.gec.leakage import duplicate_rejection_reason, ngram_overlap
 from carepath.gec.metrics import TermConfusion, score_pair, term_confusion, word_error_rate
+from carepath.gec.nbest import dedupe_keep_order, diverse_hypotheses, other_hypotheses
 from carepath.gec.prompts import (
     build_synthetic_generation_messages,
     format_inference_prompt,
@@ -212,6 +221,100 @@ class EvalGateTests(unittest.TestCase):
         report = wer_report(rows, ["raw_asr", "gec_pred"])
         accepted, _ = run_gate(report, baselines=("raw_asr",))
         self.assertFalse(accepted)
+
+
+class _StubRetriever:
+    def retrieve(self, text, limit=None):  # noqa: D401 - test stub
+        return []
+
+
+class NbestTests(unittest.TestCase):
+    def test_dedupe_keep_order(self) -> None:
+        # case/whitespace duplicates collapse; empties drop; first-seen order kept.
+        self.assertEqual(dedupe_keep_order(["A b", "a  b", "", "c"]), ["A b", "c"])
+
+    def test_other_hypotheses_single_best_is_empty(self) -> None:
+        # n_best <= 1 keeps the cheap single-decode path (no asr/audio needed).
+        self.assertEqual(other_hypotheses(None, "missing.wav", "best", 1), [])
+
+    def test_diverse_hypotheses_n1_returns_best_only(self) -> None:
+        self.assertEqual(diverse_hypotheses(None, "missing.wav", n=1, best_text="best"), ["best"])
+
+    def test_diverse_hypotheses_perturbation_best_first_and_deterministic(self) -> None:
+        try:
+            import numpy as np  # type: ignore
+            import soundfile as sf  # type: ignore
+        except Exception:  # pragma: no cover - optional deps
+            self.skipTest("numpy/soundfile not installed")
+        import tempfile
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "clip.wav"
+            sf.write(str(wav), (0.1 * np.sin(np.linspace(0, 50, 8000))).astype("float32"), 16000)
+
+            def make_stub():
+                state = {"n": 0}
+
+                def transcribe(_path):
+                    state["n"] += 1
+                    return SimpleNamespace(text=f"hyp{state['n']}")
+
+                return SimpleNamespace(transcribe=transcribe)
+
+            hyps = diverse_hypotheses(make_stub(), wav, n=3, best_text="best", seed=7)
+            self.assertEqual(hyps[0], "best")
+            self.assertEqual(len(hyps), 3)
+            self.assertEqual(hyps, diverse_hypotheses(make_stub(), wav, n=3, best_text="best", seed=7))
+
+
+class LabeledPairsTests(unittest.TestCase):
+    def test_maps_filters_and_counts_as_real(self) -> None:
+        rows = [
+            {"audio_file": "bn001.wav", "raw_asr": "benh nhan do spo2",
+             "gold_text": "bệnh nhân đo SpO2", "quality": "OK", "source": "label_studio"},
+            {"audio_file": "bn002.wav", "raw_asr": "x", "gold_text": "y",
+             "quality": "Bỏ qua", "source": "label_studio"},  # dropped
+        ]
+        pairs = list(build_labeled_pairs(rows, _StubRetriever()))
+        self.assertEqual(len(pairs), 1)
+        pair = pairs[0]
+        self.assertEqual(pair["source_kind"], LABELED_SOURCE)
+        self.assertEqual(pair["split"], "train")
+        self.assertIn("SpO2", pair["gold_terms"])  # mined from gold transcript
+        self.assertTrue(validate_gec_pair(pair).ok)
+        # wo_aug must keep labeled rows (they are real supervision).
+        mixed = [pair, _pair("train", "darag_synthetic_tts", audio_id="s1")]
+        wo_aug, _ = select_variant_rows(mixed, "wo_aug")
+        self.assertEqual([r["source_kind"] for r in wo_aug], [LABELED_SOURCE])
+
+
+class WordWerTests(unittest.TestCase):
+    def test_segmented_wer_matches_for_ascii(self) -> None:
+        # pyvi leaves ascii tokens alone (and falls back to split if absent).
+        self.assertAlmostEqual(word_error_rate("a b c", "a b d", segment=True), 1 / 3)
+
+
+class AggregateTests(unittest.TestCase):
+    def test_aggregate_and_mean_report(self) -> None:
+        r1 = {"gec_pred": {"validation": {"wer": 0.2, "term_f1": 0.8}}}
+        r2 = {"gec_pred": {"validation": {"wer": 0.4, "term_f1": 0.6}}}
+        agg = aggregate_reports([r1, r2])
+        self.assertAlmostEqual(agg["gec_pred"]["validation"]["wer"]["mean"], 0.3)
+        self.assertEqual(agg["gec_pred"]["validation"]["wer"]["n_seeds"], 2)
+        self.assertAlmostEqual(mean_report([r1, r2])["gec_pred"]["validation"]["wer"], 0.3)
+
+
+class ErrorSignalTests(unittest.TestCase):
+    def test_thin_vs_rich_signal(self) -> None:
+        thin = train_error_signal(
+            [{"split": "train", "raw_asr": "bệnh nhân đo SpO2", "gold_text": "bệnh nhân đo SpO2"}]
+        )
+        self.assertTrue(thin["thin_signal"])
+        rich = train_error_signal(
+            [{"split": "train", "raw_asr": "benh nhan", "gold_text": "bệnh nhân đo SpO2 chín tám"}]
+        )
+        self.assertFalse(rich["thin_signal"])
 
 
 if __name__ == "__main__":

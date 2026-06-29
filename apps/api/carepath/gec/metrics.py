@@ -65,12 +65,32 @@ def normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text)
 
 
-def word_error_rate(reference: str, hypothesis: str) -> float:
-    ref = normalize_text(reference).split()
-    hyp = normalize_text(hypothesis).split()
+def word_error_rate(reference: str, hypothesis: str, segment: bool = False) -> float:
+    """Word/syllable error rate.
+
+    Default ``segment=False`` splits on whitespace, which for Vietnamese is
+    *syllable*-level error rate — the standard ASR convention for the language.
+    ``segment=True`` first runs pyvi word segmentation (multi-syllable words become
+    single tokens) to give a true word-level WER; if pyvi is unavailable it falls
+    back to syllable tokens rather than failing.
+    """
+
+    ref = _wer_tokens(normalize_text(reference), segment)
+    hyp = _wer_tokens(normalize_text(hypothesis), segment)
     if not ref:
         return 0.0 if not hyp else 1.0
     return _edit_distance(ref, hyp) / len(ref)
+
+
+def _wer_tokens(text: str, segment: bool) -> list[str]:
+    if segment and text:
+        try:
+            from pyvi import ViTokenizer  # type: ignore
+
+            text = ViTokenizer.tokenize(text)
+        except Exception:
+            pass
+    return text.split()
 
 
 def char_error_rate(reference: str, hypothesis: str) -> float:

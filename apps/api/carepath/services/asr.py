@@ -87,6 +87,10 @@ class ASRResult:
     text: str
     model: str
     metadata: dict[str, object]
+    # Optional N-best hypotheses, best-first, when a caller decoded them (see
+    # ``carepath.gec.nbest``). Empty for the default single-decode path; consumers
+    # should fall back to ``(text,)`` when this is empty.
+    hypotheses: tuple[str, ...] = ()
 
 
 class ASRService(Protocol):
