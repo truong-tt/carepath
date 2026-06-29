@@ -133,6 +133,51 @@ def save_artifacts(backup: Path | None, rel_paths: list[str]) -> None:
         print("saved", dst)
 
 
+def bundle_adapter(
+    adapter_dir: str | Path,
+    dest_root: str | Path,
+    name: str | None = None,
+    make_zip: bool = True,
+) -> tuple[Path, Path | None]:
+    """Copy the *final* adapter into a small, student-ready bundle (+ optional zip).
+
+    The trained ``output_dir`` also holds bulky ``checkpoint-*`` folders (optimizer
+    state, only needed to *resume* training). Those are skipped here so the shared
+    bundle is just what inference needs: ``adapter_config.json``,
+    ``adapter_model.safetensors``, the tokenizer files, and ``darag_variant.json``
+    (~tens of MB). Returns ``(bundle_dir, zip_path or None)``.
+
+    To use the bundle the recipient needs a GPU and the matching base model
+    (downloaded automatically) — no dataset and no training.
+    """
+
+    import shutil
+
+    adapter_dir = Path(adapter_dir)
+    if not (adapter_dir / "adapter_config.json").exists():
+        raise SystemExit(
+            f"No adapter at {adapter_dir} (expected adapter_config.json). "
+            "Train the 'full' variant first."
+        )
+    bundle = Path(dest_root) / (name or adapter_dir.name)
+    if bundle.exists():
+        shutil.rmtree(bundle)
+    bundle.mkdir(parents=True, exist_ok=True)
+    for item in adapter_dir.iterdir():
+        if item.is_dir() and item.name.startswith("checkpoint-"):
+            continue  # resumable optimizer state, not needed for inference
+        if item.is_dir():
+            shutil.copytree(item, bundle / item.name)
+        else:
+            shutil.copy(item, bundle / item.name)
+    zip_path = (
+        Path(shutil.make_archive(str(bundle), "zip", root_dir=str(bundle)))
+        if make_zip
+        else None
+    )
+    return bundle, zip_path
+
+
 def latest_checkpoint(output_dir: str | Path) -> str | None:
     """Return the newest ``checkpoint-<step>`` dir under ``output_dir``, or ``None``.
 

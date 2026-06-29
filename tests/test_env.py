@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
 from carepath.gec.env import (
+    bundle_adapter,
     gpu_report,
     in_colab,
     latest_checkpoint,
@@ -67,6 +68,37 @@ class BackupHelperTests(unittest.TestCase):
             src = Path(tmp) / "metrics.json"
             src.write_text("{}", encoding="utf-8")
             save_artifacts(None, [str(src)])  # should not raise
+
+
+class BundleAdapterTests(unittest.TestCase):
+    def test_bundle_keeps_adapter_files_and_drops_checkpoints(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            adapter = Path(tmp) / "qwen3" / "full"
+            adapter.mkdir(parents=True)
+            (adapter / "adapter_config.json").write_text("{}", encoding="utf-8")
+            (adapter / "adapter_model.safetensors").write_text("weights", encoding="utf-8")
+            (adapter / "darag_variant.json").write_text(
+                '{"use_retrieval": true}', encoding="utf-8"
+            )
+            ckpt = adapter / "checkpoint-50"
+            ckpt.mkdir()
+            (ckpt / "optimizer.pt").write_text("big", encoding="utf-8")
+
+            dest = Path(tmp) / "share"
+            bundle, zip_path = bundle_adapter(adapter, dest, name="carepath-gec")
+
+            self.assertTrue((bundle / "adapter_config.json").exists())
+            self.assertTrue((bundle / "darag_variant.json").exists())
+            self.assertFalse((bundle / "checkpoint-50").exists())  # training-only
+            self.assertIsNotNone(zip_path)
+            self.assertTrue(zip_path.exists())
+
+    def test_bundle_errors_without_an_adapter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            empty = Path(tmp) / "empty"
+            empty.mkdir()
+            with self.assertRaises(SystemExit):
+                bundle_adapter(empty, Path(tmp) / "share")
 
 
 if __name__ == "__main__":
