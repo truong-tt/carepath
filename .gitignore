@@ -1,5 +1,6 @@
 .env
 .venv/
+.venv_labeling/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -7,10 +8,15 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 artifacts/
+data/labeling/
 models/
 tmp/
 *.wav
 *.mp3
+*.m4a
+*.aac
 *.flac
 *.ogg
-
+*.oga
+*.opus
+*.webm
