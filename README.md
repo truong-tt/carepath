@@ -11,13 +11,16 @@ The MVP is intentionally designed so demo success does not depend on a trained G
 
 ## Project Shape
 
-- `apps/api/carepath`: FastAPI runtime backend.
+- `apps/api/carepath`: FastAPI runtime backend (ASR + retrieval + LLM serving).
+- `apps/api/carepath/gec`: standalone, paper-faithful DARAG post-ASR correction
+  package (training/data/eval only — never imported by the serving path).
 - `data/medical_lexicon.json`: editable Vietnamese/English medical lexicon seed.
-- `scripts/create_gec_pairs.py`: Colab-friendly ViMedCSS to `raw_asr -> gold_text` data creation.
-- `scripts/evaluate_corrections.py`: baseline metric reporting.
+- `scripts/gec/`: thin CLI entrypoints over `carepath.gec` (datastore, pairs,
+  synthetic, voice-cloning TTS, leakage, train, predict, evaluate, gate).
 - `apps/web`: vanilla static frontend (landing + SOAP-note tool), served by the API.
-- `notebooks/CarePath_DARAG_Colab.ipynb`: Colab training/evaluation notebook.
-- `tests`: dependency-light unit tests.
+- `notebooks/CarePath_DARAG_dataprep_cpu.ipynb` + `CarePath_DARAG_train_gpu.ipynb`:
+  the rebuilt two-stage Colab pipeline.
+- `tests`: dependency-light unit tests (`tests/test_gec.py` covers the GEC package).
 
 ## Python Version
 
@@ -213,139 +216,172 @@ Lower `GIPFORMER_CHUNK_SECONDS` if a machine still runs out of memory; raise it
 only after testing with the real demo clip. ASR metadata reports the
 `segmentation` mode used and the `segment_count`.
 
-## GEC Methodology
+## Post-ASR Correction (DARAG)
 
-Do not train directly on clean ViMedCSS text. First create GEC pairs:
+The post-ASR corrector is a standalone, paper-faithful re-implementation of
+**DARAG** (Ghosh et al., *Failing Forward: Improving Generative Error Correction
+for ASR with Synthetic Data and Retrieval Augmentation*, Findings of ACL 2025),
+adapted to Vietnamese code-switched medical speech. It lives in
+`apps/api/carepath/gec` with thin CLIs in `scripts/gec/`. It is the **offline
+training/data/eval layer** and never imports the FastAPI serving path, so deleting
+or retraining it cannot break the live app.
 
-```text
-Gipformer ASR hypothesis -> ViMedCSS gold segment_text
-```
+What the paper contributes, and where it lives here:
 
-Then compare all three predictions on the same pairs:
+- **Synthetic data augmentation** (paper §4.1): few-shot LLM transcript generation
+  (`gec/synthetic.py`) → **voice-cloning TTS** conditioned on in-domain reference
+  speech (`gec/tts.py`, paper §4.1 Step 2 / Appendix D) → Gipformer over the cloned
+  audio (`gec/data.py`).
+- **Retrieval-Augmented Correction** (paper §4.2, Eq. 1): an NE / code-switch
+  datastore (`gec/datastore.py`) + bi-encoder cosine top-k retrieval
+  (`gec/retrieval.py`).
+- **Leakage audit** (paper App. C / Table 6): SentenceBERT cosine + BLEU of
+  synthetic vs nearest real transcript (`gec/leakage.py`).
+- **QLoRA fine-tune with ablation variants** (paper §5): `full`, `wo_rac`,
+  `wo_aug`, `only_synth` (`gec/train.py`).
+- **WER + NE-F1 tables and the acceptance gate** (paper Tables 3 & 4):
+  `gec/evaluate.py`, `gec/gate.py`.
+
+Do not train directly on clean ViMedCSS text — first create GEC pairs
+(`Gipformer ASR hypothesis -> ViMedCSS gold segment_text`), then compare:
 
 1. Raw Gipformer (`raw_asr`).
-2. LLM/RAG correction (`corrected_text`, from `scripts/run_llm_rag_baseline.py`).
-3. Trained QLoRA GEC model (`gec_pred`, from `scripts/predict_gec.py`).
+2. LLM/RAG correction (`corrected_text`, from `scripts/gec/llm_rag_baseline.py`).
+3. Trained QLoRA DARAG adapter (`gec_pred`, from `scripts/gec/predict.py`).
 
 ```powershell
-# 3) Run the trained adapter over the LLM/RAG output so one file has all columns
-python scripts/predict_gec.py `
-  --pairs artifacts/evaluations/ckey_rag_smoke.jsonl `
-  --adapter-dir artifacts/gec_lora/qwen3_gec `
+# Run the trained adapter over the LLM/RAG output so one file has every column
+python scripts/gec/predict.py `
+  --pairs artifacts/evaluations/llm_rag.jsonl `
+  --adapter-dir artifacts/gec_lora/qwen3/full `
   --output artifacts/evaluations/darag_all_preds.jsonl
 
-# Score raw vs LLM/RAG vs trained, then gate
-python scripts/evaluate_gec_runs.py `
+# Score raw vs LLM/RAG vs trained (WER table + NE-F1 ablation table), then gate
+python scripts/gec/evaluate.py `
   --input artifacts/evaluations/darag_all_preds.jsonl `
   --prediction-columns raw_asr corrected_text gec_pred `
-  --output artifacts/evaluations/darag_compare.json
+  --wer-output artifacts/evaluations/darag_wer.json `
+  --ne-f1-output artifacts/evaluations/darag_ne_f1.json
 
-python scripts/gate_gec.py --report artifacts/evaluations/darag_compare.json
+python scripts/gec/gate.py --report artifacts/evaluations/darag_wer.json
 ```
 
-The trained GEC model is accepted only when `gate_gec.py` exits `ACCEPT` — i.e. on
-the frozen validation and hard splits it matches or beats raw Gipformer and the
+The trained adapter is accepted only when `scripts/gec/gate.py` exits `ACCEPT` — on
+the frozen `validation` and `hard` splits it matches or beats raw Gipformer and the
 LLM/RAG baseline on WER and code-switched term F1 without regressing number/unit
-preservation. `predict_gec.py`, `evaluate_gec_runs.py`, and `gate_gec.py` are the
-inference + acceptance-gate path that closes the loop after `train_gec_lora.py`.
+preservation.
 
 ### Retrieval backend (code-switch terms)
 
-Retrieval defaults to the lexical/fuzzy matcher. To use the Vietnamese bi-encoder
-(`bkai-foundation-models/vietnamese-bi-encoder`) set `RETRIEVAL_BACKEND=semantic`
-or `hybrid` (needs the optional `sentence-transformers` + `pyvi` deps). Compare
-backends on the same pairs before switching:
+Retrieval defaults to the lexical/fuzzy matcher. The runtime serving path selects
+its retriever with `RETRIEVAL_BACKEND` (`lexical` / `semantic` / `hybrid`); the
+`semantic` / `hybrid` modes use the Vietnamese bi-encoder
+(`bkai-foundation-models/vietnamese-bi-encoder`) and need the optional
+`sentence-transformers` + `pyvi` deps.
+
+The offline DARAG pair builders take a matching `--retrieval-backend` flag so the
+NEs stored in training pairs use the same retriever you plan to serve with:
 
 ```powershell
-python scripts/evaluate_retrieval.py --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl --backend lexical
-python scripts/evaluate_retrieval.py --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl --backend hybrid
+python scripts/gec/make_pairs.py --asr-provider mock --limit-per-split 20 `
+  --datastore artifacts/retrieval/term_datastore_smoke.json `
+  --retrieval-backend hybrid `
+  --output artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl
 ```
 
-## DARAG Pipeline
+## DARAG Pipeline (CLIs)
 
 CKey is reserved for runtime correction, SOAP generation, and optional high-quality
-baseline calls. Synthetic transcript generation for DARAG uses open-weight HF
-models in Colab, defaulting to `Qwen/Qwen3-4B-Instruct-2507`.
+baseline calls. Synthetic transcript generation uses open-weight HF models,
+defaulting to `Qwen/Qwen3-4B-Instruct-2507`. Run with `PYTHONPATH=apps/api` (the
+CLIs also set it themselves).
 
-Small-goal sequence:
+Data prep (CPU — real Gipformer pairs are the long step):
 
 ```powershell
-python scripts/build_term_datastore.py `
-  --dataset tensorxt/ViMedCSS `
-  --limit-per-split 20 `
+python scripts/gec/build_datastore.py `
+  --dataset tensorxt/ViMedCSS --limit-per-split 20 `
   --output artifacts/retrieval/term_datastore_smoke.json
 
-python scripts/create_gec_pairs.py `
+python scripts/gec/make_pairs.py `
   --output artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl `
   --limit-per-split 20 `
-  --lexicon artifacts/retrieval/term_datastore_smoke.json `
-  --resume
+  --datastore artifacts/retrieval/term_datastore_smoke.json --resume
 
-python scripts/evaluate_corrections.py `
+# Baseline WER + LLM/RAG baseline (+GEC column)
+python scripts/gec/evaluate.py `
   --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl `
-  --prediction-column raw_asr
+  --prediction-columns raw_asr
 
-python scripts/run_llm_rag_baseline.py `
+python scripts/gec/llm_rag_baseline.py `
   --input artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl `
-  --output artifacts/evaluations/ckey_rag_smoke.jsonl `
-  --limit 20
-
-python scripts/evaluate_gec_runs.py `
-  --input artifacts/evaluations/ckey_rag_smoke.jsonl `
-  --prediction-columns raw_asr corrected_text
+  --output artifacts/evaluations/llm_rag_smoke.jsonl --limit 20
 ```
 
-Colab synthetic data sequence:
+Synthetic augmentation (GPU for generation/TTS/train):
 
 ```bash
-PYTHONPATH=apps/api python scripts/generate_synthetic_transcripts.py \
+python scripts/gec/gen_synthetic.py \
   --pairs artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl \
-  --output artifacts/synthetic/synthetic_clean_smoke.jsonl \
-  --model Qwen/Qwen3-4B-Instruct-2507 \
-  --count 50 \
-  --load-in-4bit
+  --output artifacts/synthetic/synthetic_clean_smoke.jsonl --count 50 --load-in-4bit
 
-PYTHONPATH=apps/api python scripts/synthesize_speech.py \
+# Voice-cloning TTS (paper §4.1 Step 2). --provider mms is the no-clone fallback.
+python scripts/gec/voice_clone_tts.py \
   --input artifacts/synthetic/synthetic_clean_smoke.jsonl \
   --output artifacts/synthetic/synthetic_audio_manifest_smoke.jsonl \
-  --limit 10 \
-  --resume
+  --provider xtts --ref-dataset tensorxt/ViMedCSS --ref-count 20 --limit 10 --resume
 
-PYTHONPATH=apps/api python scripts/create_synthetic_gec_pairs.py \
+python scripts/gec/make_synth_pairs.py \
   --input artifacts/synthetic/synthetic_audio_manifest_smoke.jsonl \
   --output artifacts/gec_pairs/darag_synthetic_pairs_smoke.jsonl \
-  --limit 10 \
-  --resume
+  --datastore artifacts/retrieval/term_datastore_smoke.json --limit 10 --resume
+
+# Leakage audit (paper Table 6): synthetic must be in-domain but not memorized.
+python scripts/gec/check_leakage.py \
+  --synthetic artifacts/synthetic/synthetic_clean_smoke.jsonl \
+  --real artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl \
+  --output artifacts/evaluations/leakage_smoke.json
 ```
 
-If TTS fails, use `scripts/create_text_noise_ablation.py` only as a labeled
-ablation. It mines substitutions from real Gipformer pairs and must not be
-reported as full DARAG.
+Augment + train (full run plus the paper's ablations) + gate:
+
+```bash
+python scripts/gec/augment.py \
+  --real artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl \
+  --synthetic artifacts/gec_pairs/darag_synthetic_pairs_smoke.jsonl \
+  --output artifacts/gec_pairs/darag_augmented_smoke.jsonl
+
+# --all-variants trains full / wo_rac / wo_aug / only_synth into <dir>/<variant>.
+python scripts/gec/train.py \
+  --pairs artifacts/gec_pairs/darag_augmented_smoke.jsonl \
+  --output-dir artifacts/gec_lora/qwen3 --all-variants --max-steps 60
+```
 
 ## Colab Training
 
-Three notebooks are provided. To save GPU units, prefer the split pair — the
-slow Gipformer ASR data prep is CPU-only, so running it on L4 wastes units:
+Two notebooks split the work to save GPU units — the slow Gipformer ASR data prep
+is CPU-only, so running it on an L4 wastes units:
 
-- `notebooks/CarePath_DARAG_1_dataprep_cpu.ipynb` — **CPU runtime**: builds the
-  term datastore + real Gipformer GEC pairs (the long step) and saves artifacts
-  to Google Drive (`MyDrive/carepath_artifacts`).
-- `notebooks/CarePath_DARAG_2_train_gpu.ipynb` — **L4/GPU runtime**: restores the
-  artifacts from Drive, then runs only GPU work (Qwen synthetic generation, QLoRA
-  fine-tune, adapter inference) plus short CPU glue (TTS, evaluate, gate).
-- `notebooks/CarePath_DARAG_Colab.ipynb` — the all-in-one (GPU) version if you
-  prefer a single runtime.
+- `notebooks/CarePath_DARAG_dataprep_cpu.ipynb` — **CPU runtime**: builds the NE
+  datastore + real Gipformer GEC pairs (the long step) and saves artifacts to
+  Google Drive (`MyDrive/carepath_artifacts`).
+- `notebooks/CarePath_DARAG_train_gpu.ipynb` — **L4/GPU runtime**: restores the
+  artifacts from Drive, then runs the GPU work — synthetic generation,
+  voice-cloning TTS, QLoRA fine-tune (full + ablations), prediction — plus the
+  leakage report, WER/NE-F1 tables, and acceptance gate.
 
 Each notebook's run-size cell (`LIMIT_PER_SPLIT`, `SYNTH_COUNT`, `SYNTH_TTS_LIMIT`,
-`MAX_STEPS`) keeps smoke defaults; raise them for a real run. The all-in-one
-defaults to:
+`NSYN_FACTOR`, `MAX_STEPS`) keeps smoke defaults; raise them for a real run.
+Defaults:
 
-- Model: `Qwen/Qwen3-4B-Instruct-2507`
-- OOM fallback: `Qwen/Qwen2.5-3B-Instruct`
-- Quantization: 4-bit QLoRA
-- Dataset: `tensorxt/ViMedCSS`
+- GEC model: `Qwen/Qwen3-4B-Instruct-2507` (OOM fallback `Qwen/Qwen2.5-3B-Instruct`)
+- Quantization: 4-bit QLoRA, LoRA adapters only (paper §4.3)
+- TTS: `capleaf/viXTTS` voice cloning (fallback `facebook/mms-tts-vie`, no clone)
+- Dataset: `tensorxt/ViMedCSS`, with frozen train/validation/test/hard splits
 
-The notebook is structured to produce metrics before training and to keep train/validation/test/hard splits frozen.
+> The paper fine-tunes LLaMA-2-7B (English); CarePath defaults to multilingual
+> Qwen3 for Vietnamese and uses `hard` as the in-corpus OOD split. These are
+> deliberate, documented ports — see `apps/api/carepath/gec/config.py`.
 
 Colab must be able to see this repository before running the pipeline cells.
 The setup cell supports three options:
