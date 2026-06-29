@@ -39,6 +39,13 @@ def main() -> None:
     parser.add_argument("--gradient-accumulation-steps", type=int, default=8)
     parser.add_argument("--learning-rate", type=float, default=2e-4)
     parser.add_argument("--max-seq-length", type=int, default=768)
+    parser.add_argument(
+        "--no-resume",
+        dest="resume",
+        action="store_false",
+        help="Ignore any existing checkpoint and train from scratch.",
+    )
+    parser.set_defaults(resume=True)
     args = parser.parse_args()
 
     variants = list(VARIANTS) if args.all_variants else [args.variant]
@@ -57,6 +64,7 @@ def main() -> None:
                 gradient_accumulation_steps=args.gradient_accumulation_steps,
                 learning_rate=args.learning_rate,
                 max_seq_length=args.max_seq_length,
+                resume=args.resume,
             )
         )
 

@@ -23,6 +23,7 @@ from typing import Any
 
 from carepath.gec.config import DEFAULT_BASE_MODEL, FALLBACK_BASE_MODEL, GecRunConfig
 from carepath.gec.data import eval_split_rows, read_jsonl, select_variant_rows, validate_gec_pair
+from carepath.gec.env import latest_checkpoint
 from carepath.gec.prompts import format_training_prompt
 
 
@@ -38,6 +39,10 @@ class TrainArgs:
     gradient_accumulation_steps: int = 8
     learning_rate: float = 2e-4
     max_seq_length: int = 768
+    # Resume from the newest checkpoint in output_dir if one exists, so an
+    # interrupted run (Colab disconnect, closed laptop) continues instead of
+    # restarting. Set False to force a fresh run.
+    resume: bool = True
     config: GecRunConfig = None  # type: ignore[assignment]
 
 
@@ -177,7 +182,10 @@ def _train(args: TrainArgs, model_name: str) -> None:
         trainer_kwargs["tokenizer"] = tokenizer
 
     trainer = SFTTrainer(**supported(SFTTrainer, trainer_kwargs))
-    trainer.train()
+    resume_ckpt = latest_checkpoint(args.output_dir) if args.resume else None
+    if resume_ckpt:
+        print(f"Resuming from checkpoint {resume_ckpt}")
+    trainer.train(resume_from_checkpoint=resume_ckpt)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     trainer.save_model(str(args.output_dir))
     tokenizer.save_pretrained(str(args.output_dir))
