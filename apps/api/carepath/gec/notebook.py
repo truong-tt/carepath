@@ -29,6 +29,27 @@ def _is_repo(path: Path) -> bool:
     return (path / "pyproject.toml").exists() and (path / "apps" / "api" / "carepath").exists()
 
 
+def _github_token() -> str | None:
+    """Read a GitHub token from env or, on Colab, from Secrets (``userdata``)."""
+
+    for key in ("CAREPATH_GITHUB_TOKEN", "GITHUB_TOKEN"):
+        if os.environ.get(key):
+            return os.environ[key]
+    try:
+        from google.colab import userdata  # type: ignore
+
+        for key in ("CAREPATH_GITHUB_TOKEN", "GITHUB_TOKEN"):
+            try:
+                value = userdata.get(key)
+                if value:
+                    return value
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return None
+
+
 def bootstrap(default_repo_url: str = DEFAULT_REPO_URL) -> Path:
     """Locate (or, on Colab, clone) the CarePath repo; chdir + set sys.path.
 
@@ -40,13 +61,20 @@ def bootstrap(default_repo_url: str = DEFAULT_REPO_URL) -> Path:
     start = Path.cwd().resolve()
     repo = next((d for d in [start, *start.parents] if _is_repo(d)), None)
     if repo is None and env.in_colab():
-        url = os.environ.get("CAREPATH_REPO_URL") or default_repo_url
-        token = os.environ.get("CAREPATH_GITHUB_TOKEN") or os.environ.get("GITHUB_TOKEN")
-        if token and url.startswith("https://github.com/"):
-            url = url.replace("https://", f"https://x-access-token:{token}@")
         target = Path("/content/carepath")
-        subprocess.run(["git", "clone", url, str(target)], check=True)
-        repo = target
+        if _is_repo(target):
+            repo = target
+        else:
+            if target.exists():
+                import shutil
+
+                shutil.rmtree(target)
+            url = os.environ.get("CAREPATH_REPO_URL") or default_repo_url
+            token = _github_token()
+            if token and url.startswith("https://github.com/"):
+                url = url.replace("https://", f"https://x-access-token:{token}@")
+            subprocess.run(["git", "clone", url, str(target)], check=True)
+            repo = target
     if repo is None:
         raise SystemExit("CarePath repo not found. Open this notebook from inside the repo.")
     os.chdir(repo)

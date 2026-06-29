@@ -17,7 +17,7 @@ NOTEBOOKS_DIR = Path(__file__).resolve().parents[2] / "notebooks"
 # set). The robust path (zip/secret) lives in carepath.gec.notebook.bootstrap.
 BOOTSTRAP = """\
 # --- CarePath stage bootstrap (short by design) ---
-import importlib.util, os, subprocess, sys
+import importlib.util, os, shutil, subprocess, sys
 from pathlib import Path
 
 def _find(start):
@@ -26,18 +26,50 @@ def _find(start):
             return d
     return None
 
+def _token():
+    # Colab Secrets live in userdata, NOT os.environ - check both.
+    for key in ('CAREPATH_GITHUB_TOKEN', 'GITHUB_TOKEN'):
+        if os.environ.get(key):
+            return os.environ[key]
+    try:
+        from google.colab import userdata
+        for key in ('CAREPATH_GITHUB_TOKEN', 'GITHUB_TOKEN'):
+            try:
+                val = userdata.get(key)
+                if val:
+                    return val
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return None
+
 REPO = _find(Path.cwd().resolve())
 if REPO is None and importlib.util.find_spec('google.colab'):
-    url = os.environ.get('CAREPATH_REPO_URL', 'https://github.com/truong-tt/carepath.git')
-    tok = os.environ.get('CAREPATH_GITHUB_TOKEN') or os.environ.get('GITHUB_TOKEN')
-    if tok and url.startswith('https://github.com/'):
-        url = url.replace('https://', f'https://x-access-token:{tok}@')
-    subprocess.run(['git', 'clone', url, '/content/carepath'], check=True)
-    REPO = Path('/content/carepath')
+    target = Path('/content/carepath')
+    if _find(target):                       # already cloned in this runtime
+        REPO = target
+    else:
+        if target.exists():
+            shutil.rmtree(target)           # remove a half-cloned leftover
+        url = os.environ.get('CAREPATH_REPO_URL', 'https://github.com/truong-tt/carepath.git')
+        tok = _token()
+        if tok and url.startswith('https://github.com/'):
+            url = url.replace('https://', f'https://x-access-token:{tok}@')
+        r = subprocess.run(['git', 'clone', url, str(target)], capture_output=True, text=True)
+        if r.returncode != 0:
+            err = (r.stderr or r.stdout)
+            if tok:
+                err = err.replace(tok, '***')
+            raise SystemExit(
+                'git clone failed. This repo is private — add a Colab Secret named '
+                'GITHUB_TOKEN (key icon in the left sidebar, toggle "Notebook access") '
+                'holding a GitHub token with read access to the repo, then re-run.\\n\\n' + err)
+        REPO = target
 assert REPO, 'Open this notebook from inside the CarePath repo.'
 os.chdir(REPO); sys.path.insert(0, str(REPO / 'apps' / 'api'))
 
-PROFILE = 'smoke'   # <<< set to 'full' for the real ViMedCSS run
+PROFILE = os.environ.get('CAREPATH_PROFILE', 'smoke')  # set CAREPATH_PROFILE=full for the real run
 from carepath.gec.notebook import init_stage
 CTX = init_stage(PROFILE); P = CTX.paths; PROF = CTX.profile
 """
