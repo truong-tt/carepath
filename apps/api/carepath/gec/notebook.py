@@ -3,10 +3,9 @@
 ``init_stage(profile)`` resolves the run profile, mounts Drive (Colab), and builds
 the shared ``ArtifactPaths`` — returning a ``StageContext`` whose ``run_step`` runs
 a pipeline CLI with ``PYTHONPATH`` set and ``restore``/``save`` move artifacts
-to/from Drive. The robust repo bootstrap lives in ``bootstrap()`` for callers that
-can already import ``carepath``; on Colab the first notebook cell does a minimal
-locate-or-clone before importing this module (it can't import the package until
-``apps/api`` is on ``sys.path``).
+to/from Drive. On Colab the first notebook cell does a minimal locate-or-clone
+before importing this module (it can't import the package until ``apps/api`` is
+on ``sys.path``).
 """
 
 from __future__ import annotations
@@ -20,68 +19,6 @@ from pathlib import Path
 from carepath.gec import env
 from carepath.gec.paths import ArtifactPaths
 from carepath.gec.profiles import RunProfile, get_profile
-
-DEFAULT_REPO_URL = "https://github.com/truong-tt/carepath.git"
-
-
-def _is_repo(path: Path) -> bool:
-    path = Path(path)
-    return (path / "pyproject.toml").exists() and (path / "apps" / "api" / "carepath").exists()
-
-
-def _github_token() -> str | None:
-    """Read a GitHub token from env or, on Colab, from Secrets (``userdata``)."""
-
-    for key in ("CAREPATH_GITHUB_TOKEN", "GITHUB_TOKEN"):
-        if os.environ.get(key):
-            return os.environ[key]
-    try:
-        from google.colab import userdata  # type: ignore
-
-        for key in ("CAREPATH_GITHUB_TOKEN", "GITHUB_TOKEN"):
-            try:
-                value = userdata.get(key)
-                if value:
-                    return value
-            except Exception:
-                pass
-    except Exception:
-        pass
-    return None
-
-
-def bootstrap(default_repo_url: str = DEFAULT_REPO_URL) -> Path:
-    """Locate (or, on Colab, clone) the CarePath repo; chdir + set sys.path.
-
-    Returns the repo root. Local runs just walk up from the cwd. On Colab, if the
-    repo is not already present it clones ``CAREPATH_REPO_URL`` (default public),
-    using a ``GITHUB_TOKEN`` / ``CAREPATH_GITHUB_TOKEN`` env var for a private repo.
-    """
-
-    start = Path.cwd().resolve()
-    repo = next((d for d in [start, *start.parents] if _is_repo(d)), None)
-    if repo is None and env.in_colab():
-        target = Path("/content/carepath")
-        if _is_repo(target):
-            repo = target
-        else:
-            if target.exists():
-                import shutil
-
-                shutil.rmtree(target)
-            url = os.environ.get("CAREPATH_REPO_URL") or default_repo_url
-            token = _github_token()
-            if token and url.startswith("https://github.com/"):
-                url = url.replace("https://", f"https://x-access-token:{token}@")
-            subprocess.run(["git", "clone", url, str(target)], check=True)
-            repo = target
-    if repo is None:
-        raise SystemExit("CarePath repo not found. Open this notebook from inside the repo.")
-    os.chdir(repo)
-    api = str(repo / "apps" / "api")
-    if api not in sys.path:
-        sys.path.insert(0, api)
-    return repo
 
 
 @dataclass

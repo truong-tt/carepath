@@ -13,8 +13,8 @@ from pathlib import Path
 
 NOTEBOOKS_DIR = Path(__file__).resolve().parents[2] / "notebooks"
 
-# Minimal, self-contained repo bootstrap (can't import carepath until sys.path is
-# set). The robust path (zip/secret) lives in carepath.gec.notebook.bootstrap.
+# Minimal, self-contained repo bootstrap: can't import carepath until sys.path is
+# set, so this cell locates-or-clones the repo before any package import.
 BOOTSTRAP = """\
 # --- CarePath stage bootstrap (short by design) ---
 import importlib.util, os, shutil, subprocess, sys
