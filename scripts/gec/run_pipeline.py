@@ -89,6 +89,13 @@ def stage_train(p: ArtifactPaths, prof) -> None:
     real_inputs = [str(p.real_pairs)]
     if p.labeled_pairs.exists():
         real_inputs.append(str(p.labeled_pairs))
+    # Learn real ASR confusions (paper Limitation #1) into the datastore, then
+    # refresh every pair's retrieved NEs so the RAC prompt carries the right term.
+    harvest_pairs = list(real_inputs)
+    if p.synth_pairs.exists():
+        harvest_pairs.append(str(p.synth_pairs))
+    run(["scripts/gec/harvest_aliases.py", "--datastore", str(p.datastore),
+         "--pairs", *harvest_pairs, "--refresh", "--backend", prof.retrieval_backend])
     run(["scripts/gec/augment.py", "--real", *real_inputs, "--synthetic", str(p.synth_pairs),
          "--output", str(p.augmented), "--nsyn-factor", str(prof.nsyn_factor)])
     train = ["scripts/gec/train.py", "--pairs", str(p.augmented), "--output-dir", str(p.adapters),
@@ -117,6 +124,9 @@ def stage_eval(p: ArtifactPaths, prof) -> None:
          "raw_asr", "corrected_text", "gec_pred", "--wer-output", str(p.darag_wer),
          "--ne-f1-output", str(p.darag_ne_f1)])
     run(["scripts/gec/gate.py", "--report", str(p.darag_wer)])
+    run(["scripts/gec/export_serve.py", "--adapter-dir", _full_adapter(p, prof),
+         "--datastore", str(p.datastore), "--output", str(p.serve_bundle),
+         "--gate-report", str(p.darag_wer)])
 
 
 def main() -> None:

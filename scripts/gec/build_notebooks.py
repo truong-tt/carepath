@@ -69,7 +69,7 @@ if REPO is None and importlib.util.find_spec('google.colab'):
 assert REPO, 'Open this notebook from inside the CarePath repo.'
 os.chdir(REPO); sys.path.insert(0, str(REPO / 'apps' / 'api'))
 
-PROFILE = os.environ.get('CAREPATH_PROFILE', 'smoke')  # set CAREPATH_PROFILE=full for the real run
+PROFILE = os.environ.get('CAREPATH_PROFILE', 'full')  # default full; set CAREPATH_PROFILE=smoke for a plumbing-only check
 from carepath.gec.notebook import init_stage
 CTX = init_stage(PROFILE); P = CTX.paths; PROF = CTX.profile
 """
@@ -96,6 +96,18 @@ print('dataset    ->', CTX.dataset)
 print('datastore  ->', P.datastore)
 print('real pairs ->', P.real_pairs)
 print('adapters   ->', P.adapters)
+print('serve dir  ->', P.serve_bundle)
+
+# --- Colab Pro runtime plan (which runtime per notebook) ---
+print('''
+Run the four notebooks in order, each on the runtime it names:
+  00_data_prep        [CPU]        datastore + real/labeled pairs (free)
+  01_synthesis        [GPU L4]     synthetic transcripts + TTS + pairs + leakage
+  02_train_predict    [GPU A100]   harvest + augment + QLoRA train + predict
+  03_evaluate_export  [CPU]        WER/NE-F1 tables + gate + serve bundle
+Full run ~ 3 seeds x 4 variants; training dominates GPU units, viXTTS is the other
+long pole. Every step --resumes, so a disconnect continues, it does not restart.
+Set CAREPATH_PROFILE=full for the real ViMedCSS run (smoke = plumbing only).''')
 """),
     (1, "build_datastore", False, INSTALL, """\
 # Stage 01: Build the NE / code-switch datastore  `[CPU]`
@@ -142,7 +154,8 @@ else:
 Paper §4.1 Step 1 — few-shot an open LLM for new in-domain transcripts, with the
 n-gram leakage guard rejecting near-copies. `synth_count=None` (full) matches the
 real train size (nsyn = n).""", """\
-CTX.restore([str(P.real_pairs)])
+# Fresh GPU runtime: pull the CPU notebook's datastore + pairs from Drive.
+CTX.restore([str(P.datastore), str(P.real_pairs)])
 from carepath.gec.data import read_jsonl
 count = PROF.synth_count or (sum(1 for r in read_jsonl(P.real_pairs) if r.get('split') == 'train') or 50)
 args = ['scripts/gec/gen_synthetic.py', '--pairs', str(P.real_pairs),
@@ -187,8 +200,16 @@ the DARAG variants over the profile's seeds (full averages 3). Auto-resumes from
 checkpoints.""", """\
 from pathlib import Path
 # Continue-in-a-teammate's-Colab: pull this stage's inputs from Drive first.
-CTX.restore([str(P.real_pairs)])
+CTX.restore([str(P.datastore), str(P.real_pairs)])
 CTX.restore_optional([str(P.synth_pairs), str(P.labeled_pairs)])
+# Learn real ASR confusions into the datastore (paper Limitation #1), then refresh
+# every pair's retrieved NEs so the RAC prompt carries the right term.
+harvest = [str(P.real_pairs)] + ([str(P.labeled_pairs)] if Path(P.labeled_pairs).exists() else [])
+if Path(P.synth_pairs).exists():
+    harvest.append(str(P.synth_pairs))
+CTX.run_step(['scripts/gec/harvest_aliases.py', '--datastore', str(P.datastore),
+              '--pairs', *harvest, '--refresh', '--backend', PROF.retrieval_backend])
+CTX.save([str(P.datastore)])  # enriched datastore feeds eval + the serve bundle
 real = [str(P.real_pairs)] + ([str(P.labeled_pairs)] if Path(P.labeled_pairs).exists() else [])
 CTX.run_step(['scripts/gec/augment.py', '--real', *real, '--synthetic', str(P.synth_pairs),
               '--output', str(P.augmented), '--nsyn-factor', str(PROF.nsyn_factor)])
@@ -214,6 +235,7 @@ if len(PROF.seeds) > 1:
 CTX.run_step(['scripts/gec/llm_rag_baseline.py', '--input', str(P.real_pairs), '--output', str(P.llm_rag)])
 CTX.run_step(['scripts/gec/predict.py', '--pairs', str(P.llm_rag), '--adapter-dir', adir,
               '--output', str(P.darag_preds), '--column', 'gec_pred'])
+CTX.save([str(P.darag_preds)])  # hand predictions to the CPU evaluate/export notebook
 """),
     (10, "evaluate_and_gate", False, INSTALL, """\
 # Stage 10: WER + NE-F1 tables + acceptance gate  `[CPU]`
@@ -221,6 +243,7 @@ Paper Tables 3 & 4 — WER (syllable + word) and NE micro-F1, then the gate: shi
 adapter only if it matches/beats every baseline on val + hard. For `full`, repeat
 predict/evaluate per seed and pass the reports to `evaluate.aggregate_reports` for
 mean±std.""", """\
+CTX.restore([str(P.darag_preds)])  # predictions from the train+predict notebook
 CTX.run_step(['scripts/gec/evaluate.py', '--input', str(P.darag_preds), '--prediction-columns',
               'raw_asr', 'corrected_text', 'gec_pred', '--wer-output', str(P.darag_wer),
               '--ne-f1-output', str(P.darag_ne_f1)])
@@ -230,6 +253,53 @@ from carepath.gec.evaluate import render_ne_f1_table
 print(render_ne_f1_table(json.load(open(P.darag_ne_f1, encoding='utf-8'))))
 CTX.save([str(P.darag_wer), str(P.darag_ne_f1), str(P.leakage)])
 """),
+    (11, "export_and_serve", False, INSTALL, """\
+# Stage 11: Export the gated adapter into a serve bundle  `[CPU]`
+Package the accepted `full` adapter + the enriched datastore + the frozen DARAG
+prompt into a portable `serve_manifest.json` bundle. The FastAPI backend serves it
+with `LLM_PROVIDER=gec_local` `GEC_BUNDLE_PATH=<bundle>` — RAC retrieval and a
+clinical safety gate (fallback to offline) are wired in `carepath.services.gec_local`.
+Run this only after Stage 10's gate accepts the adapter.""", """\
+from pathlib import Path
+CTX.restore([str(P.datastore)])
+adir = str(P.adapters)
+if PROF.all_variants:
+    adir = f'{adir}/full'
+if len(PROF.seeds) > 1:
+    adir = f'{adir}/seed-{PROF.seeds[0]}'
+CTX.run_step(['scripts/gec/export_serve.py', '--adapter-dir', adir,
+              '--datastore', str(P.datastore), '--output', str(P.serve_bundle),
+              '--gate-report', str(P.darag_wer)])
+CTX.save([str(P.serve_bundle)])
+print('Serve with: LLM_PROVIDER=gec_local GEC_BUNDLE_PATH=' + str(P.serve_bundle))
+"""),
+]
+
+
+# Group the 12 thin stages into 4 notebooks by RUNTIME tier — one notebook runs
+# on one Colab runtime, so CPU work never burns GPU units. Resume is preserved by
+# each step's --resume / restore / save, not by notebook boundaries, so a
+# disconnect re-enters the notebook and skips finished steps.
+GROUPS = [
+    (0, "data_prep", INSTALL, [0, 1, 2, 3], """\
+# CarePath DARAG — 00 Data prep  `[CPU runtime]`
+Setup + datastore + real ASR pairs + supplementary labeled pairs (former stages
+00–03). All CPU — run on a free Colab CPU runtime. Each step resumes, so re-running
+after a disconnect skips finished work."""),
+    (1, "synthesis", INSTALL_TTS, [4, 5, 6, 7], """\
+# 01 Synthesis  `[GPU — L4 is enough]`
+Synthetic transcripts → voice-cloned TTS → synthetic pairs → leakage report
+(former stages 04–07). GPU-light; an L4 suffices. viXTTS is the long pole and
+resumes per item."""),
+    (2, "train_predict", INSTALL, [8, 9], """\
+# 02 Train + predict  `[GPU — A100 advised]`
+Harvest real ASR confusions, augment, QLoRA fine-tune the DARAG variants
+(multi-seed), then run predictions (former stages 08–09). Training auto-resumes
+from the latest checkpoint."""),
+    (3, "evaluate_export", INSTALL, [10, 11], """\
+# 03 Evaluate + export  `[CPU runtime]`
+WER + NE-F1 tables, acceptance gate, then bundle the gated adapter for serving
+(former stages 10–11). CPU — run on a free runtime."""),
 ]
 
 
@@ -247,8 +317,14 @@ def md(text: str) -> dict:
 
 def build() -> None:
     NOTEBOOKS_DIR.mkdir(parents=True, exist_ok=True)
-    for num, slug, _gpu, install, title, body in STAGES:
-        cells = [md(title), code(BOOTSTRAP), code(install), code(body)]
+    for stale in NOTEBOOKS_DIR.glob("[0-9][0-9]_*.ipynb"):
+        stale.unlink()  # drop the previous numbering before regenerating
+    stage_by_num = {num: (title, body) for num, _slug, _gpu, _inst, title, body in STAGES}
+    for gnum, gslug, install, stage_nums, intro in GROUPS:
+        cells = [md(intro), code(BOOTSTRAP), code(install)]
+        for snum in stage_nums:
+            title, body = stage_by_num[snum]
+            cells += [md(title), code(body)]
         notebook = {
             "cells": cells,
             "metadata": {
@@ -258,9 +334,9 @@ def build() -> None:
             "nbformat": 4,
             "nbformat_minor": 5,
         }
-        path = NOTEBOOKS_DIR / f"{num:02d}_{slug}.ipynb"
+        path = NOTEBOOKS_DIR / f"{gnum:02d}_{gslug}.ipynb"
         path.write_text(json.dumps(notebook, ensure_ascii=False, indent=1), encoding="utf-8")
-        print("wrote", path.name)
+        print(f"wrote {path.name}  (former stages {stage_nums})")
 
 
 if __name__ == "__main__":

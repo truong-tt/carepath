@@ -262,12 +262,22 @@ class FallbackClinicalLLM:
 def build_llm(settings: Settings) -> ClinicalLLM:
     if settings.llm_provider in {"offline", "mock"}:
         return OfflineClinicalLLM()
+    if settings.llm_provider == "gec_local":
+        # Lazy import: gec_local imports from this module.
+        from carepath.services.gec_local import build_gec_local
+
+        primary = build_gec_local(settings)
+        if settings.llm_fallback_offline:
+            return FallbackClinicalLLM(primary, OfflineClinicalLLM())
+        return primary
     if settings.llm_provider in {"openai", "openai_compatible", "ckey"}:
         primary = OpenAICompatibleLLM(settings)
         if settings.llm_fallback_offline:
             return FallbackClinicalLLM(primary, OfflineClinicalLLM())
         return primary
-    raise ValueError("LLM_PROVIDER must be 'offline', 'openai_compatible', or 'ckey'")
+    raise ValueError(
+        "LLM_PROVIDER must be 'offline', 'openai_compatible', 'ckey', or 'gec_local'"
+    )
 
 
 CORRECTION_SYSTEM_PROMPT = """

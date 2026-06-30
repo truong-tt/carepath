@@ -65,6 +65,9 @@ class Settings:
     retrieval_backend: str
     semantic_model_name: str
     llm_fallback_offline: bool = True
+    # gec_local provider: serve a trained QLoRA adapter bundle in-process.
+    gec_bundle_path: str | None = None
+    gec_soap_delegate: str = "offline"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -108,6 +111,8 @@ class Settings:
                 "SEMANTIC_MODEL_NAME", "bkai-foundation-models/vietnamese-bi-encoder"
             ).strip(),
             llm_fallback_offline=_bool_env("LLM_FALLBACK_OFFLINE", True),
+            gec_bundle_path=os.getenv("GEC_BUNDLE_PATH") or None,
+            gec_soap_delegate=os.getenv("GEC_SOAP_DELEGATE", "offline").strip().lower(),
         )
 
 

@@ -90,6 +90,11 @@ class ArtifactPaths:
     def share(self) -> Path:
         return self.root / "share"
 
+    @property
+    def serve_bundle(self) -> Path:
+        """Self-describing deploy bundle (manifest + adapter + datastore)."""
+        return self.root / f"gec_serve{self.suffix}"
+
     def restore_set(self) -> list[str]:
         """Artifacts a GPU stage restores from Drive before it can run."""
         return [str(self.datastore), str(self.real_pairs)]
