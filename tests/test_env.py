@@ -15,6 +15,7 @@ from carepath.gec.env import (
     restore_artifacts,
     save_artifacts,
 )
+from carepath.gec.notebook import StageContext
 
 
 class EnvDetectionTests(unittest.TestCase):
@@ -68,6 +69,25 @@ class BackupHelperTests(unittest.TestCase):
             src = Path(tmp) / "metrics.json"
             src.write_text("{}", encoding="utf-8")
             save_artifacts(None, [str(src)])  # should not raise
+
+
+class DurableOutputTests(unittest.TestCase):
+    def _ctx(self, backup):
+        # durable() only reads self.backup; the rest can be None for this test.
+        return StageContext(profile=None, paths=None, backup=backup, in_colab=backup is not None)
+
+    def test_local_durable_is_the_repo_path(self) -> None:
+        rel = "artifacts/gec_pairs/pairs.jsonl"
+        self.assertEqual(self._ctx(None).durable(rel), str(Path(rel)))
+
+    def test_colab_durable_points_into_backup_by_basename(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            backup = Path(tmp) / "drive"
+            backup.mkdir()
+            out = Path(self._ctx(backup).durable("artifacts/gec_pairs/pairs.jsonl"))
+            # same basename save()/restore() use, so downstream restore still finds it
+            self.assertEqual(out, backup / "pairs.jsonl")
+            self.assertTrue(out.parent.exists())
 
 
 class BundleAdapterTests(unittest.TestCase):

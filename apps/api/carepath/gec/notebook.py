@@ -71,6 +71,23 @@ class StageContext:
     def save(self, rel_paths: list[str]) -> None:
         env.save_artifacts(self.backup, rel_paths)
 
+    def durable(self, path: str | Path) -> str:
+        """Output path that survives a Colab runtime recycle.
+
+        Long, resumable stages (ASR pairs, TTS) write here so ``--resume`` can pick
+        up after a disconnect: on Colab that's the Drive backup, where every flushed
+        row already persists; locally it's the normal ``artifacts/`` path. Uses the
+        same basename as ``save``/``restore`` so a downstream stage's ``restore``
+        finds it unchanged.
+        """
+
+        p = Path(path)
+        if self.backup is None:
+            return str(p)
+        dst = self.backup / p.name
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        return str(dst)
+
 
 def init_stage(profile: str = "smoke", dataset: str = "tensorxt/ViMedCSS") -> StageContext:
     """Resolve profile + Drive backup + artifact paths for a stage notebook."""

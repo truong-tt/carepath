@@ -124,15 +124,16 @@ Paper §3.1 — run Gipformer (or mock for smoke) over ViMedCSS audio to build
 `raw_asr -> gold_text` pairs. `--n-best` adds the perturbation hypotheses (paper
 §4.3). The **error-signal report** warns if the ASR is too accurate on train to
 teach the corrector (paper §3.2).""", """\
-CTX.run_step(['scripts/gec/make_pairs.py', '--dataset', CTX.dataset, '--output', str(P.real_pairs),
+pairs_out = CTX.durable(P.real_pairs)  # write straight to Drive on Colab so --resume survives a disconnect
+CTX.run_step(['scripts/gec/make_pairs.py', '--dataset', CTX.dataset, '--output', pairs_out,
               '--asr-provider', PROF.asr_provider, '--datastore', str(P.datastore),
               '--retrieval-backend', PROF.retrieval_backend,
               '--limit-per-split', str(PROF.limit_per_split or 0),
               '--n-best', str(PROF.n_best), '--resume'])
 from carepath.gec.data import read_jsonl
 from carepath.gec.evaluate import train_error_signal
-print(train_error_signal(read_jsonl(P.real_pairs)))
-CTX.save([str(P.datastore), str(P.real_pairs)])
+print(train_error_signal(read_jsonl(pairs_out)))
+CTX.save([str(P.datastore)])  # pairs already durable; persist the datastore too
 """),
     (3, "labeled_pairs", False, INSTALL, """\
 # Stage 03: Supplementary real pairs from the Label Studio export  `[CPU]`
@@ -143,9 +144,8 @@ from pathlib import Path
 export = 'data/labeling/training_transcripts.jsonl'
 if Path(export).exists():
     CTX.run_step(['scripts/gec/make_labeled_pairs.py', '--input', export,
-                  '--output', str(P.labeled_pairs), '--datastore', str(P.datastore),
-                  '--retrieval-backend', PROF.retrieval_backend, '--resume'])
-    CTX.save([str(P.labeled_pairs)])
+                  '--output', CTX.durable(P.labeled_pairs), '--datastore', str(P.datastore),
+                  '--retrieval-backend', PROF.retrieval_backend, '--resume'])  # durable: survives a disconnect
 else:
     print('No labeling export yet — see docs/vietnamese_labeling_guide.md. Skipping.')
 """),
@@ -159,7 +159,7 @@ CTX.restore([str(P.datastore), str(P.real_pairs)])
 from carepath.gec.data import read_jsonl
 count = PROF.synth_count or (sum(1 for r in read_jsonl(P.real_pairs) if r.get('split') == 'train') or 50)
 args = ['scripts/gec/gen_synthetic.py', '--pairs', str(P.real_pairs),
-        '--output', str(P.synth_clean), '--count', str(count)]
+        '--output', CTX.durable(P.synth_clean), '--count', str(count)]  # durable: persist so a later disconnect won't regenerate
 if PROF.name != 'smoke':
     args.append('--load-in-4bit')
 CTX.run_step(args)
@@ -168,8 +168,8 @@ CTX.run_step(args)
 # Stage 05: Voice-cloning TTS  `[GPU]`
 Paper §4.1 Step 2 / App. D — synthesize speech with viXTTS conditioned on random
 in-domain reference clips (falls back to single-speaker MMS, labeled as such).""", """\
-args = ['scripts/gec/voice_clone_tts.py', '--input', str(P.synth_clean),
-        '--output', str(P.tts_manifest), '--provider', PROF.tts_provider,
+args = ['scripts/gec/voice_clone_tts.py', '--input', CTX.durable(P.synth_clean),
+        '--output', CTX.durable(P.tts_manifest), '--provider', PROF.tts_provider,  # durable: viXTTS is long, survive a disconnect
         '--ref-dataset', CTX.dataset, '--ref-count', '20', '--resume']
 if PROF.synth_tts_limit:
     args += ['--limit', str(PROF.synth_tts_limit)]
@@ -179,16 +179,15 @@ CTX.run_step(args)
 # Stage 06: Synthetic GEC pairs (+ N-best)  `[CPU/GPU]`
 Paper §4.1 Step 3 — run the ASR over the voice-cloned audio to get synthetic
 `raw_asr -> gold_text` pairs, with the same perturbation N-best as the real pairs.""", """\
-CTX.run_step(['scripts/gec/make_synth_pairs.py', '--input', str(P.tts_manifest),
-              '--output', str(P.synth_pairs), '--datastore', str(P.datastore),
-              '--n-best', str(PROF.n_best), '--resume'])
-CTX.save([str(P.synth_pairs)])  # persist to Drive so a teammate can resume training
+CTX.run_step(['scripts/gec/make_synth_pairs.py', '--input', CTX.durable(P.tts_manifest),
+              '--output', CTX.durable(P.synth_pairs), '--datastore', str(P.datastore),
+              '--n-best', str(PROF.n_best), '--resume'])  # durable: survive a disconnect, no re-ASR
 """),
     (7, "leakage_report", True, INSTALL, """\
 # Stage 07: Leakage report — in-domain but not memorized  `[GPU-light]`
 Paper App. C / Table 6 — SentenceBERT cosine + BLEU of synthetic vs real. High
 cosine + low BLEU means the synthetic data is on-domain without copying.""", """\
-CTX.run_step(['scripts/gec/check_leakage.py', '--synthetic', str(P.synth_clean),
+CTX.run_step(['scripts/gec/check_leakage.py', '--synthetic', CTX.durable(P.synth_clean),
               '--real', str(P.real_pairs), '--output', str(P.leakage)])
 import json
 print(json.load(open(P.leakage, encoding='utf-8')))
