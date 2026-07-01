@@ -6,11 +6,53 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
+from types import SimpleNamespace
+
 from carepath.services.asr import (
+    GipformerASR,
     _merge_overlapping_text,
     _merge_text_windows,
     _plan_windows,
 )
+
+
+class _FakeStream:
+    def __init__(self) -> None:
+        self.result = SimpleNamespace(text="")
+        self.payload: tuple[int, list] | None = None
+
+    def accept_waveform(self, sample_rate, chunk) -> None:
+        self.payload = (sample_rate, list(chunk))
+
+
+class _FakeRecognizer:
+    """Decodes a stream to 't<chunk_len>' so ordering is observable."""
+
+    def __init__(self) -> None:
+        self.decode_calls = 0
+
+    def create_stream(self) -> _FakeStream:
+        return _FakeStream()
+
+    def decode_streams(self, streams) -> None:
+        self.decode_calls += 1
+        for stream in streams:
+            stream.result.text = f"t{len(stream.payload[1])}"
+
+
+class BatchedDecodeTests(unittest.TestCase):
+    def test_decode_chunks_batches_once_and_keeps_positions(self) -> None:
+        recognizer = _FakeRecognizer()
+        chunks = [(16000, [0.1] * 3), (16000, []), (16000, [0.1] * 5)]
+        texts = GipformerASR._decode_chunks(recognizer, chunks)
+        # Empty chunk stays "" in place; one decode_streams call for the batch.
+        self.assertEqual(texts, ["t3", "", "t5"])
+        self.assertEqual(recognizer.decode_calls, 1)
+
+    def test_combine_groups_merge_dedups_seam_and_join_spaces(self) -> None:
+        groups = [([None, None], "merge"), ([None], "join"), ([None], "join")]
+        text = GipformerASR._combine_groups(groups, ["a b c", "b c d", "e f", ""])
+        self.assertEqual(text, "a b c d e f")
 
 
 class PlanWindowsTests(unittest.TestCase):

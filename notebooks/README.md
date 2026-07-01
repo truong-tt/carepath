@@ -20,10 +20,17 @@ Run in order, each on the runtime it names:
 
 | # | Notebook | Runtime | Merges (paper) | What it does |
 |---|----------|---------|----------------|--------------|
-| 00 | data_prep | CPU | §4.2.1, §3.1/§3.2, Table 5 | datastore + real ASR pairs (+N-best, error-signal) + labeled pairs |
-| 01 | synthesis | GPU (L4) | §4.1, App. C/Table 6 | synth transcripts → viXTTS → synth pairs → leakage |
+| 00 | data_prep | CPU | §4.2.1, Table 5 | datastore + labeled pairs (text-only, minutes) |
+| 01 | asr_synthesis | GPU (L4) | §3.1/§3.2, §4.1, App. C/Table 6 | real ASR pairs (+N-best, error-signal) → synth transcripts → viXTTS → synth pairs → leakage |
 | 02 | train_predict | GPU (A100) | §4.2, §5 | harvest confusions + augment + multi-seed QLoRA + predict |
 | 03 | evaluate_export | CPU | Tables 3 & 4, deploy | WER/NE-F1 + gate + serve bundle |
+
+Why ASR pairs sit on the GPU notebook: the full run decodes each clip 6× (best +
+5 perturbation N-best) over ~150 h of ViMedCSS audio. On a 2-vCPU Colab CPU
+runtime that is weeks of wall time; with the CUDA sherpa-onnx build on an L4
+(installed by the notebook, `GIPFORMER_PROVIDER=cuda`, all 6 decodes batched into
+one `decode_streams` call) it is hours. If the CUDA wheel install fails,
+onnxruntime falls back to CPU with a warning — slower, never broken.
 
 Each step restores its inputs from Drive (Colab) or disk (local) and saves its
 outputs, and every step `--resume`s — so a disconnect re-enters the notebook and

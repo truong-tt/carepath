@@ -83,6 +83,16 @@ subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', '-e', '.[training]
 INSTALL_TTS = INSTALL + """subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'coqui-tts'])
 """
 
+# GPU notebook: also swap in the CUDA build of sherpa-onnx so the bulk ASR decode
+# (6 decodes per clip with N-best) runs on the GPU. Colab GPU runtimes are
+# CUDA 12 / cuDNN 9. If the wheel can't be installed, the plain CPU wheel stays
+# and onnxruntime falls back to CPU with a warning — slower, never broken.
+INSTALL_GPU_ASR = INSTALL_TTS + """\
+subprocess.run([sys.executable, '-m', 'pip', 'install', '-q',
+                'sherpa-onnx==1.13.3+cuda12.cudnn9',
+                '-f', 'https://k2-fsa.github.io/sherpa/onnx/cuda.html'])
+"""
+
 # Each stage: (num, slug, gpu, install, title_md, body_code).
 STAGES = [
     (0, "setup_and_config", False, INSTALL, """\
@@ -101,12 +111,14 @@ print('serve dir  ->', P.serve_bundle)
 # --- Colab Pro runtime plan (which runtime per notebook) ---
 print('''
 Run the four notebooks in order, each on the runtime it names:
-  00_data_prep        [CPU]        datastore + real/labeled pairs (free)
-  01_synthesis        [GPU L4]     synthetic transcripts + TTS + pairs + leakage
+  00_data_prep        [CPU]        datastore + labeled pairs (free, minutes)
+  01_asr_synthesis    [GPU L4]     real ASR pairs (bulk decode) + synthetic
+                                   transcripts + TTS + synth pairs + leakage
   02_train_predict    [GPU A100]   harvest + augment + QLoRA train + predict
   03_evaluate_export  [CPU]        WER/NE-F1 tables + gate + serve bundle
-Full run ~ 3 seeds x 4 variants; training dominates GPU units, viXTTS is the other
-long pole. Every step --resumes, so a disconnect continues, it does not restart.
+Full run ~ 3 seeds x 4 variants; training dominates GPU units; the ASR pair decode
+(6 decodes/clip over ~150h of audio) and viXTTS are the other long poles — both
+GPU. Every step --resumes, so a disconnect continues, it does not restart.
 Set CAREPATH_PROFILE=full for the real ViMedCSS run (smoke = plumbing only).''')
 """),
     (1, "build_datastore", False, INSTALL, """\
@@ -117,23 +129,27 @@ CTX.run_step(['scripts/gec/build_datastore.py', '--dataset', CTX.dataset,
               '--limit-per-split', str(PROF.limit_per_split or 0), '--output', str(P.datastore)])
 import json
 print('terms:', json.load(open(P.datastore, encoding='utf-8'))['metadata']['term_count'])
+CTX.save([str(P.datastore)])  # notebook 01 (GPU) restores this for pair building
 """),
-    (2, "asr_pairs", False, INSTALL, """\
-# Stage 02: Real GEC pairs + N-best + error-signal report  `[CPU]`
+    (2, "asr_pairs", True, INSTALL_GPU_ASR, """\
+# Stage 02: Real GEC pairs + N-best + error-signal report  `[GPU]`
 Paper §3.1 — run Gipformer (or mock for smoke) over ViMedCSS audio to build
 `raw_asr -> gold_text` pairs. `--n-best` adds the perturbation hypotheses (paper
-§4.3). The **error-signal report** warns if the ASR is too accurate on train to
-teach the corrector (paper §3.2).""", """\
+§4.3), so the full run decodes each clip 6x — that is the pipeline's bulk decode
+and it needs the CUDA provider (weeks on a 2-vCPU runtime, hours on an L4). The
+**error-signal report** warns if the ASR is too accurate on train to teach the
+corrector (paper §3.2).""", """\
+CTX.restore([str(P.datastore)])  # built in the CPU data-prep notebook
 pairs_out = CTX.durable(P.real_pairs)  # write straight to Drive on Colab so --resume survives a disconnect
 CTX.run_step(['scripts/gec/make_pairs.py', '--dataset', CTX.dataset, '--output', pairs_out,
               '--asr-provider', PROF.asr_provider, '--datastore', str(P.datastore),
               '--retrieval-backend', PROF.retrieval_backend,
               '--limit-per-split', str(PROF.limit_per_split or 0),
-              '--n-best', str(PROF.n_best), '--resume'])
+              '--n-best', str(PROF.n_best), '--resume'],
+             env_extra={'GIPFORMER_PROVIDER': os.environ.get('GIPFORMER_PROVIDER', 'cuda')})
 from carepath.gec.data import read_jsonl
 from carepath.gec.evaluate import train_error_signal
 print(train_error_signal(read_jsonl(pairs_out)))
-CTX.save([str(P.datastore)])  # pairs already durable; persist the datastore too
 """),
     (3, "labeled_pairs", False, INSTALL, """\
 # Stage 03: Supplementary real pairs from the Label Studio export  `[CPU]`
@@ -154,7 +170,8 @@ else:
 Paper §4.1 Step 1 — few-shot an open LLM for new in-domain transcripts, with the
 n-gram leakage guard rejecting near-copies. `synth_count=None` (full) matches the
 real train size (nsyn = n).""", """\
-# Fresh GPU runtime: pull the CPU notebook's datastore + pairs from Drive.
+# Pull inputs from Drive: no-op in the same session, lets a fresh runtime
+# (or a teammate's Colab) resume mid-notebook.
 CTX.restore([str(P.datastore), str(P.real_pairs)])
 from carepath.gec.data import read_jsonl
 count = PROF.synth_count or (sum(1 for r in read_jsonl(P.real_pairs) if r.get('split') == 'train') or 50)
@@ -181,7 +198,8 @@ Paper §4.1 Step 3 — run the ASR over the voice-cloned audio to get synthetic
 `raw_asr -> gold_text` pairs, with the same perturbation N-best as the real pairs.""", """\
 CTX.run_step(['scripts/gec/make_synth_pairs.py', '--input', CTX.durable(P.tts_manifest),
               '--output', CTX.durable(P.synth_pairs), '--datastore', str(P.datastore),
-              '--n-best', str(PROF.n_best), '--resume'])  # durable: survive a disconnect, no re-ASR
+              '--n-best', str(PROF.n_best), '--resume'],  # durable: survive a disconnect, no re-ASR
+             env_extra={'GIPFORMER_PROVIDER': os.environ.get('GIPFORMER_PROVIDER', 'cuda')})
 """),
     (7, "leakage_report", True, INSTALL, """\
 # Stage 07: Leakage report — in-domain but not memorized  `[GPU-light]`
@@ -276,20 +294,24 @@ print('Serve with: LLM_PROVIDER=gec_local GEC_BUNDLE_PATH=' + str(P.serve_bundle
 
 
 # Group the 12 thin stages into 4 notebooks by RUNTIME tier — one notebook runs
-# on one Colab runtime, so CPU work never burns GPU units. Resume is preserved by
-# each step's --resume / restore / save, not by notebook boundaries, so a
-# disconnect re-enters the notebook and skips finished steps.
+# on one Colab runtime, so cheap text work stays on free CPU runtimes and every
+# bulk decode/training step gets a GPU (the full-profile ASR decode is ~6x ~150h
+# of audio: weeks on 2 vCPUs, hours with the CUDA provider on an L4). Resume is
+# preserved by each step's --resume / restore / save, not by notebook boundaries,
+# so a disconnect re-enters the notebook and skips finished steps.
 GROUPS = [
-    (0, "data_prep", INSTALL, [0, 1, 2, 3], """\
+    (0, "data_prep", INSTALL, [0, 1, 3], """\
 # CarePath DARAG — 00 Data prep  `[CPU runtime]`
-Setup + datastore + real ASR pairs + supplementary labeled pairs (former stages
-00–03). All CPU — run on a free Colab CPU runtime. Each step resumes, so re-running
-after a disconnect skips finished work."""),
-    (1, "synthesis", INSTALL_TTS, [4, 5, 6, 7], """\
-# 01 Synthesis  `[GPU — L4 is enough]`
-Synthetic transcripts → voice-cloned TTS → synthetic pairs → leakage report
-(former stages 04–07). GPU-light; an L4 suffices. viXTTS is the long pole and
-resumes per item."""),
+Setup + NE datastore + supplementary labeled pairs (former stages 00, 01, 03).
+Text-only — minutes on a free Colab CPU runtime. The bulk ASR decode that used to
+live here moved to notebook 01's GPU. Each step resumes, so re-running after a
+disconnect skips finished work."""),
+    (1, "asr_synthesis", INSTALL_GPU_ASR, [2, 4, 5, 6, 7], """\
+# 01 ASR pairs + synthesis  `[GPU — L4 is enough]`
+Real ASR pairs first (the pipeline's bulk decode: 6 decodes per clip with N-best,
+CUDA sherpa-onnx), then synthetic transcripts → voice-cloned TTS → synthetic pairs
+→ leakage report (former stages 02, 04–07). Long poles: pair decode + viXTTS, both
+resume per item."""),
     (2, "train_predict", INSTALL, [8, 9], """\
 # 02 Train + predict  `[GPU — A100 advised]`
 Harvest real ASR confusions, augment, QLoRA fine-tune the DARAG variants

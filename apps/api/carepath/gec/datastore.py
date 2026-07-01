@@ -106,6 +106,12 @@ def build_datastore(
 
         for split in splits:
             data = load_dataset(dataset, split=split)
+            # Text-only job: drop every other column (above all ``audio``) before
+            # iterating — the datasets Audio feature decodes each clip on row
+            # access, which turns a sub-minute text scan into hours of decode.
+            keep = [c for c in ("cs_terms_list", "segment_text") if c in data.column_names]
+            if keep:
+                data = data.select_columns(keep)
             if limit_per_split:
                 data = data.select(range(min(limit_per_split, len(data))))
             for row in data:

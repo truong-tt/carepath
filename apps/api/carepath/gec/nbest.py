@@ -105,16 +105,29 @@ def diverse_hypotheses(
 
     texts = [best]
     with tempfile.TemporaryDirectory(prefix="carepath_nbest_") as temp_dir:
+        clip_paths: list[Path] = []
         for label, kind, amount in PERTURBATIONS:
-            if len(dedupe_keep_order(texts)) >= n:
-                break
             perturbed = _apply(np, samples, sample_rate, kind, amount, rng)
             clip_path = Path(temp_dir) / f"{label}.wav"
             sf.write(str(clip_path), perturbed, int(sample_rate))
+            clip_paths.append(clip_path)
+
+        batch = getattr(asr, "transcribe_batch", None)
+        if batch is not None:
+            # One batched decode for all perturbations — on GPU this costs about
+            # one clip's latency instead of five.
             try:
-                texts.append(asr.transcribe(clip_path).text or "")
+                texts += [result.text or "" for result in batch(clip_paths)]
             except Exception:
-                continue  # a failed perturbation must never lose the real hypotheses
+                pass  # a failed perturbation must never lose the real hypotheses
+        else:
+            for clip_path in clip_paths:
+                if len(dedupe_keep_order(texts)) >= n:
+                    break
+                try:
+                    texts.append(asr.transcribe(clip_path).text or "")
+                except Exception:
+                    continue  # a failed perturbation must never lose the real hypotheses
     return dedupe_keep_order(texts)[:n]
 
 

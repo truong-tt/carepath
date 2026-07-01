@@ -64,6 +64,10 @@ class Settings:
     retrieval_top_k: int
     retrieval_backend: str
     semantic_model_name: str
+    # onnxruntime execution provider for Gipformer ("cpu" or "cuda"). With "cuda",
+    # onnxruntime falls back to CPU (with a warning) when no GPU EP is available,
+    # so it is always safe to request.
+    gipformer_provider: str = "cpu"
     llm_fallback_offline: bool = True
     # gec_local provider: serve a trained QLoRA adapter bundle in-process.
     gec_bundle_path: str | None = None
@@ -84,7 +88,8 @@ class Settings:
             asr_provider=os.getenv("ASR_PROVIDER", "gipformer").strip().lower(),
             allow_mock_asr=_bool_env("ALLOW_MOCK_ASR", False),
             gipformer_quantize=os.getenv("GIPFORMER_QUANTIZE", "int8").strip().lower(),
-            gipformer_num_threads=_int_env("GIPFORMER_NUM_THREADS", 4),
+            gipformer_num_threads=_int_env("GIPFORMER_NUM_THREADS", os.cpu_count() or 4),
+            gipformer_provider=os.getenv("GIPFORMER_PROVIDER", "cpu").strip().lower(),
             gipformer_decoding_method=os.getenv(
                 "GIPFORMER_DECODING_METHOD", "modified_beam_search"
             ).strip(),

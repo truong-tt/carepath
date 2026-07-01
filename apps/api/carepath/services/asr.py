@@ -157,6 +157,18 @@ class GipformerASR:
         }
 
     def transcribe(self, audio_path: Path) -> ASRResult:
+        return self.transcribe_batch([audio_path])[0]
+
+    def transcribe_batch(self, audio_paths: list[Path]) -> list[ASRResult]:
+        """Decode several clips through a single ``decode_streams`` call.
+
+        Every window of every clip becomes one stream in one batched decode, so
+        onnxruntime (above all with the CUDA provider) amortizes the model run
+        across the whole batch instead of paying per-window latency. This is the
+        hot path for GEC pair building, where each clip decodes 6x (best + the
+        perturbation N-best) — pass all the perturbed copies together.
+        """
+
         recognizer = self._get_recognizer()
         try:
             import soundfile as sf  # type: ignore
@@ -164,39 +176,60 @@ class GipformerASR:
             raise ASRError("soundfile is required for Gipformer ASR") from exc
 
         try:
-            samples, sample_rate = sf.read(str(audio_path), dtype="float32")
-            if getattr(samples, "ndim", 1) > 1:
-                samples = samples.mean(axis=1)
-            text, segmentation, segment_count = self._transcribe_samples(
-                recognizer, samples, sample_rate
-            )
+            plans = []
+            for audio_path in audio_paths:
+                samples, sample_rate = sf.read(str(audio_path), dtype="float32")
+                if getattr(samples, "ndim", 1) > 1:
+                    samples = samples.mean(axis=1)
+                groups, segmentation, segment_count = self._plan_chunks(samples, sample_rate)
+                plans.append((samples, sample_rate, groups, segmentation, segment_count))
+
+            all_chunks = [
+                (sample_rate, chunk)
+                for _, sample_rate, groups, _, _ in plans
+                for chunks, _ in groups
+                for chunk in chunks
+            ]
+            texts = self._decode_chunks(recognizer, all_chunks)
         except ASRError:
             raise
         except Exception as exc:  # pragma: no cover - requires ASR runtime
             raise ASRError(f"Gipformer transcription failed: {exc}") from exc
 
-        duration_seconds = len(samples) / sample_rate if sample_rate else 0.0
-        return ASRResult(
-            text=text,
-            model=f"gipformer-65M-rnnt/{self.settings.gipformer_quantize}",
-            metadata={
-                "repo_id": self.repo_id,
-                "decoding_method": self.settings.gipformer_decoding_method,
-                "chunk_seconds": self.settings.gipformer_chunk_seconds,
-                "segmentation": segmentation,
-                "segment_count": segment_count,
-                "duration_seconds": round(duration_seconds, 3),
-                # ``chunk_count`` retained for backward compatibility with older
-                # manifests/metrics; it now equals segment_count.
-                "chunk_count": segment_count,
-            },
-        )
+        results: list[ASRResult] = []
+        position = 0
+        for samples, sample_rate, groups, segmentation, segment_count in plans:
+            n_chunks = sum(len(chunks) for chunks, _ in groups)
+            text = self._combine_groups(groups, texts[position : position + n_chunks])
+            position += n_chunks
+            duration_seconds = len(samples) / sample_rate if sample_rate else 0.0
+            results.append(
+                ASRResult(
+                    text=text,
+                    model=f"gipformer-65M-rnnt/{self.settings.gipformer_quantize}",
+                    metadata={
+                        "repo_id": self.repo_id,
+                        "provider": self.settings.gipformer_provider,
+                        "decoding_method": self.settings.gipformer_decoding_method,
+                        "chunk_seconds": self.settings.gipformer_chunk_seconds,
+                        "segmentation": segmentation,
+                        "segment_count": segment_count,
+                        "duration_seconds": round(duration_seconds, 3),
+                        # ``chunk_count`` retained for backward compatibility with
+                        # older manifests/metrics; it now equals segment_count.
+                        "chunk_count": segment_count,
+                    },
+                )
+            )
+        return results
 
-    def _transcribe_samples(self, recognizer, samples, sample_rate) -> tuple[str, str, int]:
-        """Decode ``samples`` using the configured segmentation strategy.
+    def _plan_chunks(self, samples, sample_rate):
+        """Plan the decode for one clip using the configured segmentation.
 
-        Returns ``(text, segmentation_used, segment_count)``. ``vad`` degrades to
-        ``overlap`` whenever the VAD model/deps are unavailable, so a missing
+        Returns ``(groups, segmentation_used, segment_count)`` where ``groups``
+        is ``[(chunk_arrays, merge_kind), ...]`` and ``merge_kind`` is ``"merge"``
+        (overlap seam de-dup) or ``"join"`` (plain space join). ``vad`` degrades
+        to ``overlap`` whenever the VAD model/deps are unavailable, so a missing
         silero model never breaks transcription.
         """
 
@@ -212,48 +245,59 @@ class GipformerASR:
                 overlap_samples = int(
                     sample_rate * self.settings.gipformer_overlap_seconds
                 )
-                texts: list[str] = []
+                groups = []
                 for start, end in segments:
                     seg = samples[start:end]
                     if len(seg) > max_seg:
                         sub = _plan_windows(len(seg), max_seg, overlap_samples)
-                        texts.append(
-                            _merge_text_windows(
-                                [
-                                    self._decode_window(recognizer, sample_rate, seg[s:e])
-                                    for s, e in sub
-                                ]
-                            )
-                        )
+                        groups.append(([seg[s:e] for s, e in sub], "merge"))
                     else:
-                        texts.append(self._decode_window(recognizer, sample_rate, seg))
-                text = " ".join(part for part in texts if part).strip()
-                return text, "vad", len(segments)
+                        groups.append(([seg], "join"))
+                return groups, "vad", len(segments)
             mode = "overlap"  # degrade
 
         if mode == "fixed":
             windows = _plan_windows(len(samples), window_samples, 0)
-            texts = [
-                self._decode_window(recognizer, sample_rate, samples[s:e])
-                for s, e in windows
-            ]
-            return " ".join(part for part in texts if part).strip(), "fixed", len(windows)
+            return [([samples[s:e] for s, e in windows], "join")], "fixed", len(windows)
 
         # Default: overlap-and-merge.
         overlap_samples = int(sample_rate * self.settings.gipformer_overlap_seconds)
         windows = _plan_windows(len(samples), window_samples, overlap_samples)
-        texts = [
-            self._decode_window(recognizer, sample_rate, samples[s:e]) for s, e in windows
-        ]
-        return _merge_text_windows(texts), "overlap", len(windows)
+        return [([samples[s:e] for s, e in windows], "merge")], "overlap", len(windows)
 
-    def _decode_window(self, recognizer, sample_rate, chunk) -> str:
-        if len(chunk) == 0:
-            return ""
-        stream = recognizer.create_stream()
-        stream.accept_waveform(sample_rate, chunk)
-        recognizer.decode_streams([stream])
-        return stream.result.text.strip()
+    @staticmethod
+    def _decode_chunks(recognizer, chunks: list[tuple[int, object]]) -> list[str]:
+        """Decode ``(sample_rate, samples)`` chunks in one batched call."""
+
+        streams, positions = [], []
+        for idx, (sample_rate, chunk) in enumerate(chunks):
+            if len(chunk) == 0:
+                continue
+            stream = recognizer.create_stream()
+            stream.accept_waveform(sample_rate, chunk)
+            streams.append(stream)
+            positions.append(idx)
+        if streams:
+            recognizer.decode_streams(streams)
+        texts = [""] * len(chunks)
+        for idx, stream in zip(positions, streams):
+            texts[idx] = stream.result.text.strip()
+        return texts
+
+    @staticmethod
+    def _combine_groups(groups, texts: list[str]) -> str:
+        """Reassemble one clip's transcript from its decoded window texts."""
+
+        parts: list[str] = []
+        position = 0
+        for chunks, kind in groups:
+            group_texts = texts[position : position + len(chunks)]
+            position += len(chunks)
+            if kind == "merge":
+                parts.append(_merge_text_windows(group_texts))
+            else:
+                parts.append(" ".join(t for t in group_texts if t))
+        return " ".join(p for p in parts if p).strip()
 
     def _segments_from_vad(self, samples, sample_rate) -> list[tuple[int, int]] | None:
         """Return ``[(start_sample, end_sample), ...]`` speech regions, or ``None``.
@@ -346,6 +390,7 @@ class GipformerASR:
             sample_rate=self.sample_rate,
             feature_dim=self.feature_dim,
             decoding_method=self.settings.gipformer_decoding_method,
+            provider=self.settings.gipformer_provider,
         )
         self._model_paths = model_paths
         return self._recognizer

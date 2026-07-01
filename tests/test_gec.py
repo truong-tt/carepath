@@ -267,6 +267,31 @@ class NbestTests(unittest.TestCase):
             self.assertEqual(len(hyps), 3)
             self.assertEqual(hyps, diverse_hypotheses(make_stub(), wav, n=3, best_text="best", seed=7))
 
+    def test_diverse_hypotheses_uses_transcribe_batch_in_one_call(self) -> None:
+        try:
+            import numpy as np  # type: ignore
+            import soundfile as sf  # type: ignore
+        except Exception:  # pragma: no cover - optional deps
+            self.skipTest("numpy/soundfile not installed")
+        import tempfile
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "clip.wav"
+            sf.write(str(wav), (0.1 * np.sin(np.linspace(0, 50, 8000))).astype("float32"), 16000)
+
+            calls: list[int] = []
+
+            def transcribe_batch(paths):
+                calls.append(len(paths))
+                return [SimpleNamespace(text=f"hyp{i}") for i in range(len(paths))]
+
+            stub = SimpleNamespace(transcribe=None, transcribe_batch=transcribe_batch)
+            hyps = diverse_hypotheses(stub, wav, n=5, best_text="best", seed=7)
+            self.assertEqual(calls, [5])  # all perturbations in one batched decode
+            self.assertEqual(hyps[0], "best")
+            self.assertEqual(len(hyps), 5)
+
 
 class LabeledPairsTests(unittest.TestCase):
     def test_maps_filters_and_counts_as_real(self) -> None:
