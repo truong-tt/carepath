@@ -100,7 +100,7 @@
       const mock = String(data.asr_provider).includes("mock") || String(data.llm_provider) === "offline";
       dot.className = "health-dot " + (ready ? (mock ? "health-dot--degraded" : "health-dot--ok") : "health-dot--degraded");
       text.textContent = mock ? "Chế độ demo" : (ready ? "Hệ thống sẵn sàng" : "Một phần dịch vụ chưa sẵn sàng");
-      dom.healthBadge.title = `ASR: ${data.asr_provider} · LLM: ${data.llm_provider}`;
+      dom.healthBadge.title = text.textContent;
     } catch (_) {
       dot.className = "health-dot health-dot--down";
       text.textContent = "Mất kết nối máy chủ";
@@ -257,8 +257,6 @@
     const meta = (data && data.metadata) || {};
     const bits = [];
     if (meta.latency_ms != null) bits.push(`Xử lý trong ${(meta.latency_ms / 1000).toFixed(1)}s`);
-    if (meta.llm_provider) bits.push(`LLM: ${meta.llm_provider}`);
-    if (meta.asr_model) bits.push(`ASR: ${meta.asr_model}`);
     dom.metaLine.textContent = bits.length ? `${bits.join(" · ")} · CarePath` : "CarePath";
   }
 

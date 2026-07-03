@@ -109,6 +109,9 @@ if get_settings().cors_origins:
 def health() -> HealthResponse:
     settings = get_settings()
     pipeline_health = get_pipeline().health()
+    # Hide the stack (base_url, model, repo_id live in details) in prod; keep it
+    # for local debugging. The frontend never reads details.
+    details = {} if settings.app_env == "prod" else dict(pipeline_health["details"])
     return HealthResponse(
         status=str(pipeline_health["status"]),
         app_env=settings.app_env,
@@ -116,7 +119,7 @@ def health() -> HealthResponse:
         llm_provider=settings.llm_provider,
         asr_ready=bool(pipeline_health["asr_ready"]),
         llm_ready=bool(pipeline_health["llm_ready"]),
-        details=dict(pipeline_health["details"]),
+        details=details,
     )
 
 

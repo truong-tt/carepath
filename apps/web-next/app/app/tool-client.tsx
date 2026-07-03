@@ -40,7 +40,7 @@ interface SoapData {
 }
 interface SoapResponse {
   soap?: SoapData;
-  metadata?: { latency_ms?: number; llm_provider?: string; asr_model?: string };
+  metadata?: { latency_ms?: number };
 }
 
 // ---------- Helpers ----------
@@ -196,7 +196,7 @@ export default function ToolClient() {
         setHealth({
           dot: ready ? (mock ? "health-dot--degraded" : "health-dot--ok") : "health-dot--degraded",
           text: mock ? "Chế độ demo" : ready ? "Hệ thống sẵn sàng" : "Một phần dịch vụ chưa sẵn sàng",
-          title: `ASR: ${data.asr_provider} · LLM: ${data.llm_provider}`,
+          title: mock ? "Chế độ demo" : ready ? "Hệ thống sẵn sàng" : "Một phần dịch vụ chưa sẵn sàng",
         });
       } catch {
         if (cancelled) return;
@@ -459,8 +459,6 @@ export default function ToolClient() {
   const meta = result?.metadata ?? {};
   const metaBits: string[] = [];
   if (meta.latency_ms != null) metaBits.push(`Xử lý trong ${(meta.latency_ms / 1000).toFixed(1)}s`);
-  if (meta.llm_provider) metaBits.push(`LLM: ${meta.llm_provider}`);
-  if (meta.asr_model) metaBits.push(`ASR: ${meta.asr_model}`);
   const recActive = recState === "recording" || recState === "paused";
 
   return (
