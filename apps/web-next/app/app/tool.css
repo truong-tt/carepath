@@ -1,0 +1,112 @@
+/* Tool-page additions on top of styles.css: in-browser recorder, team code,
+   client-side validation messages. Same tokens, same design language. */
+
+/* ---------- Recorder ---------- */
+.recorder {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 6px 2px 2px;
+}
+
+.rec-btn {
+  flex: none; display: grid; place-items: center;
+  width: 72px; height: 72px; border-radius: 50%;
+  border: none; cursor: pointer; color: #fff;
+  background: var(--c-teal-700);
+  box-shadow: 0 1px 2px rgba(15,118,110,.22), 0 14px 28px -12px rgba(15,118,110,.7), var(--inset-hi);
+  transition: background .35s var(--ease), transform .2s var(--ease), box-shadow .35s var(--ease);
+}
+.rec-btn:hover { background: #0b5d56; }
+.rec-btn:active { transform: scale(.96); }
+
+.rec-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rec-title { font-weight: 700; color: var(--c-slate-700); font-size: 1.02rem; }
+.rec-hint { font-size: .84rem; color: var(--c-slate-500); }
+
+/* Live recording state */
+.rec-live {
+  flex: 1; min-width: 240px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 16px; border-radius: var(--radius-md);
+  background: var(--c-red-50); box-shadow: 0 0 0 1px var(--c-red-200);
+}
+.rec-dot {
+  flex: none; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--c-red-700);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rec-dot { animation: rec-pulse 1.2s var(--ease) infinite; }
+  @keyframes rec-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(185,28,28,.35); }
+    50% { box-shadow: 0 0 0 7px rgba(185,28,28,0); }
+  }
+}
+.rec-dot--paused { background: var(--c-amber-600); animation: none; }
+.rec-time {
+  font: 700 1.3rem/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--c-slate-900); letter-spacing: .04em;
+  font-variant-numeric: tabular-nums;
+}
+.rec-state { font-size: .85rem; color: var(--c-slate-600); }
+.rec-controls { display: flex; gap: 9px; margin-left: auto; flex-wrap: wrap; }
+.rec-stop { background: var(--c-red-700); color: #fff; box-shadow: 0 1px 2px rgba(185,28,28,.25), 0 10px 20px -10px rgba(185,28,28,.6); }
+.rec-stop:hover { background: #991b1b; }
+.rec-warn { flex-basis: 100%; margin: 4px 0 0; font-size: .84rem; color: var(--c-amber-700); }
+
+/* Recorded preview */
+.rec-preview { flex: 1; min-width: 240px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* flex-basis auto, not 0: in the mobile column layout basis-0 collapses height */
+.rec-audio { display: block; flex: 1 1 auto; min-width: 200px; height: 44px; }
+
+/* "or upload" divider */
+.upload-divider {
+  display: flex; align-items: center; gap: 14px;
+  margin: 18px 0 16px; color: var(--c-slate-400);
+  font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+}
+.upload-divider::before, .upload-divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--c-slate-200);
+}
+
+/* ---------- Client-side validation / warnings ---------- */
+.upload-error {
+  margin: 14px 0 0; padding: 12px 15px; border-radius: var(--radius-md);
+  background: var(--c-red-50); box-shadow: 0 0 0 1px var(--c-red-200);
+  color: var(--c-red-700); font-size: .9rem;
+}
+.upload-warn {
+  margin: 12px 0 0; padding: 12px 15px; border-radius: var(--radius-md);
+  background: var(--c-amber-50); box-shadow: 0 0 0 1px var(--c-amber-200);
+  color: var(--c-amber-700); font-size: .9rem;
+}
+
+/* ---------- Team code (collapsed by default) ---------- */
+.teamcode { margin-top: 16px; }
+.teamcode summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  font-size: .85rem; font-weight: 600; color: var(--c-slate-500);
+  padding: 4px 2px; border-radius: 8px;
+}
+.teamcode summary::-webkit-details-marker { display: none; }
+.teamcode summary::before {
+  content: ""; width: 7px; height: 7px; flex: none;
+  border-right: 1.8px solid currentColor; border-bottom: 1.8px solid currentColor;
+  transform: rotate(-45deg); transition: transform .25s var(--ease); margin-top: -2px;
+}
+.teamcode[open] summary::before { transform: rotate(45deg); margin-top: -4px; }
+.teamcode summary:hover { color: var(--c-teal-700); }
+.teamcode-field { margin-top: 10px; }
+.teamcode-hint { margin: 8px 0 0; font-size: .8rem; color: var(--c-slate-500); }
+
+/* ---------- Mobile-first: thumb-size targets ---------- */
+@media (max-width: 560px) {
+  .recorder { flex-direction: column; align-items: stretch; text-align: center; }
+  .rec-btn { width: 84px; height: 84px; margin: 4px auto 0; }
+  .rec-copy { align-items: center; }
+  .rec-controls { margin-left: 0; width: 100%; }
+  .rec-controls .btn { flex: 1; min-height: 46px; }
+  .rec-live { justify-content: center; }
+  .rec-preview { flex-direction: column; align-items: stretch; }
+  .rec-preview .btn { min-height: 46px; }
+  .dropzone { padding: 26px 16px; }
+  .btn-primary { min-height: 52px; }
+}

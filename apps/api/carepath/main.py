@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import hmac
+import logging
 import tempfile
+import time
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from carepath.config import Settings, load_settings
@@ -22,6 +28,7 @@ from carepath.services.pipeline import CarePathPipeline, serialize_terms
 
 
 configure_logging()
+logger = logging.getLogger("carepath.main")
 
 # Upload guardrails: reject oversized or non-audio files up front with a clean
 # 400 instead of streaming junk through normalization + ASR.
@@ -38,11 +45,11 @@ ALLOWED_AUDIO_SUFFIXES = {
     ".webm",
 }
 
-app = FastAPI(
-    title="CarePath API",
-    version="0.1.0",
-    description="Vietnamese medical ASR correction and SOAP-note drafting API.",
-)
+HOUR_SECONDS = 60 * 60
+DAY_SECONDS = 24 * HOUR_SECONDS
+_rate_limit_lock = Lock()
+_rate_limit_events: dict[str, list[float]] = {}
+_global_rate_limit_events: list[float] = []
 
 
 @lru_cache(maxsize=1)
@@ -53,6 +60,34 @@ def get_settings() -> Settings:
 @lru_cache(maxsize=1)
 def get_pipeline() -> CarePathPipeline:
     return CarePathPipeline(get_settings())
+
+
+def _warmup_pipeline() -> None:
+    report = get_pipeline().warmup()
+    logger.info("pipeline warmup complete %s", report)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    _warmup_pipeline()
+    yield
+
+
+app = FastAPI(
+    title="CarePath API",
+    version="0.1.0",
+    description="Vietnamese medical ASR correction and SOAP-note drafting API.",
+    lifespan=lifespan,
+)
+
+if get_settings().cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(get_settings().cors_origins),
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["*"],
+    )
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
@@ -121,14 +156,92 @@ def _save_upload_capped(audio: UploadFile, destination: Path, max_bytes: int) ->
             handle.write(chunk)
 
 
+def _client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        forwarded_ip = forwarded_for.split(",", 1)[0].strip()
+        if forwarded_ip:
+            return forwarded_ip
+    return request.client.host if request.client else "unknown"
+
+
+def _prune(events: list[float], now: float, window_seconds: int) -> None:
+    cutoff = now - window_seconds
+    keep_from = next(
+        (idx for idx, event in enumerate(events) if event >= cutoff), len(events)
+    )
+    del events[:keep_from]
+
+
+def _retry_after(events: list[float], now: float, window_seconds: int) -> int:
+    return max(1, int(events[0] + window_seconds - now) + 1)
+
+
+def _rate_limit_error(message: str, retry_after: int) -> HTTPException:
+    return HTTPException(
+        status_code=429,
+        detail={"message": message, "retry_after_seconds": retry_after},
+        headers={"Retry-After": str(retry_after)},
+    )
+
+
+def _check_soap_rate_limit(request: Request) -> None:
+    settings = get_settings()
+    team_code = request.headers.get("x-team-code")
+    if (
+        settings.team_code
+        and team_code
+        and hmac.compare_digest(team_code, settings.team_code)
+    ):
+        return
+
+    now = time.time()
+    client_ip = _client_ip(request)
+    with _rate_limit_lock:
+        events = _rate_limit_events.setdefault(client_ip, [])
+        _prune(events, now, DAY_SECONDS)
+        _prune(_global_rate_limit_events, now, DAY_SECONDS)
+
+        hourly_events = [event for event in events if event >= now - HOUR_SECONDS]
+        if (
+            settings.soap_rate_limit_per_ip_hour > 0
+            and len(hourly_events) >= settings.soap_rate_limit_per_ip_hour
+        ):
+            raise _rate_limit_error(
+                "Bạn đã đạt giới hạn demo cho địa chỉ này. Vui lòng thử lại sau.",
+                _retry_after(hourly_events, now, HOUR_SECONDS),
+            )
+        if (
+            settings.soap_rate_limit_per_ip_day > 0
+            and len(events) >= settings.soap_rate_limit_per_ip_day
+        ):
+            raise _rate_limit_error(
+                "Bạn đã đạt giới hạn demo cho địa chỉ này. Vui lòng thử lại sau.",
+                _retry_after(events, now, DAY_SECONDS),
+            )
+        if (
+            settings.soap_rate_limit_global_day > 0
+            and len(_global_rate_limit_events) >= settings.soap_rate_limit_global_day
+        ):
+            raise _rate_limit_error(
+                "Demo đã đạt giới hạn sử dụng trong ngày. Vui lòng thử lại sau.",
+                _retry_after(_global_rate_limit_events, now, DAY_SECONDS),
+            )
+
+        events.append(now)
+        _global_rate_limit_events.append(now)
+
+
 # Sync ``def`` (not ``async``): the body does blocking work (ONNX ASR + the LLM
 # HTTP call), so FastAPI runs it in a threadpool and the event loop stays free to
 # serve health checks and other requests instead of freezing for the whole job.
 @app.post("/api/v1/soap-notes", response_model=SoapNoteResponse)
 def create_soap_note(
+    request: Request,
     audio: UploadFile = File(...),
     encounter_context: str | None = Form(default=None),
 ) -> SoapNoteResponse:
+    _check_soap_rate_limit(request)
     suffix = _validate_audio_upload(audio)
     try:
         with tempfile.TemporaryDirectory(prefix="carepath_") as temp_dir:
@@ -163,4 +276,3 @@ def create_soap_note(
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
 if WEB_DIR.is_dir():
     app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
-

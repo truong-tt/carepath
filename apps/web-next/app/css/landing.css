@@ -362,3 +362,21 @@
   .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
   .lp * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* ============================================================
+   web-next additions (not in apps/web/landing.css)
+   ============================================================ */
+/* .lp moved from <body> to a wrapper div in Next.js — needs its own height. */
+.lp { min-height: 100dvh; }
+
+/* QR block in the final CTA: desktop visitors jump to the phone recorder. */
+.lp-qr {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 10px;
+  margin-top: 30px; padding: 16px 18px 14px; border-radius: 16px;
+  background: #fff; box-shadow: 0 12px 30px -12px rgba(0,0,0,.35);
+}
+.lp-qr img { display: block; width: 112px; height: 112px; }
+.lp-qr span { font-size: .82rem; font-weight: 600; color: var(--ink-soft); }
+@media (max-width: 760px) {
+  .lp-qr { display: none; } /* pointless on the phone itself */
+}

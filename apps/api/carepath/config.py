@@ -42,6 +42,15 @@ def _float_env(name: str, default: float) -> float:
     return float(raw)
 
 
+def _csv_env(name: str) -> tuple[str, ...]:
+    raw = os.getenv(name, "")
+    return tuple(
+        value
+        for value in (item.strip().rstrip("/") for item in raw.split(","))
+        if value
+    )
+
+
 @dataclass(frozen=True)
 class Settings:
     app_env: str
@@ -69,6 +78,11 @@ class Settings:
     # so it is always safe to request.
     gipformer_provider: str = "cpu"
     llm_fallback_offline: bool = True
+    cors_origins: tuple[str, ...] = ()
+    team_code: str | None = None
+    soap_rate_limit_per_ip_hour: int = 3
+    soap_rate_limit_per_ip_day: int = 10
+    soap_rate_limit_global_day: int = 100
     # gec_local provider: serve a trained QLoRA adapter bundle in-process.
     gec_bundle_path: str | None = None
     gec_soap_delegate: str = "offline"
@@ -116,6 +130,11 @@ class Settings:
                 "SEMANTIC_MODEL_NAME", "bkai-foundation-models/vietnamese-bi-encoder"
             ).strip(),
             llm_fallback_offline=_bool_env("LLM_FALLBACK_OFFLINE", True),
+            cors_origins=_csv_env("CORS_ORIGINS"),
+            team_code=os.getenv("TEAM_CODE") or None,
+            soap_rate_limit_per_ip_hour=_int_env("SOAP_RATE_LIMIT_PER_IP_HOUR", 3),
+            soap_rate_limit_per_ip_day=_int_env("SOAP_RATE_LIMIT_PER_IP_DAY", 10),
+            soap_rate_limit_global_day=_int_env("SOAP_RATE_LIMIT_GLOBAL_DAY", 100),
             gec_bundle_path=os.getenv("GEC_BUNDLE_PATH") or None,
             gec_soap_delegate=os.getenv("GEC_SOAP_DELEGATE", "offline").strip().lower(),
         )

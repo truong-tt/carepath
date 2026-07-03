@@ -43,6 +43,30 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.llm_model, "gpt-5.4")
         self.assertEqual(settings.gipformer_chunk_seconds, 20.0)
 
+    def test_cors_origins_are_comma_separated(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "CORS_ORIGINS": "https://carepath.vercel.app, http://localhost:3000/ ,,",
+            },
+            clear=True,
+        ):
+            settings = Settings.from_env()
+
+        self.assertEqual(
+            settings.cors_origins,
+            ("https://carepath.vercel.app", "http://localhost:3000"),
+        )
+
+    def test_abuse_guard_defaults(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            settings = Settings.from_env()
+
+        self.assertIsNone(settings.team_code)
+        self.assertEqual(settings.soap_rate_limit_per_ip_hour, 3)
+        self.assertEqual(settings.soap_rate_limit_per_ip_day, 10)
+        self.assertEqual(settings.soap_rate_limit_global_day, 100)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -42,11 +42,20 @@ class UploadGuardrailTests(unittest.TestCase):
         get_pipeline.cache_clear()
         cls.client = TestClient(app)
 
-    def test_valid_wav_is_accepted(self) -> None:
-        response = self.client.post(
+    def setUp(self) -> None:
+        get_settings.cache_clear()
+        main_module._rate_limit_events.clear()
+        main_module._global_rate_limit_events.clear()
+
+    def _post_wav(self, headers: dict[str, str] | None = None):
+        return self.client.post(
             "/api/v1/soap-notes",
             files={"audio": ("demo.wav", _silent_wav_bytes(), "audio/wav")},
+            headers=headers or {},
         )
+
+    def test_valid_wav_is_accepted(self) -> None:
+        response = self._post_wav()
         self.assertEqual(response.status_code, 200, response.text)
         self.assertTrue(response.json()["soap"]["review_required"])
 
@@ -66,6 +75,102 @@ class UploadGuardrailTests(unittest.TestCase):
             )
         self.assertEqual(response.status_code, 400)
         self.assertIn("too large", response.json()["detail"])
+
+    def test_startup_warms_pipeline(self) -> None:
+        calls: list[bool] = []
+
+        class FakePipeline:
+            def warmup(self) -> dict[str, object]:
+                calls.append(True)
+                return {"asr": {"ready": True}}
+
+        with patch.object(main_module, "get_pipeline", return_value=FakePipeline()):
+            main_module._warmup_pipeline()
+
+        self.assertEqual(calls, [True])
+
+    def test_fourth_request_from_same_ip_is_rate_limited(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "TEAM_CODE": "",
+                "SOAP_RATE_LIMIT_PER_IP_HOUR": "3",
+                "SOAP_RATE_LIMIT_PER_IP_DAY": "10",
+                "SOAP_RATE_LIMIT_GLOBAL_DAY": "100",
+            },
+            clear=False,
+        ):
+            get_settings.cache_clear()
+            headers = {"X-Forwarded-For": "203.0.113.10"}
+            responses = [self._post_wav(headers=headers) for _ in range(4)]
+
+        self.assertEqual(
+            [response.status_code for response in responses[:3]],
+            [200, 200, 200],
+        )
+        self.assertEqual(responses[3].status_code, 429)
+        self.assertIn("Retry-After", responses[3].headers)
+        self.assertIn("giới hạn demo", responses[3].json()["detail"]["message"])
+
+    def test_team_code_bypasses_limits(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "TEAM_CODE": "letmein",
+                "SOAP_RATE_LIMIT_PER_IP_HOUR": "1",
+                "SOAP_RATE_LIMIT_PER_IP_DAY": "1",
+                "SOAP_RATE_LIMIT_GLOBAL_DAY": "1",
+            },
+            clear=False,
+        ):
+            get_settings.cache_clear()
+            headers = {"X-Forwarded-For": "203.0.113.11", "X-Team-Code": "letmein"}
+            responses = [self._post_wav(headers=headers) for _ in range(3)]
+
+        self.assertEqual(
+            [response.status_code for response in responses],
+            [200, 200, 200],
+        )
+
+    def test_wrong_team_code_is_limited_like_anonymous(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "TEAM_CODE": "letmein",
+                "SOAP_RATE_LIMIT_PER_IP_HOUR": "1",
+                "SOAP_RATE_LIMIT_PER_IP_DAY": "10",
+                "SOAP_RATE_LIMIT_GLOBAL_DAY": "100",
+            },
+            clear=False,
+        ):
+            get_settings.cache_clear()
+            headers = {"X-Forwarded-For": "203.0.113.12", "X-Team-Code": "wrong"}
+            first = self._post_wav(headers=headers)
+            second = self._post_wav(headers=headers)
+
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual(second.status_code, 429)
+
+    def test_global_daily_cap_limits_all_ips(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "TEAM_CODE": "",
+                "SOAP_RATE_LIMIT_PER_IP_HOUR": "10",
+                "SOAP_RATE_LIMIT_PER_IP_DAY": "10",
+                "SOAP_RATE_LIMIT_GLOBAL_DAY": "2",
+            },
+            clear=False,
+        ):
+            get_settings.cache_clear()
+            first = self._post_wav(headers={"X-Forwarded-For": "203.0.113.13"})
+            second = self._post_wav(headers={"X-Forwarded-For": "203.0.113.14"})
+            third = self._post_wav(headers={"X-Forwarded-For": "203.0.113.15"})
+
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual(second.status_code, 200, second.text)
+        self.assertEqual(third.status_code, 429)
+        self.assertIn("giới hạn sử dụng trong ngày", third.json()["detail"]["message"])
 
 
 if __name__ == "__main__":

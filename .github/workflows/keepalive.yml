@@ -1,0 +1,17 @@
+name: Keep HF Space Awake
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        env:
+          SPACE_URL: ${{ vars.SPACE_URL }}
+        run: |
+          test -n "$SPACE_URL"
+          curl -fsS "${SPACE_URL%/}/api/v1/health"
