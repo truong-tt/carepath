@@ -146,6 +146,13 @@ export default function LandingPage() {
                 </a>
                 <a className="lp-btn lp-btn-ghost" href="#quy-trinh">Xem cách dùng</a>
               </div>
+              {/* QR for desktop visitors: jump to the tool on a phone (recording lives there).
+                  Regenerate if the prod URL changes:
+                  npx qrcode -t svg -o public/qr-app.svg "https://<prod-domain>/app" */}
+              <div className="lp-qr" aria-label="Mã QR mở trang ghi âm trên điện thoại">
+                <img src="/qr-app.svg" alt="Mã QR dẫn tới trang ghi âm CarePath" width={88} height={88} />
+                <span>Quét để mở trên điện thoại và ghi âm buổi khám</span>
+              </div>
               <ul className="lp-strip" aria-label="Nguyên tắc thiết kế">
                 <li><i className="ph ph-shield-check" aria-hidden="true"></i> Bác sĩ duyệt lần cuối</li>
                 <li><i className="ph ph-translate" aria-hidden="true"></i> Hiểu thuật ngữ Việt-Anh</li>
@@ -342,13 +349,6 @@ export default function LandingPage() {
             <a className="lp-btn lp-btn-onaccent" href="/app">
               Dùng thử <i className="ph ph-arrow-right" aria-hidden="true"></i>
             </a>
-            {/* QR for desktop visitors: jump to the tool on a phone (recording lives there).
-                Regenerate when the prod URL is final (Goal 5):
-                npx qrcode -t svg -o public/qr-app.svg "https://<prod-domain>/app" */}
-            <div className="lp-qr" aria-label="Mã QR mở trang ghi âm trên điện thoại">
-              <img src="/qr-app.svg" alt="Mã QR dẫn tới trang ghi âm CarePath" width={112} height={112} />
-              <span>Mở trên điện thoại để ghi âm</span>
-            </div>
           </div>
         </section>
       </main>

@@ -369,14 +369,18 @@
 /* .lp moved from <body> to a wrapper div in Next.js — needs its own height. */
 .lp { min-height: 100dvh; }
 
-/* QR block in the final CTA: desktop visitors jump to the phone recorder. */
+/* QR chip in the hero: desktop visitors jump to the phone recorder. */
 .lp-qr {
-  display: inline-flex; flex-direction: column; align-items: center; gap: 10px;
-  margin-top: 30px; padding: 16px 18px 14px; border-radius: 16px;
-  background: #fff; box-shadow: 0 12px 30px -12px rgba(0,0,0,.35);
+  display: inline-flex; align-items: center; gap: 14px;
+  margin: 24px 0 0; padding: 12px 16px 12px 12px; border-radius: 14px;
+  background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 12px 26px -18px rgba(15, 76, 140, .45);
 }
-.lp-qr img { display: block; width: 112px; height: 112px; }
-.lp-qr span { font-size: .82rem; font-weight: 600; color: var(--ink-soft); }
+.lp-qr img { display: block; width: 88px; height: 88px; }
+.lp-qr span {
+  font-size: .85rem; font-weight: 600; color: var(--ink-soft);
+  max-width: 20ch; line-height: 1.45; text-align: left;
+}
 @media (max-width: 760px) {
   .lp-qr { display: none; } /* pointless on the phone itself */
 }
