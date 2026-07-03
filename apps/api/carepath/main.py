@@ -11,6 +11,7 @@ from threading import Lock
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from carepath.config import Settings, load_settings
@@ -79,6 +80,20 @@ app = FastAPI(
     description="Vietnamese medical ASR correction and SOAP-note drafting API.",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def reject_disallowed_origin(request: Request, call_next):
+    settings = get_settings()
+    origin = request.headers.get("origin")
+    if (
+        settings.cors_origins
+        and origin
+        and origin.rstrip("/") not in settings.cors_origins
+    ):
+        return PlainTextResponse("Disallowed CORS origin", status_code=400)
+    return await call_next(request)
+
 
 if get_settings().cors_origins:
     app.add_middleware(

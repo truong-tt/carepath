@@ -89,6 +89,24 @@ class UploadGuardrailTests(unittest.TestCase):
 
         self.assertEqual(calls, [True])
 
+    def test_disallowed_origin_is_rejected_when_allowlist_set(self) -> None:
+        with patch.dict(
+            os.environ,
+            {"CORS_ORIGINS": "https://carepath-omega.vercel.app"},
+            clear=False,
+        ):
+            get_settings.cache_clear()
+            response = self.client.options(
+                "/api/v1/soap-notes",
+                headers={
+                    "Origin": "https://example.invalid",
+                    "Access-Control-Request-Method": "POST",
+                },
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Disallowed CORS origin", response.text)
+
     def test_fourth_request_from_same_ip_is_rate_limited(self) -> None:
         with patch.dict(
             os.environ,
