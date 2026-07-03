@@ -57,11 +57,10 @@ if ($allowed.Headers["Access-Control-Allow-Origin"] -ne $vercel) {
 
 try {
     $blocked = Invoke-WebRequest `
-        -Uri "$space/api/v1/soap-notes" `
-        -Method Options `
+        -Uri "$space/api/v1/health" `
+        -Method Get `
         -Headers @{
             Origin = $foreignOrigin
-            "Access-Control-Request-Method" = "POST"
         } `
         -UseBasicParsing
     if ($blocked.Headers["Access-Control-Allow-Origin"]) {
