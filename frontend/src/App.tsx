@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import "./App.css";
 import { createSession } from "./api";
+import { AdminReview } from "./components/AdminReview";
 import { ConsentGate, type ConsentPayload } from "./components/ConsentGate";
 import { InterpreterConsole } from "./components/InterpreterConsole";
 
@@ -9,6 +10,10 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+
+  if (window.location.pathname === "/admin") {
+    return <AdminReview />;
+  }
 
   async function handleConsent(consent: ConsentPayload) {
     setStarting(true);

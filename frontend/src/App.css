@@ -52,7 +52,8 @@ button:disabled {
 }
 
 .consent-actions label,
-.typed label {
+.typed label,
+.admin-filters label {
   display: grid;
   gap: 6px;
 }
@@ -130,6 +131,8 @@ p {
 
 .typed input,
 .typed select,
+.admin-filters input,
+.admin-filters select,
 textarea {
   min-height: 42px;
   border: 1px solid #c8d0d9;
@@ -280,6 +283,19 @@ td {
   padding-top: 18px;
 }
 
+.admin-filters,
+.admin-table {
+  max-width: 1120px;
+  margin: 0 auto 18px;
+}
+
+.admin-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(120px, 1fr) repeat(3, auto) 130px;
+  gap: 12px;
+  align-items: end;
+}
+
 .turn {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -296,6 +312,7 @@ td {
   .consent,
   .controls,
   .typed,
+  .admin-filters,
   .confirmation,
   .turn {
     grid-template-columns: 1fr;
