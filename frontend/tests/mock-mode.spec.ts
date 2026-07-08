@@ -9,6 +9,7 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await page.getByRole("button", { name: "Start session" }).click();
 
   await expect(page.getByRole("heading", { name: "Live interpreter" })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Connected");
   await page.getByLabel("Typed fallback").fill("xin chao");
   await page.getByRole("button", { name: "Send" }).click();
 

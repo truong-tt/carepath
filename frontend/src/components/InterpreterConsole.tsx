@@ -35,9 +35,21 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
       .catch(() => setProviderMode("unknown"));
     const socket = new WebSocket(websocketUrl(`/ws/sessions/${sessionId}`));
     socketRef.current = socket;
-    socket.addEventListener("open", () => setStatus("Connected"));
-    socket.addEventListener("close", () => setStatus("Disconnected"));
+    const isCurrentSocket = () => socketRef.current === socket;
+    socket.addEventListener("open", () => {
+      if (isCurrentSocket()) {
+        setStatus("Connected");
+      }
+    });
+    socket.addEventListener("close", () => {
+      if (isCurrentSocket()) {
+        setStatus("Disconnected");
+      }
+    });
     socket.addEventListener("message", (event: MessageEvent<string>) => {
+      if (!isCurrentSocket()) {
+        return;
+      }
       const data = JSON.parse(event.data) as WsEvent;
       if (data.type === "session_state") {
         setTurns(data.turns);
@@ -63,6 +75,9 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
       }
     });
     return () => {
+      if (isCurrentSocket()) {
+        socketRef.current = null;
+      }
       socket.close();
     };
   }, [sessionId]);

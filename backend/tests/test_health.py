@@ -2,8 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.config import get_settings
-from app.main import app
-from app.main import validate_runtime_settings
+from app.main import app, validate_runtime_settings
 
 
 def test_health_check() -> None:
