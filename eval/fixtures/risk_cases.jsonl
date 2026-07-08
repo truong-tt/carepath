@@ -46,6 +46,7 @@
 {"id":"fm16-number-1","failure_mode":16,"source":"uống một trăm hai mươi mg","translation":"take 120 mg","asr_confidence":0.99,"mt_confidence":0.99,"expected_tier":"high","expected_kinds":["dose_number"]}
 {"id":"fm16-number-2","failure_mode":16,"source":"uống một trăm linh năm mg","translation":"take 105 mg","asr_confidence":0.99,"mt_confidence":0.99,"expected_tier":"high","expected_kinds":["dose_number"]}
 {"id":"fm16-number-3","failure_mode":16,"source":"uống một nghìn mg","translation":"take 1000 mg","asr_confidence":0.99,"mt_confidence":0.99,"expected_tier":"high","expected_kinds":["dose_number"]}
+{"id":"fm16-number-dropped-4","failure_mode":16,"source":"huyết áp 120 trên 80","translation":"blood pressure is normal","asr_confidence":0.99,"mt_confidence":0.99,"expected_tier":"critical","expected_kinds":["number_mismatch"]}
 {"id":"fm17-fast-speech-1","failure_mode":17,"source":"nói nhanh bị nuốt chữ","translation":"fast clipped speech","asr_confidence":0.45,"mt_confidence":0.99,"expected_tier":"low","expected_kinds":["low_confidence"]}
 {"id":"fm17-fast-speech-2","failure_mode":17,"source":"giọng nói quá nhanh","translation":"speech too fast","asr_confidence":0.5,"mt_confidence":0.99,"expected_tier":"low","expected_kinds":["low_confidence"]}
 {"id":"fm17-fast-speech-3","failure_mode":17,"source":"âm bị dính vào nhau","translation":"merged words","asr_confidence":0.55,"mt_confidence":0.99,"expected_tier":"low","expected_kinds":["low_confidence"]}

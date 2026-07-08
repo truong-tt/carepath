@@ -174,7 +174,7 @@ def _mismatch_spans(source_text: str, translation: str) -> list[dict[str, Any]]:
     spans: list[dict[str, Any]] = []
     source_numbers = _numbers(source_text)
     translation_numbers = _numbers(translation)
-    if source_numbers and translation_numbers and source_numbers != translation_numbers:
+    if source_numbers and source_numbers != translation_numbers:
         spans.append(
             {
                 "start": 0,

@@ -37,6 +37,13 @@ def test_number_mismatch_is_critical() -> None:
     assert "number_mismatch" in {span["kind"] for span in result.spans}
 
 
+def test_dropped_source_number_is_critical() -> None:
+    result = classify_risk("huyết áp 120 trên 80", "blood pressure is normal", 0.99, 0.99, 0.7)
+
+    assert result.tier == "critical"
+    assert "number_mismatch" in {span["kind"] for span in result.spans}
+
+
 def test_negation_mismatch_is_critical() -> None:
     result = classify_risk("không dị ứng penicillin", "allergic to penicillin", 0.99, 0.99, 0.7)
 
