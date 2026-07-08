@@ -30,11 +30,11 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
           </p>
         </div>
         <div lang="vi">
-          <p className="eyebrow">Thong bao su dung AI</p>
-          <h2>Cong cu phien dich</h2>
+          <p className="eyebrow">Thông báo sử dụng AI</p>
+          <h2>Công cụ phiên dịch</h2>
           <p>
-            Cong cu nay chi phien dich loi noi. Ket qua co the sai va khong thay the loi khuyen
-            y te, chan doan, hoac khuyen nghi dung thuoc.
+            Công cụ này chỉ phiên dịch lời nói. Kết quả có thể sai và không thay thế lời khuyên
+            y tế, chẩn đoán, hoặc khuyến nghị dùng thuốc.
           </p>
         </div>
         <form
@@ -58,7 +58,7 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
               type="checkbox"
               onChange={(event) => setAiDisclosure(event.target.checked)}
             />
-            AI translation may contain errors.
+            AI translation may contain errors. / Bản dịch AI có thể có lỗi.
           </label>
           <label>
             <input
@@ -66,7 +66,8 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
               type="checkbox"
               onChange={(event) => setInterpreterRight(event.target.checked)}
             />
-            A human interpreter can be requested at any time.
+            A human interpreter can be requested at any time. / Có thể yêu cầu thông dịch viên bất
+            cứ lúc nào.
           </label>
           {error ? <p className="error">{error}</p> : null}
           <button disabled={!canStart} type="submit">
