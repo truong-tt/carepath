@@ -28,6 +28,21 @@ NUMBER_TOKENS = set(NUMBER_VALUES) | {
     "nua",
 }
 
+NUMBER_FOLLOWERS = {
+    "vien",
+    "goi",
+    "ong",
+    "lan",
+    "ngay",
+    "tuan",
+    "thang",
+    "gio",
+    "mg",
+    "ml",
+    "mcg",
+    "tuoi",
+}
+
 UNIT_PATTERNS = [
     (r"\bmi\s*-?\s*li\s*-?\s*gam\b|\bmiligrams?\b|\bmilligrams?\b", "mg"),
     (r"\bmi\s*-?\s*li\s*-?\s*lit\b|\bmi\s*-?\s*li\s*-?\s*lít\b|\bmililit(?:s)?\b", "ml"),
@@ -105,6 +120,20 @@ def _format_number(value: float) -> str:
     return str(int(value)) if value.is_integer() else str(value).rstrip("0").rstrip(".")
 
 
+def _is_sentence_initial(text: str, start: int) -> bool:
+    before = text[:start].rstrip()
+    return not before or before[-1] in ".!?\n\r"
+
+
+def _is_capitalized_name_candidate(text: str, match: re.Match[str]) -> bool:
+    word = match.group(0)
+    return word[:1].isupper() and not _is_sentence_initial(text, match.start())
+
+
+def _next_word_key(matches: list[re.Match[str]], index: int) -> str:
+    return _word_key(matches[index].group(0)) if index < len(matches) else ""
+
+
 def _replace_number_words(text: str) -> str:
     parts: list[str] = []
     last = 0
@@ -130,8 +159,15 @@ def _replace_number_words(text: str) -> str:
         if value is None:
             i += 1
             continue
+        is_single_token = j == i + 1
+        if _is_capitalized_name_candidate(text, matches[i]):
+            i += 1
+            continue
+        if is_single_token and _next_word_key(matches, j) not in NUMBER_FOLLOWERS:
+            i += 1
+            continue
         if (
-            j == i + 1
+            is_single_token
             and _word_key(matches[i].group(0)) == "nam"
             and j < len(matches)
             and matches[j].group(0).isdigit()

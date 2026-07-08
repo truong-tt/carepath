@@ -46,6 +46,7 @@ def test_parse_vietnamese_number_words(words: list[str], value: float) -> None:
     ("raw", "expected"),
     [
         ("Uống nửa viên", "Uống 0.5 viên"),
+        ("uống nửa viên, ngày hai lần", "uống 0.5 viên, ngày 2 lần"),
         ("Ngày hai lần", "Ngày 2 lần"),
         ("trong mười ngày", "trong 10 ngày"),
         ("Tái khám sau mười ngày", "Tái khám +10 days"),
@@ -71,6 +72,8 @@ def test_parse_vietnamese_number_words(words: list[str], value: float) -> None:
         ("uống một trăm linh năm mg", "uống 105 mg"),
         ("uống một nghìn mg", "uống 1000 mg"),
         ("uống một rưỡi viên", "uống 1.5 viên"),
+        ("Ba của cháu bị đau bụng", "Ba của cháu bị đau bụng"),
+        ("anh Tư đến khám", "anh Tư đến khám"),
     ],
 )
 def test_normalize_text_research_cases(raw: str, expected: str) -> None:
