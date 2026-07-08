@@ -2,9 +2,11 @@ import csv
 import json
 import logging
 from dataclasses import dataclass, field
+from functools import partial
 from io import StringIO
 from typing import Annotated, Any
 
+import anyio
 from fastapi import (
     APIRouter,
     Depends,
@@ -322,14 +324,17 @@ async def websocket_session(
                     )
                     continue
                 try:
-                    turn = process_audio_turn(
-                        db,
-                        providers,
-                        settings,
-                        session_id=session_id,
-                        speaker=current.speaker,
-                        lang=current.lang,
-                        audio=b"".join(current.chunks),
+                    turn = await anyio.to_thread.run_sync(
+                        partial(
+                            process_audio_turn,
+                            db,
+                            providers,
+                            settings,
+                            session_id=session_id,
+                            speaker=current.speaker,
+                            lang=current.lang,
+                            audio=b"".join(current.chunks),
+                        )
                     )
                 except Exception as exc:
                     await _send_pipeline_error(websocket, session_id, exc)
@@ -337,15 +342,18 @@ async def websocket_session(
                 await websocket.send_json(turn_result_payload(turn, settings))
             elif event_type == "text_turn":
                 try:
-                    turn = process_text_turn(
-                        db,
-                        providers,
-                        settings,
-                        session_id=session_id,
-                        speaker=event["speaker"],
-                        lang=event["lang"],
-                        text=event["text"],
-                        asr_confidence=1.0,
+                    turn = await anyio.to_thread.run_sync(
+                        partial(
+                            process_text_turn,
+                            db,
+                            providers,
+                            settings,
+                            session_id=session_id,
+                            speaker=event["speaker"],
+                            lang=event["lang"],
+                            text=event["text"],
+                            asr_confidence=1.0,
+                        )
                     )
                 except Exception as exc:
                     await _send_pipeline_error(websocket, session_id, exc)
