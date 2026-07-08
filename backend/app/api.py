@@ -37,6 +37,7 @@ ws_router = APIRouter()
 DBDep = Annotated[DBSession, Depends(get_db)]
 AdminToken = Annotated[str | None, Header(alias="X-Admin-Token")]
 logger = logging.getLogger(__name__)
+MAX_TYPED_TEXT_CHARS = 2000
 
 
 @dataclass(slots=True)
@@ -44,6 +45,7 @@ class InFlightTurn:
     speaker: str
     lang: str
     chunks: list[bytes] = field(default_factory=list)
+    audio_bytes: int = 0
 
 
 # ponytail: process-local turn lock; use DB/Redis if multi-worker deploy matters.
@@ -98,6 +100,18 @@ def turn_result_payload(turn: crud.TurnRecord, settings: Settings) -> dict[str, 
         or turn.status in {"awaiting_confirm", "blocked"},
         "low_confidence": low_confidence,
     }
+
+
+def log_turn_processed(turn: crud.TurnRecord) -> None:
+    logger.info(
+        "turn_processed",
+        extra={
+            "turn_id": turn.id,
+            "session_id": turn.session_id,
+            "risk_tier": turn.risk_tier,
+            "status": turn.status,
+        },
+    )
 
 
 async def _send_pipeline_error(websocket: WebSocket, session_id: str, exc: Exception) -> None:
@@ -292,7 +306,19 @@ async def websocket_session(
                         {"type": "turn_error", "message": "no turn in progress", "retryable": True}
                     )
                     continue
-                current.chunks.append(message["bytes"])
+                chunk = message["bytes"]
+                current.audio_bytes += len(chunk)
+                if current.audio_bytes > settings.max_turn_audio_bytes:
+                    _in_flight.pop(session_id, None)
+                    await websocket.send_json(
+                        {
+                            "type": "turn_error",
+                            "message": "audio turn too large",
+                            "retryable": True,
+                        }
+                    )
+                    continue
+                current.chunks.append(chunk)
                 continue
 
             event = json.loads(message.get("text") or "{}")
@@ -339,8 +365,18 @@ async def websocket_session(
                 except Exception as exc:
                     await _send_pipeline_error(websocket, session_id, exc)
                     continue
+                log_turn_processed(turn)
                 await websocket.send_json(turn_result_payload(turn, settings))
             elif event_type == "text_turn":
+                if len(event.get("text", "")) > MAX_TYPED_TEXT_CHARS:
+                    await websocket.send_json(
+                        {
+                            "type": "turn_error",
+                            "message": "typed turn too long",
+                            "retryable": True,
+                        }
+                    )
+                    continue
                 try:
                     turn = await anyio.to_thread.run_sync(
                         partial(
@@ -358,6 +394,7 @@ async def websocket_session(
                 except Exception as exc:
                     await _send_pipeline_error(websocket, session_id, exc)
                     continue
+                log_turn_processed(turn)
                 await websocket.send_json(turn_result_payload(turn, settings))
             else:
                 await websocket.send_json(

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     admin_token: str = "change-me"
     confidence_threshold: float = Field(default=0.7, ge=0, le=1)
     retention_days: int = Field(default=30, ge=0)
+    max_turn_audio_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     database_url: str = "sqlite:///./carepath.db"
     openai_transcribe_model: str = "gpt-4o-transcribe"
     claude_mt_model: str = "claude-sonnet-5"

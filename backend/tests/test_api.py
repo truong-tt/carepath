@@ -1,5 +1,8 @@
+import logging
+
 from fastapi.testclient import TestClient
 
+from app.config import Settings
 from app.main import app
 from app.providers.mock import MockASRProvider, MockMTProvider, MockReviewerProvider
 from app.providers.registry import ProviderSet
@@ -179,6 +182,73 @@ def test_websocket_rejects_new_turns_on_ended_session(db_session) -> None:
                 "message": "session ended",
                 "retryable": False,
             }
+
+
+def test_websocket_rejects_oversized_audio(db_session, monkeypatch) -> None:
+    del db_session
+    monkeypatch.setattr("app.api.get_settings", lambda: Settings(max_turn_audio_bytes=3))
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json({"type": "start_turn", "speaker": "doctor", "lang": "vi"})
+            ws.send_bytes(b"abcd")
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "audio turn too large",
+                "retryable": True,
+            }
+
+
+def test_websocket_rejects_oversized_typed_turn(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "x" * 2001,
+                }
+            )
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "typed turn too long",
+                "retryable": True,
+            }
+
+
+def test_info_logs_do_not_include_turn_text(db_session, caplog) -> None:
+    del db_session
+    caplog.set_level(logging.INFO, logger="app.api")
+    sensitive_text = "patient-secret-phrase"
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": sensitive_text,
+                }
+            )
+            assert ws.receive_json()["type"] == "turn_result"
+
+    messages = [record.getMessage() for record in caplog.records if record.name == "app.api"]
+    assert "turn_processed" in messages
+    assert sensitive_text not in caplog.text
+    assert f"[vi->en] {sensitive_text}" not in caplog.text
 
 
 def test_confirm_rejects_ended_session_and_delivered_turn(db_session) -> None:
