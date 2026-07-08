@@ -25,8 +25,8 @@ class MTResult:
 @dataclass(frozen=True, slots=True)
 class CriticalEntity:
     kind: str
-    source_span: tuple[int, int]
-    translated_span: tuple[int, int]
+    source_text: str
+    translated_text: str
 
 
 @dataclass(frozen=True, slots=True)

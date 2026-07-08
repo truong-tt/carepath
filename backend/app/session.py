@@ -23,8 +23,8 @@ def review_payload(review: Review) -> dict[str, object]:
         "entities": [
             {
                 "kind": entity.kind,
-                "source_span": list(entity.source_span),
-                "translated_span": list(entity.translated_span),
+                "source_text": entity.source_text,
+                "translated_text": entity.translated_text,
             }
             for entity in review.entities
         ],

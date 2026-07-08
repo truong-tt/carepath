@@ -253,8 +253,8 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
                           {turn.readback.entities.map((entity, index) => (
                             <tr key={`${entity.kind}-${index}`}>
                               <td>{entity.kind}</td>
-                              <td>{entity.source_span.join("-")}</td>
-                              <td>{entity.translated_span.join("-")}</td>
+                              <td>{entity.source_text}</td>
+                              <td>{entity.translated_text}</td>
                             </tr>
                           ))}
                         </tbody>

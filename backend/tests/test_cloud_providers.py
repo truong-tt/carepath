@@ -133,7 +133,7 @@ def test_claude_mt_rejects_malformed_output(text: str) -> None:
 def test_claude_reviewer_parses_entities() -> None:
     client = FakeAnthropicClient(
         '{"back_translation":"Uống 0.5 viên",'
-        '"entities":[{"kind":"dose","source_span":[5,12],"translated_span":[5,15]}],'
+        '"entities":[{"kind":"dose","source_text":"nửa viên","translated_text":"half a tablet"}],'
         '"flags":[]}'
     )
     provider = ClaudeReviewerProvider(api_key="", client=client)
@@ -142,6 +142,8 @@ def test_claude_reviewer_parses_entities() -> None:
 
     assert review.back_translation == "Uống 0.5 viên"
     assert review.entities[0].kind == "dose"
+    assert review.entities[0].source_text == "nửa viên"
+    assert review.entities[0].translated_text == "half a tablet"
 
 
 @pytest.mark.parametrize(
@@ -150,6 +152,7 @@ def test_claude_reviewer_parses_entities() -> None:
         "{}",
         '{"back_translation":"","entities":[],"flags":[]}',
         '{"back_translation":"x","entities":[{"kind":"dose","source_span":[2],"translated_span":[0,1]}],"flags":[]}',
+        '{"back_translation":"x","entities":[{"kind":"dose","source_text":2,"translated_text":"x"}],"flags":[]}',
     ],
 )
 def test_claude_reviewer_rejects_malformed_output(text: str) -> None:

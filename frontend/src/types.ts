@@ -34,8 +34,8 @@ export type Readback = {
   back_translation: string;
   entities: Array<{
     kind: string;
-    source_span: [number, number];
-    translated_span: [number, number];
+    source_text: string;
+    translated_text: string;
   }>;
   flags: string[];
 };
