@@ -1,5 +1,5 @@
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
@@ -196,3 +196,16 @@ def hard_delete_session(db: Session, session_id: str) -> None:
         db.delete(turn)
     db.delete(session)
     db.commit()
+
+
+def purge_old_sessions(db: Session, retention_days: int) -> int:
+    if retention_days == 0:
+        return 0
+    cutoff = utc_now() - timedelta(days=retention_days)
+    old_ids = [
+        session.id
+        for session in db.exec(select(SessionRecord).where(SessionRecord.created_at < cutoff))
+    ]
+    for session_id in old_ids:
+        hard_delete_session(db, session_id)
+    return len(old_ids)
