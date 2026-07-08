@@ -1,0 +1,51 @@
+id	speaker	lang	source	reference	expected_tier	category
+eval-001	doctor	vi	Chào anh, mời ngồi.	Hello, please sit down.	medium	greeting
+eval-002	patient	en	My appointment was at 2pm.	Cuộc hẹn của tôi lúc 2 giờ chiều.	low	logistics
+eval-003	doctor	vi	Anh thấy khó chịu ở đâu?	Where do you feel discomfort?	medium	chief_complaint
+eval-004	patient	en	I've had a cough for a week.	Tôi bị ho một tuần.	low	symptom
+eval-005	doctor	vi	Đau dữ dội hay âm ỉ?	Is the pain severe or dull?	critical	severity
+eval-006	patient	en	It's a sharp pain on my right side.	Đau nhói ở bên phải.	critical	laterality
+eval-007	doctor	vi	Anh từng mổ tim chưa?	Have you ever had heart surgery?	high	history
+eval-008	patient	en	I had heart surgery in 2019.	Tôi đã mổ tim năm 2019.	high	history
+eval-009	doctor	vi	Anh đang uống thuốc gì?	What medicine are you taking?	high	medication
+eval-010	patient	en	I take metformin and Lasix.	Tôi dùng metformin và Lasix.	critical	drug_lasa
+eval-011	doctor	vi	Anh có dị ứng thuốc nào không?	Do you have any drug allergies?	critical	allergy
+eval-012	patient	en	I'm allergic to penicillin.	Tôi dị ứng penicillin.	critical	allergy
+eval-013	doctor	vi	Không dị ứng với penicillin.	Not allergic to penicillin.	critical	negation
+eval-014	doctor	vi	Uống nửa viên.	Take half a tablet.	high	dose
+eval-015	doctor	vi	Ngày hai lần.	Twice a day.	high	frequency
+eval-016	doctor	vi	Trong mười ngày.	For ten days.	high	duration
+eval-017	doctor	vi	Năm trăm mi-li-gam.	Five hundred milligrams.	high	unit
+eval-018	doctor	vi	Uống Augmentin sau ăn.	Take Augmentin after food.	high	drug
+eval-019	doctor	vi	Uống Lasix buổi sáng.	Take Lasix in the morning.	critical	lasa
+eval-020	doctor	vi	Đau chân trái.	Left leg pain.	high	laterality
+eval-021	doctor	vi	Đau mắt phải.	Right eye pain.	high	laterality
+eval-022	doctor	vi	HA cao.	High blood pressure.	high	abbreviation
+eval-023	doctor	vi	TC thấp.	Low platelets.	high	abbreviation
+eval-024	doctor	vi	Con thấy mệt không?	Do you feel tired?	high	pronoun_negation
+eval-025	doctor	vi	Đã uống thuốc.	Took medicine.	high	subject_omission
+eval-026	doctor	vi	Tái khám sau mười ngày.	Follow up after ten days.	high	date
+eval-027	doctor	vi	Một trăm hai mươi mg.	One hundred twenty milligrams.	high	number
+eval-028	doctor	vi	Nói nhanh bị nuốt chữ.	Fast clipped speech.	low	low_confidence
+eval-029	doctor	vi	Giọng bị khẩu trang che.	Mask-muffled speech.	low	low_confidence
+eval-030	doctor	vi	Tiếng ồn bệnh viện.	Hospital background noise.	low	low_confidence
+eval-031	doctor	vi	Đang mang thai.	Pregnant.	critical	pregnancy
+eval-032	doctor	vi	Đang cho con bú.	Breastfeeding.	critical	pregnancy
+eval-033	doctor	vi	Có tăng huyết áp và tiểu đường.	Has hypertension and diabetes.	high	history
+eval-034	doctor	vi	Đau ngực và khó thở.	Chest pain and shortness of breath.	critical	red_flag
+eval-035	patient	en	I've been having chest pain.	Tôi bị đau ngực.	critical	red_flag
+eval-036	doctor	vi	Ngưng thuốc.	Stop the medicine.	high	stop
+eval-037	doctor	vi	Tiếp tục thuốc.	Continue the medicine.	low	continue
+eval-038	doctor	vi	Nhỏ mắt một giọt.	One eye drop.	high	route
+eval-039	doctor	vi	Tiêm dưới da.	Subcutaneous injection.	high	route
+eval-040	doctor	vi	Uống hai gói.	Take two sachets.	high	classifier
+eval-041	doctor	vi	Tiêm một ống.	Inject one ampoule.	high	classifier
+eval-042	doctor	vi	Sốt hay xót nghe không rõ.	Fever or pain unclear.	high	low_confidence_negation
+eval-043	patient	en	I have a cough.	Tôi bị ho.	low	english_asr
+eval-044	doctor	vi	Đau bụng.	Abdominal pain.	medium	body_location
+eval-045	doctor	vi	Đau vùng thượng vị.	Upper abdominal pain.	medium	body_location
+eval-046	doctor	vi	Thuoc khang sinh thiếu dấu.	Antibiotic missing diacritics.	low	diacritics
+eval-047	doctor	vi	Dau bung thiếu dấu.	Abdominal pain missing diacritics.	medium	diacritics
+eval-048	doctor	vi	Nhỏ tai ba giọt.	Three ear drops.	high	route
+eval-049	doctor	vi	Uống ibuprofen khi đau.	Take ibuprofen when in pain.	high	drug
+eval-050	patient	en	I take amoxicillin.	Tôi dùng amoxicillin.	high	drug
