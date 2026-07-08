@@ -38,7 +38,7 @@ def test_session_rest_and_websocket_text_turn(db_session) -> None:
 
         turn_id = transcript[0]["id"]
         confirm = client.post(f"/api/turns/{turn_id}/confirm", json={})
-        assert confirm.json()["status"] == "confirmed"
+        assert confirm.status_code == 409
 
         feedback = client.post(
             f"/api/turns/{turn_id}/feedback",
@@ -155,6 +155,62 @@ def test_websocket_mt_failure_sends_error_and_keeps_socket(db_session, monkeypat
                 }
             )
             assert ws.receive_json()["type"] == "turn_result"
+
+
+def test_websocket_rejects_new_turns_on_ended_session(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        assert client.post(f"/api/sessions/{session_id}/end").status_code == 204
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                }
+            )
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "session ended",
+                "retryable": False,
+            }
+
+
+def test_confirm_rejects_ended_session_and_delivered_turn(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                }
+            )
+            delivered_id = ws.receive_json()["turn"]["id"]
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "uống 500 mg",
+                }
+            )
+            awaiting_id = ws.receive_json()["turn"]["id"]
+
+        assert client.post(f"/api/turns/{delivered_id}/confirm", json={}).status_code == 409
+        assert client.post(f"/api/sessions/{session_id}/end").status_code == 204
+        assert client.post(f"/api/turns/{awaiting_id}/confirm", json={}).status_code == 409
 
 
 def test_admin_review_filters_flagged_risk_and_exports_csv(db_session) -> None:

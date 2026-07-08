@@ -114,6 +114,17 @@ async def _send_pipeline_error(websocket: WebSocket, session_id: str, exc: Excep
     )
 
 
+def _session_is_ended(db: DBSession, session_id: str) -> bool:
+    return crud.require_session(db, session_id).status == "ended"
+
+
+async def _send_session_ended(websocket: WebSocket, session_id: str) -> None:
+    _in_flight.pop(session_id, None)
+    await websocket.send_json(
+        {"type": "turn_error", "message": "session ended", "retryable": False}
+    )
+
+
 @api_router.post("/sessions", status_code=201)
 def create_session(
     payload: SessionCreateRequest,
@@ -284,6 +295,11 @@ async def websocket_session(
 
             event = json.loads(message.get("text") or "{}")
             event_type = event.get("type")
+            if event_type in {"start_turn", "end_turn", "text_turn"} and _session_is_ended(
+                db, session_id
+            ):
+                await _send_session_ended(websocket, session_id)
+                continue
             if event_type == "start_turn":
                 if session_id in _in_flight:
                     await websocket.send_json(

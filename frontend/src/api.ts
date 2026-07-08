@@ -49,6 +49,14 @@ export async function submitFeedback(
   }
 }
 
+export async function getHealth(): Promise<{ status: string; provider_mode: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/health`);
+  if (!response.ok) {
+    throw new Error(`health check failed: ${response.status}`);
+  }
+  return response.json() as Promise<{ status: string; provider_mode: string }>;
+}
+
 export function websocketUrl(path: string): string {
   const url = new URL(path, API_BASE_URL);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";

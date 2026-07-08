@@ -31,8 +31,15 @@ afterEach(() => {
 });
 
 describe("InterpreterConsole", () => {
-  it("renders readback entity text in the confirmation card", () => {
+  it("renders readback entity text in the confirmation card", async () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: "ok", provider_mode: "cloud" }),
+      }),
+    );
     render(<InterpreterConsole sessionId="session-1" />);
 
     act(() => {
@@ -75,5 +82,6 @@ describe("InterpreterConsole", () => {
     expect(screen.getByRole("cell", { name: "dose" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "nửa viên" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "half a tablet" })).toBeInTheDocument();
+    expect(await screen.findByText("cloud mode session")).toBeInTheDocument();
   });
 });

@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { speakTurn } from "../tts";
 import type { TranscriptTurn, WsEvent } from "../types";
-import { confirmTurn, escalateSession, submitFeedback, websocketUrl } from "../api";
+import { confirmTurn, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
 import { Transcript } from "./Transcript";
 
 type InterpreterConsoleProps = {
@@ -23,12 +23,16 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
   const [status, setStatus] = useState("Connecting");
   const [warning, setWarning] = useState<string | null>(null);
   const [escalated, setEscalated] = useState(false);
+  const [providerMode, setProviderMode] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    void getHealth()
+      .then((health) => setProviderMode(health.provider_mode))
+      .catch(() => setProviderMode("unknown"));
     const socket = new WebSocket(websocketUrl(`/ws/sessions/${sessionId}`));
     socketRef.current = socket;
     socket.addEventListener("open", () => setStatus("Connected"));
@@ -169,7 +173,7 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
       ) : null}
       <header className="topbar">
         <div>
-          <p className="eyebrow">Mock mode session</p>
+          <p className="eyebrow">{providerMode ? `${providerMode} mode session` : "Session"}</p>
           <h1>Live interpreter</h1>
         </div>
         <button className="escalate" type="button" onClick={() => void handleEscalate()}>

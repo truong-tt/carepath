@@ -11,8 +11,15 @@ from app.db import get_engine, init_db
 from app.glossary import seed_glossary
 
 
+def validate_runtime_settings() -> None:
+    settings = get_settings()
+    if settings.provider_mode == "cloud" and settings.admin_token == "change-me":
+        raise RuntimeError("ADMIN_TOKEN must be changed when PROVIDER_MODE=cloud")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    validate_runtime_settings()
     init_db()
     with Session(get_engine()) as db:
         seed_glossary(db)

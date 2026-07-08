@@ -115,7 +115,9 @@ def create_turn(
     status: str,
     readback: dict[str, Any] | None = None,
 ) -> TurnRecord:
-    require_session(db, session_id)
+    session = require_session(db, session_id)
+    if session.status == "ended":
+        raise HTTPException(status_code=409, detail="session ended")
     turn = TurnRecord(
         session_id=session_id,
         seq=next_seq(db, session_id),
@@ -142,6 +144,11 @@ def confirm_turn(db: Session, turn_id: str, edited_translation: str | None) -> T
     turn = db.get(TurnRecord, turn_id)
     if turn is None:
         raise HTTPException(status_code=404, detail="turn not found")
+    session = require_session(db, turn.session_id)
+    if session.status == "ended":
+        raise HTTPException(status_code=409, detail="session ended")
+    if turn.status not in {"awaiting_confirm", "blocked"}:
+        raise HTTPException(status_code=409, detail="turn is not awaiting confirmation")
     turn.status = "corrected" if edited_translation else "confirmed"
     turn.corrected_text = edited_translation
     db.add(turn)
