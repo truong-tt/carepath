@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.providers.mock import MockASRProvider, MockMTProvider, MockReviewerProvider
+from app.providers.registry import ProviderSet
 
 
 def test_session_rest_and_websocket_text_turn(db_session) -> None:
@@ -74,6 +76,85 @@ def test_dropped_turn_does_not_block_reconnect(db_session) -> None:
 
         with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
             assert ws.receive_json() == {"type": "session_state", "turns": []}
+
+
+def test_websocket_asr_failure_sends_error_and_keeps_socket(db_session, monkeypatch) -> None:
+    del db_session
+    monkeypatch.setattr(
+        "app.api.get_providers",
+        lambda settings: ProviderSet(
+            asr=MockASRProvider(fail=True),
+            mt=MockMTProvider(),
+            reviewer=MockReviewerProvider(),
+        ),
+    )
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json({"type": "start_turn", "speaker": "doctor", "lang": "vi"})
+            ws.send_bytes(b"xin chao")
+            ws.send_json({"type": "end_turn"})
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "translation failed — retry or use typed fallback",
+                "retryable": True,
+            }
+
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                }
+            )
+            assert ws.receive_json()["type"] == "turn_result"
+
+
+def test_websocket_mt_failure_sends_error_and_keeps_socket(db_session, monkeypatch) -> None:
+    del db_session
+    mt = MockMTProvider(fail=True)
+    monkeypatch.setattr(
+        "app.api.get_providers",
+        lambda settings: ProviderSet(
+            asr=MockASRProvider(),
+            mt=mt,
+            reviewer=MockReviewerProvider(),
+        ),
+    )
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                }
+            )
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "translation failed — retry or use typed fallback",
+                "retryable": True,
+            }
+
+            mt.fail = False
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                }
+            )
+            assert ws.receive_json()["type"] == "turn_result"
 
 
 def test_admin_review_filters_flagged_risk_and_exports_csv(db_session) -> None:

@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 from dataclasses import dataclass, field
 from io import StringIO
 from typing import Annotated, Any
@@ -33,6 +34,7 @@ api_router = APIRouter(prefix="/api")
 ws_router = APIRouter()
 DBDep = Annotated[DBSession, Depends(get_db)]
 AdminToken = Annotated[str | None, Header(alias="X-Admin-Token")]
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -94,6 +96,22 @@ def turn_result_payload(turn: crud.TurnRecord, settings: Settings) -> dict[str, 
         or turn.status in {"awaiting_confirm", "blocked"},
         "low_confidence": low_confidence,
     }
+
+
+async def _send_pipeline_error(websocket: WebSocket, session_id: str, exc: Exception) -> None:
+    logger.warning(
+        "turn_processing_failed session_id=%s error_class=%s",
+        session_id,
+        exc.__class__.__name__,
+    )
+    _in_flight.pop(session_id, None)
+    await websocket.send_json(
+        {
+            "type": "turn_error",
+            "message": "translation failed — retry or use typed fallback",
+            "retryable": True,
+        }
+    )
 
 
 @api_router.post("/sessions", status_code=201)
@@ -287,27 +305,35 @@ async def websocket_session(
                         {"type": "turn_error", "message": "no turn in progress", "retryable": True}
                     )
                     continue
-                turn = process_audio_turn(
-                    db,
-                    providers,
-                    settings,
-                    session_id=session_id,
-                    speaker=current.speaker,
-                    lang=current.lang,
-                    audio=b"".join(current.chunks),
-                )
+                try:
+                    turn = process_audio_turn(
+                        db,
+                        providers,
+                        settings,
+                        session_id=session_id,
+                        speaker=current.speaker,
+                        lang=current.lang,
+                        audio=b"".join(current.chunks),
+                    )
+                except Exception as exc:
+                    await _send_pipeline_error(websocket, session_id, exc)
+                    continue
                 await websocket.send_json(turn_result_payload(turn, settings))
             elif event_type == "text_turn":
-                turn = process_text_turn(
-                    db,
-                    providers,
-                    settings,
-                    session_id=session_id,
-                    speaker=event["speaker"],
-                    lang=event["lang"],
-                    text=event["text"],
-                    asr_confidence=1.0,
-                )
+                try:
+                    turn = process_text_turn(
+                        db,
+                        providers,
+                        settings,
+                        session_id=session_id,
+                        speaker=event["speaker"],
+                        lang=event["lang"],
+                        text=event["text"],
+                        asr_confidence=1.0,
+                    )
+                except Exception as exc:
+                    await _send_pipeline_error(websocket, session_id, exc)
+                    continue
                 await websocket.send_json(turn_result_payload(turn, settings))
             else:
                 await websocket.send_json(
