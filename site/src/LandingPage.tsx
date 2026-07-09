@@ -1,12 +1,10 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import logoUrl from "./assets/carepath-translate.svg";
 import { copyFor, sources } from "./content/strings";
 import DemoPlayer from "./demo/DemoPlayer";
 import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
 import LeadForm from "./LeadForm";
-
-const MotionEnhancer = lazy(() => import("./MotionEnhancer"));
 
 interface LandingPageProps {
   language: Language;
@@ -18,46 +16,17 @@ export default function LandingPage({
   onLanguageChange,
 }: LandingPageProps) {
   const copy = copyFor(language);
-  const root = useRef<HTMLDivElement>(null);
   const [clinicName, setClinicName] = useState("Phòng khám Đa khoa An Bình");
   const [specialty, setSpecialty] = useState("Nội tổng quát");
   const [scenarioId, setScenarioId] = useState(scenarios[0].id);
   const [transcript, setTranscript] = useState("");
-  const [motionReady, setMotionReady] = useState(false);
   const scenario = getScenario(scenarioId);
   const handleTranscriptChange = useCallback((value: string) => {
     setTranscript(value);
   }, []);
 
-  useEffect(() => {
-    if (
-      typeof IntersectionObserver !== "function" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-    const target = root.current?.querySelector(".problem");
-    if (!target) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setMotionReady(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "300px" },
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div className="site-shell" ref={root}>
-      {motionReady && (
-        <Suspense fallback={null}>
-          <MotionEnhancer scope={root} />
-        </Suspense>
-      )}
+    <div className="site-shell">
       <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
         <a className="site-nav__brand" href="#top" aria-label="CarePath Translate">
           <img src={logoUrl} alt="" />
@@ -95,11 +64,7 @@ export default function LandingPage({
           <div className="hero__copy">
             <p className="hero__parent">{copy.hero.parent}</p>
             <h1 className="hero-title">
-              {copy.hero.titleBefore}{" "}
-              <span className="hero-inline-mark" aria-hidden="true">
-                <img src={logoUrl} alt="" />
-              </span>{" "}
-              {copy.hero.titleAfter}
+              {copy.hero.titleBefore} {copy.hero.titleAfter}
             </h1>
             <p className="hero__body">{copy.hero.body}</p>
             <div className="hero__actions">
@@ -111,11 +76,6 @@ export default function LandingPage({
               </a>
             </div>
             <p className="hero__note">{copy.hero.note}</p>
-          </div>
-          <div className="hero__signal" aria-hidden="true">
-            <span />
-            <span />
-            <span />
           </div>
         </section>
 
@@ -140,7 +100,7 @@ export default function LandingPage({
           </div>
         </div>
 
-        <section className="chapter problem motion-panel" id="problem">
+        <section className="chapter problem" id="problem">
           <div className="chapter__intro">
             <p className="kicker">{copy.problem.kicker}</p>
             <h2>{copy.problem.title}</h2>
@@ -189,7 +149,7 @@ export default function LandingPage({
           </div>
           <div className="process-list">
             {copy.process.steps.map((step, index) => (
-              <article className="motion-panel" key={step.title}>
+              <article key={step.title}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>
@@ -205,7 +165,7 @@ export default function LandingPage({
             <p>{copy.cost.body}</p>
           </div>
           <div className="cost-grid">
-            <article className="cost-card motion-panel">
+            <article className="cost-card">
               <p>{copy.cost.interpreterTitle}</p>
               <strong>{copy.cost.interpreterValue}</strong>
               <p>{copy.cost.interpreterNote}</p>
@@ -218,7 +178,7 @@ export default function LandingPage({
                 </a>
               </div>
             </article>
-            <article className="cost-card motion-panel">
+            <article className="cost-card">
               <p>{copy.cost.incidentTitle}</p>
               <strong>{copy.cost.incidentValue}</strong>
               <p>{copy.cost.incidentNote}</p>
@@ -226,7 +186,7 @@ export default function LandingPage({
                 {sources.ahrqCost.label}
               </a>
             </article>
-            <article className="cost-card cost-card--pilot motion-panel">
+            <article className="cost-card cost-card--pilot">
               <p>{copy.cost.pilotTitle}</p>
               <strong>{copy.cost.pilotValue}</strong>
               <p>{copy.cost.pilotNote}</p>
