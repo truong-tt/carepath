@@ -1,11 +1,13 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { copyFor } from "../content/strings";
 import { getScenario, scenarios } from "./scenarios";
 import { buildTranscript } from "./transcript";
-import type { DemoTurn, PlaybackState } from "./types";
+import type { DemoTurn, Language, PlaybackState } from "./types";
 
 const TURN_DELAY_MS = 4000;
 
 interface DemoPlayerProps {
+  language?: Language;
   scenarioId?: string;
   clinicName?: string;
   specialty?: string;
@@ -27,6 +29,7 @@ function downloadText(filename: string, content: string) {
 }
 
 export default function DemoPlayer({
+  language = "vi",
   scenarioId: controlledScenarioId,
   clinicName = "Phòng khám Đa khoa An Bình",
   specialty = "Nội tổng quát",
@@ -35,6 +38,7 @@ export default function DemoPlayer({
   onSpecialtyChange,
   onTranscriptChange,
 }: DemoPlayerProps) {
+  const labels = copyFor(language).demo;
   const [localScenarioId, setLocalScenarioId] = useState(scenarios[0].id);
   const scenarioId = controlledScenarioId ?? localScenarioId;
   const scenario = useMemo(() => getScenario(scenarioId), [scenarioId]);
@@ -121,7 +125,7 @@ export default function DemoPlayer({
         speaker: "patient",
         sourceLanguage: "vi",
         vi: text,
-        en: "Custom text received in the simulation. This is not a live translation.",
+        en: labels.customResponse,
         riskTier: "low",
         riskSpans: [],
       },
@@ -134,6 +138,7 @@ export default function DemoPlayer({
     scenario,
     allTranscriptTurns,
     corrections,
+    language,
   );
 
   useEffect(() => {
@@ -155,15 +160,15 @@ export default function DemoPlayer({
           <h2 id="demo-title">{clinicName} — Demo</h2>
           <p className="demo__specialty">{specialty}</p>
           <p className="demo__disclosure">
-            Bản mô phỏng — không phải bản dịch trực tiếp
+            {labels.disclosure}
           </p>
         </div>
-        <span className="demo__privacy">Không thu âm</span>
+        <span className="demo__privacy">{labels.privacy}</span>
       </header>
 
       <div className="demo-customization">
         <label>
-          Tên cơ sở
+          {labels.clinic}
           <input
             value={clinicName}
             maxLength={120}
@@ -171,7 +176,7 @@ export default function DemoPlayer({
           />
         </label>
         <label>
-          Chuyên khoa
+          {labels.specialty}
           <input
             value={specialty}
             maxLength={100}
@@ -180,7 +185,7 @@ export default function DemoPlayer({
         </label>
       </div>
 
-      <div className="scenario-picker" aria-label="Chọn kịch bản">
+      <div className="scenario-picker" aria-label={labels.chooseScenario}>
         {scenarios.map((item) => (
           <button
             className={item.id === scenarioId ? "scenario is-selected" : "scenario"}
@@ -188,14 +193,14 @@ export default function DemoPlayer({
             onClick={() => reset(item.id)}
             type="button"
           >
-            <strong>{item.title.vi}</strong>
-            <span>{item.summary.vi}</span>
+            <strong>{item.title[language]}</strong>
+            <span>{item.summary[language]}</span>
           </button>
         ))}
       </div>
 
-      <ol className="progress-rail" aria-label="Tiến độ bản mô phỏng">
-        {["Kịch bản đã chọn", "Nghe hội thoại", "Xác nhận read-back", "Nhận bản ghi"].map(
+      <ol className="progress-rail" aria-label={language === "vi" ? "Tiến độ bản mô phỏng" : "Simulation progress"}>
+        {labels.progress.map(
           (label, index) => (
             <li className={progress[index] ? "is-complete" : ""} key={label}>
               <span
@@ -222,7 +227,7 @@ export default function DemoPlayer({
               state === "complete"
             }
           >
-            {state === "idle" ? "Bắt đầu" : "Tiếp tục"}
+            {state === "idle" ? labels.start : labels.continue}
           </button>
         ) : (
           <button
@@ -230,7 +235,7 @@ export default function DemoPlayer({
             onClick={() => setState("paused")}
             type="button"
           >
-            Tạm dừng
+            {labels.pause}
           </button>
         )}
         <button
@@ -243,20 +248,20 @@ export default function DemoPlayer({
             state === "complete"
           }
         >
-          Lượt tiếp theo
+          {labels.next}
         </button>
         <button
           className="button button--text"
           onClick={() => reset()}
           type="button"
         >
-          Phát lại
+          {labels.replay}
         </button>
       </div>
 
       <div className="transcript" aria-live="polite">
         {revealedTurns.length === 0 ? (
-          <p className="transcript__empty">Hội thoại sẽ xuất hiện tại đây.</p>
+          <p className="transcript__empty">{labels.empty}</p>
         ) : (
           revealedTurns.map((turn) => {
             const blocked =
@@ -266,20 +271,20 @@ export default function DemoPlayer({
               <article className={`turn turn--${turn.riskTier}`} key={turn.id}>
                 <header>
                   <strong>
-                    {turn.speaker === "doctor" ? "Bác sĩ" : "Bệnh nhân"}
+                    {turn.speaker === "doctor" ? labels.doctor : labels.patient}
                   </strong>
-                  <span>{turn.riskTier}</span>
+                  <span>{labels.tiers[turn.riskTier]}</span>
                 </header>
                 <div className="turn__columns">
                   <p lang="vi">{turn.vi}</p>
                   <p lang="en">
                     {blocked
-                      ? "Bị chặn cho đến khi bác sĩ xác nhận."
+                      ? labels.blocked
                       : corrections[turn.id] ?? turn.en}
                   </p>
                 </div>
                 {turn.riskSpans.length > 0 && (
-                  <ul className="risk-list" aria-label="Chi tiết rủi ro">
+                  <ul className="risk-list" aria-label={labels.riskDetails}>
                     {turn.riskSpans.map((span, index) => (
                       <li key={`${span.kind}-${index}`}>{span.kind}: {span.vi}</li>
                     ))}
@@ -292,8 +297,8 @@ export default function DemoPlayer({
         {customTurns.map((turn) => (
           <article className="turn turn--custom" key={turn.id}>
             <header>
-              <strong>Thử tự gõ</strong>
-              <span>Mô phỏng</span>
+              <strong>{labels.customTitle}</strong>
+              <span>{labels.simulation}</span>
             </header>
             <div className="turn__columns">
               <p>{turn.vi}</p>
@@ -305,20 +310,20 @@ export default function DemoPlayer({
 
       {pendingTurn?.readback && (
         <section className="readback" aria-labelledby="readback-title">
-          <p className="readback__flag">Bản dịch đang bị chặn</p>
-          <h3 id="readback-title">Xác nhận thông tin quan trọng</h3>
+          <p className="readback__flag">{labels.blockedFlag}</p>
+          <h3 id="readback-title">{labels.readbackTitle}</h3>
           <table>
             <thead>
               <tr>
-                <th>Loại</th>
-                <th>Nguồn</th>
-                <th>Bản dịch</th>
+                <th>{labels.entityType}</th>
+                <th>{labels.source}</th>
+                <th>{labels.translation}</th>
               </tr>
             </thead>
             <tbody>
               {pendingTurn.readback.entities.map((entity) => (
                 <tr key={`${entity.kind}-${entity.sourceText}`}>
-                  <td>{entity.kind}</td>
+                  <td>{labels.entityKinds[entity.kind] ?? entity.kind}</td>
                   <td>{entity.sourceText}</td>
                   <td>{entity.translatedText}</td>
                 </tr>
@@ -326,7 +331,7 @@ export default function DemoPlayer({
             </tbody>
           </table>
           <label>
-            Chỉnh bản dịch trước khi xác nhận
+            {labels.editTranslation}
             <textarea
               value={editValue}
               onChange={(event) => setEditValue(event.target.value)}
@@ -338,14 +343,14 @@ export default function DemoPlayer({
               onClick={confirmPending}
               type="button"
             >
-              Xác nhận và tiếp tục
+              {labels.confirm}
             </button>
             <button
               className="button button--danger"
               onClick={() => setState("escalated")}
               type="button"
             >
-              Yêu cầu phiên dịch viên
+              {labels.interpreter}
             </button>
           </div>
         </section>
@@ -353,36 +358,33 @@ export default function DemoPlayer({
 
       {state === "escalated" && (
         <section className="escalation" role="alert">
-          <p>Đã dừng bản dịch tự động</p>
-          <h3>Ưu tiên phiên dịch viên cho nội dung nguy cơ cao</h3>
-          <p>
-            Đây là luồng mô phỏng. Trong sản phẩm, nội dung này không được phát
-            cho bệnh nhân trước khi có xác nhận phù hợp.
-          </p>
+          <p>{labels.escalationStopped}</p>
+          <h3>{labels.escalationTitle}</h3>
+          <p>{labels.escalationBody}</p>
           <button
             className="button button--primary"
             onClick={() => setState("complete")}
             type="button"
           >
-            Xác nhận đã chuyển phiên dịch viên
+            {labels.escalationConfirm}
           </button>
         </section>
       )}
 
       <form className="custom-input" onSubmit={submitCustom}>
-        <label htmlFor="custom-line">Thử tự gõ một câu</label>
+        <label htmlFor="custom-line">{labels.customLabel}</label>
         <div>
           <input
             id="custom-line"
             value={customInput}
             onChange={(event) => setCustomInput(event.target.value)}
-            placeholder="Nội dung chỉ được phản hồi bằng câu mẫu"
+            placeholder={labels.customPlaceholder}
           />
           <button className="button button--secondary" type="submit">
-            Thêm vào mô phỏng
+            {labels.customAdd}
           </button>
         </div>
-        <small>Không phải dịch máy trực tiếp.</small>
+        <small>{labels.customNote}</small>
       </form>
 
       {state === "complete" && (
@@ -396,7 +398,7 @@ export default function DemoPlayer({
           }
           type="button"
         >
-          Tải bản ghi demo
+          {labels.download}
         </button>
       )}
     </section>

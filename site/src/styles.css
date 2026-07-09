@@ -77,6 +77,36 @@ textarea {
   text-underline-offset: 0.28rem;
 }
 
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.language-toggle {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 58%);
+  border-radius: 999px;
+}
+
+.language-toggle button {
+  min-width: 2.3rem;
+  min-height: 2.3rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.language-toggle button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
 .nav-cta {
   padding: 0.7rem 0.9rem;
   border-radius: 0.35rem;
@@ -1061,8 +1091,7 @@ textarea {
   }
 
   .nav-cta {
-    max-width: 10rem;
-    text-align: center;
+    display: none;
   }
 
   .hero,
@@ -1192,6 +1221,7 @@ textarea {
 
   .site-nav__brand,
   .site-nav__links a,
+  .language-toggle button,
   .button-link--secondary,
   .hero__body,
   .hero__note,

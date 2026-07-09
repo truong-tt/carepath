@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { copyFor } from "./content/strings";
 import type { Language, Scenario } from "./demo/types";
 import { buildLeadDraft, defaultLeadMessage } from "./leads";
 
@@ -17,6 +18,7 @@ export default function LeadForm({
   scenario,
   transcript,
 }: LeadFormProps) {
+  const labels = copyFor(language).form;
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [contact, setContact] = useState("");
@@ -44,27 +46,6 @@ export default function LeadForm({
     });
     setDraftReady(true);
   }
-
-  const labels =
-    language === "vi"
-      ? {
-          name: "Họ và tên",
-          clinic: "Cơ sở y tế",
-          role: "Vai trò",
-          contact: "Email hoặc Zalo",
-          message: "Lời nhắn",
-          button: "Chuẩn bị yêu cầu thí điểm",
-          ready: "Bản nháp đã sẵn sàng. Kết nối gửi sẽ được thêm ở bước tiếp theo.",
-        }
-      : {
-          name: "Full name",
-          clinic: "Clinic or hospital",
-          role: "Role",
-          contact: "Email or Zalo",
-          message: "Message",
-          button: "Prepare pilot request",
-          ready: "The draft is ready. Submission will be connected in the next step.",
-        };
 
   return (
     <form
@@ -112,7 +93,7 @@ export default function LeadForm({
         />
       </label>
       <button className="button button--primary" type="submit">
-        {labels.button}
+        {labels.prepare}
       </button>
       <p aria-live="polite">{draftReady ? labels.ready : ""}</p>
     </form>

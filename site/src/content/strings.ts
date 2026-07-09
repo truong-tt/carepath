@@ -25,11 +25,65 @@ interface SafetyItem {
 }
 
 interface PageCopy {
+  language: {
+    label: string;
+    vi: string;
+    en: string;
+  };
   nav: {
     demo: string;
     safety: string;
     process: string;
     cost: string;
+  };
+  demo: {
+    disclosure: string;
+    privacy: string;
+    clinic: string;
+    specialty: string;
+    chooseScenario: string;
+    progress: string[];
+    start: string;
+    continue: string;
+    pause: string;
+    next: string;
+    replay: string;
+    empty: string;
+    doctor: string;
+    patient: string;
+    blocked: string;
+    riskDetails: string;
+    customTitle: string;
+    simulation: string;
+    blockedFlag: string;
+    readbackTitle: string;
+    entityType: string;
+    source: string;
+    translation: string;
+    editTranslation: string;
+    confirm: string;
+    interpreter: string;
+    escalationStopped: string;
+    escalationTitle: string;
+    escalationBody: string;
+    escalationConfirm: string;
+    customLabel: string;
+    customPlaceholder: string;
+    customAdd: string;
+    customNote: string;
+    customResponse: string;
+    download: string;
+    tiers: Record<"low" | "medium" | "high" | "critical", string>;
+    entityKinds: Record<string, string>;
+  };
+  form: {
+    name: string;
+    clinic: string;
+    role: string;
+    contact: string;
+    message: string;
+    prepare: string;
+    ready: string;
   };
   hero: {
     parent: string;
@@ -92,11 +146,76 @@ interface PageCopy {
 
 export const strings: Record<Language, PageCopy> = {
   vi: {
+    language: {
+      label: "Ngôn ngữ",
+      vi: "VI",
+      en: "EN",
+    },
     nav: {
       demo: "Bản mô phỏng",
       safety: "Cơ chế an toàn",
       process: "Cách hoạt động",
       cost: "Chi phí tham chiếu",
+    },
+    demo: {
+      disclosure: "Bản mô phỏng — không phải bản dịch trực tiếp",
+      privacy: "Không thu âm",
+      clinic: "Tên cơ sở",
+      specialty: "Chuyên khoa",
+      chooseScenario: "Chọn kịch bản",
+      progress: ["Kịch bản đã chọn", "Nghe hội thoại", "Xác nhận read-back", "Nhận bản ghi"],
+      start: "Bắt đầu",
+      continue: "Tiếp tục",
+      pause: "Tạm dừng",
+      next: "Lượt tiếp theo",
+      replay: "Phát lại",
+      empty: "Hội thoại sẽ xuất hiện tại đây.",
+      doctor: "Bác sĩ",
+      patient: "Bệnh nhân",
+      blocked: "Bị chặn cho đến khi bác sĩ xác nhận.",
+      riskDetails: "Chi tiết rủi ro",
+      customTitle: "Thử tự gõ",
+      simulation: "Mô phỏng",
+      blockedFlag: "Bản dịch đang bị chặn",
+      readbackTitle: "Xác nhận thông tin quan trọng",
+      entityType: "Loại",
+      source: "Nguồn",
+      translation: "Bản dịch",
+      editTranslation: "Chỉnh bản dịch trước khi xác nhận",
+      confirm: "Xác nhận và tiếp tục",
+      interpreter: "Yêu cầu phiên dịch viên",
+      escalationStopped: "Đã dừng bản dịch tự động",
+      escalationTitle: "Ưu tiên phiên dịch viên cho nội dung nguy cơ cao",
+      escalationBody: "Đây là luồng mô phỏng. Trong sản phẩm, nội dung này không được phát cho bệnh nhân trước khi có xác nhận phù hợp.",
+      escalationConfirm: "Xác nhận đã chuyển phiên dịch viên",
+      customLabel: "Thử tự gõ một câu",
+      customPlaceholder: "Nội dung chỉ được phản hồi bằng câu mẫu",
+      customAdd: "Thêm vào mô phỏng",
+      customNote: "Không phải dịch máy trực tiếp.",
+      customResponse: "Đã nhận văn bản trong bản mô phỏng. Đây không phải bản dịch trực tiếp.",
+      download: "Tải bản ghi demo",
+      tiers: {
+        low: "thấp",
+        medium: "trung bình",
+        high: "cao",
+        critical: "nghiêm trọng",
+      },
+      entityKinds: {
+        Thuốc: "Thuốc",
+        Liều: "Liều",
+        "Tần suất": "Tần suất",
+        "Thời gian": "Thời gian",
+        "Phủ định": "Phủ định",
+      },
+    },
+    form: {
+      name: "Họ và tên",
+      clinic: "Cơ sở y tế",
+      role: "Vai trò",
+      contact: "Email hoặc Zalo",
+      message: "Lời nhắn",
+      prepare: "Chuẩn bị yêu cầu thí điểm",
+      ready: "Bản nháp đã sẵn sàng. Kết nối gửi sẽ được thêm ở bước tiếp theo.",
     },
     hero: {
       parent: "Một sản phẩm của CarePath",
@@ -212,11 +331,76 @@ export const strings: Record<Language, PageCopy> = {
     },
   },
   en: {
+    language: {
+      label: "Language",
+      vi: "VI",
+      en: "EN",
+    },
     nav: {
       demo: "Simulation",
       safety: "Safety mechanics",
       process: "How it works",
       cost: "Cost references",
+    },
+    demo: {
+      disclosure: "Simulation — not a live translation",
+      privacy: "No recording",
+      clinic: "Clinic name",
+      specialty: "Specialty",
+      chooseScenario: "Choose a scenario",
+      progress: ["Scenario selected", "Hear the conversation", "Confirm read-back", "Keep transcript"],
+      start: "Start",
+      continue: "Continue",
+      pause: "Pause",
+      next: "Next turn",
+      replay: "Replay",
+      empty: "The conversation will appear here.",
+      doctor: "Doctor",
+      patient: "Patient",
+      blocked: "Blocked until the clinician confirms.",
+      riskDetails: "Risk details",
+      customTitle: "Try typing",
+      simulation: "Simulation",
+      blockedFlag: "Translation blocked",
+      readbackTitle: "Confirm critical information",
+      entityType: "Type",
+      source: "Source",
+      translation: "Translation",
+      editTranslation: "Edit the translation before confirmation",
+      confirm: "Confirm and continue",
+      interpreter: "Request an interpreter",
+      escalationStopped: "Automated translation stopped",
+      escalationTitle: "Prioritize an interpreter for high-risk content",
+      escalationBody: "This is a simulation. In the product, this content is not delivered to the patient before appropriate confirmation.",
+      escalationConfirm: "Confirm interpreter escalation",
+      customLabel: "Try typing one line",
+      customPlaceholder: "The simulation responds with a fixed message only",
+      customAdd: "Add to simulation",
+      customNote: "This is not live machine translation.",
+      customResponse: "Custom text received in the simulation. This is not a live translation.",
+      download: "Download demo transcript",
+      tiers: {
+        low: "low",
+        medium: "medium",
+        high: "high",
+        critical: "critical",
+      },
+      entityKinds: {
+        Thuốc: "Drug",
+        Liều: "Dose",
+        "Tần suất": "Frequency",
+        "Thời gian": "Duration",
+        "Phủ định": "Negation",
+      },
+    },
+    form: {
+      name: "Full name",
+      clinic: "Clinic or hospital",
+      role: "Role",
+      contact: "Email or Zalo",
+      message: "Message",
+      prepare: "Prepare pilot request",
+      ready: "The draft is ready. Submission will be connected in the next step.",
     },
     hero: {
       parent: "A CarePath product",

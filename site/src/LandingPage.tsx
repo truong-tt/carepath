@@ -13,9 +13,13 @@ gsap.registerPlugin(ScrollTrigger);
 
 interface LandingPageProps {
   language: Language;
+  onLanguageChange?: (language: Language) => void;
 }
 
-export default function LandingPage({ language }: LandingPageProps) {
+export default function LandingPage({
+  language,
+  onLanguageChange,
+}: LandingPageProps) {
   const copy = copyFor(language);
   const root = useRef<HTMLDivElement>(null);
   const [clinicName, setClinicName] = useState("Phòng khám Đa khoa An Bình");
@@ -87,7 +91,25 @@ export default function LandingPage({ language }: LandingPageProps) {
           <a href="#process">{copy.nav.process}</a>
           <a href="#cost">{copy.nav.cost}</a>
         </div>
-        <a className="nav-cta" href="#demo">{copy.hero.primaryCta}</a>
+        <div className="site-nav__actions">
+          <div className="language-toggle" aria-label={copy.language.label}>
+            <button
+              aria-pressed={language === "vi"}
+              onClick={() => onLanguageChange?.("vi")}
+              type="button"
+            >
+              {copy.language.vi}
+            </button>
+            <button
+              aria-pressed={language === "en"}
+              onClick={() => onLanguageChange?.("en")}
+              type="button"
+            >
+              {copy.language.en}
+            </button>
+          </div>
+          <a className="nav-cta" href="#demo">{copy.hero.primaryCta}</a>
+        </div>
       </nav>
 
       <main id="top">
@@ -121,6 +143,7 @@ export default function LandingPage({ language }: LandingPageProps) {
 
         <section className="demo-stage" id="demo">
           <DemoPlayer
+            language={language}
             clinicName={clinicName}
             specialty={specialty}
             scenarioId={scenarioId}
