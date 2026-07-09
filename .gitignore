@@ -20,3 +20,15 @@ tmp/
 *.oga
 *.opus
 *.webm
+
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+eval/reports/
+
+*.db
+*.sqlite
+*.sqlite3

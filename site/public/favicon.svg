@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 160" role="img" aria-labelledby="title description">
+  <title id="title">CarePath</title>
+  <desc id="description">Two speech paths meet at a central verification gate.</desc>
+  <path fill="#0f766e" d="M18 32h88v28H55v40h51v28H18z"/>
+  <path fill="#102a2e" d="M270 32h-88v28h51v68h37z"/>
+  <path fill="#f4f1e8" stroke="#102a2e" stroke-width="6" stroke-linejoin="round" d="m109 19 70 35v87l-70-35z"/>
+  <path fill="none" stroke="#0f766e" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" d="m126 76 14 14 25-31"/>
+</svg>

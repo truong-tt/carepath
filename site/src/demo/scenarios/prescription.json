@@ -1,0 +1,102 @@
+{
+  "id": "prescription",
+  "title": {
+    "vi": "Khám ngoại trú — kê đơn thuốc",
+    "en": "Outpatient visit — prescription"
+  },
+  "summary": {
+    "vi": "Liều dùng, tần suất và thời gian điều trị được chặn để xác nhận.",
+    "en": "Dose, frequency, and duration are blocked for confirmation."
+  },
+  "turns": [
+    {
+      "id": "rx-1",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Chào anh, mời ngồi.",
+      "en": "Hello, please sit down.",
+      "riskTier": "low",
+      "riskSpans": []
+    },
+    {
+      "id": "rx-2",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi bị ho một tuần.",
+      "en": "I've had a cough for a week.",
+      "riskTier": "medium",
+      "riskSpans": [
+        { "kind": "duration", "vi": "một tuần", "en": "a week" }
+      ]
+    },
+    {
+      "id": "rx-3",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Anh đang uống thuốc gì?",
+      "en": "What medicine are you taking?",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "rx-4",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi dùng metformin và Lasix.",
+      "en": "I take metformin and Lasix.",
+      "riskTier": "medium",
+      "riskSpans": [
+        { "kind": "drug", "vi": "metformin và Lasix", "en": "metformin and Lasix" }
+      ]
+    },
+    {
+      "id": "rx-5",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Tôi sẽ đọc lại hướng dẫn dùng thuốc.",
+      "en": "I will read back the medication instructions.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "rx-6",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Uống nửa viên Augmentin, ngày hai lần, trong mười ngày.",
+      "en": "Take half an Augmentin tablet twice a day for ten days.",
+      "riskTier": "high",
+      "riskSpans": [
+        { "kind": "dose", "vi": "nửa viên", "en": "half a tablet" },
+        { "kind": "drug", "vi": "Augmentin", "en": "Augmentin" },
+        { "kind": "frequency", "vi": "ngày hai lần", "en": "twice a day" },
+        { "kind": "duration", "vi": "mười ngày", "en": "ten days" }
+      ],
+      "readback": {
+        "entities": [
+          { "kind": "Thuốc", "sourceText": "Augmentin", "translatedText": "Augmentin" },
+          { "kind": "Liều", "sourceText": "nửa viên", "translatedText": "half a tablet" },
+          { "kind": "Tần suất", "sourceText": "ngày hai lần", "translatedText": "twice a day" },
+          { "kind": "Thời gian", "sourceText": "mười ngày", "translatedText": "ten days" }
+        ]
+      }
+    },
+    {
+      "id": "rx-7",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi uống thuốc sau bữa ăn phải không?",
+      "en": "Should I take the medicine after a meal?",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "rx-8",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Đúng, uống sau bữa ăn.",
+      "en": "Yes, take it after a meal.",
+      "riskTier": "medium",
+      "riskSpans": []
+    }
+  ]
+}
