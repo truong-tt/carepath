@@ -70,3 +70,40 @@ jobs:
       - name: Run Playwright e2e
         working-directory: frontend
         run: npx playwright test
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install demo site
+        working-directory: site
+        run: npm ci
+      - name: Lint demo site
+        working-directory: site
+        run: npm run lint
+      - name: Test demo site
+        working-directory: site
+        run: npm test
+      - name: Build demo site
+        working-directory: site
+        run: npm run build
+      - name: Install Playwright browser
+        working-directory: site
+        run: npx playwright install --with-deps chromium
+      - name: Run demo site e2e
+        working-directory: site
+        run: npm run e2e
+      - name: Rebuild production demo site
+        working-directory: site
+        run: npm run build
+      - name: Audit demo site
+        working-directory: site
+        run: npm audit
+      - name: Run Lighthouse gates
+        working-directory: site
+        run: npm run lighthouse
