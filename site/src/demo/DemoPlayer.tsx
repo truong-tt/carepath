@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { copyFor } from "../content/strings";
 import { getScenario, scenarios } from "./scenarios";
 import { buildTranscript } from "./transcript";
@@ -49,6 +49,12 @@ export default function DemoPlayer({
   const [editValue, setEditValue] = useState("");
   const [customInput, setCustomInput] = useState("");
   const [customTurns, setCustomTurns] = useState<DemoTurn[]>([]);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const safetyDialog = useRef<HTMLDialogElement>(null);
 
   const revealedTurns = scenario.turns.slice(0, revealedCount);
   const pendingTurn =
@@ -97,10 +103,36 @@ export default function DemoPlayer({
   }
 
   useEffect(() => {
-    if (state !== "playing") return;
+    if (
+      state !== "playing" ||
+      reducedMotion ||
+      (typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    ) {
+      return;
+    }
     const timer = window.setTimeout(advance, TURN_DELAY_MS);
     return () => window.clearTimeout(timer);
   });
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const dialog = safetyDialog.current;
+    if (!dialog) return;
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) dialog.showModal();
+    } else {
+      dialog.setAttribute("open", "");
+    }
+  }, [pendingTurn, state]);
 
   function confirmPending() {
     if (!pendingTurn) return;
@@ -189,6 +221,7 @@ export default function DemoPlayer({
         {scenarios.map((item) => (
           <button
             className={item.id === scenarioId ? "scenario is-selected" : "scenario"}
+            aria-pressed={item.id === scenarioId}
             key={item.id}
             onClick={() => reset(item.id)}
             type="button"
@@ -308,10 +341,19 @@ export default function DemoPlayer({
         ))}
       </div>
 
-      {pendingTurn?.readback && (
-        <section className="readback" aria-labelledby="readback-title">
-          <p className="readback__flag">{labels.blockedFlag}</p>
-          <h3 id="readback-title">{labels.readbackTitle}</h3>
+      {(pendingTurn?.readback || state === "escalated") && (
+        <dialog
+          aria-labelledby={
+            pendingTurn?.readback ? "readback-title" : "escalation-title"
+          }
+          className="safety-dialog"
+          onCancel={(event) => event.preventDefault()}
+          ref={safetyDialog}
+        >
+          {pendingTurn?.readback && state !== "escalated" ? (
+            <section className="readback">
+              <p className="readback__flag">{labels.blockedFlag}</p>
+              <h3 id="readback-title">{labels.readbackTitle}</h3>
           <table>
             <thead>
               <tr>
@@ -353,22 +395,22 @@ export default function DemoPlayer({
               {labels.interpreter}
             </button>
           </div>
-        </section>
-      )}
-
-      {state === "escalated" && (
-        <section className="escalation" role="alert">
-          <p>{labels.escalationStopped}</p>
-          <h3>{labels.escalationTitle}</h3>
-          <p>{labels.escalationBody}</p>
-          <button
-            className="button button--primary"
-            onClick={() => setState("complete")}
-            type="button"
-          >
-            {labels.escalationConfirm}
-          </button>
-        </section>
+            </section>
+          ) : (
+            <section className="escalation" aria-live="assertive">
+              <p>{labels.escalationStopped}</p>
+              <h3 id="escalation-title">{labels.escalationTitle}</h3>
+              <p>{labels.escalationBody}</p>
+              <button
+                className="button button--primary"
+                onClick={() => setState("complete")}
+                type="button"
+              >
+                {labels.escalationConfirm}
+              </button>
+            </section>
+          )}
+        </dialog>
       )}
 
       <form className="custom-input" onSubmit={submitCustom}>

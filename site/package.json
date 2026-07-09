@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.app.json && vite build && node scripts/check-diacritics.mjs",
+    "build:e2e": "tsc -p tsconfig.app.json && vite build --mode e2e && node scripts/check-diacritics.mjs",
+    "e2e": "playwright test",
+    "lighthouse": "node scripts/run-lighthouse.mjs",
     "lint": "eslint .",
+    "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {
@@ -20,12 +24,15 @@
     "@eslint/js": "9.39.4",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.61.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "6.0.3",
     "eslint": "9.39.4",
     "globals": "15.12.0",
     "jsdom": "25.0.1",
+    "lighthouse": "12.6.1",
     "typescript": "5.6.3",
     "typescript-eslint": "8.63.0",
     "vite": "8.1.3",

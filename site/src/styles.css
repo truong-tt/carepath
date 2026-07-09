@@ -230,7 +230,7 @@ textarea {
 
 .hero__note {
   margin: 1.1rem 0 0;
-  color: color-mix(in srgb, var(--ink), transparent 42%);
+  color: color-mix(in srgb, var(--ink), transparent 25%);
   font-size: 0.8rem;
 }
 
@@ -371,7 +371,7 @@ textarea {
 
 .demo__specialty {
   margin: 0.3rem 0 0 !important;
-  color: color-mix(in srgb, var(--ink), transparent 38%);
+  color: color-mix(in srgb, var(--ink), transparent 22%);
   font-size: 0.8rem;
 }
 
@@ -436,7 +436,7 @@ textarea {
 .scenario span {
   font-size: 0.78rem;
   line-height: 1.5;
-  opacity: 0.72;
+  opacity: 0.9;
 }
 
 .progress-rail {
@@ -455,7 +455,7 @@ textarea {
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0.55rem;
-  color: color-mix(in srgb, var(--ink), transparent 48%);
+  color: color-mix(in srgb, var(--ink), transparent 25%);
   font-size: 0.76rem;
 }
 
@@ -574,7 +574,7 @@ textarea:focus-visible {
 
 .transcript__empty {
   align-self: center;
-  color: color-mix(in srgb, var(--ink), transparent 48%);
+  color: color-mix(in srgb, var(--ink), transparent 22%);
   text-align: center;
 }
 
@@ -649,6 +649,28 @@ textarea:focus-visible {
 .readback {
   border-block: 1px solid var(--amber);
   background: #fff7e3;
+}
+
+.safety-dialog {
+  width: min(100% - 2rem, 58rem);
+  max-height: calc(100vh - 2rem);
+  padding: 0;
+  border: 0;
+  border-radius: 0.9rem;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: 0 2rem 8rem rgb(0 0 0 / 0.35);
+}
+
+.safety-dialog::backdrop {
+  background: rgb(5 23 26 / 0.72);
+  backdrop-filter: blur(0.3rem);
+}
+
+.safety-dialog .readback,
+.safety-dialog .escalation {
+  border: 0;
+  border-radius: 0.9rem;
 }
 
 .readback h3,
@@ -726,7 +748,7 @@ textarea {
 }
 
 .custom-input small {
-  color: color-mix(in srgb, var(--ink), transparent 45%);
+  color: color-mix(in srgb, var(--ink), transparent 22%);
 }
 
 .chapter {
@@ -831,6 +853,10 @@ textarea {
   color: color-mix(in srgb, var(--ivory), transparent 30%);
 }
 
+.safety .kicker {
+  color: #66d8cc;
+}
+
 .safety-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -859,7 +885,7 @@ textarea {
 }
 
 .safety-card__number {
-  color: var(--teal);
+  color: #66d8cc;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
 }
@@ -923,6 +949,10 @@ textarea {
   background: var(--mist);
 }
 
+.cost .kicker {
+  color: #0a655f;
+}
+
 .cost-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -965,7 +995,7 @@ textarea {
 }
 
 .cost-card--pilot > p:not(:first-child) {
-  color: rgb(255 255 255 / 0.78);
+  color: rgb(255 255 255 / 0.92);
 }
 
 .source-links {
@@ -1042,7 +1072,7 @@ textarea {
 }
 
 .pilot__copy small {
-  color: color-mix(in srgb, var(--ink), transparent 45%);
+  color: color-mix(in srgb, var(--ink), transparent 22%);
   line-height: 1.6;
 }
 

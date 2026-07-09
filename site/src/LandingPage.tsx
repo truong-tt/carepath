@@ -1,7 +1,4 @@
-import { useCallback, useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import logoUrl from "./assets/carepath-translate.svg";
 import { copyFor, sources } from "./content/strings";
 import DemoPlayer from "./demo/DemoPlayer";
@@ -9,7 +6,7 @@ import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
 import LeadForm from "./LeadForm";
 
-gsap.registerPlugin(ScrollTrigger);
+const MotionEnhancer = lazy(() => import("./MotionEnhancer"));
 
 interface LandingPageProps {
   language: Language;
@@ -26,60 +23,41 @@ export default function LandingPage({
   const [specialty, setSpecialty] = useState("Nội tổng quát");
   const [scenarioId, setScenarioId] = useState(scenarios[0].id);
   const [transcript, setTranscript] = useState("");
+  const [motionReady, setMotionReady] = useState(false);
   const scenario = getScenario(scenarioId);
   const handleTranscriptChange = useCallback((value: string) => {
     setTranscript(value);
   }, []);
 
-  useGSAP(
-    () => {
-      if (
-        typeof window.matchMedia !== "function" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        return;
-      }
-
-      gsap.utils.toArray<HTMLElement>(".motion-panel").forEach((panel) => {
-        gsap.fromTo(
-          panel,
-          { opacity: 0.35, scale: 0.88 },
-          {
-            opacity: 1,
-            scale: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: panel,
-              start: "top 92%",
-              end: "center 55%",
-              scrub: 0.7,
-            },
-          },
-        );
-      });
-
-      gsap.fromTo(
-        ".safety-card",
-        { y: 90, opacity: 0.35 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.09,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".safety-grid",
-            start: "top 80%",
-            end: "bottom 70%",
-            scrub: 0.8,
-          },
-        },
-      );
-    },
-    { scope: root },
-  );
+  useEffect(() => {
+    if (
+      typeof IntersectionObserver !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const target = root.current?.querySelector(".problem");
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setMotionReady(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="site-shell" ref={root}>
+      {motionReady && (
+        <Suspense fallback={null}>
+          <MotionEnhancer scope={root} />
+        </Suspense>
+      )}
       <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
         <a className="site-nav__brand" href="#top" aria-label="CarePath Translate">
           <img src={logoUrl} alt="" />
