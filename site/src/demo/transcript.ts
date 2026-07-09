@@ -7,7 +7,7 @@ export function buildTranscript(
   language: Language = "vi",
 ): string {
   const lines = [
-    "CAREPATH TRANSLATE",
+    "CAREPATH",
     language === "vi"
       ? "BẢN MÔ PHỎNG — KHÔNG PHẢI BẢN DỊCH TRỰC TIẾP"
       : "SIMULATION — NOT A LIVE TRANSLATION",

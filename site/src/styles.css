@@ -1,4 +1,4 @@
-/* CarePath Translate demo site — clinical-trust design system.
+/* CarePath demo site — clinical-trust design system.
  *
  * Tokens: brand palette stays fixed; semantic tokens swap per color scheme.
  * Radius rule: panels 0.75rem · controls 0.5rem · status chips pill.
@@ -103,8 +103,19 @@ textarea {
 
 /* ---------- shared bits ---------- */
 
-.kicker,
-.hero__parent {
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.kicker {
   margin: 0 0 0.9rem;
   color: var(--accent-ink);
   font-size: 0.72rem;
@@ -293,6 +304,66 @@ textarea:focus-visible {
   margin: 1.1rem 0 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+/* ---------- module tiles ---------- */
+
+.modules {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 1rem;
+  width: min(100% - 3rem, var(--container));
+  margin: 0 auto;
+  padding-bottom: clamp(2rem, 3vw, 2.5rem);
+}
+
+.module-tile {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 1.35rem 3rem 1.45rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 200ms ease;
+}
+
+.module-tile--scribe {
+  background: var(--tint);
+}
+
+.module-tile:hover {
+  border-color: var(--text);
+}
+
+.module-tile h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.module-tile p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.module-tile__arrow {
+  position: absolute;
+  top: 1.15rem;
+  right: 1.3rem;
+  color: var(--accent-ink);
+  font-size: 1.05rem;
+  transition: transform 200ms ease;
+}
+
+.module-tile:hover .module-tile__arrow {
+  transform: translateY(0.2rem);
 }
 
 /* ---------- demo stage ---------- */
@@ -828,6 +899,179 @@ textarea {
   }
 }
 
+/* ---------- scribe showcase ---------- */
+
+.scribe-panel {
+  overflow: hidden;
+  margin-top: clamp(2.25rem, 4vw, 3rem);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.scribe-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.scribe-panel__header p {
+  margin: 0;
+}
+
+.scribe-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+
+.scribe-tab {
+  padding: 0.9rem 1.1rem;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 200ms ease;
+}
+
+.scribe-tab:last-child {
+  border-right: 0;
+}
+
+.scribe-tab:hover {
+  background: var(--tint);
+  color: var(--text);
+}
+
+.scribe-tab:active {
+  transform: scale(0.995);
+}
+
+.scribe-tab[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.scribe-tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--teal), white 30%);
+  outline-offset: -3px;
+}
+
+.scribe-doc {
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+  min-height: 17rem;
+  padding: 1.5rem;
+  background: var(--tint);
+}
+
+.scribe-doc__text {
+  max-width: 46rem;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+mark.scribe-mark {
+  border-radius: 0.2rem;
+  background: transparent;
+  color: inherit;
+}
+
+.scribe-mark--miss {
+  color: var(--amber-text);
+  font-weight: 600;
+  text-decoration: underline dashed var(--amber);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.28rem;
+}
+
+.scribe-mark--fix {
+  padding: 0.05rem 0.3rem;
+  background: color-mix(in srgb, var(--teal) 16%, transparent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.soap-note {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-control);
+  background: var(--line);
+}
+
+.soap-note > div {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  background: var(--surface);
+}
+
+.soap-note dt {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.soap-note dt span {
+  display: inline-grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid var(--teal);
+  border-radius: var(--r-control);
+  color: var(--accent-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.soap-note dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.scribe-status {
+  justify-self: start;
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--amber);
+  border-radius: 999px;
+  color: var(--amber-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.scribe-caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.scribe-note {
+  max-width: 44rem;
+  margin: 1.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
 /* ---------- chapters ---------- */
 
 .chapter {
@@ -1281,8 +1525,28 @@ textarea {
 
   .hero,
   .chapter,
-  .demo-stage {
+  .demo-stage,
+  .modules {
     width: min(100% - 1.5rem, var(--container));
+  }
+
+  .modules,
+  .scribe-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .scribe-tab {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .scribe-tab:last-child {
+    border-bottom: 0;
+  }
+
+  .soap-note > div {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
   }
 
   .demo__header {

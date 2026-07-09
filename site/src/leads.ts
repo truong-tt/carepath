@@ -36,9 +36,9 @@ export function defaultLeadMessage(
   language: Language,
 ): string {
   if (language === "en") {
-    return `I would like to discuss a CarePath Translate pilot for ${clinic} (${specialty}) using the “${scenario.title.en}” scenario.`;
+    return `I would like to discuss a CarePath pilot for ${clinic} (${specialty}) using the “${scenario.title.en}” scenario.`;
   }
-  return `Tôi muốn trao đổi về chương trình thí điểm CarePath Translate cho ${clinic} (${specialty}) với kịch bản “${scenario.title.vi}”.`;
+  return `Tôi muốn trao đổi về chương trình thí điểm CarePath cho ${clinic} (${specialty}) với kịch bản “${scenario.title.vi}”.`;
 }
 
 export function buildLeadDraft({
@@ -66,7 +66,7 @@ export function buildLeadDraft({
 }
 
 export function buildLeadMailto(payload: LeadDraft, email = ""): string {
-  const subject = `CarePath Translate pilot — ${payload.clinic}`;
+  const subject = `CarePath pilot - ${payload.clinic}`;
   const body = [
     payload.message,
     "",

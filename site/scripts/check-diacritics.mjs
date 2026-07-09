@@ -20,16 +20,19 @@ const output = (await Promise.all(files.map((path) => readFile(path, "utf8")))).
 );
 
 const required = [
-  "Phiên dịch có bước xác nhận.",
+  "Hỗ trợ AI, bác sĩ xác nhận.",
   "Bản mô phỏng — không phải bản dịch trực tiếp",
   "Thông báo sử dụng AI",
   "Công cụ phiên dịch",
+  "Chờ bác sĩ duyệt",
+  "Bản nháp SOAP chờ duyệt",
 ];
 const forbidden = [
-  "Phien dich co buoc xac nhan",
+  "Ho tro AI, bac si xac nhan",
   "Ban mo phong",
   "Thong bao su dung AI",
   "Cong cu phien dich",
+  "Cho bac si duyet",
 ];
 
 for (const phrase of required) {

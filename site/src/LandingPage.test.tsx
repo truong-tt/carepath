@@ -8,12 +8,17 @@ describe("LandingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Phiên dịch y khoa, xác nhận trước khi phát/,
+        name: /Phiên dịch và ghi chép y khoa, xác nhận trước khi sử dụng/,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Bản dịch quan trọng không được tự động đi thẳng tới người bệnh.",
+        name: "Nội dung quan trọng không tự động đi thẳng tới người bệnh hay hồ sơ.",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Từ lời nói trong buổi khám thành bản nháp SOAP.",
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("TODO-pricing")).toBeInTheDocument();
@@ -24,12 +29,12 @@ describe("LandingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Clinical translation, confirmed before delivery/,
+        name: /Medical interpreting and notes, confirmed before use/,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Important translations do not automatically pass straight to the patient.",
+        name: "Important content does not pass straight to the patient or the record.",
       }),
     ).toBeInTheDocument();
     expect(

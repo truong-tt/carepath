@@ -1,4 +1,4 @@
-# CarePath Translate demo site
+# CarePath demo site
 
 Static, client-only product demonstration. It never records audio or calls a
 translation service.

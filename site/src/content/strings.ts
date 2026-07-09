@@ -32,11 +32,13 @@ interface PageCopy {
   };
   nav: {
     demo: string;
+    scribe: string;
     safety: string;
     process: string;
     cost: string;
   };
   demo: {
+    brand: string;
     disclosure: string;
     privacy: string;
     clinic: string;
@@ -90,12 +92,27 @@ interface PageCopy {
     required: string;
   };
   hero: {
-    parent: string;
     titleBefore: string;
     titleAfter: string;
     body: string;
     primaryCta: string;
     secondaryCta: string;
+    note: string;
+  };
+  modules: {
+    heading: string;
+    interpreter: { name: string; body: string };
+    scribe: { name: string; body: string };
+  };
+  scribe: {
+    brand: string;
+    kicker: string;
+    title: string;
+    body: string;
+    disclosure: string;
+    steps: Record<"raw" | "corrected" | "soap", { label: string; caption: string }>;
+    status: string;
+    soapLabels: Record<"s" | "o" | "a" | "p", string>;
     note: string;
   };
   marquee: string[];
@@ -157,11 +174,13 @@ export const strings: Record<Language, PageCopy> = {
     },
     nav: {
       demo: "Bản mô phỏng",
+      scribe: "Scribe",
       safety: "Cơ chế an toàn",
       process: "Cách hoạt động",
       cost: "Chi phí tham chiếu",
     },
     demo: {
+      brand: "CarePath Phiên dịch",
       disclosure: "Bản mô phỏng — không phải bản dịch trực tiếp",
       privacy: "Không thu âm",
       clinic: "Tên cơ sở",
@@ -226,13 +245,52 @@ export const strings: Record<Language, PageCopy> = {
       required: "Vui lòng điền trường này.",
     },
     hero: {
-      parent: "Một sản phẩm của CarePath",
-      titleBefore: "Phiên dịch y khoa,",
-      titleAfter: "xác nhận trước khi phát.",
-      body: "Công cụ hỗ trợ phiên dịch Việt–Anh, hiển thị rõ nội dung rủi ro và chuyển sang phiên dịch viên khi cần. Không chẩn đoán, không tư vấn điều trị.",
+      titleBefore: "Phiên dịch và ghi chép y khoa,",
+      titleAfter: "xác nhận trước khi sử dụng.",
+      body: "Phiên dịch Việt-Anh có bước xác nhận, cùng Scribe tạo bản nháp SOAP từ chính lời trong buổi khám. Không chẩn đoán, không tư vấn điều trị.",
       primaryCta: "Xem demo 90 giây",
       secondaryCta: "Xem cơ chế an toàn",
       note: "Không cần đăng ký. Không thu âm. Không gửi dữ liệu.",
+    },
+    modules: {
+      heading: "Hai phân hệ",
+      interpreter: {
+        name: "Phiên dịch",
+        body: "Hội thoại Việt-Anh trực tiếp; nội dung rủi ro chỉ được phát khi bác sĩ đã xác nhận.",
+      },
+      scribe: {
+        name: "Scribe",
+        body: "Bản nháp SOAP tiếng Việt từ hội thoại khám, luôn chờ bác sĩ duyệt.",
+      },
+    },
+    scribe: {
+      brand: "CarePath Scribe",
+      kicker: "Phân hệ Scribe",
+      title: "Từ lời nói trong buổi khám thành bản nháp SOAP.",
+      body: "Scribe nghe hội thoại khám bằng tiếng Việt, hiệu chỉnh thuật ngữ bị nhận dạng sai và xếp thành bản nháp SOAP. Bản nháp chỉ vào hồ sơ sau khi bác sĩ duyệt.",
+      disclosure: "Bản mô phỏng với dữ liệu mẫu, không phải hồ sơ thật",
+      steps: {
+        raw: {
+          label: "1. Bản gõ thô từ ASR",
+          caption: "Gạch chân: đoạn máy nghe sai trong bản gõ thô.",
+        },
+        corrected: {
+          label: "2. Sau hiệu chỉnh thuật ngữ",
+          caption: "Tô nền: thuật ngữ và con số đã được hiệu chỉnh.",
+        },
+        soap: {
+          label: "3. Bản nháp SOAP",
+          caption: "Bản nháp xếp theo bốn mục, chờ bác sĩ duyệt từng dòng.",
+        },
+      },
+      status: "Chờ bác sĩ duyệt",
+      soapLabels: {
+        s: "Chủ quan",
+        o: "Khách quan",
+        a: "Đánh giá",
+        p: "Kế hoạch",
+      },
+      note: "Nội dung trên là dữ liệu mẫu cho bản mô phỏng. Scribe không tự đưa ra chẩn đoán; mọi mục đều lấy từ lời đã nói trong buổi khám.",
     },
     marquee: [
       "Xác nhận read-back",
@@ -240,11 +298,12 @@ export const strings: Record<Language, PageCopy> = {
       "Cảnh báo độ tin cậy thấp",
       "Không lưu âm thanh",
       "Chuyển phiên dịch viên",
+      "Bản nháp SOAP chờ duyệt",
     ],
     problem: {
       kicker: "Rủi ro đang có",
       title: "Một câu bị hiểu sai có thể đi xa hơn một cuộc hội thoại.",
-      body: "CarePath Translate không hứa thay thế phán đoán lâm sàng hay phiên dịch viên. Sản phẩm tập trung vào một việc hẹp hơn: làm cho điểm cần xác nhận trở nên nhìn thấy được.",
+      body: "CarePath không hứa thay thế phán đoán lâm sàng hay phiên dịch viên. Sản phẩm tập trung vào một việc hẹp hơn: làm cho điểm cần xác nhận trở nên nhìn thấy được.",
       memoryStat: "40–80%",
       memoryDetail: "thông tin y khoa bằng lời nói có thể bị quên ngay; gần một nửa phần được nhớ lại có thể không chính xác.",
       translationStat: "Tới 66%",
@@ -253,8 +312,8 @@ export const strings: Record<Language, PageCopy> = {
     },
     safety: {
       kicker: "An toàn theo thiết kế",
-      title: "Bản dịch quan trọng không được tự động đi thẳng tới người bệnh.",
-      body: "Năm cơ chế dưới đây mô phỏng đúng nguyên tắc của sản phẩm, không phải lời hứa về chẩn đoán hay kết quả điều trị.",
+      title: "Nội dung quan trọng không tự động đi thẳng tới người bệnh hay hồ sơ.",
+      body: "Năm cơ chế dưới đây áp dụng cho cả phiên dịch lẫn bản nháp Scribe. Đây là nguyên tắc sản phẩm, không phải lời hứa về kết quả điều trị.",
       items: [
         {
           title: { vi: "Xác nhận read-back", en: "Read-back confirmation" },
@@ -332,7 +391,7 @@ export const strings: Record<Language, PageCopy> = {
       transcriptNote: "Bản ghi song ngữ hiện tại được đính kèm trong dữ liệu yêu cầu.",
     },
     footer: {
-      promise: "Phiên dịch có bước xác nhận.",
+      promise: "Hỗ trợ AI, bác sĩ xác nhận.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
       honesty: "Bản mô phỏng không dịch trực tiếp, không thu âm và không đưa ra lời khuyên y tế.",
       contact: "Liên hệ chương trình thí điểm",
@@ -346,11 +405,13 @@ export const strings: Record<Language, PageCopy> = {
     },
     nav: {
       demo: "Simulation",
+      scribe: "Scribe",
       safety: "Safety mechanics",
       process: "How it works",
       cost: "Cost references",
     },
     demo: {
+      brand: "CarePath Interpreter",
       disclosure: "Simulation — not a live translation",
       privacy: "No recording",
       clinic: "Clinic name",
@@ -415,13 +476,52 @@ export const strings: Record<Language, PageCopy> = {
       required: "Please complete this field.",
     },
     hero: {
-      parent: "A CarePath product",
-      titleBefore: "Clinical translation,",
-      titleAfter: "confirmed before delivery.",
-      body: "A Vietnamese–English translation aid that surfaces risky content and escalates to a human interpreter when needed. It does not diagnose or provide treatment advice.",
+      titleBefore: "Medical interpreting and notes,",
+      titleAfter: "confirmed before use.",
+      body: "Live Vietnamese-English interpreting with a confirmation step, plus Scribe drafts of the visit's SOAP note. No diagnosis, no treatment advice.",
       primaryCta: "Watch the 90-second demo",
       secondaryCta: "See the safety mechanics",
       note: "No signup. No recording. No data sent.",
+    },
+    modules: {
+      heading: "Two modules",
+      interpreter: {
+        name: "Interpreter",
+        body: "Live Vietnamese-English conversation; risky content is delivered only after the clinician confirms.",
+      },
+      scribe: {
+        name: "Scribe",
+        body: "Vietnamese SOAP-note drafts from the visit conversation, always awaiting clinician review.",
+      },
+    },
+    scribe: {
+      brand: "CarePath Scribe",
+      kicker: "The Scribe module",
+      title: "From spoken visit to a SOAP draft.",
+      body: "Scribe listens to the Vietnamese consultation, fixes misrecognized medical terms, and arranges a SOAP draft. Nothing enters the record until the clinician approves.",
+      disclosure: "Simulation with sample data, not a real record",
+      steps: {
+        raw: {
+          label: "1. Raw ASR transcript",
+          caption: "Underlined: what the machine misheard in the raw transcript.",
+        },
+        corrected: {
+          label: "2. After term correction",
+          caption: "Highlighted: corrected terms and numbers.",
+        },
+        soap: {
+          label: "3. SOAP draft",
+          caption: "Draft arranged in four sections, each line awaiting clinician review.",
+        },
+      },
+      status: "Awaiting clinician review",
+      soapLabels: {
+        s: "Subjective",
+        o: "Objective",
+        a: "Assessment",
+        p: "Plan",
+      },
+      note: "The content above is sample data for this simulation. Scribe does not produce its own diagnosis; every line comes from what was said during the visit.",
     },
     marquee: [
       "Read-back confirmation",
@@ -429,11 +529,12 @@ export const strings: Record<Language, PageCopy> = {
       "Low-confidence warning",
       "No audio storage",
       "Interpreter escalation",
+      "SOAP drafts held for review",
     ],
     problem: {
       kicker: "The current risk",
       title: "A misunderstood sentence can travel beyond one conversation.",
-      body: "CarePath Translate does not promise to replace clinical judgment or human interpreters. It focuses on a narrower job: making confirmation points visible.",
+      body: "CarePath does not promise to replace clinical judgment or human interpreters. It focuses on a narrower job: making confirmation points visible.",
       memoryStat: "40–80%",
       memoryDetail: "of verbal medical information may be forgotten immediately; almost half of what is retained may be incorrect.",
       translationStat: "Up to 66%",
@@ -442,8 +543,8 @@ export const strings: Record<Language, PageCopy> = {
     },
     safety: {
       kicker: "Safety by design",
-      title: "Important translations do not automatically pass straight to the patient.",
-      body: "These five mechanics reflect the product principles. They are not diagnostic or treatment-outcome claims.",
+      title: "Important content does not pass straight to the patient or the record.",
+      body: "These five mechanics apply to both interpreting and Scribe drafts. They are product principles, not treatment-outcome claims.",
       items: [],
     },
     process: {
@@ -485,7 +586,7 @@ export const strings: Record<Language, PageCopy> = {
       transcriptNote: "The current bilingual transcript is attached to the request data.",
     },
     footer: {
-      promise: "Translation with confirmation built in.",
+      promise: "AI assistance, clinician confirmed.",
       posture: "Designed around data minimization, awareness of Decree 13/PDP obligations, and §1557-aligned language-access positioning. This is not a legal certification claim.",
       honesty: "The simulation does not translate live, record audio, or provide medical advice.",
       contact: "Contact the pilot program",

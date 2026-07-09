@@ -188,7 +188,7 @@ export default function DemoPlayer({
     <section className="demo" aria-labelledby="demo-title">
       <header className="demo__header">
         <div>
-          <p className="demo__brand">CarePath Translate</p>
+          <p className="demo__brand">{labels.brand}</p>
           <h2 id="demo-title">{clinicName} — Demo</h2>
           <p className="demo__specialty">{specialty}</p>
           <p className="demo__disclosure">
@@ -434,7 +434,7 @@ export default function DemoPlayer({
           className="button button--download"
           onClick={() =>
             downloadText(
-              `carepath-translate-${scenario.id}.txt`,
+              `carepath-demo-${scenario.id}.txt`,
               transcriptText,
             )
           }

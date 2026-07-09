@@ -18,7 +18,7 @@ describe("language preference", () => {
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
       screen.getByRole("heading", {
-        name: /Clinical translation, confirmed before delivery/,
+        name: /Medical interpreting and notes, confirmed before use/,
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
@@ -29,7 +29,12 @@ describe("language preference", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Important translations do not automatically pass straight to the patient.",
+        name: "Important content does not pass straight to the patient or the record.",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "From spoken visit to a SOAP draft.",
       }),
     ).toBeInTheDocument();
     expect(
@@ -48,7 +53,7 @@ describe("language preference", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Translation with confirmation built in."),
+      screen.getByText("AI assistance, clinician confirmed."),
     ).toBeInTheDocument();
   });
 

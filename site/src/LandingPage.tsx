@@ -1,10 +1,11 @@
 import { useCallback, useState } from "react";
-import logoUrl from "./assets/carepath-translate.svg";
+import logoUrl from "./assets/carepath.svg";
 import { copyFor, sources } from "./content/strings";
 import DemoPlayer from "./demo/DemoPlayer";
 import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
 import LeadForm from "./LeadForm";
+import ScribeShowcase from "./scribe/ScribeShowcase";
 
 interface LandingPageProps {
   language: Language;
@@ -28,12 +29,13 @@ export default function LandingPage({
   return (
     <div className="site-shell">
       <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
-        <a className="site-nav__brand" href="#top" aria-label="CarePath Translate">
+        <a className="site-nav__brand" href="#top" aria-label="CarePath">
           <img src={logoUrl} alt="" />
-          <span>CarePath Translate</span>
+          <span>CarePath</span>
         </a>
         <div className="site-nav__links">
           <a href="#demo">{copy.nav.demo}</a>
+          <a href="#scribe">{copy.nav.scribe}</a>
           <a href="#safety">{copy.nav.safety}</a>
           <a href="#process">{copy.nav.process}</a>
           <a href="#cost">{copy.nav.cost}</a>
@@ -62,7 +64,6 @@ export default function LandingPage({
       <main id="top">
         <section className="hero">
           <div className="hero__copy">
-            <p className="hero__parent">{copy.hero.parent}</p>
             <h1 className="hero-title">
               {copy.hero.titleBefore} {copy.hero.titleAfter}
             </h1>
@@ -77,6 +78,22 @@ export default function LandingPage({
             </div>
             <p className="hero__note">{copy.hero.note}</p>
           </div>
+        </section>
+
+        <section className="modules" aria-labelledby="modules-title">
+          <h2 className="visually-hidden" id="modules-title">
+            {copy.modules.heading}
+          </h2>
+          <a className="module-tile" href="#demo">
+            <h3>{copy.modules.interpreter.name}</h3>
+            <p>{copy.modules.interpreter.body}</p>
+            <span aria-hidden="true" className="module-tile__arrow">↓</span>
+          </a>
+          <a className="module-tile module-tile--scribe" href="#scribe">
+            <h3>{copy.modules.scribe.name}</h3>
+            <p>{copy.modules.scribe.body}</p>
+            <span aria-hidden="true" className="module-tile__arrow">↓</span>
+          </a>
         </section>
 
         <section className="demo-stage" id="demo">
@@ -99,6 +116,16 @@ export default function LandingPage({
             ))}
           </div>
         </div>
+
+        <section className="chapter scribe" id="scribe">
+          <div className="chapter__intro">
+            <p className="kicker">{copy.scribe.kicker}</p>
+            <h2>{copy.scribe.title}</h2>
+            <p>{copy.scribe.body}</p>
+          </div>
+          <ScribeShowcase language={language} />
+          <p className="scribe-note">{copy.scribe.note}</p>
+        </section>
 
         <section className="chapter problem" id="problem">
           <div className="chapter__intro">
