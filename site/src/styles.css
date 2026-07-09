@@ -339,6 +339,29 @@ textarea {
   white-space: nowrap;
 }
 
+.demo__specialty {
+  margin: 0.3rem 0 0 !important;
+  color: color-mix(in srgb, var(--ink), transparent 38%);
+  font-size: 0.8rem;
+}
+
+.demo-customization {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+  background: color-mix(in srgb, var(--mist), transparent 45%);
+}
+
+.demo-customization label {
+  display: grid;
+  gap: 0.4rem;
+  color: color-mix(in srgb, var(--ink), transparent 22%);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
 .scenario-picker {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -947,6 +970,83 @@ textarea {
   line-height: 1.7;
 }
 
+.pilot {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(28rem, 1.2fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: start;
+}
+
+.pilot__copy {
+  position: sticky;
+  top: 2rem;
+}
+
+.pilot__copy h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: Satoshi, "Be Vietnam Pro", sans-serif;
+  font-size: clamp(2.8rem, 6vw, 6.5rem);
+  letter-spacing: -0.065em;
+  line-height: 0.96;
+}
+
+.pilot__copy > p:not(.kicker) {
+  max-width: 38rem;
+  color: color-mix(in srgb, var(--ink), transparent 28%);
+  line-height: 1.8;
+}
+
+.pilot__configuration {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 2rem 0 1rem;
+}
+
+.pilot__configuration span {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 70%);
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.pilot__copy small {
+  color: color-mix(in srgb, var(--ink), transparent 45%);
+  line-height: 1.6;
+}
+
+.lead-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: clamp(1.4rem, 3vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 76%);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--ivory), white 45%);
+  box-shadow: 0 2rem 5rem rgb(16 42 46 / 0.08);
+}
+
+.lead-form label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lead-form__message,
+.lead-form .button,
+.lead-form > p {
+  grid-column: 1 / -1;
+}
+
+.lead-form > p {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--teal);
+  font-size: 0.8rem;
+}
+
 @media (max-width: 760px) {
   .site-nav {
     width: min(100% - 1.5rem, 88rem);
@@ -988,10 +1088,13 @@ textarea {
   }
 
   .scenario-picker,
+  .demo-customization,
   .turn__columns,
   .problem,
   .cost-grid,
-  .site-footer {
+  .site-footer,
+  .pilot,
+  .lead-form {
     grid-template-columns: 1fr;
   }
 
@@ -1051,6 +1154,16 @@ textarea {
 
   .site-footer {
     padding-inline: 1.25rem;
+  }
+
+  .pilot__copy {
+    position: static;
+  }
+
+  .lead-form__message,
+  .lead-form .button,
+  .lead-form > p {
+    grid-column: 1;
   }
 }
 

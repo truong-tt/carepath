@@ -5,6 +5,16 @@ import type { DemoTurn, PlaybackState } from "./types";
 
 const TURN_DELAY_MS = 4000;
 
+interface DemoPlayerProps {
+  scenarioId?: string;
+  clinicName?: string;
+  specialty?: string;
+  onScenarioChange?: (scenarioId: string) => void;
+  onClinicNameChange?: (clinicName: string) => void;
+  onSpecialtyChange?: (specialty: string) => void;
+  onTranscriptChange?: (transcript: string) => void;
+}
+
 function downloadText(filename: string, content: string) {
   const url = URL.createObjectURL(
     new Blob([content], { type: "text/plain;charset=utf-8" }),
@@ -16,8 +26,17 @@ function downloadText(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export default function DemoPlayer() {
-  const [scenarioId, setScenarioId] = useState(scenarios[0].id);
+export default function DemoPlayer({
+  scenarioId: controlledScenarioId,
+  clinicName = "Phòng khám Đa khoa An Bình",
+  specialty = "Nội tổng quát",
+  onScenarioChange,
+  onClinicNameChange,
+  onSpecialtyChange,
+  onTranscriptChange,
+}: DemoPlayerProps) {
+  const [localScenarioId, setLocalScenarioId] = useState(scenarios[0].id);
+  const scenarioId = controlledScenarioId ?? localScenarioId;
   const scenario = useMemo(() => getScenario(scenarioId), [scenarioId]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [state, setState] = useState<PlaybackState>("idle");
@@ -34,7 +53,11 @@ export default function DemoPlayer() {
       : undefined;
 
   function reset(nextScenarioId = scenarioId) {
-    setScenarioId(nextScenarioId);
+    if (onScenarioChange) {
+      onScenarioChange(nextScenarioId);
+    } else {
+      setLocalScenarioId(nextScenarioId);
+    }
     setRevealedCount(0);
     setState("idle");
     setConfirmedIds([]);
@@ -107,6 +130,16 @@ export default function DemoPlayer() {
   }
 
   const allTranscriptTurns = [...revealedTurns, ...customTurns];
+  const transcriptText = buildTranscript(
+    scenario,
+    allTranscriptTurns,
+    corrections,
+  );
+
+  useEffect(() => {
+    onTranscriptChange?.(transcriptText);
+  }, [onTranscriptChange, transcriptText]);
+
   const progress = [
     true,
     revealedCount > 0,
@@ -119,13 +152,33 @@ export default function DemoPlayer() {
       <header className="demo__header">
         <div>
           <p className="demo__brand">CarePath Translate</p>
-          <h2 id="demo-title">Bản mô phỏng hội thoại</h2>
+          <h2 id="demo-title">{clinicName} — Demo</h2>
+          <p className="demo__specialty">{specialty}</p>
           <p className="demo__disclosure">
             Bản mô phỏng — không phải bản dịch trực tiếp
           </p>
         </div>
         <span className="demo__privacy">Không thu âm</span>
       </header>
+
+      <div className="demo-customization">
+        <label>
+          Tên cơ sở
+          <input
+            value={clinicName}
+            maxLength={120}
+            onChange={(event) => onClinicNameChange?.(event.target.value)}
+          />
+        </label>
+        <label>
+          Chuyên khoa
+          <input
+            value={specialty}
+            maxLength={100}
+            onChange={(event) => onSpecialtyChange?.(event.target.value)}
+          />
+        </label>
+      </div>
 
       <div className="scenario-picker" aria-label="Chọn kịch bản">
         {scenarios.map((item) => (
@@ -338,7 +391,7 @@ export default function DemoPlayer() {
           onClick={() =>
             downloadText(
               `carepath-translate-${scenario.id}.txt`,
-              buildTranscript(scenario, allTranscriptTurns, corrections),
+              transcriptText,
             )
           }
           type="button"

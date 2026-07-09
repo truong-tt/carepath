@@ -1,11 +1,13 @@
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logoUrl from "./assets/carepath-translate.svg";
 import { copyFor, sources } from "./content/strings";
 import DemoPlayer from "./demo/DemoPlayer";
+import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
+import LeadForm from "./LeadForm";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,6 +18,14 @@ interface LandingPageProps {
 export default function LandingPage({ language }: LandingPageProps) {
   const copy = copyFor(language);
   const root = useRef<HTMLDivElement>(null);
+  const [clinicName, setClinicName] = useState("Phòng khám Đa khoa An Bình");
+  const [specialty, setSpecialty] = useState("Nội tổng quát");
+  const [scenarioId, setScenarioId] = useState(scenarios[0].id);
+  const [transcript, setTranscript] = useState("");
+  const scenario = getScenario(scenarioId);
+  const handleTranscriptChange = useCallback((value: string) => {
+    setTranscript(value);
+  }, []);
 
   useGSAP(
     () => {
@@ -110,7 +120,15 @@ export default function LandingPage({ language }: LandingPageProps) {
         </section>
 
         <section className="demo-stage" id="demo">
-          <DemoPlayer />
+          <DemoPlayer
+            clinicName={clinicName}
+            specialty={specialty}
+            scenarioId={scenarioId}
+            onClinicNameChange={setClinicName}
+            onSpecialtyChange={setSpecialty}
+            onScenarioChange={setScenarioId}
+            onTranscriptChange={handleTranscriptChange}
+          />
         </section>
 
         <div className="marquee" aria-label={copy.marquee.join(", ")}>
@@ -213,6 +231,27 @@ export default function LandingPage({ language }: LandingPageProps) {
               <p>{copy.cost.pilotNote}</p>
             </article>
           </div>
+        </section>
+
+        <section className="chapter pilot" id="pilot">
+          <div className="pilot__copy">
+            <p className="kicker">{copy.pilot.kicker}</p>
+            <h2>{copy.pilot.title}</h2>
+            <p>{copy.pilot.body}</p>
+            <div className="pilot__configuration">
+              <span>{clinicName}</span>
+              <span>{specialty}</span>
+              <span>{scenario.title[language]}</span>
+            </div>
+            <small>{copy.pilot.transcriptNote}</small>
+          </div>
+          <LeadForm
+            clinic={clinicName}
+            specialty={specialty}
+            scenario={scenario}
+            transcript={transcript}
+            language={language}
+          />
         </section>
       </main>
 

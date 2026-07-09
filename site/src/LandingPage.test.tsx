@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import LandingPage from "./LandingPage";
 
@@ -37,5 +37,32 @@ describe("LandingPage", () => {
         name: "Status-quo costs need honest context.",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("reflects clinic customization in the demo and form", () => {
+    render(<LandingPage language="vi" />);
+
+    const clinic = screen.getByRole("textbox", { name: "Tên cơ sở" });
+    fireEvent.change(clinic, { target: { value: "Phòng khám Minh Tâm" } });
+
+    expect(
+      screen.getByRole("heading", { name: "Phòng khám Minh Tâm — Demo" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Cơ sở y tế" }),
+    ).toHaveValue("Phòng khám Minh Tâm");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Kiểm tra dị ứng — xác nhận phủ định/,
+      }),
+    );
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Lời nhắn",
+        }) as HTMLTextAreaElement
+      ).value,
+    ).toContain("Kiểm tra dị ứng — xác nhận phủ định");
   });
 });

@@ -76,6 +76,12 @@ interface PageCopy {
     pilotValue: string;
     pilotNote: string;
   };
+  pilot: {
+    kicker: string;
+    title: string;
+    body: string;
+    transcriptNote: string;
+  };
   footer: {
     promise: string;
     posture: string;
@@ -192,6 +198,12 @@ export const strings: Record<Language, PageCopy> = {
       pilotValue: "TODO-pricing",
       pilotNote: "Giá sẽ được công khai sau khi phạm vi hỗ trợ, thời lượng và trách nhiệm của các bên được xác định. Không có giá gạch bỏ hoặc khan hiếm giả.",
     },
+    pilot: {
+      kicker: "Bản demo của cơ sở bạn",
+      title: "Giữ lại bản demo bạn vừa tạo",
+      body: "Thông tin cơ sở, chuyên khoa, kịch bản và phần hội thoại đã xem sẽ đi cùng yêu cầu thí điểm. Không có hộp đồng ý tiếp thị được chọn sẵn.",
+      transcriptNote: "Bản ghi song ngữ hiện tại được đính kèm trong dữ liệu yêu cầu.",
+    },
     footer: {
       promise: "Phiên dịch có bước xác nhận.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
@@ -269,6 +281,12 @@ export const strings: Record<Language, PageCopy> = {
       pilotTitle: "Pilot program",
       pilotValue: "TODO-pricing",
       pilotNote: "Pricing will be published after support scope, duration, and responsibilities are defined. No fake markdown or scarcity.",
+    },
+    pilot: {
+      kicker: "Your clinic's demo",
+      title: "Keep the demo you just created",
+      body: "Your clinic, specialty, scenario, and viewed transcript travel with the pilot request. There is no preselected marketing consent.",
+      transcriptNote: "The current bilingual transcript is attached to the request data.",
     },
     footer: {
       promise: "Translation with confirmation built in.",
