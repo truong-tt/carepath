@@ -285,7 +285,9 @@ export default function LandingPage({
         </div>
         <p>{copy.footer.posture}</p>
         <p>{copy.footer.honesty}</p>
-        <a href="mailto:">{copy.footer.contact}</a>
+        <a href={`mailto:${encodeURIComponent(import.meta.env.VITE_LEAD_EMAIL ?? "")}`}>
+          {copy.footer.contact}
+        </a>
       </footer>
     </div>
   );

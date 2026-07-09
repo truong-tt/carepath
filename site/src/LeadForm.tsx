@@ -1,7 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { copyFor } from "./content/strings";
 import type { Language, Scenario } from "./demo/types";
-import { buildLeadDraft, defaultLeadMessage } from "./leads";
+import {
+  buildLeadDraft,
+  defaultLeadMessage,
+  submitLead,
+  type LeadSubmissionConfig,
+} from "./leads";
 
 interface LeadFormProps {
   language: Language;
@@ -9,6 +14,10 @@ interface LeadFormProps {
   specialty: string;
   scenario: Scenario;
   transcript: string;
+  endpoint?: string;
+  leadEmail?: string;
+  fetcher?: typeof fetch;
+  onMailto?: (url: string) => void;
 }
 
 export default function LeadForm({
@@ -17,6 +26,10 @@ export default function LeadForm({
   specialty,
   scenario,
   transcript,
+  endpoint = import.meta.env.VITE_LEAD_ENDPOINT,
+  leadEmail = import.meta.env.VITE_LEAD_EMAIL,
+  fetcher,
+  onMailto,
 }: LeadFormProps) {
   const labels = copyFor(language).form;
   const [name, setName] = useState("");
@@ -26,7 +39,10 @@ export default function LeadForm({
     defaultLeadMessage(clinic, specialty, scenario, language),
   );
   const [messageDirty, setMessageDirty] = useState(false);
-  const [draftReady, setDraftReady] = useState(false);
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "posted" | "mailto" | "error"
+  >("idle");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!messageDirty) {
@@ -34,9 +50,21 @@ export default function LeadForm({
     }
   }, [clinic, language, messageDirty, scenario, specialty]);
 
-  function prepareDraft(event: FormEvent<HTMLFormElement>) {
+  async function sendRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    buildLeadDraft({
+    const nextErrors: Record<string, string> = {};
+    for (const [key, value] of Object.entries({
+      name,
+      role,
+      contact,
+      message,
+    })) {
+      if (!value.trim()) nextErrors[key] = labels.required;
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    const payload = buildLeadDraft({
       clinic,
       specialty,
       scenario,
@@ -44,22 +72,38 @@ export default function LeadForm({
       language,
       fields: { name, role, contact, message },
     });
-    setDraftReady(true);
+    setStatus("submitting");
+    try {
+      const submissionConfig: LeadSubmissionConfig = {
+        endpoint,
+        email: leadEmail,
+      };
+      if (fetcher) submissionConfig.fetcher = fetcher;
+      if (onMailto) submissionConfig.openMailto = onMailto;
+      const result = await submitLead(payload, submissionConfig);
+      setStatus(result);
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
     <form
       className="lead-form"
       data-transcript-length={transcript.length}
-      onSubmit={prepareDraft}
+      onSubmit={sendRequest}
+      noValidate
     >
       <label>
         {labels.name}
         <input
           value={name}
           maxLength={120}
+          aria-invalid={Boolean(errors.name)}
+          aria-describedby={errors.name ? "lead-name-error" : undefined}
           onChange={(event) => setName(event.target.value)}
         />
+        {errors.name && <span className="field-error" id="lead-name-error">{errors.name}</span>}
       </label>
       <label>
         {labels.clinic}
@@ -70,32 +114,53 @@ export default function LeadForm({
         <input
           value={role}
           maxLength={100}
+          aria-invalid={Boolean(errors.role)}
+          aria-describedby={errors.role ? "lead-role-error" : undefined}
           onChange={(event) => setRole(event.target.value)}
         />
+        {errors.role && <span className="field-error" id="lead-role-error">{errors.role}</span>}
       </label>
       <label>
         {labels.contact}
         <input
           value={contact}
           maxLength={160}
+          aria-invalid={Boolean(errors.contact)}
+          aria-describedby={errors.contact ? "lead-contact-error" : undefined}
           onChange={(event) => setContact(event.target.value)}
         />
+        {errors.contact && <span className="field-error" id="lead-contact-error">{errors.contact}</span>}
       </label>
       <label className="lead-form__message">
         {labels.message}
         <textarea
           value={message}
           maxLength={1200}
+          aria-invalid={Boolean(errors.message)}
+          aria-describedby={errors.message ? "lead-message-error" : undefined}
           onChange={(event) => {
             setMessage(event.target.value);
             setMessageDirty(true);
           }}
         />
+        {errors.message && <span className="field-error" id="lead-message-error">{errors.message}</span>}
       </label>
-      <button className="button button--primary" type="submit">
-        {labels.prepare}
+      <button
+        className="button button--primary"
+        disabled={status === "submitting"}
+        type="submit"
+      >
+        {status === "submitting" ? labels.submitting : labels.prepare}
       </button>
-      <p aria-live="polite">{draftReady ? labels.ready : ""}</p>
+      <p className={status === "error" ? "form-status is-error" : "form-status"} aria-live="polite">
+        {status === "posted"
+          ? labels.posted
+          : status === "mailto"
+            ? labels.mailOpened
+            : status === "error"
+              ? labels.failed
+              : ""}
+      </p>
     </form>
   );
 }

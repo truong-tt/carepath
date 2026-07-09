@@ -83,7 +83,11 @@ interface PageCopy {
     contact: string;
     message: string;
     prepare: string;
-    ready: string;
+    submitting: string;
+    posted: string;
+    mailOpened: string;
+    failed: string;
+    required: string;
   };
   hero: {
     parent: string;
@@ -215,7 +219,11 @@ export const strings: Record<Language, PageCopy> = {
       contact: "Email hoặc Zalo",
       message: "Lời nhắn",
       prepare: "Chuẩn bị yêu cầu thí điểm",
-      ready: "Bản nháp đã sẵn sàng. Kết nối gửi sẽ được thêm ở bước tiếp theo.",
+      submitting: "Đang gửi yêu cầu…",
+      posted: "Đã gửi yêu cầu thí điểm.",
+      mailOpened: "Đã mở bản nháp email. Hãy kiểm tra và gửi thư để hoàn tất.",
+      failed: "Không thể gửi yêu cầu. Vui lòng kiểm tra kết nối và thử lại.",
+      required: "Vui lòng điền trường này.",
     },
     hero: {
       parent: "Một sản phẩm của CarePath",
@@ -400,7 +408,11 @@ export const strings: Record<Language, PageCopy> = {
       contact: "Email or Zalo",
       message: "Message",
       prepare: "Prepare pilot request",
-      ready: "The draft is ready. Submission will be connected in the next step.",
+      submitting: "Sending request…",
+      posted: "Pilot request sent.",
+      mailOpened: "An email draft was opened. Review and send it to finish.",
+      failed: "The request could not be sent. Check the connection and try again.",
+      required: "Please complete this field.",
     },
     hero: {
       parent: "A CarePath product",

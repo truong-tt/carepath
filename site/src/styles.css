@@ -1077,6 +1077,16 @@ textarea {
   font-size: 0.8rem;
 }
 
+.field-error,
+.form-status.is-error {
+  color: var(--critical);
+}
+
+.field-error {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
 @media (max-width: 760px) {
   .site-nav {
     width: min(100% - 1.5rem, 88rem);

@@ -13,6 +13,13 @@ export interface LeadDraft {
   language: Language;
 }
 
+export interface LeadSubmissionConfig {
+  endpoint?: string;
+  email?: string;
+  fetcher?: typeof fetch;
+  openMailto?: (url: string) => void;
+}
+
 interface LeadDraftInput {
   clinic: string;
   specialty: string;
@@ -56,4 +63,46 @@ export function buildLeadDraft({
     transcript,
     language,
   };
+}
+
+export function buildLeadMailto(payload: LeadDraft, email = ""): string {
+  const subject = `CarePath Translate pilot — ${payload.clinic}`;
+  const body = [
+    payload.message,
+    "",
+    `${payload.name} — ${payload.role}`,
+    payload.contact,
+    `${payload.clinic} — ${payload.specialty}`,
+    payload.scenarioTitle,
+    "",
+    payload.transcript,
+  ].join("\n");
+  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export async function submitLead(
+  payload: LeadDraft,
+  {
+    endpoint,
+    email,
+    fetcher = fetch,
+    openMailto = (url) => {
+      window.location.href = url;
+    },
+  }: LeadSubmissionConfig,
+): Promise<"posted" | "mailto"> {
+  if (endpoint) {
+    const response = await fetcher(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error(`Lead endpoint returned ${response.status}.`);
+    }
+    return "posted";
+  }
+
+  openMailto(buildLeadMailto(payload, email));
+  return "mailto";
 }
