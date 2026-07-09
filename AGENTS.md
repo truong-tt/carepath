@@ -2,6 +2,10 @@
 
 Read `PLAN.md` first (the implementation plan), `docs/research.md` for background.
 Work PLAN.md phases in order; don't skip ahead or invent features not in §3 Scope.
+Demo-website work is a separate track: see `DEMO-SITE-PLAN.md`; it lives in `/site`
+only and must not modify `backend/` or `frontend/`.
+Product unification (merge with the scriber on `main`) follows `MERGE-PLAN.md`;
+the post-merge review is run by claude-fable-5 against `JUDGE.md`.
 
 ## Non-negotiable safety invariants (PLAN.md §2 — full text there)
 
