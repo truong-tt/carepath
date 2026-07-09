@@ -1,0 +1,91 @@
+{
+  "id": "chest-pain",
+  "title": {
+    "vi": "Đau ngực — chuyển phiên dịch viên",
+    "en": "Chest pain — interpreter escalation"
+  },
+  "summary": {
+    "vi": "Dấu hiệu nguy cơ cao dừng mô phỏng và ưu tiên phiên dịch viên.",
+    "en": "A critical red flag stops the simulation and prioritizes an interpreter."
+  },
+  "turns": [
+    {
+      "id": "cp-1",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Anh thấy khó chịu ở đâu?",
+      "en": "Where do you feel discomfort?",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "cp-2",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi thấy mệt từ sáng.",
+      "en": "I have felt tired since this morning.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "cp-3",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Cơn đau bắt đầu khi nào?",
+      "en": "When did the pain start?",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "cp-4",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Khoảng ba mươi phút trước.",
+      "en": "About thirty minutes ago.",
+      "riskTier": "medium",
+      "riskSpans": [
+        { "kind": "duration", "vi": "ba mươi phút", "en": "thirty minutes" }
+      ]
+    },
+    {
+      "id": "cp-5",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi bị đau ngực và khó thở.",
+      "en": "I have chest pain and shortness of breath.",
+      "riskTier": "critical",
+      "riskSpans": [
+        { "kind": "red-flag", "vi": "đau ngực", "en": "chest pain" },
+        { "kind": "red-flag", "vi": "khó thở", "en": "shortness of breath" }
+      ],
+      "escalation": true
+    },
+    {
+      "id": "cp-6",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Tạm dừng công cụ phiên dịch tự động.",
+      "en": "Pause the automated translation tool.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "cp-7",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Yêu cầu phiên dịch viên hỗ trợ.",
+      "en": "Request support from a human interpreter.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "cp-8",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi hiểu.",
+      "en": "I understand.",
+      "riskTier": "low",
+      "riskSpans": []
+    }
+  ]
+}

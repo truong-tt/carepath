@@ -32,59 +32,480 @@ textarea {
   font: inherit;
 }
 
-.brand-intro {
-  display: grid;
-  min-height: 100vh;
-  place-content: center;
-  justify-items: center;
-  padding: 2rem;
-  text-align: center;
+.demo-page {
+  width: min(100% - 2rem, 88rem);
+  margin: 0 auto;
+  padding: 2rem 0 6rem;
 }
 
-.brand-intro__mark {
-  width: min(15rem, 64vw);
+.demo-page__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
 }
 
-.brand-intro__mark img {
-  display: block;
-  width: 100%;
+.demo-page__brand img {
+  width: 4.5rem;
   height: auto;
 }
 
-.brand-intro__parent {
-  margin: 1.5rem 0 0;
+.demo-page__brand div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.demo-page__brand strong {
+  font-family: Satoshi, "Be Vietnam Pro", sans-serif;
+  font-size: 1.15rem;
+}
+
+.demo-page__brand span {
+  color: color-mix(in srgb, var(--ink), transparent 35%);
+  font-size: 0.78rem;
+}
+
+.demo {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 78%);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--ivory), white 38%);
+  box-shadow: 0 2.5rem 8rem rgb(16 42 46 / 0.1);
+}
+
+.demo__header,
+.demo__controls,
+.transcript,
+.readback,
+.custom-input,
+.escalation {
+  padding: 1.5rem;
+}
+
+.demo__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+}
+
+.demo__header h2,
+.demo__header p {
+  margin: 0;
+}
+
+.demo__header h2 {
+  margin-top: 0.3rem;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.demo__brand {
   color: var(--teal);
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.brand-intro h1 {
+.demo__disclosure {
+  margin-top: 0.45rem !important;
+  color: color-mix(in srgb, var(--ink), transparent 35%);
+  font-size: 0.82rem;
+}
+
+.demo__privacy {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  color: var(--teal);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.scenario-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 10rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+}
+
+.scenario {
+  display: grid;
+  align-content: end;
+  gap: 0.45rem;
+  padding: 1.35rem;
+  border: 0;
+  border-right: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 300ms ease,
+    transform 300ms ease;
+}
+
+.scenario:last-child {
+  border-right: 0;
+}
+
+.scenario:hover,
+.scenario:focus-visible {
+  background: var(--mist);
+}
+
+.scenario:active {
+  transform: scale(0.985);
+}
+
+.scenario.is-selected {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.scenario span {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.progress-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
-  font-family: Satoshi, "Be Vietnam Pro", sans-serif;
-  font-size: clamp(3.5rem, 13vw, 8rem);
-  letter-spacing: -0.07em;
-  line-height: 0.95;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+  counter-reset: progress;
+  list-style: none;
 }
 
-.brand-intro p {
-  max-width: 38rem;
+.progress-rail li {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  color: color-mix(in srgb, var(--ink), transparent 48%);
+  font-size: 0.76rem;
 }
 
-.brand-intro__note {
-  padding: 0.55rem 0.8rem;
-  border: 1px solid color-mix(in srgb, var(--ink), transparent 75%);
-  border-radius: 0.35rem;
-  font-size: 0.875rem;
+.progress-rail li:not(:last-child)::after {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: 0.75rem;
+  left: 2.2rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--ink), transparent 78%);
+  content: "";
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    background: var(--ink);
-    color: var(--ivory);
+.progress-rail li span {
+  z-index: 1;
+  display: inline-grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
+  background: var(--ivory);
+  font-weight: 700;
+}
+
+.progress-rail li.is-complete {
+  color: var(--teal);
+}
+
+.progress-rail li.is-complete span {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: white;
+}
+
+.progress-check::before {
+  width: 0.65rem;
+  height: 0.35rem;
+  border-bottom: 2px solid white;
+  border-left: 2px solid white;
+  content: "";
+  transform: translateY(-0.08rem) rotate(-45deg);
+}
+
+.demo__controls,
+.readback__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.button {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 250ms ease,
+    background 250ms ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.button:focus-visible,
+.scenario:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--teal), white 30%);
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.button--primary {
+  background: var(--teal);
+  color: white;
+}
+
+.button--secondary {
+  border-color: color-mix(in srgb, var(--ink), transparent 60%);
+  background: transparent;
+  color: var(--ink);
+}
+
+.button--danger {
+  border-color: var(--critical);
+  background: transparent;
+  color: var(--critical);
+}
+
+.button--text {
+  background: transparent;
+  color: var(--ink);
+}
+
+.button--download {
+  margin: 0 1.5rem 1.5rem;
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.transcript {
+  display: grid;
+  gap: 1rem;
+  min-height: 15rem;
+  background: color-mix(in srgb, var(--mist), transparent 58%);
+}
+
+.transcript__empty {
+  align-self: center;
+  color: color-mix(in srgb, var(--ink), transparent 48%);
+  text-align: center;
+}
+
+.turn {
+  padding: 1rem;
+  border-left: 3px solid transparent;
+  border-radius: 0.6rem;
+  background: var(--ivory);
+}
+
+.turn--medium {
+  border-left-color: #4b76a8;
+}
+
+.turn--high {
+  border-left-color: var(--amber);
+}
+
+.turn--critical {
+  border-left-color: var(--critical);
+}
+
+.turn--custom {
+  border: 1px dashed var(--teal);
+}
+
+.turn header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.turn header span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.turn__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.turn__columns p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.turn__columns p + p {
+  padding-left: 1.25rem;
+  border-left: 1px solid color-mix(in srgb, var(--ink), transparent 82%);
+}
+
+.risk-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.risk-list li {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--amber), transparent 20%);
+  border-radius: 999px;
+  color: #704300;
+  font-size: 0.72rem;
+}
+
+.readback {
+  border-block: 1px solid var(--amber);
+  background: #fff7e3;
+}
+
+.readback h3,
+.readback__flag {
+  margin-top: 0;
+}
+
+.readback__flag {
+  color: #704300;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.readback table {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+}
+
+.readback th,
+.readback td {
+  padding: 0.7rem;
+  border-bottom: 1px solid rgb(112 67 0 / 0.2);
+  text-align: left;
+}
+
+.readback label {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+textarea,
+input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 60%);
+  border-radius: 0.4rem;
+  background: white;
+  color: var(--ink);
+}
+
+textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.escalation {
+  border-block: 3px solid var(--critical);
+  background: #fff2f2;
+}
+
+.escalation h3 {
+  max-width: 45rem;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.custom-input {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.custom-input label {
+  font-weight: 600;
+}
+
+.custom-input div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem;
+}
+
+.custom-input small {
+  color: color-mix(in srgb, var(--ink), transparent 45%);
+}
+
+@media (max-width: 760px) {
+  .demo-page {
+    width: min(100% - 1rem, 88rem);
+    padding-top: 1rem;
   }
 
-  .brand-intro__mark img {
-    filter: drop-shadow(0 1.5rem 3rem rgb(15 118 110 / 0.22));
+  .scenario-picker,
+  .turn__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario {
+    min-height: 7rem;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ink), transparent 84%);
+  }
+
+  .progress-rail {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .progress-rail li::after {
+    display: none;
+  }
+
+  .turn__columns p + p {
+    padding-top: 0.75rem;
+    padding-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ink), transparent 82%);
+    border-left: 0;
+  }
+
+  .custom-input div {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

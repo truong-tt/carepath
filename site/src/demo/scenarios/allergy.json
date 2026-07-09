@@ -1,0 +1,100 @@
+{
+  "id": "allergy",
+  "title": {
+    "vi": "Kiểm tra dị ứng — xác nhận phủ định",
+    "en": "Allergy check — negation confirmation"
+  },
+  "summary": {
+    "vi": "Từ phủ định và tên dị nguyên được tách riêng để bác sĩ xác nhận.",
+    "en": "Negation and allergen are separated for clinician confirmation."
+  },
+  "turns": [
+    {
+      "id": "al-1",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Anh có dị ứng thuốc nào không?",
+      "en": "Do you have any drug allergies?",
+      "riskTier": "medium",
+      "riskSpans": [
+        { "kind": "allergy", "vi": "dị ứng", "en": "allergies" }
+      ]
+    },
+    {
+      "id": "al-2",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi không chắc.",
+      "en": "I'm not sure.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "al-3",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Anh có từng dị ứng với penicillin không?",
+      "en": "Have you ever been allergic to penicillin?",
+      "riskTier": "medium",
+      "riskSpans": [
+        { "kind": "allergy", "vi": "dị ứng", "en": "allergic" },
+        { "kind": "drug", "vi": "penicillin", "en": "penicillin" }
+      ]
+    },
+    {
+      "id": "al-4",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Không, tôi không dị ứng với penicillin.",
+      "en": "No, I am not allergic to penicillin.",
+      "riskTier": "critical",
+      "riskSpans": [
+        { "kind": "negation", "vi": "Không", "en": "No" },
+        { "kind": "negation", "vi": "không dị ứng", "en": "not allergic" },
+        { "kind": "drug", "vi": "penicillin", "en": "penicillin" }
+      ],
+      "readback": {
+        "entities": [
+          { "kind": "Phủ định", "sourceText": "not allergic", "translatedText": "không dị ứng" },
+          { "kind": "Thuốc", "sourceText": "penicillin", "translatedText": "penicillin" }
+        ]
+      }
+    },
+    {
+      "id": "al-5",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Tôi đã ghi nhận đúng câu trả lời của anh.",
+      "en": "I have recorded your answer correctly.",
+      "riskTier": "low",
+      "riskSpans": []
+    },
+    {
+      "id": "al-6",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Tôi có cần nhắc lại không?",
+      "en": "Do I need to repeat it?",
+      "riskTier": "low",
+      "riskSpans": []
+    },
+    {
+      "id": "al-7",
+      "speaker": "doctor",
+      "sourceLanguage": "vi",
+      "vi": "Không, thông tin đã được xác nhận.",
+      "en": "No, the information has been confirmed.",
+      "riskTier": "medium",
+      "riskSpans": []
+    },
+    {
+      "id": "al-8",
+      "speaker": "patient",
+      "sourceLanguage": "en",
+      "vi": "Cảm ơn bác sĩ.",
+      "en": "Thank you, doctor.",
+      "riskTier": "low",
+      "riskSpans": []
+    }
+  ]
+}
