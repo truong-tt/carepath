@@ -141,6 +141,12 @@ async def _send_session_ended(websocket: WebSocket, session_id: str) -> None:
     )
 
 
+@api_router.get("/health")
+def health() -> dict[str, str]:
+    settings = get_settings()
+    return {"status": "ok", "provider_mode": settings.provider_mode}
+
+
 @api_router.post("/sessions", status_code=201)
 def create_session(
     payload: SessionCreateRequest,

@@ -40,9 +40,3 @@ app.add_middleware(
 )
 app.include_router(api_router)
 app.include_router(ws_router)
-
-
-@app.get("/api/health")
-def health() -> dict[str, str]:
-    settings = get_settings()
-    return {"status": "ok", "provider_mode": settings.provider_mode}

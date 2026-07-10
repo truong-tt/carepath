@@ -14,6 +14,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
+from sqlmodel import Session as InterpreterDBSession
+
+# Interpreter module (backend/): the second CarePath product, served by this
+# same process so one deploy covers both. Requires `pip install ./backend`.
+from app import crud as interpreter_crud
+from app.api import api_router as interpreter_api_router
+from app.api import ws_router as interpreter_ws_router
+from app.config import get_settings as get_interpreter_settings
+from app.db import get_engine as get_interpreter_engine
+from app.db import init_db as init_interpreter_db
+from app.glossary import seed_glossary
+from app.main import validate_runtime_settings as validate_interpreter_settings
+
 from carepath.config import Settings, load_settings
 from carepath.logging_config import configure_logging
 from carepath.schemas import (
@@ -68,9 +81,25 @@ def _warmup_pipeline() -> None:
     logger.info("pipeline warmup complete %s", report)
 
 
+def _startup_interpreter() -> None:
+    # Mirrors the backend/app/main.py lifespan so the standalone dev app and
+    # this combined service boot identically.
+    validate_interpreter_settings()
+    init_interpreter_db()
+    interpreter_settings = get_interpreter_settings()
+    with InterpreterDBSession(get_interpreter_engine()) as db:
+        seed_glossary(db)
+        interpreter_crud.purge_old_sessions(db, interpreter_settings.retention_days)
+    logger.info(
+        "interpreter startup complete provider_mode=%s",
+        interpreter_settings.provider_mode,
+    )
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     _warmup_pipeline()
+    _startup_interpreter()
     yield
 
 
@@ -103,6 +132,13 @@ if get_settings().cors_origins:
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["*"],
     )
+
+
+# Interpreter routes (/api/health, /api/sessions*, /api/turns*, /api/admin/*,
+# /ws/sessions/*). No prefix collision with the scriber's /api/v1/*; registered
+# before the static mount at the bottom so API routes always win.
+app.include_router(interpreter_api_router)
+app.include_router(interpreter_ws_router)
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
