@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -116,9 +117,18 @@ app = FastAPI(
 async def reject_disallowed_origin(request: Request, call_next):
     settings = get_settings()
     origin = request.headers.get("origin")
+    request_host = (
+        request.headers.get("x-forwarded-host") or request.headers.get("host", "")
+    ).split(",", 1)[0].strip().lower()
+    try:
+        origin_host = urlsplit(origin).netloc.lower() if origin else ""
+    except ValueError:
+        origin_host = ""
+    same_origin = bool(request_host and origin_host == request_host)
     if (
         settings.cors_origins
         and origin
+        and not same_origin
         and origin.rstrip("/") not in settings.cors_origins
     ):
         return PlainTextResponse("Disallowed CORS origin", status_code=400)
