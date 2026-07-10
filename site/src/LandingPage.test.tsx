@@ -1,6 +1,27 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import LandingPage from "./LandingPage";
+import { copyFor, type ProductKey } from "./content/strings";
+
+function expectProductCopy(language: "vi" | "en") {
+  const copy = copyFor(language);
+  for (const key of ["interpreter", "scribe"] satisfies ProductKey[]) {
+    const product = copy.products[key];
+    expect(screen.getAllByText(product.name).length).toBeGreaterThan(0);
+    expect(screen.getByText(product.body)).toBeInTheDocument();
+    expect(screen.getAllByText(product.audience).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(product.status).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole("link", { name: product.cta.explore }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: product.cta.open }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: product.cta.pilot }),
+    ).toBeInTheDocument();
+  }
+}
 
 describe("LandingPage", () => {
   it("renders the Vietnamese evidence-led page", () => {
@@ -24,6 +45,7 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: "CarePath Interpreter" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "CarePath Scribe" })).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
+    expectProductCopy("vi");
   });
 
   it("renders the complete page in English", () => {
@@ -50,6 +72,7 @@ describe("LandingPage", () => {
     expect(
       screen.getAllByText("Pilot tool — every draft requires clinician review."),
     ).toHaveLength(2);
+    expectProductCopy("en");
   });
 
   it("reflects clinic customization in the demo and form", () => {

@@ -2160,19 +2160,41 @@ mark.scribe-mark {
   padding: clamp(1.25rem, 3vw, 2.5rem);
 }
 
-.evidence-capture__content > span {
-  display: block;
-  width: 72%;
-  height: 0.55rem;
-  background: var(--line);
+.evidence-capture__turn,
+.evidence-capture__content dl > div {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--tint-section);
 }
 
-.evidence-capture__content > span:nth-child(2) {
-  width: 46%;
+.evidence-capture__turn small,
+.evidence-capture__content dt,
+.evidence-capture__source {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.5;
 }
 
-.evidence-capture__content > span:last-child {
-  width: 58%;
+.evidence-capture__turn p,
+.evidence-capture__content dd {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.evidence-capture__content dl {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.evidence-capture__content dt {
+  color: var(--amber-text);
+}
+
+.evidence-capture__source {
+  margin: 0;
 }
 
 .evidence-capture__content strong {

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { validateDeployEnv } from "./validate-deploy-env.mjs";
@@ -39,4 +40,11 @@ test("rejects paths, queries, and fragments that would corrupt runtime URLs", ()
       }),
     /VITE_API_BASE must not include a query or fragment[\s\S]*VITE_CONSOLE_URL must not include a query or fragment[\s\S]*VITE_API_BASE pathname must be \//,
   );
+});
+
+test("Vercel runs validation before the production build", async () => {
+  const config = JSON.parse(
+    await readFile(new URL("../vercel.json", import.meta.url), "utf8"),
+  );
+  assert.equal(config.buildCommand, "npm run validate:deploy && npm run build");
 });

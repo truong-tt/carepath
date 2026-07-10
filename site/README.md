@@ -19,5 +19,8 @@ Normal builds allow same-origin API fallbacks for the combined FastAPI service.
 The Vercel build validates that both Space URLs are configured and use one
 HTTPS origin.
 
+`gsap` and `@gsap/react` are used only for the desktop product-index pin and
+safety-card stack, including scoped cleanup and reduced-motion breakpoints.
+
 The generated identity board is stored in `brand/`; production identity assets
 live in `src/assets/`.

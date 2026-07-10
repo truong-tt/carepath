@@ -394,7 +394,7 @@ export const strings: Record<Language, PageCopy> = {
     scribeTool: {
       title: "Từ bản ghi âm buổi khám đến bệnh án SOAP",
       intro: "Tải lên tệp ghi âm buổi khám bằng tiếng Việt. Hệ thống phiên âm, hiệu chỉnh thuật ngữ và soạn bản nháp SOAP để bác sĩ kiểm tra.",
-      back: "Về trang chính",
+      back: "Tất cả sản phẩm",
       health: {
         checking: "Đang kết nối…",
         ready: "Hệ thống sẵn sàng",
@@ -747,7 +747,7 @@ export const strings: Record<Language, PageCopy> = {
     scribeTool: {
       title: "From visit recording to a SOAP note",
       intro: "Upload a Vietnamese consultation recording. The system transcribes it, corrects medical terms, and drafts a SOAP note for clinician review.",
-      back: "Back to overview",
+      back: "All products",
       health: {
         checking: "Connecting…",
         ready: "System ready",

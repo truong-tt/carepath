@@ -35,7 +35,7 @@ const correctedSegments: Segment[] = [
   },
 ];
 
-const soapDraft: Array<{ key: "s" | "o" | "a" | "p"; text: string }> = [
+export const soapDraft: Array<{ key: "s" | "o" | "a" | "p"; text: string }> = [
   { key: "s", text: "Đau đầu, chóng mặt từ sáng nay. Không đau ngực, không khó thở." },
   {
     key: "o",

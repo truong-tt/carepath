@@ -7,7 +7,7 @@ import type { Language } from "./demo/types";
 import { useLandingMotion } from "./landing/useLandingMotion";
 import LeadForm from "./LeadForm";
 import { leadContact, zaloHref, type ProductInterest } from "./leads";
-import ScribeShowcase from "./scribe/ScribeShowcase";
+import ScribeShowcase, { soapDraft } from "./scribe/ScribeShowcase";
 
 interface LandingPageProps {
   language: Language;
@@ -15,6 +15,7 @@ interface LandingPageProps {
 }
 
 const productOrder: ProductKey[] = ["interpreter", "scribe"];
+const interpreterEvidenceTurn = getScenario("allergy").turns[3];
 
 export default function LandingPage({
   language,
@@ -403,11 +404,38 @@ export default function LandingPage({
                   <span>CarePath</span>
                   <span>{evidence.product}</span>
                 </div>
-                <div className="evidence-capture__content">
-                  <span />
-                  <span />
+                <div
+                  className={`evidence-capture__content evidence-capture__content--${evidence.kind}`}
+                >
+                  {evidence.kind === "interpreter" && (
+                    <>
+                      <div className="evidence-capture__turn">
+                        <small>EN · {copy.demo.patient}</small>
+                        <p lang="en">{interpreterEvidenceTurn.en}</p>
+                      </div>
+                      <div className="evidence-capture__turn">
+                        <small>VI · {copy.demo.translation}</small>
+                        <p lang="vi">{interpreterEvidenceTurn.vi}</p>
+                      </div>
+                    </>
+                  )}
+                  {evidence.kind === "scribe" && (
+                    <dl>
+                      {soapDraft.slice(0, 2).map((row) => (
+                        <div key={row.key}>
+                          <dt>{copy.scribe.soapLabels[row.key]}</dt>
+                          <dd lang="vi">{row.text}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {evidence.kind === "research" && (
+                    <p className="evidence-capture__source">
+                      docs/research.md<br />
+                      {evidence.body}
+                    </p>
+                  )}
                   <strong>{evidence.detail}</strong>
-                  <span />
                 </div>
               </div>
             </article>

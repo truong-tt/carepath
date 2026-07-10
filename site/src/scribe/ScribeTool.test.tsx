@@ -51,6 +51,9 @@ describe("ScribeTool", () => {
     render(<ScribeTool language="vi" />);
     await screen.findByText("Chế độ demo");
     expect(
+      screen.getAllByRole("link", { name: "Tất cả sản phẩm" }),
+    ).toHaveLength(2);
+    expect(
       screen.getByText("Công cụ thí điểm · Cần bác sĩ duyệt"),
     ).toBeInTheDocument();
 
