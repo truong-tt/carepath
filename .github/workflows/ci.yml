@@ -5,6 +5,20 @@ on:
   pull_request:
 
 jobs:
+  unified-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install both API packages
+        run: python -m pip install -e ".[dev]" -e "./backend[dev]"
+      - name: Scriber and combined-app tests
+        run: pytest
+      - name: Scriber smoke test (mock ASR + offline LLM)
+        run: python scripts/smoke_backend.py
+
   backend:
     runs-on: ubuntu-latest
     steps:
