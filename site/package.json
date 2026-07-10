@@ -11,19 +11,23 @@
     "lighthouse": "node scripts/run-lighthouse.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:deploy-env": "node --test scripts/validate-deploy-env.test.mjs",
+    "validate:deploy": "node scripts/validate-deploy-env.mjs"
   },
   "dependencies": {
-    "@fontsource/be-vietnam-pro": "5.2.8",
+    "@fontsource/geist": "5.2.9",
+    "@gsap/react": "2.1.2",
+    "gsap": "3.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
     "@eslint/js": "9.39.4",
+    "@playwright/test": "1.61.1",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",
-    "@axe-core/playwright": "4.12.1",
-    "@playwright/test": "1.61.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "6.0.3",

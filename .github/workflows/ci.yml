@@ -103,6 +103,9 @@ jobs:
       - name: Test demo site
         working-directory: site
         run: npm test
+      - name: Test Vercel environment validation
+        working-directory: site
+        run: npm run test:deploy-env
       - name: Build demo site
         working-directory: site
         run: npm run build

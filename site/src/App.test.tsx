@@ -18,42 +18,37 @@ describe("language preference", () => {
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
       screen.getByRole("heading", {
-        name: /Medical interpreting and notes, confirmed before use/,
+        name: "One care journey. Two CarePath products.",
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "A misunderstood sentence can travel beyond one conversation.",
+        name: "Choose the right product for the right point in care.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Important content does not pass straight to the patient or the record.",
+        name: "One shared oversight layer. Two product-specific safety systems.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "From spoken visit to a SOAP draft.",
+        name: "Turn what was said into a structured draft.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Speak. Review. Deliver only after confirmation.",
+        name: "See how each product keeps review points in the right place.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Status-quo costs need honest context.",
+        name: "Choose the product that fits your workflow.",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
-        name: "Keep the demo you just created",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("AI assistance, clinician confirmed."),
+      screen.getByText("AI assistance, clinician in control."),
     ).toBeInTheDocument();
   });
 

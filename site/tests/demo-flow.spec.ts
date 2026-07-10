@@ -107,14 +107,68 @@ test("initial and confirmation states have no serious axe violations", async ({
   await expectNoSeriousAxeViolations(page);
 });
 
-test("phone layout has no horizontal overflow", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
+test("both product choices stay above the fold across release viewports", async ({
+  page,
+}) => {
+  const viewports = [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 900 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
+      }),
+    ).toBeVisible();
+
+    for (const name of ["Khám phá Interpreter", "Khám phá Scribe"]) {
+      const choice = page.getByRole("link", { exact: true, name });
+      await expect(choice).toBeVisible();
+      const box = await choice.boundingBox();
+      expect(box).not.toBeNull();
+      expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(
+        viewport.height,
+      );
+    }
+
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      ),
+    ).toBeLessThanOrEqual(0);
+
+    if (viewport.width <= 1023) {
+      const menu = page.locator(".site-nav__menu");
+      await menu.locator("summary").click();
+      await expect(menu.getByRole("link", { name: "Interpreter" })).toBeVisible();
+      await expect(menu.getByRole("link", { name: "Scribe" })).toBeVisible();
+    }
+  }
+
+  await expect(
+    page.getByRole("link", { exact: true, name: "Mở công cụ Interpreter" }),
+  ).toHaveAttribute("href", "/console/");
+  await expect(
+    page.getByRole("link", { exact: true, name: "Mở công cụ Scribe" }),
+  ).toHaveAttribute("href", "#/scribe");
+});
+
+test("returning from Scribe restores focus to the landing page", async ({ page }) => {
+  await page.route("**/api/v1/health", async (route) => {
+    await route.fulfill({ status: 200, json: { asr_ready: true, llm_ready: true } });
+  });
+  await page.goto("/#/scribe");
+  await page.locator(".nav-cta").click();
+
+  await expect(page).toHaveURL(/#top$/);
+  await expect(page.locator("main#top")).toBeFocused();
 });
 
 test.describe("reduced motion", () => {

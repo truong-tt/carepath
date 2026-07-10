@@ -1,8 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "@fontsource/be-vietnam-pro/400.css";
-import "@fontsource/be-vietnam-pro/600.css";
-import "@fontsource/be-vietnam-pro/700.css";
+import "@fontsource/geist/latin-400.css";
+import "@fontsource/geist/vietnamese-400.css";
+import "@fontsource/geist/latin-500.css";
+import "@fontsource/geist/vietnamese-500.css";
+import "@fontsource/geist/latin-600.css";
+import "@fontsource/geist/vietnamese-600.css";
+import "@fontsource/geist/latin-700.css";
+import "@fontsource/geist/vietnamese-700.css";
 import App from "./App";
 import "./styles.css";
 

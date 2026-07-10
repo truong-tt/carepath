@@ -50,6 +50,9 @@ describe("ScribeTool", () => {
 
     render(<ScribeTool language="vi" />);
     await screen.findByText("Chế độ demo");
+    expect(
+      screen.getByText("Công cụ thí điểm · Cần bác sĩ duyệt"),
+    ).toBeInTheDocument();
 
     const submit = screen.getByRole("button", { name: "Tạo bệnh án SOAP" });
     expect(submit).toBeDisabled();

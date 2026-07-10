@@ -3,25 +3,39 @@ import type { Language, LocalizedText } from "../demo/types";
 export const sources = {
   research: {
     label: "CarePath research report",
-    href: "https://github.com/truong-tt/carepath/blob/carepath-interpreter-demo/docs/research.md",
-  },
-  phuYenRates: {
-    label: "Quyết định 32/2021/QĐ-UBND, tỉnh Phú Yên",
-    href: "https://vbpl.vn/TW/Pages/vbpq-print.aspx?ItemID=149549",
-  },
-  healthPricing: {
-    label: "Thông tư 21/2024/TT-BYT",
-    href: "https://vbpl.moj.gov.vn/boyte/Pages/vbpq-toanvan.aspx?ItemID=170583&Keyword=",
-  },
-  ahrqCost: {
-    label: "AHRQ National Scorecard, 2019",
-    href: "https://www.ahrq.gov/sites/default/files/wysiwyg/professionals/quality-patient-safety/pfp/hacreport-2019.pdf",
+    href: "https://github.com/truong-tt/carepath/blob/main/docs/research.md",
   },
 } as const;
 
 interface SafetyItem {
   title: LocalizedText;
   body: LocalizedText;
+}
+
+export type ProductKey = "interpreter" | "scribe";
+
+interface ProductCopy {
+  name: string;
+  audience: string;
+  input: string;
+  output: string;
+  status: string;
+  disclosure: string;
+  title: string;
+  body: string;
+  workflow: Array<{ title: string; body: string }>;
+  safety: string[];
+  cta: {
+    explore: string;
+    open: string;
+    pilot: string;
+  };
+}
+
+interface SafetyCardCopy {
+  title: string;
+  body: string;
+  items: SafetyItem[];
 }
 
 interface PageCopy {
@@ -31,11 +45,11 @@ interface PageCopy {
     en: string;
   };
   nav: {
-    demo: string;
+    interpreter: string;
     scribe: string;
     safety: string;
-    process: string;
-    cost: string;
+    pilot: string;
+    menu: string;
   };
   demo: {
     brand: string;
@@ -84,6 +98,8 @@ interface PageCopy {
     clinic: string;
     role: string;
     contact: string;
+    interest: string;
+    interestOptions: Record<"interpreter" | "scribe" | "both", string>;
     message: string;
     prepare: string;
     submitting: string;
@@ -93,29 +109,27 @@ interface PageCopy {
     required: string;
   };
   hero: {
-    titleBefore: string;
-    titleAfter: string;
-    body: string;
-    primaryCta: string;
-    secondaryCta: string;
-    note: string;
-  };
-  modules: {
-    heading: string;
-    interpreter: { name: string; body: string };
-    scribe: { name: string; body: string };
-  };
-  scribe: {
-    brand: string;
-    kicker: string;
     title: string;
     body: string;
+    interpreterCta: string;
+    scribeCta: string;
+  };
+  gateway: {
+    heading: string;
+    body: string;
+    audience: string;
+    input: string;
+    output: string;
+    workflow: string;
+  };
+  products: Record<ProductKey, ProductCopy>;
+  scribe: {
+    brand: string;
     disclosure: string;
     steps: Record<"raw" | "corrected" | "soap", { label: string; caption: string }>;
     status: string;
     soapLabels: Record<"s" | "o" | "a" | "p", string>;
     note: string;
-    cta: string;
   };
   scribeTool: {
     title: string;
@@ -143,43 +157,30 @@ interface PageCopy {
     disclaimer: string;
   };
   marquee: string[];
-  problem: {
-    kicker: string;
+  evidence: {
     title: string;
     body: string;
-    memoryStat: string;
-    memoryDetail: string;
-    translationStat: string;
-    translationDetail: string;
-    framing: string;
+    carouselLabel: string;
+    previous: string;
+    next: string;
+    slideLabel: string;
+    source: string;
+    items: Array<{
+      kind: "interpreter" | "scribe" | "research";
+      product: string;
+      title: string;
+      body: string;
+      detail: string;
+    }>;
   };
   safety: {
-    kicker: string;
     title: string;
     body: string;
-    items: SafetyItem[];
-  };
-  process: {
-    kicker: string;
-    title: string;
-    steps: Array<{ title: string; body: string }>;
-  };
-  cost: {
-    kicker: string;
-    title: string;
-    body: string;
-    interpreterTitle: string;
-    interpreterValue: string;
-    interpreterNote: string;
-    incidentTitle: string;
-    incidentValue: string;
-    incidentNote: string;
-    pilotTitle: string;
-    pilotValue: string;
-    pilotNote: string;
+    shared: SafetyCardCopy;
+    interpreter: SafetyCardCopy;
+    scribe: SafetyCardCopy;
   };
   pilot: {
-    kicker: string;
     title: string;
     body: string;
     transcriptNote: string;
@@ -200,11 +201,11 @@ export const strings: Record<Language, PageCopy> = {
       en: "EN",
     },
     nav: {
-      demo: "Bản mô phỏng",
+      interpreter: "Interpreter",
       scribe: "Scribe",
-      safety: "Cơ chế an toàn",
-      process: "Cách hoạt động",
-      cost: "Chi phí tham chiếu",
+      safety: "An toàn",
+      pilot: "Thí điểm",
+      menu: "Mở điều hướng",
     },
     demo: {
       brand: "CarePath Phiên dịch",
@@ -264,6 +265,12 @@ export const strings: Record<Language, PageCopy> = {
       clinic: "Cơ sở y tế",
       role: "Vai trò",
       contact: "Email hoặc Zalo",
+      interest: "Sản phẩm quan tâm",
+      interestOptions: {
+        interpreter: "CarePath Interpreter",
+        scribe: "CarePath Scribe",
+        both: "Cả hai sản phẩm",
+      },
       message: "Lời nhắn",
       prepare: "Chuẩn bị yêu cầu thí điểm",
       submitting: "Đang gửi yêu cầu…",
@@ -273,29 +280,93 @@ export const strings: Record<Language, PageCopy> = {
       required: "Vui lòng điền trường này.",
     },
     hero: {
-      titleBefore: "Phiên dịch và ghi chép y khoa,",
-      titleAfter: "xác nhận trước khi sử dụng.",
-      body: "Phiên dịch Việt-Anh có bước xác nhận, cùng Scribe tạo bản nháp SOAP từ chính lời trong buổi khám. Không chẩn đoán, không tư vấn điều trị.",
-      primaryCta: "Xem demo 90 giây",
-      secondaryCta: "Xem cơ chế an toàn",
-      note: "Không cần đăng ký. Không thu âm. Không gửi dữ liệu.",
+      title: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
+      body: "Interpreter hỗ trợ hội thoại y khoa Việt–Anh với bước chặn rủi ro và xác nhận của bác sĩ. Scribe chuyển tệp âm thanh buổi khám thành bản nháp SOAP để bác sĩ duyệt.",
+      interpreterCta: "Khám phá Interpreter",
+      scribeCta: "Khám phá Scribe",
     },
-    modules: {
-      heading: "Hai phân hệ",
+    gateway: {
+      heading: "Chọn đúng sản phẩm cho đúng thời điểm chăm sóc.",
+      body: "Hai công việc riêng biệt, cùng giữ bác sĩ ở vị trí quyết định.",
+      audience: "Dành cho",
+      input: "Đầu vào",
+      output: "Đầu ra",
+      workflow: "Luồng chính",
+    },
+    products: {
       interpreter: {
-        name: "Phiên dịch",
-        body: "Hội thoại Việt-Anh trực tiếp; nội dung rủi ro chỉ được phát khi bác sĩ đã xác nhận.",
+        name: "CarePath Interpreter",
+        audience: "Bác sĩ và cơ sở y tế cần trao đổi Việt–Anh rõ ràng trong buổi khám.",
+        input: "Hội thoại Việt–Anh theo từng lượt.",
+        output: "Bản dịch hiển thị theo mức rủi ro; nội dung nguy cơ cao chờ bác sĩ xác nhận.",
+        status: "Mô phỏng tương tác — chưa phải phiên dịch trực tiếp.",
+        disclosure: "Bản mô phỏng không sử dụng micro và không lưu âm thanh.",
+        title: "Giữ quyền xác nhận ở phía bác sĩ.",
+        body: "Interpreter chỉ dịch nội dung hội thoại. Nội dung nguy cơ cao hoặc nghiêm trọng bị chặn khỏi người bệnh cho đến khi bác sĩ xác nhận, chỉnh sửa hoặc chuyển sang phiên dịch viên.",
+        workflow: [
+          {
+            title: "Hội thoại",
+            body: "Bác sĩ và người bệnh trao đổi theo từng lượt ngắn.",
+          },
+          {
+            title: "Bác sĩ xác nhận",
+            body: "Thuốc, liều, phủ định và nội dung rủi ro được tách ra để kiểm tra.",
+          },
+          {
+            title: "Bản dịch được phát",
+            body: "Lượt nguy cơ cao hoặc nghiêm trọng chỉ đến người bệnh sau xác nhận; cảnh báo vẫn hiển thị ở các lượt còn lại.",
+          },
+        ],
+        safety: [
+          "Chặn lượt nguy cơ cao và nghiêm trọng",
+          "Hiện cảnh báo khi độ tin cậy thấp",
+          "Read-back trước khi phát nội dung quan trọng",
+          "Luôn có đường chuyển sang phiên dịch viên",
+        ],
+        cta: {
+          explore: "Khám phá Interpreter",
+          open: "Mở công cụ Interpreter",
+          pilot: "Thí điểm Interpreter",
+        },
       },
       scribe: {
-        name: "Scribe",
-        body: "Bản nháp SOAP tiếng Việt từ hội thoại khám, luôn chờ bác sĩ duyệt.",
+        name: "CarePath Scribe",
+        audience: "Bác sĩ cần giảm thời gian ghi chép sau buổi khám tiếng Việt.",
+        input: "Tệp âm thanh buổi khám do cơ sở chủ động tải lên.",
+        output: "Bản nháp SOAP có đánh dấu thông tin còn thiếu.",
+        status: "Công cụ thí điểm — mọi bản nháp cần bác sĩ duyệt.",
+        disclosure: "Tệp âm thanh do cơ sở chủ động tải lên được xử lý để tạo bản nháp; bản nháp không tự đi vào hồ sơ.",
+        title: "Từ lời đã nói đến bản nháp có cấu trúc.",
+        body: "Scribe phiên âm hội thoại tiếng Việt, hiệu chỉnh thuật ngữ y khoa và được yêu cầu chỉ sắp xếp nội dung đã nói thành bản nháp SOAP. Bác sĩ vẫn phải đối chiếu bản nháp với hội thoại và loại bỏ nội dung không có căn cứ.",
+        workflow: [
+          {
+            title: "Tải lên hội thoại",
+            body: "Cơ sở chủ động chọn tệp âm thanh của buổi khám.",
+          },
+          {
+            title: "Hiệu chỉnh thuật ngữ",
+            body: "Các thuật ngữ và con số nhận dạng sai được làm nổi bật.",
+          },
+          {
+            title: "Bản nháp SOAP",
+            body: "Nội dung được xếp theo SOAP và giữ ở trạng thái chờ bác sĩ duyệt.",
+          },
+        ],
+        safety: [
+          "Luôn ghi rõ đây là bản nháp",
+          "Hiện danh sách thông tin còn thiếu",
+          "Đối chiếu nội dung y khoa với hội thoại",
+          "Bác sĩ duyệt trước khi đưa vào hồ sơ",
+        ],
+        cta: {
+          explore: "Khám phá Scribe",
+          open: "Mở công cụ Scribe",
+          pilot: "Thí điểm Scribe",
+        },
       },
     },
     scribe: {
       brand: "CarePath Scribe",
-      kicker: "Phân hệ Scribe",
-      title: "Từ lời nói trong buổi khám thành bản nháp SOAP.",
-      body: "Scribe nghe hội thoại khám bằng tiếng Việt, hiệu chỉnh thuật ngữ bị nhận dạng sai và xếp thành bản nháp SOAP. Bản nháp chỉ vào hồ sơ sau khi bác sĩ duyệt.",
       disclosure: "Bản mô phỏng với dữ liệu mẫu, không phải hồ sơ thật",
       steps: {
         raw: {
@@ -318,8 +389,7 @@ export const strings: Record<Language, PageCopy> = {
         a: "Đánh giá",
         p: "Kế hoạch",
       },
-      note: "Nội dung trên là dữ liệu mẫu cho bản mô phỏng. Scribe không tự đưa ra chẩn đoán; mọi mục đều lấy từ lời đã nói trong buổi khám.",
-      cta: "Mở công cụ Scribe",
+      note: "Trong bản mô phỏng này, mọi mục đều truy nguyên từ dữ liệu mẫu; khi sử dụng công cụ, bác sĩ vẫn phải đối chiếu bản nháp với hội thoại.",
     },
     scribeTool: {
       title: "Từ bản ghi âm buổi khám đến bệnh án SOAP",
@@ -353,107 +423,127 @@ export const strings: Record<Language, PageCopy> = {
       disclaimer: "Bản demo cho nhân viên y tế. Không dùng cho chẩn đoán lâm sàng chính thức.",
     },
     marquee: [
-      "Xác nhận read-back",
-      "Đánh dấu nội dung rủi ro",
-      "Cảnh báo độ tin cậy thấp",
-      "Không lưu âm thanh",
-      "Chuyển phiên dịch viên",
-      "Bản nháp SOAP chờ duyệt",
+      "Interpreter — xác nhận read-back",
+      "Interpreter — chặn nội dung rủi ro",
+      "Interpreter — cảnh báo độ tin cậy thấp",
+      "Scribe — hiệu chỉnh thuật ngữ",
+      "Scribe — đánh dấu thông tin còn thiếu",
+      "Scribe — Bản nháp SOAP chờ duyệt",
     ],
-    problem: {
-      kicker: "Rủi ro đang có",
-      title: "Một câu bị hiểu sai có thể đi xa hơn một cuộc hội thoại.",
-      body: "CarePath không hứa thay thế phán đoán lâm sàng hay phiên dịch viên. Sản phẩm tập trung vào một việc hẹp hơn: làm cho điểm cần xác nhận trở nên nhìn thấy được.",
-      memoryStat: "40–80%",
-      memoryDetail: "thông tin y khoa bằng lời nói có thể bị quên ngay; gần một nửa phần được nhớ lại có thể không chính xác.",
-      translationStat: "Tới 66%",
-      translationDetail: "bộ hướng dẫn xuất viện được Google dịch sang tiếng Nga trong một nghiên cứu năm 2025 có ít nhất một điểm không chính xác.",
-      framing: "Mỗi lượt khám không được phiên dịch đúng là một rủi ro mà cơ sở y tế đang gánh cho người bệnh, uy tín và quy trình chăm sóc.",
-    },
-    safety: {
-      kicker: "An toàn theo thiết kế",
-      title: "Nội dung quan trọng không tự động đi thẳng tới người bệnh hay hồ sơ.",
-      body: "Năm cơ chế dưới đây áp dụng cho cả phiên dịch lẫn bản nháp Scribe. Đây là nguyên tắc sản phẩm, không phải lời hứa về kết quả điều trị.",
+    evidence: {
+      title: "Xem cách mỗi sản phẩm giữ điểm cần duyệt ở đúng chỗ.",
+      body: "Các màn hình dưới đây dùng dữ liệu mẫu đã làm sạch. Bằng chứng nghiên cứu dẫn về báo cáo nguồn của CarePath; không có lời chứng thực hoặc tuyên bố kết quả giả định.",
+      carouselLabel: "Bằng chứng sản phẩm CarePath",
+      previous: "Màn trước",
+      next: "Màn tiếp theo",
+      slideLabel: "Màn",
+      source: "Đọc báo cáo nghiên cứu và nguồn trích dẫn",
       items: [
         {
-          title: { vi: "Xác nhận read-back", en: "Read-back confirmation" },
-          body: {
-            vi: "Liều, thuốc, tần suất và phủ định được tách riêng để bác sĩ kiểm tra trước khi phát.",
-            en: "Dose, drug, frequency, and negation are separated for clinician review before delivery.",
-          },
+          kind: "interpreter",
+          product: "CarePath Interpreter",
+          title: "Lượt nguy cơ được giữ lại cho bác sĩ.",
+          body: "Màn hình mô phỏng hiển thị đồng thời câu nguồn, bản dịch, nhãn rủi ro và hành động xác nhận.",
+          detail: "Dữ liệu mẫu: dị ứng penicillin được đánh dấu và chưa phát cho người bệnh.",
         },
         {
-          title: { vi: "Đánh dấu rủi ro", en: "Risk highlighting" },
-          body: {
-            vi: "Màu sắc đi cùng nhãn chữ để thuốc, dị ứng, con số và dấu hiệu nguy cơ không bị chìm trong hội thoại.",
-            en: "Color and text labels keep drugs, allergies, numbers, and red flags visible.",
-          },
+          kind: "scribe",
+          product: "CarePath Scribe",
+          title: "Bản nháp cho thấy phần cần kiểm tra.",
+          body: "Màn hình mẫu đặt bản gõ thô, thuật ngữ đã sửa và bốn mục SOAP trong cùng một luồng duyệt.",
+          detail: "Dữ liệu mẫu: mục Đánh giá vẫn ở trạng thái chờ bác sĩ duyệt.",
         },
         {
-          title: { vi: "Độ tin cậy thấp", en: "Low confidence" },
-          body: {
-            vi: "Kết quả không chắc chắn luôn hiện cảnh báo và yêu cầu nói lại hoặc nhập văn bản.",
-            en: "Uncertain output is visibly flagged and asks for repetition or typed input.",
-          },
-        },
-        {
-          title: { vi: "Phiên dịch viên", en: "Human interpreter" },
-          body: {
-            vi: "Nội dung nguy cơ rất cao dừng tự động và giữ thao tác chuyển phiên dịch viên trong tầm tay.",
-            en: "Very high-risk content stops automation and keeps interpreter escalation within reach.",
-          },
-        },
-        {
-          title: { vi: "Thông báo sử dụng AI", en: "AI-use disclosure" },
-          body: {
-            vi: "Công cụ phiên dịch không lưu âm thanh; người dùng luôn được biết đây là AI và có thể yêu cầu con người hỗ trợ.",
-            en: "The translation tool stores no audio; users are told AI is involved and may request human support.",
-          },
+          kind: "research",
+          product: "Cơ sở nghiên cứu",
+          title: "Thiết kế cho việc xác nhận nhìn thấy được.",
+          body: "Báo cáo CarePath tổng hợp các nguồn về khả năng quên thông tin y khoa bằng lời và sai sót trong bản dịch máy hướng dẫn xuất viện.",
+          detail: "Các nguồn, giới hạn và bối cảnh nghiên cứu được giữ cùng báo cáo thay vì chuyển thành tuyên bố tiếp thị.",
         },
       ],
     },
-    process: {
-      kicker: "Một vòng xác nhận rõ ràng",
-      title: "Nói. Kiểm tra. Chỉ phát sau khi xác nhận.",
-      steps: [
-        {
-          title: "Nói theo lượt",
-          body: "Bác sĩ và bệnh nhân nói theo từng lượt ngắn; bản mô phỏng không sử dụng micro.",
-        },
-        {
-          title: "Nhìn thấy rủi ro",
-          body: "Nội dung song ngữ xuất hiện cùng nhãn thuốc, liều, phủ định và độ tin cậy.",
-        },
-        {
-          title: "Xác nhận hoặc chuyển người",
-          body: "Bác sĩ xác nhận read-back, chỉnh bản dịch, hoặc yêu cầu phiên dịch viên.",
-        },
-      ],
-    },
-    cost: {
-      kicker: "Đối chiếu minh bạch",
-      title: "Chi phí hiện trạng cần được nhìn đúng ngữ cảnh.",
-      body: "Các con số dưới đây là điểm tham chiếu công khai, không phải báo giá dịch vụ y tế và không phải cam kết tiết kiệm của CarePath.",
-      interpreterTitle: "Khung tham chiếu phiên dịch",
-      interpreterValue: "150.000–250.000 đồng/giờ",
-      interpreterNote: "Mức trần tham chiếu tại Phú Yên năm 2021: 150.000 đồng/giờ cho thời lượng từ bốn giờ, 250.000 đồng/giờ cho thời lượng ngắn hơn. Ngoài phạm vi quyết định, các bên tự thỏa thuận. Đây không phải giá phiên dịch y khoa toàn quốc.",
-      incidentTitle: "Chi phí tăng thêm do biến cố thuốc",
-      incidentValue: "5.746 USD / biến cố",
-      incidentNote: "Ước tính AHRQ tại bệnh viện Hoa Kỳ, công bố năm 2019. Không phải số liệu Việt Nam, không riêng lỗi phiên dịch và có khoảng bất định rộng.",
-      pilotTitle: "Chương trình thí điểm",
-      pilotValue: "TODO-pricing",
-      pilotNote: "Giá sẽ được công khai sau khi phạm vi hỗ trợ, thời lượng và trách nhiệm của các bên được xác định. Không có giá gạch bỏ hoặc khan hiếm giả.",
+    safety: {
+      title: "Một lớp giám sát chung. Hai cơ chế an toàn riêng.",
+      body: "CarePath không thay bác sĩ ra quyết định. Mỗi sản phẩm dừng đầu ra cần xác nhận ở đúng cổng duyệt của quy trình mà nó phục vụ.",
+      shared: {
+        title: "Giám sát chung cho CarePath",
+        body: "Bốn nguyên tắc áp dụng cho cả Interpreter và Scribe.",
+        items: [
+          {
+            title: { vi: "Bác sĩ giữ quyền quyết định", en: "Clinician authority" },
+            body: { vi: "Bác sĩ giữ quyền kiểm soát; lượt Interpreter nguy cơ cao và mọi bản nháp Scribe đều chờ bước xác nhận phù hợp.", en: "The clinician stays in control; high-risk Interpreter turns and every Scribe draft wait at the appropriate review gate." },
+          },
+          {
+            title: { vi: "Thông báo AI rõ ràng", en: "Clear AI disclosure" },
+            body: { vi: "Trạng thái mô phỏng, thí điểm và bản nháp luôn được gọi đúng tên.", en: "Simulation, pilot, and draft states are always named plainly." },
+          },
+          {
+            title: { vi: "Độ không chắc chắn nhìn thấy được", en: "Visible uncertainty" },
+            body: { vi: "Kết quả thiếu hoặc không chắc chắn không bị giao im lặng.", en: "Missing or uncertain output is never delivered silently." },
+          },
+          {
+            title: { vi: "Giảm thiểu dữ liệu", en: "Data minimization" },
+            body: { vi: "Chỉ xử lý dữ liệu cần cho lượt dịch hoặc bản nháp đang thực hiện.", en: "Only data needed for the active translation turn or draft is processed." },
+          },
+        ],
+      },
+      interpreter: {
+        title: "An toàn của Interpreter",
+        body: "Nội dung nguy cơ không đi thẳng tới người bệnh.",
+        items: [
+          {
+            title: { vi: "Chặn nguy cơ cao", en: "High-risk blocking" },
+            body: { vi: "Lượt nguy cơ cao và nghiêm trọng chờ bác sĩ xác nhận.", en: "High- and critical-risk turns wait for clinician confirmation." },
+          },
+          {
+            title: { vi: "Cảnh báo độ tin cậy thấp", en: "Low-confidence warnings" },
+            body: { vi: "Kết quả không chắc chắn luôn được gắn cờ rõ ràng.", en: "Uncertain output is always visibly flagged." },
+          },
+          {
+            title: { vi: "Read-back hoặc chuyển người", en: "Read-back or human escalation" },
+            body: { vi: "Bác sĩ xác nhận, chỉnh sửa hoặc yêu cầu phiên dịch viên.", en: "The clinician confirms, edits, or requests an interpreter." },
+          },
+          {
+            title: { vi: "Thông báo sử dụng AI", en: "AI-use disclosure" },
+            body: {
+              vi: "Công cụ phiên dịch không lưu âm thanh; người dùng luôn được biết đây là AI và có thể yêu cầu con người hỗ trợ.",
+              en: "The Interpreter stores no audio; users are told AI is involved and may request human support.",
+            },
+          },
+        ],
+      },
+      scribe: {
+        title: "An toàn của Scribe",
+        body: "Bản nháp không tự trở thành hồ sơ bệnh án.",
+        items: [
+          {
+            title: { vi: "Trạng thái bản nháp", en: "Draft-only status" },
+            body: { vi: "Mọi kết quả đều ghi rõ cần bác sĩ kiểm tra.", en: "Every result states that clinician review is required." },
+          },
+          {
+            title: { vi: "Thông tin còn thiếu", en: "Missing information" },
+            body: { vi: "Phần chưa có trong hội thoại được nêu ra thay vì tự điền.", en: "Details absent from the conversation are surfaced rather than invented." },
+          },
+          {
+            title: { vi: "Đối chiếu với nội dung nguồn", en: "Check against source content" },
+            body: { vi: "Mô hình được yêu cầu không tự thêm chẩn đoán, tư vấn hoặc thuốc; bác sĩ vẫn phải đối chiếu bản nháp với hội thoại.", en: "The model is instructed not to add diagnoses, advice, or medication; the clinician must still check the draft against the conversation." },
+          },
+          {
+            title: { vi: "Duyệt trước hồ sơ", en: "Review before record entry" },
+            body: { vi: "Bác sĩ kiểm tra trước khi bản nháp được đưa vào hồ sơ.", en: "A clinician checks the draft before it enters the record." },
+          },
+        ],
+      },
     },
     pilot: {
-      kicker: "Bản demo của cơ sở bạn",
-      title: "Giữ lại bản demo bạn vừa tạo",
-      body: "Thông tin cơ sở, chuyên khoa, kịch bản và phần hội thoại đã xem sẽ đi cùng yêu cầu thí điểm. Không có hộp đồng ý tiếp thị được chọn sẵn.",
-      transcriptNote: "Bản ghi song ngữ hiện tại được đính kèm trong dữ liệu yêu cầu.",
+      title: "Chọn sản phẩm phù hợp với quy trình của bạn.",
+      body: "Yêu cầu thí điểm có thể dành cho Interpreter, Scribe hoặc cả hai. Phạm vi và giá được xác định sau khi cùng xem quy trình thực tế; không có báo giá giả định trên trang này.",
+      transcriptNote: "Nếu chọn Interpreter, kịch bản và bản ghi song ngữ hiện tại sẽ đi cùng yêu cầu.",
     },
     footer: {
-      promise: "Hỗ trợ AI, bác sĩ xác nhận.",
+      promise: "AI hỗ trợ, bác sĩ giữ quyền quyết định.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
-      honesty: "Bản mô phỏng không dịch trực tiếp, không thu âm và không đưa ra lời khuyên y tế.",
+      honesty: "Interpreter là bản mô phỏng tương tác; Scribe là công cụ thí điểm tạo bản nháp. Cả hai đều cần giám sát của nhân viên y tế.",
       contact: "Liên hệ chương trình thí điểm",
     },
   },
@@ -464,11 +554,11 @@ export const strings: Record<Language, PageCopy> = {
       en: "EN",
     },
     nav: {
-      demo: "Simulation",
+      interpreter: "Interpreter",
       scribe: "Scribe",
-      safety: "Safety mechanics",
-      process: "How it works",
-      cost: "Cost references",
+      safety: "Safety",
+      pilot: "Pilot",
+      menu: "Open navigation",
     },
     demo: {
       brand: "CarePath Interpreter",
@@ -528,6 +618,12 @@ export const strings: Record<Language, PageCopy> = {
       clinic: "Clinic or hospital",
       role: "Role",
       contact: "Email or Zalo",
+      interest: "Product interest",
+      interestOptions: {
+        interpreter: "CarePath Interpreter",
+        scribe: "CarePath Scribe",
+        both: "Both products",
+      },
       message: "Message",
       prepare: "Prepare pilot request",
       submitting: "Sending request…",
@@ -537,29 +633,93 @@ export const strings: Record<Language, PageCopy> = {
       required: "Please complete this field.",
     },
     hero: {
-      titleBefore: "Medical interpreting and notes,",
-      titleAfter: "confirmed before use.",
-      body: "Live Vietnamese-English interpreting with a confirmation step, plus Scribe drafts of the visit's SOAP note. No diagnosis, no treatment advice.",
-      primaryCta: "Watch the 90-second demo",
-      secondaryCta: "See the safety mechanics",
-      note: "No signup. No recording. No data sent.",
+      title: "One care journey. Two CarePath products.",
+      body: "Interpreter supports Vietnamese–English clinical conversations with risk blocking and clinician confirmation. Scribe turns uploaded visit audio into a SOAP draft for clinician review.",
+      interpreterCta: "Explore Interpreter",
+      scribeCta: "Explore Scribe",
     },
-    modules: {
-      heading: "Two modules",
+    gateway: {
+      heading: "Choose the right product for the right point in care.",
+      body: "Two separate jobs, both keeping the clinician in control.",
+      audience: "For",
+      input: "Input",
+      output: "Output",
+      workflow: "Core flow",
+    },
+    products: {
       interpreter: {
-        name: "Interpreter",
-        body: "Live Vietnamese-English conversation; risky content is delivered only after the clinician confirms.",
+        name: "CarePath Interpreter",
+        audience: "Clinicians and care teams who need clear Vietnamese–English communication during a visit.",
+        input: "Turn-by-turn Vietnamese–English conversation.",
+        output: "Translation follows the risk tier; high-risk content waits for clinician confirmation.",
+        status: "Interactive simulation — not live interpreting.",
+        disclosure: "The simulation does not use the microphone or store audio.",
+        title: "Keep confirmation with the clinician.",
+        body: "Interpreter only translates the conversation. High- or critical-risk content stays blocked from the patient until the clinician confirms, edits, or escalates to a human interpreter.",
+        workflow: [
+          {
+            title: "Conversation",
+            body: "Clinician and patient exchange short, turn-based statements.",
+          },
+          {
+            title: "Clinician confirmation",
+            body: "Drugs, doses, negations, and risky content are separated for review.",
+          },
+          {
+            title: "Translation delivered",
+            body: "High- or critical-risk turns reach the patient only after confirmation; warnings remain visible on other turns.",
+          },
+        ],
+        safety: [
+          "Block high- and critical-risk turns",
+          "Show low-confidence warnings",
+          "Require read-back for critical information",
+          "Keep human-interpreter escalation available",
+        ],
+        cta: {
+          explore: "Explore Interpreter",
+          open: "Open Interpreter",
+          pilot: "Pilot Interpreter",
+        },
       },
       scribe: {
-        name: "Scribe",
-        body: "Vietnamese SOAP-note drafts from the visit conversation, always awaiting clinician review.",
+        name: "CarePath Scribe",
+        audience: "Clinicians who want to reduce documentation time after Vietnamese visits.",
+        input: "Visit audio intentionally uploaded by the care team.",
+        output: "A SOAP draft with missing information called out.",
+        status: "Pilot tool — every draft requires clinician review.",
+        disclosure: "Audio intentionally uploaded by the care team is processed to create the draft; the draft never enters the record automatically.",
+        title: "Turn what was said into a structured draft.",
+        body: "Scribe transcribes the Vietnamese conversation, corrects medical terms, and is instructed to arrange only spoken content into a SOAP draft. The clinician must still compare the draft with the conversation and remove unsupported content.",
+        workflow: [
+          {
+            title: "Upload the visit",
+            body: "The care team intentionally selects the visit audio file.",
+          },
+          {
+            title: "Correct terminology",
+            body: "Misrecognized medical terms and numbers are highlighted.",
+          },
+          {
+            title: "SOAP draft",
+            body: "Content is arranged into SOAP and held for clinician review.",
+          },
+        ],
+        safety: [
+          "Always label output as a draft",
+          "Surface missing information",
+          "Check clinical content against the conversation",
+          "Require review before record entry",
+        ],
+        cta: {
+          explore: "Explore Scribe",
+          open: "Open Scribe",
+          pilot: "Pilot Scribe",
+        },
       },
     },
     scribe: {
       brand: "CarePath Scribe",
-      kicker: "The Scribe module",
-      title: "From spoken visit to a SOAP draft.",
-      body: "Scribe listens to the Vietnamese consultation, fixes misrecognized medical terms, and arranges a SOAP draft. Nothing enters the record until the clinician approves.",
       disclosure: "Simulation with sample data, not a real record",
       steps: {
         raw: {
@@ -582,8 +742,7 @@ export const strings: Record<Language, PageCopy> = {
         a: "Assessment",
         p: "Plan",
       },
-      note: "The content above is sample data for this simulation. Scribe does not produce its own diagnosis; every line comes from what was said during the visit.",
-      cta: "Open the Scribe tool",
+      note: "In this simulation, every item is traceable to sample data; when using the tool, the clinician must still check the draft against the conversation.",
     },
     scribeTool: {
       title: "From visit recording to a SOAP note",
@@ -617,77 +776,131 @@ export const strings: Record<Language, PageCopy> = {
       disclaimer: "Demo for healthcare staff. Not for formal clinical diagnosis.",
     },
     marquee: [
-      "Read-back confirmation",
-      "Risk highlighting",
-      "Low-confidence warning",
-      "No audio storage",
-      "Interpreter escalation",
-      "SOAP drafts held for review",
+      "Interpreter — read-back confirmation",
+      "Interpreter — risk-content blocking",
+      "Interpreter — low-confidence warnings",
+      "Scribe — terminology correction",
+      "Scribe — missing-information flags",
+      "Scribe — SOAP drafts held for review",
     ],
-    problem: {
-      kicker: "The current risk",
-      title: "A misunderstood sentence can travel beyond one conversation.",
-      body: "CarePath does not promise to replace clinical judgment or human interpreters. It focuses on a narrower job: making confirmation points visible.",
-      memoryStat: "40–80%",
-      memoryDetail: "of verbal medical information may be forgotten immediately; almost half of what is retained may be incorrect.",
-      translationStat: "Up to 66%",
-      translationDetail: "of Russian Google-translated discharge-instruction sets in a 2025 study contained at least one inaccuracy.",
-      framing: "Every visit without accurate interpretation creates risk for the patient, the clinic's reputation, and its care process.",
-    },
-    safety: {
-      kicker: "Safety by design",
-      title: "Important content does not pass straight to the patient or the record.",
-      body: "These five mechanics apply to both interpreting and Scribe drafts. They are product principles, not treatment-outcome claims.",
-      items: [],
-    },
-    process: {
-      kicker: "A clear confirmation loop",
-      title: "Speak. Review. Deliver only after confirmation.",
-      steps: [
+    evidence: {
+      title: "See how each product keeps review points in the right place.",
+      body: "These screens use sanitized sample data. Research evidence links to CarePath's source report; there are no invented testimonials or outcome claims.",
+      carouselLabel: "CarePath product evidence",
+      previous: "Previous slide",
+      next: "Next slide",
+      slideLabel: "Slide",
+      source: "Read the research report and cited sources",
+      items: [
         {
-          title: "Speak in turns",
-          body: "Clinician and patient use short turns; this simulation never uses the microphone.",
+          kind: "interpreter",
+          product: "CarePath Interpreter",
+          title: "A risky turn stays with the clinician.",
+          body: "The simulation shows source text, translation, risk labels, and the confirmation action together.",
+          detail: "Sample data: a penicillin allergy is flagged and has not been delivered to the patient.",
         },
         {
-          title: "See the risk",
-          body: "Bilingual text appears with drug, dose, negation, and confidence labels.",
+          kind: "scribe",
+          product: "CarePath Scribe",
+          title: "The draft exposes what still needs review.",
+          body: "The sample screen keeps the raw transcript, corrected terms, and four SOAP sections in one review flow.",
+          detail: "Sample data: Assessment remains marked as awaiting clinician review.",
         },
         {
-          title: "Confirm or escalate",
-          body: "The clinician confirms the read-back, edits the translation, or requests an interpreter.",
+          kind: "research",
+          product: "Research basis",
+          title: "Designed for visible confirmation.",
+          body: "CarePath's report collects sources on recall of spoken medical information and errors in machine-translated discharge instructions.",
+          detail: "Sources, limitations, and study context stay with the report instead of becoming detached marketing claims.",
         },
       ],
     },
-    cost: {
-      kicker: "Transparent comparison",
-      title: "Status-quo costs need honest context.",
-      body: "These figures are public reference points, not medical-service quotes or CarePath savings claims.",
-      interpreterTitle: "Interpreter reference framework",
-      interpreterValue: "VND 150,000–250,000/hour",
-      interpreterNote: "A 2021 Phú Yên reference ceiling is VND 150,000/hour for work lasting at least four hours and VND 250,000/hour for shorter work. Other work is negotiated. This is not a nationwide medical-interpreting price.",
-      incidentTitle: "Incremental adverse-drug-event cost",
-      incidentValue: "USD 5,746 / event",
-      incidentNote: "AHRQ estimate for US hospitals, published in 2019. It is not Vietnamese data, is not specific to interpreting errors, and has a wide uncertainty interval.",
-      pilotTitle: "Pilot program",
-      pilotValue: "TODO-pricing",
-      pilotNote: "Pricing will be published after support scope, duration, and responsibilities are defined. No fake markdown or scarcity.",
+    safety: {
+      title: "One shared oversight layer. Two product-specific safety systems.",
+      body: "CarePath does not replace clinician judgment. Each product stops output that requires confirmation at the review gate that belongs to its workflow.",
+      shared: {
+        title: "Shared CarePath oversight",
+        body: "Four principles apply to both Interpreter and Scribe.",
+        items: [
+          {
+            title: { vi: "Bác sĩ giữ quyền quyết định", en: "Clinician authority" },
+            body: { vi: "Bác sĩ giữ quyền kiểm soát; lượt Interpreter nguy cơ cao và mọi bản nháp Scribe đều chờ bước xác nhận phù hợp.", en: "The clinician stays in control; high-risk Interpreter turns and every Scribe draft wait at the appropriate review gate." },
+          },
+          {
+            title: { vi: "Thông báo AI rõ ràng", en: "Clear AI disclosure" },
+            body: { vi: "Trạng thái mô phỏng, thí điểm và bản nháp luôn được gọi đúng tên.", en: "Simulation, pilot, and draft states are always named plainly." },
+          },
+          {
+            title: { vi: "Độ không chắc chắn nhìn thấy được", en: "Visible uncertainty" },
+            body: { vi: "Kết quả thiếu hoặc không chắc chắn không bị giao im lặng.", en: "Missing or uncertain output is never delivered silently." },
+          },
+          {
+            title: { vi: "Giảm thiểu dữ liệu", en: "Data minimization" },
+            body: { vi: "Chỉ xử lý dữ liệu cần cho lượt dịch hoặc bản nháp đang thực hiện.", en: "Only data needed for the active translation turn or draft is processed." },
+          },
+        ],
+      },
+      interpreter: {
+        title: "Interpreter safety",
+        body: "Risky content does not pass straight to the patient.",
+        items: [
+          {
+            title: { vi: "Chặn nguy cơ cao", en: "High-risk blocking" },
+            body: { vi: "Lượt nguy cơ cao và nghiêm trọng chờ bác sĩ xác nhận.", en: "High- and critical-risk turns wait for clinician confirmation." },
+          },
+          {
+            title: { vi: "Cảnh báo độ tin cậy thấp", en: "Low-confidence warnings" },
+            body: { vi: "Kết quả không chắc chắn luôn được gắn cờ rõ ràng.", en: "Uncertain output is always visibly flagged." },
+          },
+          {
+            title: { vi: "Read-back hoặc chuyển người", en: "Read-back or human escalation" },
+            body: { vi: "Bác sĩ xác nhận, chỉnh sửa hoặc yêu cầu phiên dịch viên.", en: "The clinician confirms, edits, or requests an interpreter." },
+          },
+          {
+            title: { vi: "Thông báo sử dụng AI", en: "AI-use disclosure" },
+            body: {
+              vi: "Công cụ phiên dịch không lưu âm thanh; người dùng luôn được biết đây là AI và có thể yêu cầu con người hỗ trợ.",
+              en: "The Interpreter stores no audio; users are told AI is involved and may request human support.",
+            },
+          },
+        ],
+      },
+      scribe: {
+        title: "Scribe safety",
+        body: "A draft never becomes a medical record by itself.",
+        items: [
+          {
+            title: { vi: "Trạng thái bản nháp", en: "Draft-only status" },
+            body: { vi: "Mọi kết quả đều ghi rõ cần bác sĩ kiểm tra.", en: "Every result states that clinician review is required." },
+          },
+          {
+            title: { vi: "Thông tin còn thiếu", en: "Missing information" },
+            body: { vi: "Phần chưa có trong hội thoại được nêu ra thay vì tự điền.", en: "Details absent from the conversation are surfaced rather than invented." },
+          },
+          {
+            title: { vi: "Đối chiếu với nội dung nguồn", en: "Check against source content" },
+            body: { vi: "Mô hình được yêu cầu không tự thêm chẩn đoán, tư vấn hoặc thuốc; bác sĩ vẫn phải đối chiếu bản nháp với hội thoại.", en: "The model is instructed not to add diagnoses, advice, or medication; the clinician must still check the draft against the conversation." },
+          },
+          {
+            title: { vi: "Duyệt trước hồ sơ", en: "Review before record entry" },
+            body: { vi: "Bác sĩ kiểm tra trước khi bản nháp được đưa vào hồ sơ.", en: "A clinician checks the draft before it enters the record." },
+          },
+        ],
+      },
     },
     pilot: {
-      kicker: "Your clinic's demo",
-      title: "Keep the demo you just created",
-      body: "Your clinic, specialty, scenario, and viewed transcript travel with the pilot request. There is no preselected marketing consent.",
-      transcriptNote: "The current bilingual transcript is attached to the request data.",
+      title: "Choose the product that fits your workflow.",
+      body: "A pilot request can cover Interpreter, Scribe, or both. Scope and pricing follow a review of the real workflow; this page does not publish a placeholder quote.",
+      transcriptNote: "For Interpreter interest, the current scenario and bilingual transcript travel with the request.",
     },
     footer: {
-      promise: "AI assistance, clinician confirmed.",
+      promise: "AI assistance, clinician in control.",
       posture: "Designed around data minimization, awareness of Decree 13/PDP obligations, and §1557-aligned language-access positioning. This is not a legal certification claim.",
-      honesty: "The simulation does not translate live, record audio, or provide medical advice.",
+      honesty: "Interpreter is an interactive simulation; Scribe is a pilot draft tool. Both require healthcare-staff oversight.",
       contact: "Contact the pilot program",
     },
   },
 };
-
-strings.en.safety.items = strings.vi.safety.items;
 
 export function copyFor(language: Language): PageCopy {
   return strings[language];

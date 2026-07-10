@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import App from "./App";
@@ -11,5 +11,22 @@ describe("App", () => {
 
     expect(screen.getByRole("heading", { name: "CarePath Interpreter" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Hold to talk/ })).not.toBeInTheDocument();
+  });
+
+  it("identifies Interpreter as a mock product and shares the language preference", () => {
+    localStorage.clear();
+    render(<App />);
+
+    expect(screen.getByRole("navigation", { name: "Đường dẫn sản phẩm" })).toHaveTextContent(
+      "CarePath/Interpreter",
+    );
+    expect(screen.getByText("Bản mô phỏng tương tác")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Tất cả sản phẩm" })).toHaveAttribute("href", "/");
+
+    fireEvent.click(screen.getByRole("button", { name: "EN" }));
+    expect(screen.getByText("Interactive mock simulation")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "All products" })).toBeInTheDocument();
+    expect(document.querySelector(".product-shell")).toHaveAttribute("lang", "en");
+    expect(localStorage.getItem("carepath-demo-language")).toBe("en");
   });
 });

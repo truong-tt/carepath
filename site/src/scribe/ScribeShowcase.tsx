@@ -9,8 +9,8 @@ interface Segment {
   mark?: "miss" | "fix";
 }
 
-// Sample dictation for the simulation. Every SOAP line below is traceable to
-// this spoken content — Scribe never invents clinical content of its own.
+// Sanitized sample dictation for the simulation. Every SOAP line in this
+// fixed example is traceable to the sample content below.
 const rawSegments: Segment[] = [
   { text: "bệnh nhân nữ 54 tuổi tiền sử tăng huyết áp đang dùng " },
   { text: "am lô đi pin", mark: "miss" },

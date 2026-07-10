@@ -1,13 +1,21 @@
 # CarePath Unified Deploy
 
-One Hugging Face Space runs everything: the demo site at `/`, the Scribe tool
-at `/#/scribe`, the interpreter console at `/console/`, the scriber API at
-`/api/v1/*`, and the interpreter API at `/api/*` + `/ws/*`. Everything is
-same-origin, so no CORS configuration is needed for the deployed frontends.
+Use `https://carepath-omega.vercel.app` as the public two-product site. One
+Hugging Face Space runs the unified product service: the Scribe tool at
+`/#/scribe`, the Interpreter console at `/console/`, the Scribe API at
+`/api/v1/*`, and the Interpreter API at `/api/*` + `/ws/*`. Deploy and verify
+the Space before pointing Vercel at it.
 
 ## Hugging Face Space
 
-1. Create a new Hugging Face Space and choose **Docker** as the SDK.
+Reuse the existing Docker Space
+[`tranth3truong/carepath-api`](https://huggingface.co/spaces/tranth3truong/carepath-api),
+served at `https://tranth3truong-carepath-api.hf.space`. Deploy this unified
+repository there; the older Scribe-only revision does not contain `/console/`
+or the Interpreter API.
+
+1. Rebuild the existing `tranth3truong/carepath-api` Space with **Docker** as
+   the SDK. Create a replacement only if that Space is no longer available.
 2. Copy `README.hf-space.md` to the Space as `README.md` so the Space has:
 
 ```yaml
@@ -33,6 +41,7 @@ SOAP_RATE_LIMIT_PER_IP_HOUR=3
 SOAP_RATE_LIMIT_PER_IP_DAY=10
 SOAP_RATE_LIMIT_GLOBAL_DAY=100
 APP_ENV=prod
+CORS_ORIGINS=https://carepath-omega.vercel.app
 ```
 
 The interpreter module runs in mock mode by default and needs no secrets.
@@ -40,9 +49,9 @@ When its cloud track lands, it will additionally need `PROVIDER_MODE=cloud`,
 `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and a non-default `ADMIN_TOKEN`
 (startup refuses `change-me` in cloud mode).
 
-`CORS_ORIGINS` can stay unset for the Space (same-origin). Set it only when a
-frontend is hosted elsewhere or for local Vite dev against the deployed API,
-e.g. `CORS_ORIGINS=http://localhost:5173`.
+The Vercel site uploads Scribe audio directly to the Space, so its exact origin
+must be present in `CORS_ORIGINS`. Add local Vite origins as comma-separated
+values only when testing local frontends against the deployed API.
 
 Requests with header `X-Team-Code: <TEAM_CODE>` bypass the SOAP rate limits
 for internal doctor-comparison runs. Limited requests return HTTP `429`,
@@ -82,11 +91,10 @@ curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
   -F "encounter_context=Phòng khám nội tổng quát"
 ```
 
-## Optional: keep the existing Vercel URL
+## Canonical Vercel site
 
-The Space alone is a complete deploy. If you also want the site on an existing
-Vercel project (e.g. `https://carepath-omega.vercel.app`), the new `site/` is a
-static Vite build that works there directly:
+The `site/` directory is the static marketing deployment at
+`https://carepath-omega.vercel.app`:
 
 1. In the Vercel project settings, change **Root Directory** from the removed
    `apps/web-next` to `site` (framework/build/output come from
@@ -94,22 +102,25 @@ static Vite build that works there directly:
 2. Set these Vercel environment variables:
 
 ```text
-VITE_API_BASE=https://<your-hf-space>.hf.space
-VITE_CONSOLE_URL=https://<your-hf-space>.hf.space/console/
+VITE_API_BASE=https://tranth3truong-carepath-api.hf.space
+VITE_CONSOLE_URL=https://tranth3truong-carepath-api.hf.space/console/
 VITE_LEAD_ENDPOINT=<optional lead endpoint>
 VITE_LEAD_EMAIL=<pilot contact email>
 ```
 
-3. Allow the Vercel origin on the Space (the Scribe tool posts audio directly
-   to it):
+3. Confirm the Space contains the Vercel origin configured above. Do not add
+   Vercel API or WebSocket rewrites; the Space owns those routes.
 
-```text
-CORS_ORIGINS=https://carepath-omega.vercel.app
-```
+The Vercel build runs `npm run validate:deploy` before compiling. It fails when
+either URL is missing or invalid, does not use HTTPS, uses a different origin,
+contains a query/fragment, or does not use the exact `/` and `/console/`
+pathnames. Local
+and combined-service builds still use same-origin fallbacks because the normal
+`npm run build` does not run this deployment-only check.
 
-The interpreter console itself stays on the Space (`/console/` needs the
-WebSocket API); the Vercel landing links out to it via `VITE_CONSOLE_URL`.
-The scripted demo and the pilot form are fully client-side and need nothing.
+The Interpreter console stays on the Space because it needs the WebSocket API;
+the Vercel landing links to it via `VITE_CONSOLE_URL`. The pilot form remains
+client-side unless `VITE_LEAD_ENDPOINT` is configured.
 
 ## Keep-Alive
 
@@ -117,7 +128,7 @@ The workflow in `.github/workflows/keepalive.yml` pings the Space every 12
 hours. Set the GitHub repository variable:
 
 ```text
-SPACE_URL=https://<your-hf-space>.hf.space
+SPACE_URL=https://tranth3truong-carepath-api.hf.space
 ```
 
 Then run **Actions > Keep HF Space Awake > Run workflow** once and confirm the

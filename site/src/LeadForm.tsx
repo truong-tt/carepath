@@ -6,6 +6,7 @@ import {
   defaultLeadMessage,
   submitLead,
   type LeadSubmissionConfig,
+  type ProductInterest,
 } from "./leads";
 
 interface LeadFormProps {
@@ -18,6 +19,8 @@ interface LeadFormProps {
   leadEmail?: string;
   fetcher?: typeof fetch;
   onMailto?: (url: string) => void;
+  interest?: ProductInterest;
+  onInterestChange?: (interest: ProductInterest) => void;
 }
 
 export default function LeadForm({
@@ -30,13 +33,17 @@ export default function LeadForm({
   leadEmail = import.meta.env.VITE_LEAD_EMAIL,
   fetcher,
   onMailto,
+  interest: controlledInterest,
+  onInterestChange,
 }: LeadFormProps) {
   const labels = copyFor(language).form;
+  const [localInterest, setLocalInterest] = useState<ProductInterest>("both");
+  const interest = controlledInterest ?? localInterest;
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [contact, setContact] = useState("");
   const [message, setMessage] = useState(() =>
-    defaultLeadMessage(clinic, specialty, scenario, language),
+    defaultLeadMessage(clinic, specialty, scenario, language, interest),
   );
   const [messageDirty, setMessageDirty] = useState(false);
   const [status, setStatus] = useState<
@@ -46,9 +53,11 @@ export default function LeadForm({
 
   useEffect(() => {
     if (!messageDirty) {
-      setMessage(defaultLeadMessage(clinic, specialty, scenario, language));
+      setMessage(
+        defaultLeadMessage(clinic, specialty, scenario, language, interest),
+      );
     }
-  }, [clinic, language, messageDirty, scenario, specialty]);
+  }, [clinic, interest, language, messageDirty, scenario, specialty]);
 
   async function sendRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,6 +79,7 @@ export default function LeadForm({
       scenario,
       transcript,
       language,
+      interest,
       fields: { name, role, contact, message },
     });
     setStatus("submitting");
@@ -108,6 +118,25 @@ export default function LeadForm({
       <label>
         {labels.clinic}
         <input value={clinic} readOnly />
+      </label>
+      <label>
+        {labels.interest}
+        <select
+          value={interest}
+          onChange={(event) => {
+            const nextInterest = event.target.value as ProductInterest;
+            if (controlledInterest === undefined) {
+              setLocalInterest(nextInterest);
+            }
+            onInterestChange?.(nextInterest);
+          }}
+        >
+          <option value="interpreter">
+            {labels.interestOptions.interpreter}
+          </option>
+          <option value="scribe">{labels.interestOptions.scribe}</option>
+          <option value="both">{labels.interestOptions.both}</option>
+        </select>
       </label>
       <label>
         {labels.role}

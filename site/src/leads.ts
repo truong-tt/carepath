@@ -1,5 +1,7 @@
 import type { Language, Scenario } from "./demo/types";
 
+export type ProductInterest = "interpreter" | "scribe" | "both";
+
 export interface LeadDraft {
   name: string;
   clinic: string;
@@ -11,6 +13,7 @@ export interface LeadDraft {
   specialty: string;
   transcript: string;
   language: Language;
+  interest: ProductInterest;
 }
 
 export interface LeadSubmissionConfig {
@@ -26,6 +29,7 @@ interface LeadDraftInput {
   scenario: Scenario;
   transcript: string;
   language: Language;
+  interest?: ProductInterest;
   fields?: Partial<Pick<LeadDraft, "name" | "role" | "contact" | "message">>;
 }
 
@@ -34,11 +38,24 @@ export function defaultLeadMessage(
   specialty: string,
   scenario: Scenario,
   language: Language,
+  interest: ProductInterest = "both",
 ): string {
+  const product =
+    interest === "both"
+      ? language === "en"
+        ? "CarePath Interpreter and Scribe"
+        : "CarePath Interpreter và Scribe"
+      : `CarePath ${interest === "scribe" ? "Scribe" : "Interpreter"}`;
+  const scenarioContext =
+    interest === "scribe"
+      ? ""
+      : language === "en"
+        ? ` using the “${scenario.title.en}” scenario`
+        : ` với kịch bản “${scenario.title.vi}”`;
   if (language === "en") {
-    return `I would like to discuss a CarePath pilot for ${clinic} (${specialty}) using the “${scenario.title.en}” scenario.`;
+    return `I would like to discuss a ${product} pilot for ${clinic} (${specialty})${scenarioContext}.`;
   }
-  return `Tôi muốn trao đổi về chương trình thí điểm CarePath cho ${clinic} (${specialty}) với kịch bản “${scenario.title.vi}”.`;
+  return `Tôi muốn trao đổi về chương trình thí điểm ${product} cho ${clinic} (${specialty})${scenarioContext}.`;
 }
 
 export function buildLeadDraft({
@@ -47,8 +64,10 @@ export function buildLeadDraft({
   scenario,
   transcript,
   language,
+  interest = "both",
   fields = {},
 }: LeadDraftInput): LeadDraft {
+  const includeInterpreterContext = interest !== "scribe";
   return {
     name: fields.name ?? "",
     clinic,
@@ -56,18 +75,21 @@ export function buildLeadDraft({
     contact: fields.contact ?? "",
     message:
       fields.message ??
-      defaultLeadMessage(clinic, specialty, scenario, language),
-    scenarioId: scenario.id,
-    scenarioTitle: scenario.title[language],
+      defaultLeadMessage(clinic, specialty, scenario, language, interest),
+    scenarioId: includeInterpreterContext ? scenario.id : "",
+    scenarioTitle: includeInterpreterContext ? scenario.title[language] : "",
     specialty,
-    transcript,
+    transcript: includeInterpreterContext ? transcript : "",
     language,
+    interest,
   };
 }
 
 export function buildLeadMailto(payload: LeadDraft, email = ""): string {
-  const subject = `CarePath pilot - ${payload.clinic}`;
+  const subject = `CarePath pilot (${payload.interest}) - ${payload.clinic}`;
   const body = [
+    `Product interest: ${payload.interest}`,
+    "",
     payload.message,
     "",
     `${payload.name} — ${payload.role}`,

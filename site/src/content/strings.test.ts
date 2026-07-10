@@ -15,7 +15,7 @@ describe("Vietnamese copy", () => {
     const copy = collectStrings(strings.vi);
 
     expect(copy.every((value) => value === value.normalize("NFC"))).toBe(true);
-    expect(copy).toContain("Hỗ trợ AI, bác sĩ xác nhận.");
+    expect(copy).toContain("AI hỗ trợ, bác sĩ giữ quyền quyết định.");
     expect(copy).toContain("Chờ bác sĩ duyệt");
     expect(copy).toContain("Thông báo sử dụng AI");
     expect(copy).toContain(

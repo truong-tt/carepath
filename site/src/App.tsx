@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import ScribeTool from "./scribe/ScribeTool";
 import type { Language } from "./demo/types";
@@ -11,6 +11,7 @@ export default function App() {
   // Hash route: "#/scribe" opens the Scribe tool; every other hash is a
   // landing-page anchor (#demo, #scribe overview, #safety, ...).
   const [route, setRoute] = useState(() => window.location.hash);
+  const wasScribeTool = useRef(route === "#/scribe");
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -28,6 +29,22 @@ export default function App() {
   useEffect(() => {
     if (isScribeTool) window.scrollTo(0, 0);
   }, [isScribeTool]);
+
+  useEffect(() => {
+    let frame: number | undefined;
+    if (wasScribeTool.current && !isScribeTool) {
+      frame = window.requestAnimationFrame(() => {
+        const anchor = document.getElementById(route.slice(1) || "top") ??
+          document.getElementById("top");
+        anchor?.scrollIntoView();
+        anchor?.focus({ preventScroll: true });
+      });
+    }
+    wasScribeTool.current = isScribeTool;
+    return () => {
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+    };
+  }, [isScribeTool, route]);
 
   return isScribeTool ? (
     <ScribeTool language={language} onLanguageChange={setLanguage} />

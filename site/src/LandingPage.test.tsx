@@ -8,20 +8,22 @@ describe("LandingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Phiên dịch và ghi chép y khoa, xác nhận trước khi sử dụng/,
+        name: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Nội dung quan trọng không tự động đi thẳng tới người bệnh hay hồ sơ.",
+        name: "Một lớp giám sát chung. Hai cơ chế an toàn riêng.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Từ lời nói trong buổi khám thành bản nháp SOAP.",
+        name: "Từ lời đã nói đến bản nháp có cấu trúc.",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("TODO-pricing")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "CarePath Interpreter" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "CarePath Scribe" })).toBeInTheDocument();
+    expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
   });
 
   it("renders the complete page in English", () => {
@@ -29,19 +31,25 @@ describe("LandingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Medical interpreting and notes, confirmed before use/,
+        name: "One care journey. Two CarePath products.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Important content does not pass straight to the patient or the record.",
+        name: "One shared oversight layer. Two product-specific safety systems.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Status-quo costs need honest context.",
+        name: "Choose the product that fits your workflow.",
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Interactive simulation — not live interpreting."),
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByText("Pilot tool — every draft requires clinician review."),
+    ).toHaveLength(2);
   });
 
   it("reflects clinic customization in the demo and form", () => {

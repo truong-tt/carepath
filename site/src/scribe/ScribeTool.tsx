@@ -243,11 +243,20 @@ export default function ScribeTool({
   return (
     <div className="site-shell">
       <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
-        <a className="site-nav__brand" href="#top" aria-label="CarePath">
+        <a className="site-nav__brand" href="#top" aria-label={labels.back}>
           <img src={logoUrl} alt="" />
-          <span>CarePath</span>
+          <span className="product-breadcrumb">
+            <strong>CarePath</strong>
+            <span aria-hidden="true">/</span>
+            <span>Scribe</span>
+          </span>
         </a>
         <div className="site-nav__actions">
+          <span className="product-shell-status">
+            {language === "vi"
+              ? "Công cụ thí điểm · Cần bác sĩ duyệt"
+              : "Pilot tool · Clinician review required"}
+          </span>
           <div className="language-toggle" aria-label={copy.language.label}>
             <button
               aria-pressed={language === "vi"}

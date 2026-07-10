@@ -1,7 +1,7 @@
 # CarePath
 
-AI assistance for Vietnamese clinics, one product with two modules, one
-principle: **the clinician confirms before anything is used.**
+A clinical AI suite for Vietnamese clinics with two distinct products and one
+principle: **the clinician stays in control.**
 
 - **Scribe** (`apps/api/carepath`, routes `/api/v1/*`) — upload consultation
   audio, get a Gipformer ONNX transcript with retrieval-assisted term
