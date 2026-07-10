@@ -1,0 +1,2 @@
+# Playwright snapshots are byte-compared; never convert their line endings.
+site/tests/**/*-snapshots/** -text

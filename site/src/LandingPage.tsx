@@ -125,6 +125,9 @@ export default function LandingPage({
           </div>
           <ScribeShowcase language={language} />
           <p className="scribe-note">{copy.scribe.note}</p>
+          <a className="button-link button-link--secondary scribe-cta" href="#/scribe">
+            {copy.scribe.cta}
+          </a>
         </section>
 
         <section className="chapter problem" id="problem">

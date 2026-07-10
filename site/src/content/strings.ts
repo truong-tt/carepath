@@ -114,6 +114,32 @@ interface PageCopy {
     status: string;
     soapLabels: Record<"s" | "o" | "a" | "p", string>;
     note: string;
+    cta: string;
+  };
+  scribeTool: {
+    title: string;
+    intro: string;
+    back: string;
+    health: Record<"checking" | "ready" | "demo" | "degraded" | "down", string>;
+    dropzone: string;
+    dropzoneHint: string;
+    contextLabel: string;
+    removeFile: string;
+    submit: string;
+    steps: [string, string, string];
+    progressLabel: string;
+    errorTitle: string;
+    retry: string;
+    resultTitle: string;
+    reviewBanner: string;
+    missingTitle: string;
+    processedIn: string;
+    copy: string;
+    copied: string;
+    copyFailed: string;
+    newNote: string;
+    copyHeading: string;
+    disclaimer: string;
   };
   marquee: string[];
   problem: {
@@ -291,6 +317,38 @@ export const strings: Record<Language, PageCopy> = {
         p: "Kế hoạch",
       },
       note: "Nội dung trên là dữ liệu mẫu cho bản mô phỏng. Scribe không tự đưa ra chẩn đoán; mọi mục đều lấy từ lời đã nói trong buổi khám.",
+      cta: "Mở công cụ Scribe",
+    },
+    scribeTool: {
+      title: "Từ bản ghi âm buổi khám đến bệnh án SOAP",
+      intro: "Tải lên tệp ghi âm buổi khám bằng tiếng Việt. Hệ thống phiên âm, hiệu chỉnh thuật ngữ và soạn bản nháp SOAP để bác sĩ kiểm tra.",
+      back: "Về trang chính",
+      health: {
+        checking: "Đang kết nối…",
+        ready: "Hệ thống sẵn sàng",
+        demo: "Chế độ demo",
+        degraded: "Một phần dịch vụ chưa sẵn sàng",
+        down: "Mất kết nối máy chủ",
+      },
+      dropzone: "Kéo thả tệp âm thanh vào đây, hoặc bấm để chọn",
+      dropzoneHint: "Hỗ trợ WAV, MP3, M4A, OGG, FLAC. Tối đa 25 MB.",
+      contextLabel: "Bối cảnh buổi khám (tùy chọn)",
+      removeFile: "Bỏ tệp",
+      submit: "Tạo bệnh án SOAP",
+      steps: ["Phiên âm", "Hiệu chỉnh thuật ngữ", "Soạn bệnh án SOAP"],
+      progressLabel: "Tiến độ xử lý",
+      errorTitle: "Đã xảy ra lỗi.",
+      retry: "Thử lại",
+      resultTitle: "Bệnh án SOAP (bản nháp)",
+      reviewBanner: "Bản nháp do AI tạo, cần bác sĩ kiểm tra trước khi đưa vào hồ sơ bệnh án.",
+      missingTitle: "Thông tin còn thiếu",
+      processedIn: "Xử lý trong {seconds} giây",
+      copy: "Sao chép",
+      copied: "Đã sao chép",
+      copyFailed: "Không sao chép được",
+      newNote: "Tạo bệnh án mới",
+      copyHeading: "BỆNH ÁN SOAP (bản nháp, cần bác sĩ kiểm tra)",
+      disclaimer: "Bản demo cho nhân viên y tế. Không dùng cho chẩn đoán lâm sàng chính thức.",
     },
     marquee: [
       "Xác nhận read-back",
@@ -522,6 +580,38 @@ export const strings: Record<Language, PageCopy> = {
         p: "Plan",
       },
       note: "The content above is sample data for this simulation. Scribe does not produce its own diagnosis; every line comes from what was said during the visit.",
+      cta: "Open the Scribe tool",
+    },
+    scribeTool: {
+      title: "From visit recording to a SOAP note",
+      intro: "Upload a Vietnamese consultation recording. The system transcribes it, corrects medical terms, and drafts a SOAP note for clinician review.",
+      back: "Back to overview",
+      health: {
+        checking: "Connecting…",
+        ready: "System ready",
+        demo: "Demo mode",
+        degraded: "Some services are not ready",
+        down: "Server unreachable",
+      },
+      dropzone: "Drop an audio file here, or click to choose",
+      dropzoneHint: "WAV, MP3, M4A, OGG, FLAC. Up to 25 MB.",
+      contextLabel: "Encounter context (optional)",
+      removeFile: "Remove file",
+      submit: "Draft the SOAP note",
+      steps: ["Transcribing", "Correcting terms", "Drafting the SOAP note"],
+      progressLabel: "Processing progress",
+      errorTitle: "Something went wrong.",
+      retry: "Try again",
+      resultTitle: "SOAP note (draft)",
+      reviewBanner: "AI-generated draft. A clinician must review it before it enters the medical record.",
+      missingTitle: "Missing information",
+      processedIn: "Processed in {seconds} s",
+      copy: "Copy",
+      copied: "Copied",
+      copyFailed: "Copy failed",
+      newNote: "Start a new note",
+      copyHeading: "SOAP NOTE (draft, requires clinician review)",
+      disclaimer: "Demo for healthcare staff. Not for formal clinical diagnosis.",
     },
     marquee: [
       "Read-back confirmation",

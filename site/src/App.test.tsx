@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
 describe("language preference", () => {
@@ -65,5 +65,31 @@ describe("language preference", () => {
     expect(
       screen.getByRole("button", { name: "VI" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("routes #/scribe to the Scribe tool page", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          asr_ready: true,
+          llm_ready: true,
+          asr_provider: "mock",
+          llm_provider: "offline",
+        }),
+      }),
+    );
+    window.location.hash = "#/scribe";
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Từ bản ghi âm buổi khám đến bệnh án SOAP",
+      }),
+    ).toBeInTheDocument();
+
+    window.location.hash = "";
+    vi.unstubAllGlobals();
   });
 });

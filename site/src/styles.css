@@ -1072,6 +1072,202 @@ mark.scribe-mark {
   line-height: 1.65;
 }
 
+.scribe-cta {
+  margin-top: 1.4rem;
+}
+
+/* ---------- scribe tool page (#/scribe) ---------- */
+
+.tool-shell {
+  width: min(100% - 3rem, 52rem);
+  margin: 0 auto;
+  padding: clamp(2.5rem, 4vw, 3.5rem) 0 clamp(3rem, 5vw, 4rem);
+}
+
+.tool-header h1 {
+  max-width: 40rem;
+  margin: 0;
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.tool-header__intro {
+  max-width: 40rem;
+  margin: 1.1rem 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.2rem 0 0;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.health-badge__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.health-badge--ready .health-badge__dot {
+  background: var(--teal);
+}
+
+.health-badge--demo .health-badge__dot,
+.health-badge--degraded .health-badge__dot {
+  background: var(--amber);
+}
+
+.health-badge--down .health-badge__dot {
+  background: var(--critical);
+}
+
+.tool-panel {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: clamp(1.6rem, 3vw, 2.2rem);
+  padding: clamp(1.4rem, 2.5vw, 2rem);
+}
+
+.dropzone {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  padding: clamp(1.8rem, 4vw, 2.8rem) 1.5rem;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--r-panel);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.dropzone:hover,
+.dropzone.is-drag,
+.dropzone:focus-within {
+  border-color: var(--teal);
+  background: var(--tint);
+}
+
+.dropzone span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.dropzone input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--tint);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.file-chip button {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tool-context {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tool-panel .button--primary {
+  justify-self: start;
+}
+
+.progress-rail--tool {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 1.4rem 0.5rem;
+  border-bottom: 0;
+}
+
+.tool-error strong {
+  color: var(--critical-text);
+}
+
+.tool-error p {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.tool-error .button {
+  justify-self: start;
+}
+
+.tool-missing {
+  padding: 0.9rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--amber) 60%, transparent);
+  border-radius: var(--r-control);
+  font-size: 0.9rem;
+}
+
+.tool-missing ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.soap-note dd p,
+.soap-note dd ul {
+  margin: 0 0 0.4rem;
+}
+
+.soap-note dd ul {
+  padding-left: 1.2rem;
+}
+
+.soap-note dd > :last-child {
+  margin-bottom: 0;
+}
+
+.tool-disclaimer {
+  margin: 1.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 /* ---------- chapters ---------- */
 
 .chapter {
@@ -1528,6 +1724,10 @@ mark.scribe-mark {
   .demo-stage,
   .modules {
     width: min(100% - 1.5rem, var(--container));
+  }
+
+  .tool-shell {
+    width: min(100% - 1.5rem, 52rem);
   }
 
   .modules,
