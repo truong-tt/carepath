@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { scenarios } from "./demo/scenarios";
-import { buildLeadDraft, buildLeadMailto } from "./leads";
+import { buildLeadDraft, buildLeadMailto, submitLead } from "./leads";
 
 describe("buildLeadDraft", () => {
   it("attaches the configured scenario and transcript", () => {
@@ -53,5 +53,33 @@ describe("buildLeadDraft", () => {
     );
     expect(mailto).toContain("subject=CarePath pilot (interpreter)");
     expect(mailto).toContain("Product interest: interpreter");
+  });
+});
+
+describe("submitLead", () => {
+  const draft = buildLeadDraft({
+    clinic: "Phòng khám Minh Tâm",
+    specialty: "Nội tổng quát",
+    scenario: scenarios[0],
+    transcript: "",
+    language: "vi",
+  });
+
+  it("throws instead of opening an empty mail draft when no channel is configured", async () => {
+    const openMailto = vi.fn();
+    await expect(
+      submitLead(draft, { endpoint: "", email: "", openMailto }),
+    ).rejects.toThrow();
+    expect(openMailto).not.toHaveBeenCalled();
+  });
+
+  it("opens a prefilled mail draft when an email is configured", async () => {
+    const openMailto = vi.fn();
+    const result = await submitLead(draft, {
+      email: "pilot@example.com",
+      openMailto,
+    });
+    expect(result).toBe("mailto");
+    expect(openMailto).toHaveBeenCalledOnce();
   });
 });

@@ -138,6 +138,7 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--line);
   background: var(--nav-bg);
   backdrop-filter: blur(0.5rem);
+  box-shadow: 0 1px 0 var(--line), 0 10px 24px -18px rgb(16 42 46 / 0.45);
 }
 
 .site-nav__brand {
@@ -783,7 +784,7 @@ textarea {
   gap: 2rem;
   padding: 0.85rem 2rem;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1370,6 +1371,11 @@ mark.scribe-mark {
   .demo__header {
     flex-direction: column;
     gap: 0.9rem;
+  }
+
+  .demo__controls {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .scenario-picker,
@@ -2055,6 +2061,10 @@ mark.scribe-mark {
   padding: clamp(8rem, 14vw, 13rem) 0;
 }
 
+.evidence .section-intro h2 {
+  font-size: clamp(1.85rem, 2.2vw, 2.5rem);
+}
+
 .evidence-carousel {
   min-width: 0;
 }
@@ -2088,7 +2098,7 @@ mark.scribe-mark {
 
 .evidence-slide__copy h3 {
   margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2.6rem);
+  font-size: clamp(1.4rem, 1.8vw, 1.9rem);
   letter-spacing: -0.04em;
   line-height: 1.05;
 }
@@ -2245,12 +2255,12 @@ mark.scribe-mark {
 
 @media (max-width: 1023px) {
   .site-nav__menu {
-    position: relative;
     display: block;
     order: 2;
   }
 
   .site-nav__menu summary {
+    position: relative;
     padding: 0.55rem 0.75rem;
     border: 1px solid var(--line-strong);
     border-radius: var(--r-control);
@@ -2267,7 +2277,7 @@ mark.scribe-mark {
   .site-nav__menu > div {
     position: absolute;
     top: calc(100% + 0.75rem);
-    right: 0;
+    right: max(1.5rem, calc((100vw - var(--container)) / 2));
     display: grid;
     width: min(19rem, calc(100vw - 2rem));
     padding: 0.65rem;
@@ -2352,6 +2362,10 @@ mark.scribe-mark {
 @media (max-width: 760px) {
   .site-nav {
     gap: 0.6rem;
+  }
+
+  .site-nav__menu > div {
+    right: 1rem;
   }
 
   .site-nav__brand > span:not(.product-breadcrumb) {

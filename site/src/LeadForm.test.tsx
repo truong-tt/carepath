@@ -78,6 +78,36 @@ describe("LeadForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("reports an error instead of a dead mail draft when no channel is configured", async () => {
+    const onMailto = vi.fn();
+    render(
+      <LeadForm
+        clinic="Phòng khám Minh Tâm"
+        endpoint=""
+        leadEmail=""
+        language="vi"
+        onMailto={onMailto}
+        scenario={scenarios[0]}
+        specialty="Nội tổng quát"
+        transcript=""
+      />,
+    );
+
+    fillRequiredFields();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Chuẩn bị yêu cầu thí điểm" }),
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "Không thể gửi yêu cầu. Vui lòng kiểm tra kết nối và thử lại.",
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(onMailto).not.toHaveBeenCalled();
+  });
+
   it("shows inline errors without attempting submission", () => {
     const fetcher = vi.fn();
     render(

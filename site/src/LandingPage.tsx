@@ -6,7 +6,7 @@ import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
 import { useLandingMotion } from "./landing/useLandingMotion";
 import LeadForm from "./LeadForm";
-import type { ProductInterest } from "./leads";
+import { leadContact, zaloHref, type ProductInterest } from "./leads";
 import ScribeShowcase from "./scribe/ScribeShowcase";
 
 interface LandingPageProps {
@@ -21,6 +21,7 @@ export default function LandingPage({
   onLanguageChange,
 }: LandingPageProps) {
   const pageRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDetailsElement>(null);
   const copy = copyFor(language);
   const [clinicName, setClinicName] = useState("Phòng khám Đa khoa An Bình");
   const [specialty, setSpecialty] = useState("Nội tổng quát");
@@ -57,9 +58,20 @@ export default function LandingPage({
           <span>CarePath</span>
         </a>
         <div className="site-nav__links">{navLinks}</div>
-        <details className="site-nav__menu">
+        <details className="site-nav__menu" ref={menuRef}>
           <summary>{copy.nav.menu}</summary>
-          <div>{navLinks}</div>
+          <div
+            onClick={(event) => {
+              if (
+                menuRef.current &&
+                (event.target as HTMLElement).closest("a")
+              ) {
+                menuRef.current.open = false;
+              }
+            }}
+          >
+            {navLinks}
+          </div>
         </details>
         <div className="site-nav__actions">
           <div className="language-toggle" aria-label={copy.language.label}>
@@ -473,9 +485,10 @@ export default function LandingPage({
         </div>
         <p>{copy.footer.posture}</p>
         <p>{copy.footer.honesty}</p>
-        <a href={`mailto:${encodeURIComponent(import.meta.env.VITE_LEAD_EMAIL ?? "")}`}>
-          {copy.footer.contact}
-        </a>
+        <div>
+          <a href={`mailto:${leadContact.email}`}>{copy.footer.contact}</a>
+          <a href={zaloHref}>Zalo · {leadContact.phone}</a>
+        </div>
       </footer>
     </div>
   );

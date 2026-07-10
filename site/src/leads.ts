@@ -2,6 +2,16 @@ import type { Language, Scenario } from "./demo/types";
 
 export type ProductInterest = "interpreter" | "scribe" | "both";
 
+// Contact channel for the pilot lead form + footer. Values fall back to
+// baked-in defaults so the conversion path works even when no env var is set;
+// override VITE_LEAD_EMAIL / VITE_LEAD_PHONE to change them per deployment.
+export const leadContact = {
+  email: import.meta.env.VITE_LEAD_EMAIL?.trim() || "tranth3truong@gmail.com",
+  phone: import.meta.env.VITE_LEAD_PHONE?.trim() || "+84827745579",
+};
+
+export const zaloHref = `https://zalo.me/${leadContact.phone.replace(/\D/g, "")}`;
+
 export interface LeadDraft {
   name: string;
   clinic: string;
@@ -123,6 +133,10 @@ export async function submitLead(
       throw new Error(`Lead endpoint returned ${response.status}.`);
     }
     return "posted";
+  }
+
+  if (!email) {
+    throw new Error("No lead endpoint or email is configured.");
   }
 
   openMailto(buildLeadMailto(payload, email));

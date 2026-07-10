@@ -4,6 +4,7 @@ import type { Language, Scenario } from "./demo/types";
 import {
   buildLeadDraft,
   defaultLeadMessage,
+  leadContact,
   submitLead,
   type LeadSubmissionConfig,
   type ProductInterest,
@@ -30,7 +31,7 @@ export default function LeadForm({
   scenario,
   transcript,
   endpoint = import.meta.env.VITE_LEAD_ENDPOINT,
-  leadEmail = import.meta.env.VITE_LEAD_EMAIL,
+  leadEmail = leadContact.email,
   fetcher,
   onMailto,
   interest: controlledInterest,
