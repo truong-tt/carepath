@@ -22,6 +22,12 @@ dev = [
   "ruff>=0.6,<1.0",
 ]
 
+[tool.setuptools.package-data]
+app = [
+  "glossary/data/*.csv",
+  "risk/lexicons/*.json",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
