@@ -12,6 +12,12 @@ __pycache__/
 *.egg-info/
 .env
 .env.*
+**/node_modules
+**/dist
+**/coverage
+**/playwright-report
+**/test-results
+**/*.db
 artifacts/
 data/labeling/
 models/
