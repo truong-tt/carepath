@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hmac
 import logging
+import os
 import tempfile
 import time
 from contextlib import asynccontextmanager
@@ -324,9 +325,22 @@ def create_soap_note(
     )
 
 
-# Serve the vanilla frontend (apps/web) same-origin so the tool page can call
-# the /api/v1 endpoints with relative paths (no CORS). Mounted last so the API
-# routes above take precedence; html=True serves index.html for / and /app/.
-WEB_DIR = Path(__file__).resolve().parents[2] / "web"
-if WEB_DIR.is_dir():
-    app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
+# Serve the built frontends same-origin so they call both APIs with relative
+# URLs (no CORS): interpreter console at /console, demo site (landing + the
+# #/scribe tool) at /. Mounted last so API routes take precedence; a missing
+# dist folder is skipped with a warning — dev and CI use the Vite dev servers.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+CONSOLE_DIST_DIR = Path(
+    os.getenv("CONSOLE_DIST_DIR") or _REPO_ROOT / "frontend" / "dist"
+)
+SITE_DIST_DIR = Path(os.getenv("SITE_DIST_DIR") or _REPO_ROOT / "site" / "dist")
+if CONSOLE_DIST_DIR.is_dir():
+    app.mount(
+        "/console", StaticFiles(directory=CONSOLE_DIST_DIR, html=True), name="console"
+    )
+else:
+    logger.warning("console dist missing at %s; /console not served", CONSOLE_DIST_DIR)
+if SITE_DIST_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=SITE_DIST_DIR, html=True), name="site")
+else:
+    logger.warning("site dist missing at %s; / not served", SITE_DIST_DIR)

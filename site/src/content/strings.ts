@@ -39,6 +39,7 @@ interface PageCopy {
   };
   demo: {
     brand: string;
+    consoleCta: string;
     disclosure: string;
     privacy: string;
     clinic: string;
@@ -207,6 +208,7 @@ export const strings: Record<Language, PageCopy> = {
     },
     demo: {
       brand: "CarePath Phiên dịch",
+      consoleCta: "Mở công cụ Phiên dịch",
       disclosure: "Bản mô phỏng — không phải bản dịch trực tiếp",
       privacy: "Không thu âm",
       clinic: "Tên cơ sở",
@@ -470,6 +472,7 @@ export const strings: Record<Language, PageCopy> = {
     },
     demo: {
       brand: "CarePath Interpreter",
+      consoleCta: "Open the Interpreter tool",
       disclosure: "Simulation — not a live translation",
       privacy: "No recording",
       clinic: "Clinic name",

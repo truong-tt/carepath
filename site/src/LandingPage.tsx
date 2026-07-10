@@ -107,6 +107,9 @@ export default function LandingPage({
             onScenarioChange={setScenarioId}
             onTranscriptChange={handleTranscriptChange}
           />
+          <a className="button-link button-link--secondary scribe-cta" href="/console/">
+            {copy.demo.consoleCta}
+          </a>
         </section>
 
         <div className="marquee" aria-label={copy.marquee.join(", ")}>
