@@ -107,7 +107,10 @@ export default function LandingPage({
             onScenarioChange={setScenarioId}
             onTranscriptChange={handleTranscriptChange}
           />
-          <a className="button-link button-link--secondary scribe-cta" href="/console/">
+          <a
+            className="button-link button-link--secondary scribe-cta"
+            href={import.meta.env.VITE_CONSOLE_URL || "/console/"}
+          >
             {copy.demo.consoleCta}
           </a>
         </section>

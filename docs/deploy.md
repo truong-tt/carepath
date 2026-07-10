@@ -82,6 +82,35 @@ curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
   -F "encounter_context=Phòng khám nội tổng quát"
 ```
 
+## Optional: keep the existing Vercel URL
+
+The Space alone is a complete deploy. If you also want the site on an existing
+Vercel project (e.g. `https://carepath-omega.vercel.app`), the new `site/` is a
+static Vite build that works there directly:
+
+1. In the Vercel project settings, change **Root Directory** from the removed
+   `apps/web-next` to `site` (framework/build/output come from
+   `site/vercel.json`).
+2. Set these Vercel environment variables:
+
+```text
+VITE_API_BASE=https://<your-hf-space>.hf.space
+VITE_CONSOLE_URL=https://<your-hf-space>.hf.space/console/
+VITE_LEAD_ENDPOINT=<optional lead endpoint>
+VITE_LEAD_EMAIL=<pilot contact email>
+```
+
+3. Allow the Vercel origin on the Space (the Scribe tool posts audio directly
+   to it):
+
+```text
+CORS_ORIGINS=https://carepath-omega.vercel.app
+```
+
+The interpreter console itself stays on the Space (`/console/` needs the
+WebSocket API); the Vercel landing links out to it via `VITE_CONSOLE_URL`.
+The scripted demo and the pilot form are fully client-side and need nothing.
+
 ## Keep-Alive
 
 The workflow in `.github/workflows/keepalive.yml` pings the Space every 12
