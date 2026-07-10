@@ -1,11 +1,12 @@
-# Agent instructions — carepath-interpreter
+# Agent instructions — CarePath (unified)
 
-Read `PLAN.md` first (the implementation plan), `docs/research.md` for background.
-Work PLAN.md phases in order; don't skip ahead or invent features not in §3 Scope.
-Demo-website work is a separate track: see `DEMO-SITE-PLAN.md`; it lives in `/site`
-only and must not modify `backend/` or `frontend/`.
-Product unification (merge with the scriber on `main`) follows `MERGE-PLAN.md`;
-the post-merge review is run by claude-fable-5 against `JUDGE.md`.
+One product, two modules: the scriber (`apps/api/carepath`, `/api/v1/*`) and the
+interpreter (`backend/app`, `/api/*` + `/ws/*`), served by one FastAPI process
+plus two Vite frontends (`site/` at `/`, `frontend/` at `/console/`).
+`PLAN.md` and `DEMO-SITE-PLAN.md` are historical build plans for the interpreter
+and demo site. `MERGE-PLAN.md` is the executed unification plan (M.0–M.8 done);
+`JUDGE.md` is its review protocol, run by claude-fable-5.
+`docs/research.md` holds the interpreter safety background.
 
 ## Non-negotiable safety invariants (PLAN.md §2 — full text there)
 
@@ -19,8 +20,13 @@ the post-merge review is run by claude-fable-5 against `JUDGE.md`.
 
 ## Commands
 
-- Backend: `cd backend && uvicorn app.main:app --reload` · tests: `pytest`
-- Frontend: `cd frontend && npm run dev` · tests: `npm test` · e2e: `npx playwright test`
+- Combined service: `uvicorn carepath.main:app --app-dir apps/api --reload`
+  (needs `pip install -e ".[dev]" -e "./backend[dev]"`)
+- Scriber + combined tests: root `pytest` · keyless smoke: `python scripts/smoke_backend.py`
+- Interpreter backend alone: `cd backend && uvicorn app.main:app --reload` · tests: `pytest`
+- Console: `cd frontend && npm run dev` · tests: `npm test` · e2e: `npx playwright test`
+- Demo site: `cd site && npm run dev` · tests: `npm test` · build (diacritics gate):
+  `npm run build` · e2e: `npm run e2e`
 - Full mock-mode run: set `PROVIDER_MODE=mock` in `.env` — must work with no API keys.
 - Eval regression: `python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock`
 
