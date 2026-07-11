@@ -438,7 +438,7 @@ export const strings: Record<Language, PageCopy> = {
       helper: "Tạo bản nháp y khoa",
       intro: "AI dùng phiên âm tự động để tạo bản nháp y khoa theo bốn mục SOAP; bác sĩ cần kiểm tra trước khi sử dụng.",
       preStartSteps: [
-        "Bật ghi âm buổi khám",
+        "Tải tệp ghi âm buổi khám lên",
         "Phiên âm tự động lời nói thành văn bản",
         "AI tạo bản nháp y khoa theo bốn mục SOAP",
         "Bác sĩ kiểm tra, chỉnh sửa; bản nháp không tự vào hồ sơ",
@@ -839,7 +839,7 @@ export const strings: Record<Language, PageCopy> = {
       helper: "AI Scribe",
       intro: "Upload a Vietnamese consultation recording. The system uses automated transcription, corrects medical terms, and creates a four-part SOAP draft for clinician review.",
       preStartSteps: [
-        "Record the visit",
+        "Upload the visit recording",
         "Automated transcription turns speech into text",
         "AI creates a four-part SOAP draft",
         "The clinician checks and edits; the draft never enters the record automatically",

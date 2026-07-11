@@ -67,6 +67,7 @@ describe("ScribeTool", () => {
         "AI chỉ hỗ trợ tạo bản nháp. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByText("Tải tệp ghi âm buổi khám lên")).toBeInTheDocument();
     expect(
       screen.getByText(
         "AI tạo bản nháp y khoa theo bốn mục SOAP",

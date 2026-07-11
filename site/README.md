@@ -1,10 +1,11 @@
 # CarePath public site
 
 Static, Vietnamese-first buyer site for the two CarePath products. The embedded
-Interpreter experience is a scripted client-only simulation. The Scribe route
-at `/#/scribe` uploads a user-selected audio file to `VITE_API_BASE`; its
-Interpreter link uses `VITE_CONSOLE_URL`; it includes the selected `lang` when
-that URL crosses origins.
+live medical interpretation experience is a scripted client-only simulation.
+The clinical-note route at `/ghi-chep-lam-sang/` uploads a user-selected audio
+file to `VITE_API_BASE`; its live-interpretation link uses `VITE_CONSOLE_URL`
+and includes the selected `lang` when that URL crosses origins. Legacy
+`/#/scribe` links are redirected to the clinical-note route.
 
 ```powershell
 npm.cmd install
