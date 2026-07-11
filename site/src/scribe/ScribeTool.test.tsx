@@ -56,12 +56,27 @@ describe("ScribeTool", () => {
     expect(
       screen.getByText("Công cụ thí điểm · Cần bác sĩ duyệt"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
-    expect(screen.getByText("AI chỉ hỗ trợ soạn thảo. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.")).toBeInTheDocument();
-    expect(screen.getByText("CarePath dùng tệp ghi âm do cơ sở chọn và tải lên; màn hình này không tự bắt đầu micro.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục ghi chép" }));
+    expect(
+      screen.getByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "AI chỉ hỗ trợ tạo bản nháp. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "AI tạo bản nháp y khoa theo bốn mục SOAP",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Bác sĩ kiểm tra, chỉnh sửa; bản nháp không tự vào hồ sơ",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
 
-    const submit = screen.getByRole("button", { name: "Tạo bệnh án SOAP" });
+    const submit = screen.getByRole("button", { name: "Tạo bản nháp SOAP" });
     expect(submit).toBeDisabled();
     selectWav();
     expect(submit).toBeEnabled();
@@ -101,16 +116,16 @@ describe("ScribeTool", () => {
     );
 
     render(<ScribeTool language="vi" />);
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục ghi chép" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
     selectWav();
-    fireEvent.click(screen.getByRole("button", { name: "Tạo bệnh án SOAP" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
     expect(
       await screen.findByText("Bạn đã đạt giới hạn demo cho địa chỉ này."),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
     expect(
-      screen.getByRole("button", { name: "Tạo bệnh án SOAP" }),
+      screen.getByRole("button", { name: "Tạo bản nháp SOAP" }),
     ).toBeInTheDocument();
   });
 

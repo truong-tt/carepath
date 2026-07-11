@@ -74,7 +74,7 @@ describe("language preference", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Ghi chép bệnh án AI",
+        name: "Ghi chép bệnh án AI — bản nháp",
       }),
     ).toBeInTheDocument();
 
