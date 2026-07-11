@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import ScribeTool, { RichText } from "./ScribeTool";
+import ScribeTool, { classifyFailure, RichText } from "./ScribeTool";
 
 const healthResponse = {
   ok: true,
@@ -96,11 +96,9 @@ describe("ScribeTool", () => {
     expect(soapCall[1].method).toBe("POST");
   });
 
-  it("shows the server's rate-limit message on 429", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
+  it("shows a localized rate-limit message and keeps the selected file for a manual retry", async () => {
+    const fetchMock = vi
+      .fn()
         .mockResolvedValueOnce(healthResponse)
         .mockResolvedValueOnce({
           ok: false,
@@ -112,6 +110,35 @@ describe("ScribeTool", () => {
                 retry_after_seconds: 60,
               },
             }),
+        });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ScribeTool language="vi" />);
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    selectWav();
+    fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
+
+    expect(
+      await screen.findByText("Bạn đã đạt giới hạn tạo bản nháp. Vui lòng thử lại sau."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
+    expect(
+      screen.getByRole("button", { name: "Tạo bản nháp SOAP" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("kham.wav · 4 B")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not expose raw server detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(healthResponse)
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 502,
+          text: async () => "LLM_API_KEY is required for production-provider",
         }),
     );
 
@@ -120,12 +147,26 @@ describe("ScribeTool", () => {
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
+    expect(await screen.findByText("Chưa thể tạo bản nháp lúc này. Hãy thử lại sau.")).toBeInTheDocument();
+    expect(screen.queryByText(/LLM_API_KEY/)).not.toBeInTheDocument();
+  });
+
+  it("shows a localized offline error when the draft request cannot connect", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(healthResponse)
+        .mockRejectedValueOnce(new TypeError("Failed to fetch")),
+    );
+
+    render(<ScribeTool language="vi" />);
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    selectWav();
+    fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
+
     expect(
-      await screen.findByText("Bạn đã đạt giới hạn demo cho địa chỉ này."),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Thử lại" }));
-    expect(
-      screen.getByRole("button", { name: "Tạo bản nháp SOAP" }),
+      await screen.findByText("Không thể kết nối với máy chủ. Hãy kiểm tra kết nối rồi thử lại."),
     ).toBeInTheDocument();
   });
 
@@ -133,6 +174,19 @@ describe("ScribeTool", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     render(<ScribeTool language="en" />);
     expect(await screen.findByText("Server unreachable")).toBeInTheDocument();
+  });
+});
+
+describe("classifyFailure", () => {
+  it.each([
+    [400, "Unsupported file type", "unsupported"],
+    [400, "Audio file too large", "oversize"],
+    [429, "anything", "rateLimit"],
+    [503, "ASR failed", "asr"],
+    [502, "LLM failed", "llm"],
+    [500, "anything", "unknown"],
+  ] as const)("classifies status %i as %s", (status, detail, expected) => {
+    expect(classifyFailure(status, detail)).toBe(expected);
   });
 });
 

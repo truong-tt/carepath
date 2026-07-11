@@ -17,6 +17,7 @@ const TEAM_CODE: string = import.meta.env.VITE_TEAM_CODE ?? "";
 
 type ToolState = "idle" | "loading" | "error" | "result";
 type HealthState = "checking" | "ready" | "demo" | "degraded" | "down";
+type FailureKind = "unsupported" | "oversize" | "rateLimit" | "asr" | "llm" | "offline" | "unknown";
 
 interface SoapDraft {
   subjective?: string;
@@ -81,16 +82,20 @@ export function RichText({ text }: { text: string | undefined }) {
   return <>{blocks}</>;
 }
 
-function errorDetail(payload: unknown, fallback: string): string {
-  if (payload && typeof payload === "object" && "detail" in payload) {
-    const detail = (payload as { detail: unknown }).detail;
-    if (typeof detail === "string") return detail;
-    if (detail && typeof detail === "object" && "message" in detail) {
-      const message = (detail as { message: unknown }).message;
-      if (typeof message === "string") return message;
-    }
+export function classifyFailure(status: number, detail: string): FailureKind {
+  const message = detail.toLowerCase();
+  if (status === 429) return "rateLimit";
+  if (status === 503) return "asr";
+  if (status === 502) return "llm";
+  if (message.includes("unsupported file")) return "unsupported";
+  if (message.includes("too large")) return "oversize";
+  return "unknown";
+}
+
+class ScribeRequestError extends Error {
+  constructor(readonly kind: FailureKind, detail: string) {
+    super(detail);
   }
-  return fallback;
 }
 
 function formatBytes(size: number): string {
@@ -118,7 +123,7 @@ export default function ScribeTool({
   const [file, setFile] = useState<File | null>(null);
   const [context, setContext] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorKind, setErrorKind] = useState<FailureKind>("unknown");
   const [result, setResult] = useState<SoapResponse | null>(null);
   const [doneSteps, setDoneSteps] = useState(0);
   const [copyState, setCopyState] = useState<"idle" | "done" | "failed">("idle");
@@ -190,16 +195,15 @@ export default function ScribeTool({
         /* non-JSON error body */
       }
       if (!response.ok) {
-        throw new Error(errorDetail(data, raw || `HTTP ${response.status}`));
+        throw new ScribeRequestError(classifyFailure(response.status, raw), raw);
       }
       setResult(data as SoapResponse);
       setDoneSteps(3);
       setState("result");
       setCopyState("idle");
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error && error.message ? error.message : labels.errorTitle,
-      );
+      console.error("Scribe draft request failed", error);
+      setErrorKind(error instanceof ScribeRequestError ? error.kind : "offline");
       setState("error");
     } finally {
       stepTimers.current.forEach(window.clearTimeout);
@@ -378,7 +382,7 @@ export default function ScribeTool({
         {state === "error" && (
           <div className="scribe-panel tool-panel tool-error" role="alert">
             <strong>{labels.errorTitle}</strong>
-            <p>{errorMessage}</p>
+            <p>{labels.errors[errorKind]}</p>
             <button
               className="button button--secondary"
               onClick={() => setState("idle")}

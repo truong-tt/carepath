@@ -159,6 +159,7 @@ interface PageCopy {
     steps: [string, string, string];
     progressLabel: string;
     errorTitle: string;
+    errors: Record<"unsupported" | "oversize" | "rateLimit" | "asr" | "llm" | "offline" | "unknown", string>;
     retry: string;
     resultTitle: string;
     reviewBanner: string;
@@ -429,7 +430,7 @@ export const strings: Record<Language, PageCopy> = {
         "Bác sĩ kiểm tra, chỉnh sửa; bản nháp không tự vào hồ sơ",
       ],
       preStartReminder: "AI chỉ hỗ trợ tạo bản nháp. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
-      uploadNotice: "CarePath dùng tệp ghi âm do cơ sở chọn và tải lên để tạo bản nháp; màn hình này không tự bắt đầu micro.",
+      uploadNotice: "Cơ sở chủ động chọn và tải tệp ghi âm lên để tạo bản nháp. Tệp chỉ được xử lý tạm thời trong phạm vi yêu cầu này; màn hình không tự bắt đầu micro.",
       continue: "Tiếp tục tạo bản nháp",
       back: "Tất cả chức năng",
       health: {
@@ -447,6 +448,15 @@ export const strings: Record<Language, PageCopy> = {
       steps: ["Phiên âm tự động", "Hiệu chỉnh thuật ngữ", "Tạo bản nháp theo bốn mục SOAP"],
       progressLabel: "Tiến độ tạo bản nháp",
       errorTitle: "Đã xảy ra lỗi.",
+      errors: {
+        unsupported: "Tệp đã chọn không được hỗ trợ. Hãy chọn một tệp âm thanh.",
+        oversize: "Tệp vượt quá dung lượng cho phép 25 MB. Hãy chọn tệp nhỏ hơn.",
+        rateLimit: "Bạn đã đạt giới hạn tạo bản nháp. Vui lòng thử lại sau.",
+        asr: "Không thể phiên âm tệp âm thanh này. Hãy kiểm tra tệp rồi thử lại.",
+        llm: "Chưa thể tạo bản nháp lúc này. Hãy thử lại sau.",
+        offline: "Không thể kết nối với máy chủ. Hãy kiểm tra kết nối rồi thử lại.",
+        unknown: "Không thể tạo bản nháp lúc này. Hãy thử lại.",
+      },
       retry: "Thử lại",
       resultTitle: "Bản nháp y khoa theo bốn mục SOAP",
       reviewBanner: "Bản nháp do AI tạo, cần bác sĩ kiểm tra trước khi đưa vào hồ sơ bệnh án.",
@@ -810,7 +820,7 @@ export const strings: Record<Language, PageCopy> = {
         "The clinician checks and edits; the draft never enters the record automatically",
       ],
       preStartReminder: "AI assists with drafting only. The clinician must review the draft before use.",
-      uploadNotice: "CarePath uses the recording file selected and uploaded by the clinic to create a draft; this screen does not start the microphone.",
+      uploadNotice: "The clinic deliberately selects and uploads the recording file to create a draft. The file is processed temporarily for this request only; this screen does not start the microphone.",
       continue: "Continue to draft",
       back: "All products",
       health: {
@@ -828,6 +838,15 @@ export const strings: Record<Language, PageCopy> = {
       steps: ["Automated transcription", "Correcting terms", "Creating the four-part SOAP draft"],
       progressLabel: "Draft creation progress",
       errorTitle: "Something went wrong.",
+      errors: {
+        unsupported: "The selected file is not supported. Choose an audio file.",
+        oversize: "The file exceeds the 25 MB limit. Choose a smaller file.",
+        rateLimit: "You have reached the draft-creation limit. Try again later.",
+        asr: "This audio file could not be transcribed. Check the file and try again.",
+        llm: "The draft cannot be created right now. Try again later.",
+        offline: "The server cannot be reached. Check your connection and try again.",
+        unknown: "The draft cannot be created right now. Try again.",
+      },
       retry: "Try again",
       resultTitle: "Four-part SOAP draft",
       reviewBanner: "AI-generated draft. A clinician must review it before it enters the medical record.",
