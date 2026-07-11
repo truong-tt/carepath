@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { speakTurn } from "../tts";
 import type { TranscriptTurn, WsEvent } from "../types";
@@ -13,6 +13,7 @@ type InterpreterConsoleProps = {
 };
 
 type Speaker = "doctor" | "patient";
+type InputState = "connecting" | "ready" | "recording" | "processing" | "delivered" | "review-required" | "disconnected";
 
 const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
   doctor: { lang: "vi" },
@@ -26,7 +27,7 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [speaker, setSpeaker] = useState<Speaker>(initialSpeaker);
   const [typedText, setTypedText] = useState("");
-  const [status, setStatus] = useState("connecting");
+  const [inputState, setInputState] = useState<InputState>("connecting");
   const [warning, setWarning] = useState<string | null>(null);
   const [escalated, setEscalated] = useState(false);
   const [providerMode, setProviderMode] = useState("");
@@ -34,6 +35,7 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const turnActiveRef = useRef(false);
 
   useEffect(() => {
     void getHealth()
@@ -42,14 +44,19 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
     const socket = new WebSocket(websocketUrl(`/ws/sessions/${sessionId}`));
     socketRef.current = socket;
     const isCurrentSocket = () => socketRef.current === socket;
+    if (socket.readyState === WebSocket.OPEN) {
+      setInputState("ready");
+    }
     socket.addEventListener("open", () => {
       if (isCurrentSocket()) {
-        setStatus("connected");
+        setInputState("ready");
       }
     });
     socket.addEventListener("close", () => {
       if (isCurrentSocket()) {
-        setStatus("disconnected");
+        stopRecording();
+        turnActiveRef.current = false;
+        setInputState("disconnected");
       }
     });
     socket.addEventListener("message", (event: MessageEvent<string>) => {
@@ -67,6 +74,8 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
           requires_confirmation: data.requires_confirmation,
         };
         setTurns((current) => [...current, nextTurn]);
+        turnActiveRef.current = false;
+        setInputState(data.requires_confirmation ? "review-required" : "delivered");
         if (data.low_confidence) {
           setWarning(textRef.current.lowConfidence);
         } else if (data.requires_confirmation) {
@@ -77,10 +86,15 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
         }
       }
       if (data.type === "turn_error") {
+        stopRecording();
+        turnActiveRef.current = false;
+        setInputState("ready");
         setWarning(textRef.current.turnError);
       }
     });
     return () => {
+      turnActiveRef.current = false;
+      stopRecording();
       if (isCurrentSocket()) {
         socketRef.current = null;
       }
@@ -104,9 +118,17 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
     if (!text) {
       return;
     }
+    if (turnActiveRef.current || inputState === "disconnected" || inputState === "connecting") {
+      return;
+    }
     const config = speakerConfig[speaker];
+    turnActiveRef.current = true;
+    setInputState("processing");
     if (sendJson({ type: "text_turn", speaker, lang: config.lang, text })) {
       setTypedText("");
+    } else {
+      turnActiveRef.current = false;
+      setInputState("ready");
     }
   }
 
@@ -137,6 +159,9 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
   }
 
   async function startRecording(nextSpeaker: Speaker) {
+    if (turnActiveRef.current || inputState === "disconnected" || inputState === "connecting") {
+      return;
+    }
     const config = speakerConfig[nextSpeaker];
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -148,8 +173,14 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
       return;
     }
 
+    turnActiveRef.current = true;
+    setInputState("recording");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!turnActiveRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const recorder = new MediaRecorder(stream);
       streamRef.current = stream;
       recorderRef.current = recorder;
@@ -164,10 +195,23 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
           socket.send(JSON.stringify({ type: "end_turn" }));
         }
         stream.getTracks().forEach((track) => track.stop());
+        if (streamRef.current === stream) {
+          streamRef.current = null;
+        }
+      });
+      recorder.addEventListener("error", () => {
+        turnActiveRef.current = false;
+        stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        setInputState("ready");
+        setWarning(text.turnError);
       });
       recorder.start(250);
-      setStatus(`recording:${nextSpeaker}`);
     } catch {
+      turnActiveRef.current = false;
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      setInputState("ready");
       setWarning(text.microphoneDenied);
     }
   }
@@ -177,11 +221,30 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
     if (recorder && recorder.state !== "inactive") {
       recorder.stop();
       recorderRef.current = null;
-      setStatus("connected");
+      setInputState("processing");
+    } else if (turnActiveRef.current) {
+      turnActiveRef.current = false;
+      setInputState("ready");
     }
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
   }
+
+  function handlePttKeyDown(event: KeyboardEvent<HTMLButtonElement>, nextSpeaker: Speaker) {
+    if ((event.key === " " || event.key === "Enter") && !event.repeat) {
+      event.preventDefault();
+      void startRecording(nextSpeaker);
+    }
+  }
+
+  function handlePttKeyUp(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      stopRecording();
+    }
+  }
+
+  const canSubmit = !turnActiveRef.current && inputState !== "connecting" && inputState !== "disconnected";
 
   return (
     <main className="workspace" lang={language}>
@@ -204,7 +267,7 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
         {(Object.keys(speakerConfig) as Speaker[]).map((key) => (
           <section className="input-region" key={key}>
             <h2>
-              <button className="region-select" type="button" aria-pressed={speaker === key} onClick={() => setSpeaker(key)}>
+              <button className="region-select" type="button" aria-pressed={speaker === key} disabled={!canSubmit} onClick={() => setSpeaker(key)}>
                 {key === "doctor" ? `${text.doctor} · ${text.vietnamese}` : `${language === "vi" ? "Người bệnh" : text.patient} · English`}
               </button>
             </h2>
@@ -213,9 +276,17 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
                 <button
                   className="talk"
                   type="button"
+                  aria-pressed={inputState === "recording"}
+                  aria-describedby="input-state"
+                  disabled={!canSubmit}
                   onPointerDown={() => void startRecording(key)}
                   onPointerUp={stopRecording}
                   onPointerCancel={stopRecording}
+                  onTouchStart={() => void startRecording(key)}
+                  onTouchEnd={stopRecording}
+                  onTouchCancel={stopRecording}
+                  onKeyDown={(event) => handlePttKeyDown(event, key)}
+                  onKeyUp={handlePttKeyUp}
                 >
                   {text.holdToTalk}
                 </button>
@@ -225,18 +296,19 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
                     <input
                       placeholder={text.typedPlaceholder}
                       value={typedText}
+                      disabled={!canSubmit}
                       onChange={(event) => setTypedText(event.target.value)}
                     />
                   </label>
-                  <button type="submit">{text.send}</button>
+                  <button disabled={!canSubmit} type="submit">{text.send}</button>
                 </form>
               </>
             ) : null}
           </section>
         ))}
       </section>
-      <div className="status" role="status">
-        <span>{status.startsWith("recording:") ? text.recording.replace("{speaker}", status.endsWith("doctor") ? text.doctor : text.patient) : text[status as "connecting" | "connected" | "disconnected"]}</span>
+      <div className="status" id="input-state" role="status">
+        <span>{inputState === "recording" ? text.recording.replace("{speaker}", speaker === "doctor" ? text.doctor : text.patient) : inputState === "processing" ? text.inputProcessing : inputState === "delivered" ? text.inputDelivered : inputState === "review-required" ? text.inputReviewRequired : inputState === "ready" ? text.inputReady : text[inputState]}</span>
         {warning ? <strong>{warning}</strong> : null}
       </div>
       {turns.some((turn) => turn.low_confidence) ? (

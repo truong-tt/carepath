@@ -34,7 +34,7 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await page.getByRole("button", { name: "Bắt đầu phiên dịch" }).click();
 
   await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Đã kết nối");
+  await expect(page.getByRole("status")).toContainText("Sẵn sàng");
   const doctorRegion = page.locator(".input-region").filter({ has: page.getByRole("heading", { name: "Bác sĩ · Tiếng Việt" }) });
   await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("xin chao");
   await doctorRegion.getByRole("button", { name: "Gửi" }).click();

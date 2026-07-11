@@ -20,9 +20,30 @@ class FakeWebSocket extends EventTarget {
     this.readyState = 3;
   }
 
+  open() {
+    this.dispatchEvent(new Event("open"));
+  }
+
   receive(data: WsEvent) {
     this.dispatchEvent(new MessageEvent("message", { data: JSON.stringify(data) }));
   }
+}
+
+class FakeMediaRecorder extends EventTarget {
+  state: RecordingState = "inactive";
+
+  constructor() {
+    super();
+  }
+
+  start = vi.fn(() => {
+    this.state = "recording";
+  });
+
+  stop = vi.fn(() => {
+    this.state = "inactive";
+    this.dispatchEvent(new Event("stop"));
+  });
 }
 
 afterEach(() => {
@@ -30,11 +51,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function openSocket() {
+  act(() => FakeWebSocket.instances[0].open());
+}
+
 describe("InterpreterConsole", () => {
   it("keeps typed turns in their selected doctor and patient regions", () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
     render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
 
     expect(screen.getByRole("heading", { name: "Bác sĩ · Tiếng Việt" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Người bệnh · English" })).toBeInTheDocument();
@@ -43,6 +69,7 @@ describe("InterpreterConsole", () => {
     const input = screen.getByPlaceholderText("Nhập nội dung cần dịch");
     fireEvent.change(input, { target: { value: "xin chào" } });
     fireEvent.submit(input.closest("form")!);
+    act(() => FakeWebSocket.instances[0].receive({ type: "turn_error", message: "retry", retryable: true }));
     fireEvent.click(screen.getByRole("button", { name: "Người bệnh · English" }));
     fireEvent.change(screen.getByPlaceholderText("Nhập nội dung cần dịch"), { target: { value: "hello" } });
     fireEvent.submit(screen.getByPlaceholderText("Nhập nội dung cần dịch").closest("form")!);
@@ -58,6 +85,44 @@ describe("InterpreterConsole", () => {
 
     expect(screen.getByRole("button", { name: "Người bệnh · English" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Bác sĩ · Tiếng Việt" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("prevents overlapping starts while microphone permission is pending", () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    const getUserMedia = vi.fn(() => new Promise<MediaStream>(() => undefined));
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+
+    const talk = screen.getByRole("button", { name: "Nhấn giữ để nói" });
+    fireEvent.keyDown(talk, { key: "Enter" });
+    fireEvent.keyDown(talk, { key: "Enter" });
+
+    expect(getUserMedia).toHaveBeenCalledTimes(1);
+    expect(talk).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("textbox")).toBeDisabled();
+  });
+
+  it("uses Space push-to-talk and releases microphone tracks", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    const track = { stop: vi.fn() } as unknown as MediaStreamTrack;
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [track] }) } });
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+
+    const talk = screen.getByRole("button", { name: "Nhấn giữ để nói" });
+    fireEvent.keyDown(talk, { key: " " });
+    await act(async () => undefined);
+    expect(talk).toHaveAttribute("aria-pressed", "true");
+    fireEvent.keyUp(talk, { key: " " });
+
+    expect(track.stop).toHaveBeenCalled();
+    expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(JSON.stringify({ type: "start_turn", speaker: "doctor", lang: "vi" }));
+    expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(JSON.stringify({ type: "end_turn" }));
   });
 
   it("renders readback entity text in the confirmation card", async () => {
