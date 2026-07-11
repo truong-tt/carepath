@@ -68,7 +68,10 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
                 type="checkbox"
                 onChange={(event) => setAiDisclosure(event.target.checked)}
               />
-              {text.aiDisclosure} <span lang={language === "vi" ? "en" : "vi"}>{companion.aiDisclosure}</span>
+              <span className="consent-choice-copy">
+                {text.aiDisclosure}
+                <span lang={language === "vi" ? "en" : "vi"}>{companion.aiDisclosure}</span>
+              </span>
             </label>
             <label lang={language}>
               <input
@@ -76,7 +79,10 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
                 type="checkbox"
                 onChange={(event) => setInterpreterRight(event.target.checked)}
               />
-              {text.interpreterRight} <span lang={language === "vi" ? "en" : "vi"}>{companion.interpreterRight}</span>
+              <span className="consent-choice-copy">
+                {text.interpreterRight}
+                <span lang={language === "vi" ? "en" : "vi"}>{companion.interpreterRight}</span>
+              </span>
             </label>
           </fieldset>
           {error ? <p className="error" role="alert">{error}</p> : null}

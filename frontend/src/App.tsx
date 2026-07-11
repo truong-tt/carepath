@@ -86,6 +86,10 @@ function App() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [deviceCheck, hash, intent, sessionId]);
+
   async function handleConsent(consent: ConsentPayload) {
     setStarting(true);
     setError(null);

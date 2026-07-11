@@ -13,6 +13,21 @@ test("serves production assets from the canonical interpreter path", async ({ pa
   ).toBe(true);
 });
 
+test("keeps bilingual consent choices readable at phone width", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/phien-dich-y-khoa/");
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+
+  const companion = page.getByText(/AI-generated translations can contain errors/);
+  await expect(companion).toBeVisible();
+  const bounds = await companion.boundingBox();
+  expect(bounds?.width).toBeGreaterThan(180);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
+});
+
 test("reaches internal review only through the canonical hash route", async ({ page }) => {
   await page.goto("/phien-dich-y-khoa/#/kiem-duyet");
 

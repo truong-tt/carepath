@@ -295,6 +295,16 @@ button:disabled {
   align-items: start;
 }
 
+.consent-choice-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.consent-choice-copy > [lang] {
+  color: #5b6876;
+}
+
 .eyebrow,
 .meta {
   margin: 0 0 8px;
@@ -315,6 +325,7 @@ p {
 }
 
 .topbar,
+.lifecycle-actions,
 .input-regions,
 .typed,
 .status,
@@ -322,6 +333,20 @@ p {
 .transcript {
   max-width: 1120px;
   margin: 0 auto 18px;
+}
+
+.lifecycle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lifecycle-actions > button {
+  flex: 1 1 12rem;
+}
+
+.lifecycle-actions > .error {
+  flex-basis: 100%;
 }
 
 .topbar,
