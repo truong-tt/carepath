@@ -5,6 +5,7 @@ import type { TranscriptTurn, WsEvent } from "../types";
 import { confirmTurn, deleteSession, endSession, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
 import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
+import { SessionChecklist } from "./SessionChecklist";
 
 type InterpreterConsoleProps = {
   deviceId?: string;
@@ -39,6 +40,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [openReview, setOpenReview] = useState<string | null>(null);
   const [closed, setClosed] = useState(false);
   const [lifecycleError, setLifecycleError] = useState<"end" | "delete" | null>(null);
+  const [escalationLocated, setEscalationLocated] = useState(false);
   const [focusTarget, setFocusTarget] = useState<{ speaker: Speaker; target: "talk" | "type" } | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -175,6 +177,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   }
 
   async function handleEscalate() {
+    setEscalationLocated(true);
     playbackSuppressedRef.current = true;
     setPlaybackSuppressed(true);
     window.speechSynthesis?.cancel();
@@ -326,10 +329,16 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           {providerMode === "mock" ? <p className="eyebrow">{text.mockDisclaimer}</p> : null}
           <h1>{text.title}</h1>
         </div>
-        <button className="escalate" type="button" onClick={() => void handleEscalate()}>
+        <button className="escalate" type="button" onFocus={() => setEscalationLocated(true)} onClick={() => void handleEscalate()}>
           {text.requestInterpreter}
         </button>
       </header>
+      <SessionChecklist
+        language={language}
+        delivered={turns.some((turn) => turn.status === "delivered")}
+        confirmed={turns.some((turn) => turn.status === "confirmed" || turn.status === "corrected")}
+        escalationLocated={escalationLocated}
+      />
       <section className="lifecycle-actions" aria-label={text.lifecycle}>
         <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.endSession}</button>
         <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.withdrawConsent}</button>

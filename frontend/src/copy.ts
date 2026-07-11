@@ -163,6 +163,7 @@ export const copy = {
       current: "Đang thực hiện",
       upcoming: "Tiếp theo",
     },
+    checklist: { title: "Danh sách an toàn phiên đầu", delivered: "Đã chuyển lượt đầu tiên", confirmed: "Đã hoàn tất xác nhận", escalation: "Đã xác định nút yêu cầu phiên dịch viên", dismiss: "Ẩn danh sách" },
   },
   en: {
     title: "CarePath | Medical Interpreter",
@@ -324,6 +325,7 @@ export const copy = {
       current: "Current step",
       upcoming: "Upcoming",
     },
+    checklist: { title: "First-session safety checklist", delivered: "First turn delivered", confirmed: "Confirmation completed", escalation: "Human-interpreter control located", dismiss: "Dismiss checklist" },
   },
 } as const;
 

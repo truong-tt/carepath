@@ -175,6 +175,23 @@ button:disabled {
   gap: 6px;
 }
 
+.session-checklist {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #d7dfe8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.session-checklist ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .intent-quiz fieldset {
   display: grid;
   gap: 12px;
