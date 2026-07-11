@@ -107,6 +107,20 @@ test("initial and confirmation states have no serious axe violations", async ({
   await expectNoSeriousAxeViolations(page);
 });
 
+test("safety cards stay in the document flow while scrolling", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  const cards = page.locator("[data-safety-card]");
+  await cards.first().scrollIntoViewIfNeeded();
+  await page.mouse.wheel(0, 500);
+
+  await expect(cards).toHaveCount(3);
+  for (const card of await cards.all()) {
+    await expect(card).toHaveCSS("transform", "none");
+  }
+});
+
 test("both product choices remain discoverable across release viewports", async ({
   page,
 }) => {

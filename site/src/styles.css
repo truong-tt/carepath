@@ -127,7 +127,7 @@ textarea:focus-visible {
 /* ---------- navigation ---------- */
 
 .site-nav {
-  position: relative;
+  position: sticky;
   top: 0;
   z-index: 20;
   display: flex;
