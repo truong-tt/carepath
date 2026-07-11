@@ -764,46 +764,6 @@ textarea {
   color: var(--muted);
 }
 
-/* ---------- marquee ---------- */
-
-.marquee {
-  overflow: hidden;
-  margin-top: clamp(2.5rem, 4vw, 3.5rem);
-  border-block: 1px solid var(--line);
-}
-
-.marquee__track {
-  display: flex;
-  width: max-content;
-  animation: marquee 36s linear infinite;
-}
-
-.marquee__track span {
-  display: inline-flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 0.85rem 2rem;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.marquee__track span::after {
-  width: 1px;
-  height: 0.9rem;
-  background: var(--line-strong);
-  content: "";
-}
-
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 /* ---------- scribe showcase ---------- */
 
 .scribe-panel {
@@ -1438,11 +1398,6 @@ mark.scribe-mark {
     animation-iteration-count: 1 !important;
   }
 
-  .marquee__track {
-    flex-wrap: wrap;
-    width: auto;
-    animation: none;
-  }
 }
 
 /* ---------- two-product landing ---------- */
@@ -1508,8 +1463,7 @@ mark.scribe-mark {
   line-height: 1.75;
 }
 
-.hero__actions,
-.product-chapter__actions {
+.hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -1643,8 +1597,8 @@ mark.scribe-mark {
 }
 
 .product-accordion {
-  display: flex;
-  min-height: 29rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: clamp(2.5rem, 5vw, 4rem);
   border: 1px solid var(--line);
   background: var(--line);
@@ -1654,21 +1608,12 @@ mark.scribe-mark {
 
 .product-accordion__panel {
   display: grid;
-  flex: 1 1 50%;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 1.5rem;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 1rem;
   min-width: 0;
   padding: clamp(1.5rem, 3.5vw, 3rem);
   color: var(--text);
   text-decoration: none;
-  transition:
-    flex-grow 650ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 300ms ease;
-}
-
-.product-accordion__panel:hover,
-.product-accordion__panel:focus-visible {
-  flex-grow: 1.22;
 }
 
 .product-accordion__panel--interpreter {
@@ -1688,18 +1633,23 @@ mark.scribe-mark {
   gap: 0.65rem;
 }
 
-.product-accordion__heading h3 {
+.product-accordion__heading h2 {
   margin: 0;
   font-size: clamp(1.6rem, 3vw, 2.6rem);
   letter-spacing: -0.04em;
   line-height: 1;
 }
 
-.product-accordion__heading span {
+.product-accordion__helper,
+.product-accordion__status {
   max-width: 24rem;
   color: var(--muted);
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.product-accordion__status {
+  color: var(--accent-ink);
 }
 
 .product-accordion__panel > p {
@@ -1709,15 +1659,13 @@ mark.scribe-mark {
   line-height: 1.65;
 }
 
-.product-accordion dl,
-.product-facts dl {
+.product-accordion dl {
   display: grid;
   gap: 1rem;
   margin: 0;
 }
 
-.product-accordion dl > div,
-.product-facts dl > div {
+.product-accordion dl > div {
   display: grid;
   grid-template-columns: 5.5rem 1fr;
   gap: 1rem;
@@ -1725,16 +1673,14 @@ mark.scribe-mark {
   border-top: 1px solid var(--line);
 }
 
-.product-accordion dt,
-.product-facts dt {
+.product-accordion dt {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.product-accordion dd,
-.product-facts dd {
+.product-accordion dd {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.55;
@@ -1756,209 +1702,6 @@ mark.scribe-mark {
 
 .product-accordion__panel:hover .product-accordion__cta span {
   transform: translate(0.25rem, 0.25rem);
-}
-
-.product-story {
-  display: block;
-  width: min(100% - 3rem, var(--container));
-  margin: 0 auto;
-  padding: clamp(6rem, 11vw, 10rem) 0;
-}
-
-.product-index {
-  align-self: start;
-  padding-top: 0.5rem;
-}
-
-.product-index > strong {
-  font-size: clamp(1.4rem, 2.2vw, 2rem);
-  letter-spacing: -0.04em;
-}
-
-.product-index > p {
-  margin: 0.8rem 0 1.5rem;
-  color: var(--muted);
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-
-.product-index nav {
-  display: grid;
-}
-
-.product-index a {
-  padding: 0.85rem 0;
-  border-top: 1px solid var(--line);
-  color: var(--text);
-  font-size: 0.82rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.product-index a:last-child {
-  border-bottom: 1px solid var(--line);
-}
-
-.product-index a:hover {
-  color: var(--accent-ink);
-}
-
-.product-chapters {
-  display: grid;
-  gap: clamp(9rem, 15vw, 14rem);
-  min-width: 0;
-}
-
-.product-chapter {
-  min-width: 0;
-  scroll-margin-top: 6rem;
-}
-
-.product-chapter__header {
-  display: grid;
-  gap: 1.3rem;
-}
-
-.product-chapter__identity {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.product-chapter__identity p {
-  margin: 0;
-  font-weight: 700;
-}
-
-.product-chapter__identity span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.product-chapter__header h2 {
-  max-width: 52rem;
-  margin: 0;
-  font-size: clamp(2.4rem, 5.8vw, 5rem);
-  font-weight: 650;
-  letter-spacing: -0.06em;
-  line-height: 0.98;
-  text-wrap: balance;
-}
-
-.product-chapter__header > p {
-  max-width: 48rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: clamp(1rem, 1.3vw, 1.14rem);
-  line-height: 1.75;
-}
-
-.product-facts {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.45fr);
-  gap: 2rem;
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-}
-
-.product-facts > p {
-  align-self: start;
-  margin: 0;
-  padding: 1rem;
-  border-left: 3px solid var(--teal);
-  background: var(--tint);
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.65;
-}
-
-.product-chapter--scribe .product-facts > p {
-  border-color: var(--amber);
-}
-
-.product-workflow {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  margin: clamp(3rem, 6vw, 5rem) 0 0;
-  padding: 0;
-  border: 1px solid var(--line);
-  background: var(--line);
-  counter-reset: product-step;
-  list-style: none;
-}
-
-.product-workflow li {
-  min-height: 13rem;
-  padding: 1.35rem;
-  background: var(--surface);
-  counter-increment: product-step;
-}
-
-.product-workflow li::before {
-  color: var(--muted);
-  content: counter(product-step, decimal-leading-zero);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.product-workflow h3 {
-  margin: 2.4rem 0 0.6rem;
-  font-size: 1.05rem;
-}
-
-.product-workflow p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.86rem;
-  line-height: 1.6;
-}
-
-.product-safety-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem 2rem;
-  margin: 2rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.product-safety-list li {
-  position: relative;
-  padding: 0.8rem 0 0.8rem 1.25rem;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.86rem;
-}
-
-.product-safety-list li::before {
-  position: absolute;
-  top: 1.35rem;
-  left: 0;
-  width: 0.42rem;
-  height: 0.42rem;
-  border-radius: 50%;
-  background: var(--teal);
-  content: "";
-}
-
-.product-chapter--scribe .product-safety-list li::before {
-  background: var(--amber);
-}
-
-.product-demo {
-  margin-top: clamp(3rem, 6vw, 5rem);
-}
-
-.product-demo .scribe-panel {
-  margin-top: 0;
-}
-
-.marquee {
-  margin-top: clamp(2rem, 6vw, 5rem);
 }
 
 .safety-suite {
@@ -2345,53 +2088,6 @@ mark.scribe-mark {
     order: 3;
   }
 
-  .hero {
-    min-height: 0;
-  }
-
-  .hero__lower {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  .product-accordion {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .product-accordion__panel,
-  .product-accordion__panel:hover,
-  .product-accordion__panel:focus-visible {
-    flex: none;
-  }
-
-  .product-story {
-    grid-template-columns: 1fr;
-  }
-
-  .product-index {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0 2rem;
-  }
-
-  .product-index > p {
-    grid-column: 1;
-  }
-
-  .product-index nav {
-    display: flex;
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    gap: 1.25rem;
-    align-items: start;
-  }
-
-  .product-index a,
-  .product-index a:last-child {
-    border: 0;
-  }
-
   .evidence {
     grid-template-columns: 1fr;
   }
@@ -2446,91 +2142,17 @@ mark.scribe-mark {
     transform: translate(-50%, -50%);
   }
 
-  .hero,
   .product-gateway,
-  .product-story,
   .evidence {
     width: min(100% - 1.5rem, var(--container));
-  }
-
-  .hero {
-    padding-top: 4.5rem;
-  }
-
-  .hero-title.hero-title--wide {
-    font-size: clamp(2rem, 10vw, 3.2rem);
-    line-height: 1;
-  }
-
-  .hero__lower {
-    grid-template-columns: 1fr;
-  }
-
-  .hero__art {
-    min-height: 14rem;
-  }
-
-  .hero__route {
-    width: 90%;
-  }
-
-  .hero__route--interpreter {
-    left: -1%;
-  }
-
-  .hero__route--scribe {
-    right: -1%;
-  }
-
-  .hero__actions,
-  .product-chapter__actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .hero__actions .button-link,
-  .product-chapter__actions .button-link {
-    justify-content: center;
-    text-align: center;
   }
 
   .product-accordion {
     grid-template-columns: 1fr;
   }
 
-  .product-accordion__panel {
-    min-height: 28rem;
-  }
-
-  .product-index {
-    grid-template-columns: 1fr;
-  }
-
-  .product-index nav {
-    display: grid;
-    grid-column: 1;
-    grid-row: auto;
-    gap: 0;
-  }
-
-  .product-index a,
-  .product-index a:last-child {
-    border-top: 1px solid var(--line);
-  }
-
-  .product-index a:last-child {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .product-facts,
-  .product-workflow,
-  .product-safety-list,
   .evidence-slide {
     grid-template-columns: 1fr;
-  }
-
-  .product-workflow li {
-    min-height: 10rem;
   }
 
   .safety-suite {
@@ -2564,29 +2186,5 @@ mark.scribe-mark {
 
   .evidence-capture {
     min-height: 24rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .product-accordion {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .product-accordion__panel,
-  .product-accordion__panel:hover,
-  .product-accordion__panel:focus-visible {
-    flex: none;
-    transform: none;
-  }
-
-  .marquee__track span[aria-hidden="true"] {
-    display: none;
-  }
-}
-
-@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
-  .product-accordion {
-    grid-template-columns: 1fr;
   }
 }

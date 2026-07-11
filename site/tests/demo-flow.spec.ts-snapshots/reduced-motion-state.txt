@@ -1,5 +1,0 @@
-{
-  "marqueeAnimation": "none",
-  "transcriptTurns": 0,
-  "reducedMotion": true
-}

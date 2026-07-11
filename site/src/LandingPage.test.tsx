@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import LandingPage from "./LandingPage";
 import { copyFor, type ProductKey } from "./content/strings";
@@ -8,20 +8,17 @@ function expectProductCopy(language: "vi" | "en") {
   for (const key of ["interpreter", "scribe"] satisfies ProductKey[]) {
     const product = copy.products[key];
     expect(screen.getAllByText(product.name).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(product.body).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(product.audience).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(product.status).length).toBeGreaterThan(0);
+    expect(screen.getByText(product.body)).toBeInTheDocument();
+    expect(screen.getByText(product.audience)).toBeInTheDocument();
+    expect(screen.getByText(product.input)).toBeInTheDocument();
+    expect(screen.getByText(product.output)).toBeInTheDocument();
+    expect(screen.getByText(product.status)).toBeInTheDocument();
     expect(screen.getByText(product.helper)).toBeInTheDocument();
-    expect(screen.getByText(product.preview)).toBeInTheDocument();
     expect(screen.getByText(product.timing)).toBeInTheDocument();
     expect(screen.getByText(product.chooserSafety)).toBeInTheDocument();
     expect(screen.getByRole("link", {
       name: `${product.name}: ${product.cta.open}`,
     })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: product.cta.open })).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: product.cta.pilot }),
-    ).toBeInTheDocument();
   }
 }
 
@@ -40,17 +37,8 @@ describe("LandingPage", () => {
         name: "Một lớp giám sát chung. Hai cơ chế an toàn riêng.",
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "Từ lời đã nói đến bản nháp có cấu trúc.",
-      }),
-    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "1. Phiên âm tự động" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "3. Bản ghi y khoa theo bốn mục SOAP" }),
-    ).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
     expectProductCopy("vi");
   });
@@ -80,30 +68,12 @@ describe("LandingPage", () => {
     expectProductCopy("en");
   });
 
-  it("reflects clinic customization in the demo and form", () => {
+  it("keeps the pilot form after the decision gateway", () => {
     render(<LandingPage language="vi" />);
 
-    const clinic = screen.getByRole("textbox", { name: "Tên cơ sở" });
-    fireEvent.change(clinic, { target: { value: "Phòng khám Minh Tâm" } });
-
-    expect(
-      screen.getByRole("heading", { name: "Phòng khám Minh Tâm — Demo" }),
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("textbox", { name: "Cơ sở y tế" }),
-    ).toHaveValue("Phòng khám Minh Tâm");
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Kiểm tra dị ứng — xác nhận phủ định/,
-      }),
-    );
-    expect(
-      (
-        screen.getByRole("textbox", {
-          name: "Lời nhắn",
-        }) as HTMLTextAreaElement
-      ).value,
-    ).toContain("Kiểm tra dị ứng — xác nhận phủ định");
+    ).toHaveValue("Phòng khám Đa khoa An Bình");
+    expect(screen.getByRole("combobox", { name: "Chức năng quan tâm" })).toHaveValue("both");
   });
 });

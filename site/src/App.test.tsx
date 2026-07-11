@@ -16,7 +16,11 @@ describe("language preference", () => {
 
     expect(document.documentElement.lang).toBe("en");
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
-    expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "CarePath Interpreter: Open Interpreter",
+      }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "Choose the right product for the right point in care.",
@@ -25,11 +29,6 @@ describe("language preference", () => {
     expect(
       screen.getByRole("heading", {
         name: "One shared oversight layer. Two product-specific safety systems.",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "Turn what was said into a structured draft.",
       }),
     ).toBeInTheDocument();
     expect(

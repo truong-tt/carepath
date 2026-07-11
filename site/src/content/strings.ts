@@ -167,7 +167,6 @@ interface PageCopy {
     copyHeading: string;
     disclaimer: string;
   };
-  marquee: string[];
   evidence: {
     title: string;
     body: string;
@@ -453,14 +452,6 @@ export const strings: Record<Language, PageCopy> = {
       copyHeading: "BỆNH ÁN SOAP (bản nháp, cần bác sĩ kiểm tra)",
       disclaimer: "Bản demo cho nhân viên y tế. Không dùng cho chẩn đoán lâm sàng chính thức.",
     },
-    marquee: [
-      "Phiên dịch — xác nhận read-back",
-      "Phiên dịch — chặn nội dung rủi ro",
-      "Phiên dịch — cảnh báo độ tin cậy thấp",
-      "Ghi chép — hiệu chỉnh thuật ngữ",
-      "Ghi chép — đánh dấu thông tin còn thiếu",
-      "Ghi chép — bản nháp SOAP chờ duyệt",
-    ],
     evidence: {
       title: "Xem cách mỗi sản phẩm giữ điểm cần duyệt ở đúng chỗ.",
       body: "Các màn hình dưới đây dùng dữ liệu mẫu đã làm sạch. Bằng chứng nghiên cứu dẫn về báo cáo nguồn của CarePath; không có lời chứng thực hoặc tuyên bố kết quả giả định.",
@@ -826,14 +817,6 @@ export const strings: Record<Language, PageCopy> = {
       copyHeading: "SOAP NOTE (draft, requires clinician review)",
       disclaimer: "Demo for healthcare staff. Not for formal clinical diagnosis.",
     },
-    marquee: [
-      "Interpreter — read-back confirmation",
-      "Interpreter — risk-content blocking",
-      "Interpreter — low-confidence warnings",
-      "Scribe — terminology correction",
-      "Scribe — missing-information flags",
-      "Scribe — SOAP drafts held for review",
-    ],
     evidence: {
       title: "See how each product keeps review points in the right place.",
       body: "These screens use sanitized sample data. Research evidence links to CarePath's source report; there are no invented testimonials or outcome claims.",

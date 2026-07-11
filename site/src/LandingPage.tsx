@@ -1,13 +1,11 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import logoUrl from "./assets/carepath.svg";
 import { copyFor, sources, type ProductKey } from "./content/strings";
-import DemoPlayer from "./demo/DemoPlayer";
 import { getScenario, scenarios } from "./demo/scenarios";
 import type { Language } from "./demo/types";
-import { useLandingMotion } from "./landing/useLandingMotion";
 import LeadForm from "./LeadForm";
 import { leadContact, zaloHref, type ProductInterest } from "./leads";
-import ScribeShowcase, { soapDraft } from "./scribe/ScribeShowcase";
+import { soapDraft } from "./scribe/ScribeShowcase";
 
 interface LandingPageProps {
   language: Language;
@@ -21,35 +19,28 @@ export default function LandingPage({
   language,
   onLanguageChange,
 }: LandingPageProps) {
-  const pageRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDetailsElement>(null);
   const copy = copyFor(language);
-  const [clinicName, setClinicName] = useState("Phòng khám Đa khoa An Bình");
-  const [specialty, setSpecialty] = useState("Nội tổng quát");
-  const [scenarioId, setScenarioId] = useState(scenarios[0].id);
-  const [transcript, setTranscript] = useState("");
   const [interest, setInterest] = useState<ProductInterest>("both");
   const [evidenceIndex, setEvidenceIndex] = useState(0);
-  const scenario = getScenario(scenarioId);
+  const clinicName = "Phòng khám Đa khoa An Bình";
+  const specialty = "Nội tổng quát";
+  const scenario = scenarios[0];
   const evidence = copy.evidence.items[evidenceIndex];
-
-  useLandingMotion(pageRef);
-
-  const handleTranscriptChange = useCallback((value: string) => {
-    setTranscript(value);
-  }, []);
+  const interpreterHref = import.meta.env.VITE_CONSOLE_URL || "/console/";
+  const scribeHref = "#/scribe";
 
   const navLinks = (
     <>
-      <a href="#interpreter">{copy.nav.interpreter}</a>
-      <a href="#scribe">{copy.nav.scribe}</a>
+      <a href="#products">{copy.nav.interpreter}</a>
+      <a href="#products">{copy.nav.scribe}</a>
       <a href="#safety">{copy.nav.safety}</a>
       <a href="#pilot">{copy.nav.pilot}</a>
     </>
   );
 
   return (
-    <div className="site-shell" ref={pageRef}>
+    <div className="site-shell">
       <nav
         className="site-nav"
         aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}
@@ -95,7 +86,7 @@ export default function LandingPage({
       </nav>
 
       <main id="top" tabIndex={-1}>
-        <section className="product-gateway" aria-labelledby="gateway-title">
+        <section className="product-gateway" id="products" aria-labelledby="gateway-title">
           <header className="section-intro section-intro--wide">
             <h1 id="gateway-title">{copy.gateway.heading}</h1>
             <p>{copy.gateway.body}</p>
@@ -107,16 +98,13 @@ export default function LandingPage({
                 <a
                   className={`product-accordion__panel product-accordion__panel--${key}`}
                   aria-label={`${product.name}: ${product.cta.open}`}
-                  href={
-                    key === "interpreter"
-                      ? import.meta.env.VITE_CONSOLE_URL || "/console/"
-                      : "#/scribe"
-                  }
+                  href={key === "interpreter" ? interpreterHref : scribeHref}
                   key={key}
                 >
                   <div className="product-accordion__heading">
-                    <h3>{product.name}</h3>
-                    <span>{product.helper}</span>
+                    <h2>{product.name}</h2>
+                    <span className="product-accordion__helper">{product.helper}</span>
+                    <span className="product-accordion__status">{product.status}</span>
                   </div>
                   <p>{product.body}</p>
                   <p className="product-accordion__timing">{product.timing}</p>
@@ -126,8 +114,12 @@ export default function LandingPage({
                       <dd>{product.audience}</dd>
                     </div>
                     <div>
-                      <dt>{copy.gateway.workflow}</dt>
-                      <dd>{product.preview}</dd>
+                      <dt>{copy.gateway.input}</dt>
+                      <dd>{product.input}</dd>
+                    </div>
+                    <div>
+                      <dt>{copy.gateway.output}</dt>
+                      <dd>{product.output}</dd>
                     </div>
                   </dl>
                   <p className="product-accordion__safety">{product.chooserSafety}</p>
@@ -140,157 +132,6 @@ export default function LandingPage({
             })}
           </div>
         </section>
-
-        <section
-          className="product-story"
-          aria-label={copy.gateway.detailLabel}
-          data-product-story
-        >
-          <div className="product-chapters">
-            <article
-              className="product-chapter product-chapter--interpreter"
-              id="interpreter"
-              tabIndex={-1}
-            >
-              <header className="product-chapter__header">
-                <div className="product-chapter__identity">
-                  <p>{copy.products.interpreter.name}</p>
-                  <span>{copy.products.interpreter.status}</span>
-                </div>
-                <h2>{copy.products.interpreter.title}</h2>
-                <p>{copy.products.interpreter.body}</p>
-              </header>
-              <div className="product-facts">
-                <dl>
-                  <div>
-                    <dt>{copy.gateway.audience}</dt>
-                    <dd>{copy.products.interpreter.audience}</dd>
-                  </div>
-                  <div>
-                    <dt>{copy.gateway.input}</dt>
-                    <dd>{copy.products.interpreter.input}</dd>
-                  </div>
-                  <div>
-                    <dt>{copy.gateway.output}</dt>
-                    <dd>{copy.products.interpreter.output}</dd>
-                  </div>
-                </dl>
-                <p>{copy.products.interpreter.disclosure}</p>
-              </div>
-              <ol className="product-workflow">
-                {copy.products.interpreter.workflow.map((step) => (
-                  <li key={step.title}>
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
-                  </li>
-                ))}
-              </ol>
-              <ul className="product-safety-list">
-                {copy.products.interpreter.safety.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <div className="product-chapter__actions">
-                <a
-                  className="button-link button-link--interpreter"
-                  href={import.meta.env.VITE_CONSOLE_URL || "/console/"}
-                >
-                  {copy.products.interpreter.cta.open}
-                </a>
-                <a
-                  className="button-link button-link--secondary"
-                  href="#pilot"
-                  onClick={() => setInterest("interpreter")}
-                >
-                  {copy.products.interpreter.cta.pilot}
-                </a>
-              </div>
-              <div className="product-demo">
-                <DemoPlayer
-                  language={language}
-                  clinicName={clinicName}
-                  specialty={specialty}
-                  scenarioId={scenarioId}
-                  onClinicNameChange={setClinicName}
-                  onSpecialtyChange={setSpecialty}
-                  onScenarioChange={setScenarioId}
-                  onTranscriptChange={handleTranscriptChange}
-                />
-              </div>
-            </article>
-
-            <article
-              className="product-chapter product-chapter--scribe"
-              id="scribe"
-              tabIndex={-1}
-            >
-              <header className="product-chapter__header">
-                <div className="product-chapter__identity">
-                  <p>{copy.products.scribe.name}</p>
-                  <span>{copy.products.scribe.status}</span>
-                </div>
-                <h2>{copy.products.scribe.title}</h2>
-                <p>{copy.products.scribe.body}</p>
-              </header>
-              <div className="product-facts">
-                <dl>
-                  <div>
-                    <dt>{copy.gateway.audience}</dt>
-                    <dd>{copy.products.scribe.audience}</dd>
-                  </div>
-                  <div>
-                    <dt>{copy.gateway.input}</dt>
-                    <dd>{copy.products.scribe.input}</dd>
-                  </div>
-                  <div>
-                    <dt>{copy.gateway.output}</dt>
-                    <dd>{copy.products.scribe.output}</dd>
-                  </div>
-                </dl>
-                <p>{copy.products.scribe.disclosure}</p>
-              </div>
-              <ol className="product-workflow">
-                {copy.products.scribe.workflow.map((step) => (
-                  <li key={step.title}>
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
-                  </li>
-                ))}
-              </ol>
-              <ul className="product-safety-list">
-                {copy.products.scribe.safety.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <div className="product-chapter__actions">
-                <a className="button-link button-link--scribe" href="#/scribe">
-                  {copy.products.scribe.cta.open}
-                </a>
-                <a
-                  className="button-link button-link--secondary"
-                  href="#pilot"
-                  onClick={() => setInterest("scribe")}
-                >
-                  {copy.products.scribe.cta.pilot}
-                </a>
-              </div>
-              <div className="product-demo">
-                <ScribeShowcase language={language} />
-                <p className="scribe-note">{copy.scribe.note}</p>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <div className="marquee" aria-label={copy.marquee.join(", ")}>
-          <div className="marquee__track">
-            {[...copy.marquee, ...copy.marquee].map((item, index) => (
-              <span aria-hidden={index >= copy.marquee.length} key={`${item}-${index}`}>
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
 
         <section
           className="safety-suite"
@@ -463,7 +304,7 @@ export default function LandingPage({
             clinic={clinicName}
             specialty={specialty}
             scenario={scenario}
-            transcript={transcript}
+            transcript=""
             language={language}
             interest={interest}
             onInterestChange={setInterest}

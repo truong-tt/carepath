@@ -25,7 +25,7 @@ const required = [
   "Thông báo sử dụng AI",
   "Công cụ phiên dịch",
   "Chờ bác sĩ duyệt",
-  "Ghi chép — bản nháp SOAP chờ duyệt",
+  "Bản nháp SOAP có đánh dấu thông tin còn thiếu.",
 ];
 const forbidden = [
   "AI ho tro, bac si giu quyen quyet dinh",
