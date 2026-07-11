@@ -121,6 +121,26 @@ describe("InterpreterConsole", () => {
     expect(screen.getByRole("button", { name: "Gửi" })).toBeDisabled();
   });
 
+  it("requires confirmation before deleting session data", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const onComplete = vi.fn();
+    render(<InterpreterConsole onComplete={onComplete} sessionId="session-1" />);
+    openSocket();
+
+    fireEvent.click(screen.getByRole("button", { name: "Xóa dữ liệu phiên" }));
+    await act(async () => undefined);
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/api/sessions/session-1"),
+      { method: "DELETE" },
+    );
+    expect(onComplete).toHaveBeenCalledOnce();
+  });
+
   it("prevents overlapping starts while microphone permission is pending", () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));

@@ -1,4 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+
+async function tabTo(page: Page, target: Locator) {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+    await page.keyboard.press("Tab");
+  }
+  throw new Error("Keyboard focus did not reach the expected control.");
+}
 
 async function startTypedConsole(page: Page) {
   await page.goto("/");
@@ -142,4 +150,46 @@ test("keeps playback fail-closed after a failed escalation until the clinician r
   await page.getByRole("button", { name: "Mở bản xem xét" }).click();
   await page.getByRole("button", { name: "Xác nhận và phát" }).click();
   await expect.poll(speechCalls).toBe(beforeEscalation + 2);
+});
+
+test("supports keyboard-only onboarding through session end", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "carepathMicrophoneRequests", { value: 0, writable: true });
+    const original = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+    navigator.mediaDevices.getUserMedia = async (...args) => {
+      (window as Window & { carepathMicrophoneRequests: number }).carepathMicrophoneRequests += 1;
+      return original(...args);
+    };
+  });
+  await page.goto("/");
+
+  const next = page.getByRole("button", { name: "Tiếp tục" });
+  await tabTo(page, next);
+  await page.keyboard.press("Enter");
+  await tabTo(page, next);
+  await page.keyboard.press("Enter");
+
+  const aiConsent = page.getByLabel(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/);
+  const humanConsent = page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/);
+  await expect(aiConsent).not.toBeChecked();
+  await expect(humanConsent).not.toBeChecked();
+  await tabTo(page, aiConsent);
+  await page.keyboard.press("Space");
+  await tabTo(page, humanConsent);
+  await page.keyboard.press("Space");
+  const start = page.getByRole("button", { name: "Bắt đầu phiên dịch" });
+  await tabTo(page, start);
+  await page.keyboard.press("Enter");
+
+  await expect(page.getByRole("heading", { name: "Kiểm tra micrô trước khi bắt đầu" })).toBeVisible();
+  expect(await page.evaluate(() => (window as Window & { carepathMicrophoneRequests: number }).carepathMicrophoneRequests)).toBe(0);
+  const typed = page.getByRole("button", { name: "Tiếp tục bằng văn bản" });
+  await tabTo(page, typed);
+  await page.keyboard.press("Enter");
+
+  const end = page.getByRole("button", { name: "Kết thúc phiên" });
+  await tabTo(page, end);
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bắt đầu phiên dịch" })).toBeDisabled();
 });
