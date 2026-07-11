@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { copy, type Language } from "../copy";
+import { DemoPreview } from "./DemoPreview";
 
 export type ConsentPayload = {
   ai_disclosure: boolean;
@@ -46,6 +47,7 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
             <span lang={language === "vi" ? "en" : "vi"}>{companion.limitation}</span>
           </p>
         </div>
+        <DemoPreview language={language} />
         <form
           className="consent-actions"
           onSubmit={(event) => {

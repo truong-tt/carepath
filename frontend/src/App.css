@@ -182,6 +182,33 @@ button:disabled {
   line-height: 1.5;
 }
 
+.demo-preview {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.demo-preview .consent-reminder {
+  margin: 0;
+}
+
+.demo-preview__turn {
+  padding: 12px 14px;
+  border: 1px solid #c8d0d9;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.demo-preview__turn.lowConfidence {
+  border-color: #9b6a00;
+  background: #fff9eb;
+}
+
+.demo-preview__turn.blocked {
+  border-color: #9b1c1c;
+  background: #fff7f7;
+}
+
 .consent-actions fieldset,
 .consent-actions label,
 .typed label,
