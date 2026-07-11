@@ -111,6 +111,7 @@ export function AdminReview({ language = "vi" }: { language?: Language }) {
         <div>
           <p className="eyebrow">Admin review</p>
           <h1>Translation review</h1>
+          <a href="#/">{language === "vi" ? "Quay lại phiên dịch" : "Return to interpreter"}</a>
         </div>
         <a href="#" onClick={(event) => void downloadCsv(event)}>
           Download CSV

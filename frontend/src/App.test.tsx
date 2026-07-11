@@ -47,4 +47,20 @@ describe("App", () => {
 
     window.history.replaceState({}, "", "/");
   });
+
+  it("renders review only at the internal hash route and returns to the interpreter entry", () => {
+    window.history.replaceState({}, "", "/phien-dich-y-khoa/#/kiem-duyet");
+    const { unmount } = render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Translation review" })).toBeInTheDocument();
+    const returnLink = screen.getByRole("link", { name: "Quay lại phiên dịch" });
+    expect(returnLink).toHaveAttribute("href", "#/");
+
+    window.location.hash = "#/";
+    fireEvent(window, new HashChangeEvent("hashchange"));
+    expect(screen.getByText("Hôm nay bạn là ai?")).toBeInTheDocument();
+
+    unmount();
+    window.history.replaceState({}, "", "/");
+  });
 });

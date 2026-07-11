@@ -126,6 +126,9 @@ The Interpreter stays on the Space because it needs the WebSocket API;
 the Vercel landing links to it via `VITE_CONSOLE_URL`. The pilot form remains
 client-side unless `VITE_LEAD_ENDPOINT` is configured.
 
+Authorized reviewers can open `/phien-dich-y-khoa/#/kiem-duyet`. This internal
+route is not linked from public navigation; its review token stays in memory.
+
 ## Keep-Alive
 
 The workflow in `.github/workflows/keepalive.yml` pings the Space every 12

@@ -70,12 +70,19 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [intent, setIntent] = useState<Intent | null>(null);
+  const [hash, setHash] = useState(() => window.location.hash);
 
   useEffect(() => {
     persistLanguage(language);
     document.documentElement.lang = language;
     document.title = copy[language].title;
   }, [language]);
+
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   async function handleConsent(consent: ConsentPayload) {
     setStarting(true);
@@ -91,7 +98,7 @@ function App() {
   }
 
   let content;
-  if (window.location.pathname === "/admin") {
+  if (hash === "#/kiem-duyet") {
     content = <AdminReview language={language} />;
   } else if (sessionId) {
     content = <InterpreterConsole initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} sessionId={sessionId} />;

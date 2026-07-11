@@ -12,3 +12,11 @@ test("serves production assets from the canonical interpreter path", async ({ pa
     ),
   ).toBe(true);
 });
+
+test("reaches internal review only through the canonical hash route", async ({ page }) => {
+  await page.goto("/phien-dich-y-khoa/#/kiem-duyet");
+
+  await expect(page.getByRole("heading", { name: "Translation review" })).toBeVisible();
+  await page.getByRole("link", { name: "Quay lại phiên dịch" }).click();
+  await expect(page.getByText("Hôm nay bạn là ai?")).toBeVisible();
+});
