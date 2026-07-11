@@ -1,6 +1,17 @@
-import type { Turn } from "./types";
+import type { TranscriptTurn } from "./types";
 
-export function speakTurn(turn: Turn) {
+export function canSpeakTurn(turn: TranscriptTurn, playbackSuppressed: boolean): boolean {
+  return !playbackSuppressed
+    && !turn.low_confidence
+    && !turn.requires_confirmation
+    && !["awaiting_confirm", "blocked", "ended"].includes(turn.status)
+    && ["delivered", "confirmed", "corrected"].includes(turn.status);
+}
+
+export function speakTurn(turn: TranscriptTurn, playbackSuppressed: boolean) {
+  if (!canSpeakTurn(turn, playbackSuppressed)) {
+    return;
+  }
   if (!("speechSynthesis" in window)) {
     return;
   }

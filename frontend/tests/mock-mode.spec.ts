@@ -7,6 +7,9 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
     let microphoneRequests = 0;
     const getUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
     Object.defineProperty(window, "carepathMicrophoneRequests", { get: () => microphoneRequests });
+    Object.defineProperty(window, "carepathSpeechCalls", { value: 0, writable: true });
+    Object.defineProperty(window, "speechSynthesis", { value: { cancel() {}, speak() { (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls += 1; } } });
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { value: class { lang = ""; constructor(text: string) { void text; } } });
     navigator.mediaDevices.getUserMedia = async (...args) => {
       microphoneRequests += 1;
       return getUserMedia(...args);
@@ -60,10 +63,21 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toBeVisible();
   await page.getByRole("button", { name: "Mở bản xem xét" }).click();
   await expect(page.getByText("Cao: Liều lượng").first()).toBeVisible();
-  await page.getByRole("button", { name: "Xác nhận" }).click();
+  await page.getByRole("button", { name: "Xác nhận và phát" }).click();
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toHaveCount(0);
   await expect(page.getByText("Cao · Đã xác nhận")).toBeVisible();
 
   await page.getByRole("button", { name: "Yêu cầu phiên dịch viên trực tiếp" }).click();
   await expect(page.getByRole("heading", { name: "Đã yêu cầu phiên dịch viên trực tiếp" })).toBeVisible();
+  await expect(page.getByText("Đã tạm dừng phát tự động. Chỉ tiếp tục sau khi bác sĩ xác nhận phát cục bộ.")).toBeVisible();
+  const speechCalls = await page.evaluate(() => (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls);
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("xin chao sau leo thang");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await expect(page.getByText("[vi->en] xin chao sau leo thang", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls)).toBe(speechCalls);
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("uống 500 mg sau leo thang");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await page.getByRole("button", { name: "Mở bản xem xét" }).click();
+  await page.getByRole("button", { name: "Xác nhận và phát" }).click();
+  expect(await page.evaluate(() => (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls)).toBe(speechCalls);
 });

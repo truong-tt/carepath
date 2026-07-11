@@ -32,6 +32,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [inputState, setInputState] = useState<InputState>("connecting");
   const [warning, setWarning] = useState<string | null>(null);
   const [escalated, setEscalated] = useState(false);
+  const [playbackSuppressed, setPlaybackSuppressed] = useState(false);
   const [providerMode, setProviderMode] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [openReview, setOpenReview] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const turnActiveRef = useRef(false);
+  const playbackSuppressedRef = useRef(false);
   const reviewRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           setWarning(textRef.current.confirmationRequired);
         } else {
           setWarning(null);
-          speakTurn(data.turn);
+          speakTurn(nextTurn, playbackSuppressedRef.current);
         }
       }
       if (data.type === "turn_error") {
@@ -153,13 +155,16 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
       setTurns((current) => current.map((item) => (item.id === turn.id ? nextTurn : item)));
       setOpenReview(null);
       setWarning(null);
-      speakTurn(confirmed);
+      speakTurn(nextTurn, playbackSuppressedRef.current);
     } catch {
       setWarning(text.confirmFailed);
     }
   }
 
   async function handleEscalate() {
+    playbackSuppressedRef.current = true;
+    setPlaybackSuppressed(true);
+    window.speechSynthesis?.cancel();
     try {
       await escalateSession(sessionId);
       setEscalated(true);
@@ -231,6 +236,11 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
     }
   }
 
+  function resumePlayback() {
+    playbackSuppressedRef.current = false;
+    setPlaybackSuppressed(false);
+  }
+
   function stopRecording() {
     const recorder = recorderRef.current;
     if (recorder && recorder.state !== "inactive") {
@@ -267,6 +277,12 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         <section className="escalation-card" role="alert" aria-live="assertive">
           <h1>{text.escalationTitle}</h1>
           <p>{text.escalationBody}</p>
+        </section>
+      ) : null}
+      {playbackSuppressed ? (
+        <section className="playback-warning" role="alert">
+          <p>{text.playbackSuppressed}</p>
+          <button type="button" onClick={resumePlayback}>{text.resumePlayback}</button>
         </section>
       ) : null}
       <header className="topbar">
