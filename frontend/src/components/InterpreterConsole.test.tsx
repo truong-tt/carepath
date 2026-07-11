@@ -182,6 +182,7 @@ describe("InterpreterConsole", () => {
 
     expect(getUserMedia).toHaveBeenCalledTimes(1);
     expect(talk).toHaveAttribute("aria-pressed", "true");
+    expect(talk).toBeEnabled();
     expect(screen.getByRole("textbox")).toBeDisabled();
   });
 

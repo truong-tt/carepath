@@ -367,7 +367,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                   type="button"
                   aria-pressed={inputState === "recording"}
                   aria-describedby="input-state"
-                  disabled={!canSubmit || !voiceReady}
+                  disabled={(!canSubmit && inputState !== "recording") || !voiceReady}
                   ref={(element) => { talkRefs.current[key] = element ?? undefined; }}
                   onPointerDown={() => void startRecording(key)}
                   onPointerUp={stopRecording}

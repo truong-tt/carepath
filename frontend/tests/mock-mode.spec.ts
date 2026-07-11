@@ -193,3 +193,88 @@ test("supports keyboard-only onboarding through session end", async ({ page }) =
   await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Bắt đầu phiên dịch" })).toBeDisabled();
 });
+
+test("supports keyboard PTT, low-confidence recovery, and deletion", async ({ page }) => {
+  await page.addInitScript(() => {
+    const NativeWebSocket = window.WebSocket;
+    const sockets: WebSocket[] = [];
+    Object.defineProperty(window, "carepathSockets", { value: sockets });
+    Object.defineProperty(window, "carepathTrackStops", { value: 0, writable: true });
+    Object.defineProperty(window, "WebSocket", {
+      value: class extends NativeWebSocket {
+        constructor(url: string | URL, protocols?: string | string[]) {
+          super(url, protocols);
+          sockets.push(this);
+        }
+      },
+    });
+    Object.defineProperty(navigator.mediaDevices, "enumerateDevices", {
+      value: async () => [{ deviceId: "mock-mic", groupId: "mock", kind: "audioinput", label: "Mock microphone", toJSON() { return {}; } }],
+    });
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      value: async () => ({
+        getTracks: () => [{ stop() { (window as Window & { carepathTrackStops: number }).carepathTrackStops += 1; } }],
+      }),
+    });
+    Object.defineProperty(window, "AudioContext", {
+      value: class {
+        createAnalyser() { return { fftSize: 32, getByteTimeDomainData(values: Uint8Array) { values.fill(128); } }; }
+        createMediaStreamSource() { return { connect() {} }; }
+        close() { return Promise.resolve(); }
+      },
+    });
+    Object.defineProperty(window, "MediaRecorder", {
+      value: class extends EventTarget {
+        state: RecordingState = "inactive";
+        start() { this.state = "recording"; }
+        stop() { this.state = "inactive"; this.dispatchEvent(new Event("stop")); }
+      },
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByLabel(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/).check();
+  await page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/).check();
+  await page.getByRole("button", { name: "Bắt đầu phiên dịch" }).click();
+  await page.getByRole("button", { name: "Kiểm tra micrô" }).click();
+  await expect(page.getByText("Micrô đã sẵn sàng.")).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục bằng micrô" }).click();
+
+  const talk = page.getByRole("button", { name: "Nhấn giữ để nói" });
+  await tabTo(page, talk);
+  await page.keyboard.down("Space");
+  await expect(page.getByRole("status")).toContainText("Đang ghi lời nói");
+  await page.keyboard.up("Space");
+  await expect(page.getByText("mock transcript", { exact: true })).toBeVisible();
+
+  await page.evaluate(() => {
+    const socket = (window as Window & { carepathSockets: WebSocket[] }).carepathSockets.at(-1);
+    socket?.dispatchEvent(new MessageEvent("message", { data: JSON.stringify({
+      type: "turn_result",
+      low_confidence: true,
+      requires_confirmation: false,
+      turn: {
+        id: "low-e2e", session_id: "e2e", seq: 2, speaker: "patient", src_lang: "en", tgt_lang: "vi",
+        source_text: "hello", normalized_text: "hello", translation: "xin chào", asr_confidence: 0.4,
+        mt_confidence: 0.9, risk_tier: "low", risk_spans: [], readback: null, status: "delivered",
+        corrected_text: null, created_at: new Date(0).toISOString(),
+      },
+    }) }));
+  });
+  const typeRecovery = page.getByRole("button", { name: "Nhập văn bản" });
+  await tabTo(page, typeRecovery);
+  await page.keyboard.press("Enter");
+  await expect(page.getByPlaceholder("Nhập nội dung cần dịch")).toBeFocused();
+  const repeatRecovery = page.getByRole("button", { name: "Nói lại" });
+  await tabTo(page, repeatRecovery);
+  await page.keyboard.press("Enter");
+  await expect(talk).toBeFocused();
+
+  page.once("dialog", (dialog) => dialog.accept());
+  const remove = page.getByRole("button", { name: "Xóa dữ liệu phiên" });
+  await tabTo(page, remove);
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Bắt đầu phiên dịch" })).toBeDisabled();
+  expect(await page.evaluate(() => (window as Window & { carepathTrackStops: number }).carepathTrackStops)).toBeGreaterThan(1);
+});
