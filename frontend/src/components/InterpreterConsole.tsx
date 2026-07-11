@@ -1,7 +1,7 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { speakTurn } from "../tts";
-import type { TranscriptTurn, WsEvent } from "../types";
+import type { PipelineFailureContext, TranscriptTurn, WsEvent } from "../types";
 import { confirmTurn, deleteSession, endSession, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
 import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
@@ -33,6 +33,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [typedText, setTypedText] = useState("");
   const [inputState, setInputState] = useState<InputState>("connecting");
   const [warning, setWarning] = useState<string | null>(null);
+  const [pipelineFailure, setPipelineFailure] = useState<PipelineFailureContext | null>(null);
   const [escalated, setEscalated] = useState(false);
   const [playbackSuppressed, setPlaybackSuppressed] = useState(false);
   const [providerMode, setProviderMode] = useState("");
@@ -96,6 +97,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         setTurns(data.turns);
       }
       if (data.type === "turn_result") {
+        setPipelineFailure(null);
         const nextTurn = {
           ...data.turn,
           low_confidence: data.low_confidence,
@@ -116,6 +118,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         turnActiveRef.current = false;
         setInputState("ready");
         setWarning(textRef.current.turnError);
+        if (data.failure_context) setPipelineFailure(data.failure_context);
       }
     });
     return () => {
@@ -149,6 +152,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
       return;
     }
     const config = speakerConfig[speaker];
+    setPipelineFailure(null);
     turnActiveRef.current = true;
     setInputState("processing");
     if (sendJson({ type: "text_turn", speaker, lang: config.lang, text })) {
@@ -212,6 +216,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
     }
 
     turnActiveRef.current = true;
+    setPipelineFailure(null);
     setInputState("recording");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: deviceId ? { deviceId: { exact: deviceId } } : true });
@@ -398,6 +403,27 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         {warning ? <strong>{warning}</strong> : null}
       </div>
       <section className="confirmations" aria-label={text.confirmations}>
+        {pipelineFailure ? (
+          <article className="confirmation" role="alert">
+            <p className="meta">{text.pipelineFailureTitle}</p>
+            <p>
+              <strong>{text.source}:</strong>{" "}
+              <span lang={pipelineFailure.src_lang}>
+                {pipelineFailure.source_text || text.sourceUnavailable}
+              </span>
+            </p>
+            <p>
+              <strong>{text.translation}:</strong>{" "}
+              <span lang={pipelineFailure.tgt_lang}>
+                {pipelineFailure.translation || text.translationUnavailable}
+              </span>
+            </p>
+            <p>{text.pipelineFailureAction}</p>
+            <button className="escalate" disabled={closed} type="button" onClick={() => void handleEscalate()}>
+              {text.requestInterpreter}
+            </button>
+          </article>
+        ) : null}
         {turns
           .filter(
             (turn) =>

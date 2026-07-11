@@ -114,7 +114,15 @@ def log_turn_processed(turn: crud.TurnRecord) -> None:
     )
 
 
-async def _send_pipeline_error(websocket: WebSocket, session_id: str, exc: Exception) -> None:
+async def _send_pipeline_error(
+    websocket: WebSocket,
+    session_id: str,
+    exc: Exception,
+    *,
+    speaker: str,
+    lang: str,
+    source_text: str | None,
+) -> None:
     logger.warning(
         "turn_processing_failed session_id=%s error_class=%s",
         session_id,
@@ -126,6 +134,13 @@ async def _send_pipeline_error(websocket: WebSocket, session_id: str, exc: Excep
             "type": "turn_error",
             "message": "translation failed — retry or use typed fallback",
             "retryable": True,
+            "failure_context": {
+                "speaker": speaker,
+                "src_lang": lang,
+                "tgt_lang": "en" if lang.lower().startswith("vi") else "vi",
+                "source_text": source_text,
+                "translation": None,
+            },
         }
     )
 
@@ -369,7 +384,14 @@ async def websocket_session(
                         )
                     )
                 except Exception as exc:
-                    await _send_pipeline_error(websocket, session_id, exc)
+                    await _send_pipeline_error(
+                        websocket,
+                        session_id,
+                        exc,
+                        speaker=current.speaker,
+                        lang=current.lang,
+                        source_text=None,
+                    )
                     continue
                 log_turn_processed(turn)
                 await websocket.send_json(turn_result_payload(turn, settings))
@@ -398,7 +420,14 @@ async def websocket_session(
                         )
                     )
                 except Exception as exc:
-                    await _send_pipeline_error(websocket, session_id, exc)
+                    await _send_pipeline_error(
+                        websocket,
+                        session_id,
+                        exc,
+                        speaker=event["speaker"],
+                        lang=event["lang"],
+                        source_text=event["text"],
+                    )
                     continue
                 log_turn_processed(turn)
                 await websocket.send_json(turn_result_payload(turn, settings))

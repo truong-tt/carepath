@@ -45,6 +45,14 @@ export type TranscriptTurn = Turn & {
   requires_confirmation?: boolean;
 };
 
+export type PipelineFailureContext = {
+  speaker: "doctor" | "patient";
+  src_lang: string;
+  tgt_lang: string;
+  source_text: string | null;
+  translation: string | null;
+};
+
 export type WsEvent =
   | { type: "session_state"; turns: Turn[] }
   | {
@@ -53,4 +61,9 @@ export type WsEvent =
       requires_confirmation: boolean;
       low_confidence: boolean;
     }
-  | { type: "turn_error"; message: string; retryable: boolean };
+  | {
+      type: "turn_error";
+      message: string;
+      retryable: boolean;
+      failure_context?: PipelineFailureContext;
+    };

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { InterpreterConsole } from "./InterpreterConsole";
@@ -85,6 +85,32 @@ describe("InterpreterConsole", () => {
 
     expect(screen.getByRole("button", { name: "Người bệnh · English" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Bác sĩ · Tiếng Việt" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("keeps pipeline failures in a clinician-only blocked review", () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+
+    act(() => FakeWebSocket.instances[0].receive({
+      type: "turn_error",
+      message: "translation failed",
+      retryable: true,
+      failure_context: {
+        speaker: "doctor",
+        src_lang: "vi",
+        tgt_lang: "en",
+        source_text: "xin chào",
+        translation: null,
+      },
+    }));
+
+    const review = screen.getByRole("alert");
+    expect(review).toHaveTextContent("Lượt dịch đã được chặn vì xử lý thất bại");
+    expect(review).toHaveTextContent("xin chào");
+    expect(review).toHaveTextContent("Chưa có bản dịch để phát cho người bệnh");
+    expect(within(review).getByRole("button", { name: "Yêu cầu phiên dịch viên trực tiếp" })).toBeEnabled();
   });
 
   it("stops locally and returns control after ending a session", async () => {

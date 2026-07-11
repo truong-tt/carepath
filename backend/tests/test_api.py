@@ -126,6 +126,13 @@ def test_websocket_asr_failure_sends_error_and_keeps_socket(db_session, monkeypa
                 "type": "turn_error",
                 "message": "translation failed — retry or use typed fallback",
                 "retryable": True,
+                "failure_context": {
+                    "speaker": "doctor",
+                    "src_lang": "vi",
+                    "tgt_lang": "en",
+                    "source_text": None,
+                    "translation": None,
+                },
             }
 
             ws.send_json(
@@ -168,6 +175,13 @@ def test_websocket_mt_failure_sends_error_and_keeps_socket(db_session, monkeypat
                 "type": "turn_error",
                 "message": "translation failed — retry or use typed fallback",
                 "retryable": True,
+                "failure_context": {
+                    "speaker": "doctor",
+                    "src_lang": "vi",
+                    "tgt_lang": "en",
+                    "source_text": "xin chao",
+                    "translation": None,
+                },
             }
 
             mt.fail = False
