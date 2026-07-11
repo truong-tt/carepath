@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const python = process.platform === "win32" ? "..\\.venv\\Scripts\\python.exe" : "python";
+const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+
 export default defineConfig({
   testDir: "./tests",
   testIgnore: "production-base.spec.ts",
@@ -9,14 +12,14 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: "..\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      command: `${python} -m uvicorn app.main:app --host 127.0.0.1 --port 8000`,
       cwd: "../backend",
       url: "http://127.0.0.1:8000/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: "npm.cmd run dev -- --host 127.0.0.1 --port 5173",
+      command: `${npm} run dev -- --host 127.0.0.1 --port 5173`,
       url: "http://127.0.0.1:5173",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
