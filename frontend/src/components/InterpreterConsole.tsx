@@ -3,7 +3,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { speakTurn } from "../tts";
 import type { TranscriptTurn, WsEvent } from "../types";
 import { confirmTurn, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
-import type { Language } from "../copy";
+import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
 
 type InterpreterConsoleProps = {
@@ -13,16 +13,17 @@ type InterpreterConsoleProps = {
 
 type Speaker = "doctor" | "patient";
 
-const speakerConfig: Record<Speaker, { label: string; lang: "vi" | "en" }> = {
-  doctor: { label: "Doctor Vietnamese", lang: "vi" },
-  patient: { label: "Patient English", lang: "en" },
+const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
+  doctor: { lang: "vi" },
+  patient: { lang: "en" },
 };
 
 export function InterpreterConsole({ language = "vi", sessionId }: InterpreterConsoleProps) {
+  const text = copy[language].workspace;
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [speaker, setSpeaker] = useState<Speaker>("doctor");
   const [typedText, setTypedText] = useState("");
-  const [status, setStatus] = useState("Connecting");
+  const [status, setStatus] = useState("connecting");
   const [warning, setWarning] = useState<string | null>(null);
   const [escalated, setEscalated] = useState(false);
   const [providerMode, setProviderMode] = useState("");
@@ -40,12 +41,12 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
     const isCurrentSocket = () => socketRef.current === socket;
     socket.addEventListener("open", () => {
       if (isCurrentSocket()) {
-        setStatus("Connected");
+        setStatus("connected");
       }
     });
     socket.addEventListener("close", () => {
       if (isCurrentSocket()) {
-        setStatus("Disconnected");
+        setStatus("disconnected");
       }
     });
     socket.addEventListener("message", (event: MessageEvent<string>) => {
@@ -64,16 +65,16 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
         };
         setTurns((current) => [...current, nextTurn]);
         if (data.low_confidence) {
-          setWarning("Low confidence - please repeat or type.");
+          setWarning(text.lowConfidence);
         } else if (data.requires_confirmation) {
-          setWarning("Doctor confirmation required before patient playback.");
+          setWarning(text.confirmationRequired);
         } else {
           setWarning(null);
           speakTurn(data.turn);
         }
       }
       if (data.type === "turn_error") {
-        setWarning(data.message);
+        setWarning(text.turnError);
       }
     });
     return () => {
@@ -87,7 +88,7 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
   function sendJson(payload: unknown) {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      setWarning("Connection is not ready.");
+      setWarning(text.connectionNotReady);
       return false;
     }
     socket.send(JSON.stringify(payload));
@@ -118,7 +119,7 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
       setWarning(null);
       speakTurn(confirmed);
     } catch {
-      setWarning("Could not confirm the turn.");
+      setWarning(text.confirmFailed);
     }
   }
 
@@ -128,7 +129,7 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
       setEscalated(true);
       setWarning(null);
     } catch {
-      setWarning("Could not mark the session escalated.");
+      setWarning(text.escalationFailed);
     }
   }
 
@@ -136,11 +137,11 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
     const config = speakerConfig[nextSpeaker];
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      setWarning("Connection is not ready. Type the turn instead.");
+      setWarning(text.connectionNotReadyType);
       return;
     }
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setWarning("Microphone is unavailable. Type the turn instead.");
+      setWarning(text.microphoneUnavailable);
       return;
     }
 
@@ -162,9 +163,9 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
         stream.getTracks().forEach((track) => track.stop());
       });
       recorder.start(250);
-      setStatus(`Recording ${config.label}`);
+      setStatus(`recording:${nextSpeaker}`);
     } catch {
-      setWarning("Microphone permission denied. Type the turn instead.");
+      setWarning(text.microphoneDenied);
     }
   }
 
@@ -173,7 +174,7 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
     if (recorder && recorder.state !== "inactive") {
       recorder.stop();
       recorderRef.current = null;
-      setStatus("Connected");
+      setStatus("connected");
     }
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
@@ -183,21 +184,20 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
     <main className="workspace" lang={language}>
       {escalated ? (
         <section className="escalation-card" role="alert" aria-live="assertive">
-          <h1>Human interpreter requested</h1>
-          <p>Pause AI playback and connect a qualified interpreter before continuing.</p>
-          <p lang="vi">Đã yêu cầu thông dịch viên. Tạm dừng phát bản dịch AI trước khi tiếp tục.</p>
+          <h1>{text.escalationTitle}</h1>
+          <p>{text.escalationBody}</p>
         </section>
       ) : null}
       <header className="topbar">
         <div>
-          <p className="eyebrow">{providerMode ? `${providerMode} mode session` : "Session"}</p>
-          <h1>Live interpreter</h1>
+          {providerMode === "mock" ? <p className="eyebrow">{text.mockDisclaimer}</p> : null}
+          <h1>{text.title}</h1>
         </div>
         <button className="escalate" type="button" onClick={() => void handleEscalate()}>
-          Human interpreter
+          {text.requestInterpreter}
         </button>
       </header>
-      <section className="controls" aria-label="Push to talk controls">
+      <section className="controls" aria-label={text.controls}>
         {(Object.keys(speakerConfig) as Speaker[]).map((key) => (
           <button
             className="talk"
@@ -207,39 +207,39 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
             onPointerUp={stopRecording}
             onPointerCancel={stopRecording}
           >
-            Hold to talk
-            <span>{speakerConfig[key].label}</span>
+            {text.holdToTalk}
+            <span>{key === "doctor" ? `${text.doctor} · ${text.vietnamese}` : `${text.patient} · ${text.english}`}</span>
           </button>
         ))}
       </section>
       <form className="typed" onSubmit={submitTyped}>
         <label>
-          Speaker
+          {text.speaker}
           <select value={speaker} onChange={(event) => setSpeaker(event.target.value as Speaker)}>
-            <option value="doctor">Doctor Vietnamese</option>
-            <option value="patient">Patient English</option>
+            <option value="doctor">{text.doctor} · {text.vietnamese}</option>
+            <option value="patient">{text.patient} · {text.english}</option>
           </select>
         </label>
         <label>
-          Typed fallback
+          {text.typedFallback}
           <input
-            placeholder="Type a turn for mock mode"
+            placeholder={text.typedPlaceholder}
             value={typedText}
             onChange={(event) => setTypedText(event.target.value)}
           />
         </label>
-        <button type="submit">Send</button>
+        <button type="submit">{text.send}</button>
       </form>
       <div className="status" role="status">
-        <span>{status}</span>
+        <span>{status.startsWith("recording:") ? text.recording.replace("{speaker}", status.endsWith("doctor") ? text.doctor : text.patient) : text[status as "connecting" | "connected" | "disconnected"]}</span>
         {warning ? <strong>{warning}</strong> : null}
       </div>
       {turns.some((turn) => turn.low_confidence) ? (
         <section className="low-confidence" role="alert">
-          <strong>Low confidence.</strong> Please repeat the turn or use typed fallback.
+          {text.lowConfidence}
         </section>
       ) : null}
-      <section className="confirmations" aria-label="Doctor confirmation">
+      <section className="confirmations" aria-label={text.confirmations}>
         {turns
           .filter(
             (turn) =>
@@ -251,41 +251,41 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
             <article className="confirmation" key={turn.id}>
               <div>
                 <p className="meta">
-                  Doctor confirmation required · {turn.risk_tier}
-                  {turn.risk_tier === "critical" ? " · human interpreter recommended" : ""}
+                  {text.confirmationRequiredLabel} · {riskText(text, turn.risk_tier)}
+                  {turn.risk_tier === "critical" ? ` · ${text.interpreterRecommended}` : ""}
                 </p>
-                <p>{turn.source_text}</p>
-                <p>{turn.translation}</p>
+                <p lang={turn.src_lang}>{turn.source_text}</p>
+                <p lang={turn.tgt_lang}>{turn.translation}</p>
                 {turn.readback ? (
                   <div className="readback">
                     <p>
-                      <strong>Read-back:</strong> {turn.readback.back_translation}
+                      <strong>{text.readback}:</strong> <span lang={turn.src_lang}>{turn.readback.back_translation}</span>
                     </p>
                     {turn.readback.entities.length ? (
                       <table>
                         <thead>
                           <tr>
-                            <th>Entity</th>
-                            <th>Source</th>
-                            <th>Translation</th>
+                            <th>{text.entity}</th>
+                            <th>{text.source}</th>
+                            <th>{text.translation}</th>
                           </tr>
                         </thead>
                         <tbody>
                           {turn.readback.entities.map((entity, index) => (
                             <tr key={`${entity.kind}-${index}`}>
-                              <td>{entity.kind}</td>
-                              <td>{entity.source_text}</td>
-                              <td>{entity.translated_text}</td>
+                              <td>{riskKindText(text, entity.kind)}</td>
+                              <td lang={turn.src_lang}>{entity.source_text}</td>
+                              <td lang={turn.tgt_lang}>{entity.translated_text}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     ) : null}
-                    {turn.readback.flags.length ? <p>Flags: {turn.readback.flags.join(", ")}</p> : null}
+                    {turn.readback.flags.length ? <p>{text.flags}: {text.riskKind.other}</p> : null}
                   </div>
                 ) : null}
                 <label className="edit-translation">
-                  Edit translation
+                  {text.editTranslation}
                   <textarea
                     value={edits[turn.id] ?? turn.translation}
                     onChange={(event) =>
@@ -296,22 +296,23 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
               </div>
               <div className="confirmation-actions">
                 <button type="button" onClick={() => void handleConfirm(turn)}>
-                  Confirm
+                  {text.confirm}
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleConfirm(turn, edits[turn.id] ?? turn.translation)}
                 >
-                  Save edit
+                  {text.saveEdit}
                 </button>
                 <button className="escalate" type="button" onClick={() => void handleEscalate()}>
-                  Escalate
+                  {text.escalate}
                 </button>
               </div>
             </article>
           ))}
       </section>
       <Transcript
+        language={language}
         turns={turns}
         onFeedback={async (turnId, reason, comment) => {
           await submitFeedback(turnId, { reason, comment });
@@ -319,4 +320,12 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
       />
     </main>
   );
+}
+
+function riskText(text: (typeof copy)[Language]["workspace"], value: string) {
+  return text.risk[value as keyof typeof text.risk] ?? text.risk.other;
+}
+
+function riskKindText(text: (typeof copy)[Language]["workspace"], value: string) {
+  return text.riskKind[value as keyof typeof text.riskKind] ?? text.riskKind.other;
 }

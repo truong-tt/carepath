@@ -1,13 +1,16 @@
 import { useState } from "react";
 
+import { copy, type Language } from "../copy";
 import type { TranscriptTurn } from "../types";
 
 type TranscriptProps = {
+  language?: Language;
   turns: TranscriptTurn[];
   onFeedback?: (turnId: string, reason: string, comment: string) => Promise<void>;
 };
 
-export function Transcript({ turns, onFeedback }: TranscriptProps) {
+export function Transcript({ language = "vi", turns, onFeedback }: TranscriptProps) {
+  const text = copy[language].workspace;
   const [openFeedback, setOpenFeedback] = useState<string | null>(null);
   const [reason, setReason] = useState("wrong_term");
   const [comment, setComment] = useState("");
@@ -24,12 +27,12 @@ export function Transcript({ turns, onFeedback }: TranscriptProps) {
   }
 
   return (
-    <section className="transcript" aria-label="Bilingual transcript">
+    <section className="transcript" aria-label={text.transcript}>
       <div className="transcript-head">
-        <h2>Transcript</h2>
-        <span>{turns.length} turns</span>
+        <h2>{text.transcript}</h2>
+        <span>{turns.length} {text.turns}</span>
       </div>
-      {turns.length === 0 ? <p className="empty">No turns yet.</p> : null}
+      {turns.length === 0 ? <p className="empty">{text.noTurns}</p> : null}
       {turns.map((turn) => {
         const blocked =
           turn.requires_confirmation || turn.status === "awaiting_confirm" || turn.status === "blocked";
@@ -37,26 +40,26 @@ export function Transcript({ turns, onFeedback }: TranscriptProps) {
           <article className="turn" key={turn.id}>
             <div>
               <p className="meta">
-                {turn.seq}. {turn.speaker} · {turn.src_lang} to {turn.tgt_lang}
+                {turn.seq}. {turn.speaker === "doctor" ? text.doctor : text.patient} · {turn.src_lang === "vi" ? text.vietnamese : text.english} → {turn.tgt_lang === "vi" ? text.vietnamese : text.english}
               </p>
-              <p>{highlightText(turn.source_text, turn)}</p>
+              <p lang={turn.src_lang}>{highlightText(turn.source_text, turn, language)}</p>
             </div>
             <div>
               <p className="meta">
-                {turn.risk_tier} · {turn.status}
-                {turn.low_confidence ? " · low confidence" : ""}
-                {turn.requires_confirmation ? " · confirmation required" : ""}
+                {riskText(text, turn.risk_tier)} · {statusText(text, turn.status)}
+                {turn.low_confidence ? ` · ${text.lowConfidence}` : ""}
+                {turn.requires_confirmation ? ` · ${text.confirmationRequiredLabel}` : ""}
               </p>
-              <p>
+              <p lang={blocked ? language : turn.tgt_lang}>
                 {blocked
-                  ? "Blocked pending doctor confirmation."
-                  : highlightText(turn.corrected_text || turn.translation, turn)}
+                  ? text.blocked
+                  : highlightText(turn.corrected_text || turn.translation, turn, language)}
               </p>
               {turn.risk_spans.length ? (
-                <ul className="risk-list" aria-label="Risk spans">
+                <ul className="risk-list" aria-label={text.riskSpans}>
                   {turn.risk_spans.map((span, index) => (
                     <li className={`risk-badge ${span.severity}`} key={`${span.kind}-${index}`}>
-                      {span.severity}: {span.kind}
+                      {riskText(text, span.severity)}: {riskKindText(text, span.kind)}
                     </li>
                   ))}
                 </ul>
@@ -64,9 +67,9 @@ export function Transcript({ turns, onFeedback }: TranscriptProps) {
               {onFeedback ? (
                 <div className="feedback">
                   <button type="button" onClick={() => setOpenFeedback(turn.id)}>
-                    Flag translation
+                    {text.feedback}
                   </button>
-                  {savedTurn === turn.id ? <span>Feedback saved.</span> : null}
+                  {savedTurn === turn.id ? <span>{text.feedbackSaved}</span> : null}
                   {openFeedback === turn.id ? (
                     <form
                       onSubmit={(event) => {
@@ -75,19 +78,19 @@ export function Transcript({ turns, onFeedback }: TranscriptProps) {
                       }}
                     >
                       <label>
-                        Reason
+                        {text.reason}
                         <select value={reason} onChange={(event) => setReason(event.target.value)}>
-                          <option value="wrong_term">Wrong term</option>
-                          <option value="wrong_meaning">Wrong meaning</option>
-                          <option value="missing">Missing content</option>
-                          <option value="other">Other</option>
+                          <option value="wrong_term">{text.feedbackReason.wrong_term}</option>
+                          <option value="wrong_meaning">{text.feedbackReason.wrong_meaning}</option>
+                          <option value="missing">{text.feedbackReason.missing}</option>
+                          <option value="other">{text.feedbackReason.other}</option>
                         </select>
                       </label>
                       <label>
-                        Comment
+                        {text.comment}
                         <input value={comment} onChange={(event) => setComment(event.target.value)} />
                       </label>
-                      <button type="submit">Submit feedback</button>
+                      <button type="submit">{text.submitFeedback}</button>
                     </form>
                   ) : null}
                 </div>
@@ -107,7 +110,7 @@ function fold(value: string): string {
     .toLocaleLowerCase();
 }
 
-function highlightText(text: string, turn: TranscriptTurn) {
+function highlightText(text: string, turn: TranscriptTurn, language: Language) {
   const span = turn.risk_spans.find((candidate) => fold(text).includes(fold(candidate.term)));
   if (!span) {
     return text;
@@ -119,11 +122,23 @@ function highlightText(text: string, turn: TranscriptTurn) {
   return (
     <>
       {text.slice(0, start)}
-      <mark className={`risk-mark ${span.severity}`} title={`${span.severity}: ${span.kind}`}>
-        <span className="sr-only">{span.severity} risk: </span>
+      <mark className={`risk-mark ${span.severity}`} title={`${riskText(copy[language].workspace, span.severity)}: ${riskKindText(copy[language].workspace, span.kind)}`}>
+        <span className="sr-only">{riskText(copy[language].workspace, span.severity)}: </span>
         {text.slice(start, end)}
       </mark>
       {text.slice(end)}
     </>
   );
+}
+
+function riskText(text: (typeof copy)[Language]["workspace"], value: string) {
+  return text.risk[value as keyof typeof text.risk] ?? text.risk.other;
+}
+
+function statusText(text: (typeof copy)[Language]["workspace"], value: string) {
+  return text.status[value as keyof typeof text.status] ?? text.status.other;
+}
+
+function riskKindText(text: (typeof copy)[Language]["workspace"], value: string) {
+  return text.riskKind[value as keyof typeof text.riskKind] ?? text.riskKind.other;
 }

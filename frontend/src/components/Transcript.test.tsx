@@ -27,10 +27,17 @@ const baseTurn: TranscriptTurn = {
 };
 
 describe("Transcript", () => {
+  it("renders the complete English empty state", () => {
+    render(<Transcript language="en" turns={[]} />);
+
+    expect(screen.getByRole("heading", { name: "Conversation" })).toBeInTheDocument();
+    expect(screen.getByText("No turns yet.")).toBeInTheDocument();
+  });
+
   it("hides blocked translations until doctor confirmation", () => {
     render(<Transcript turns={[baseTurn]} />);
 
-    expect(screen.getByText("Blocked pending doctor confirmation.")).toBeInTheDocument();
+    expect(screen.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toBeInTheDocument();
     expect(screen.queryByText("take 500 mg")).not.toBeInTheDocument();
   });
 
@@ -50,7 +57,7 @@ describe("Transcript", () => {
       />,
     );
 
-    expect(screen.getByText("high: dose_number")).toBeInTheDocument();
+    expect(screen.getByText("Cao: Liều lượng")).toBeInTheDocument();
     expect(screen.getAllByText("500 mg")).toHaveLength(2);
   });
 
@@ -58,11 +65,11 @@ describe("Transcript", () => {
     const onFeedback = vi.fn().mockResolvedValue(undefined);
     render(<Transcript turns={[{ ...baseTurn, status: "confirmed", requires_confirmation: false }]} onFeedback={onFeedback} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Flag translation" }));
-    fireEvent.change(screen.getByLabelText("Comment"), { target: { value: "bad term" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit feedback" }));
+    fireEvent.click(screen.getByRole("button", { name: "Báo lỗi bản dịch" }));
+    fireEvent.change(screen.getByLabelText("Ghi chú"), { target: { value: "bad term" } });
+    fireEvent.click(screen.getByRole("button", { name: "Gửi phản hồi" }));
 
-    expect(await screen.findByText("Feedback saved.")).toBeInTheDocument();
+    expect(await screen.findByText("Đã lưu phản hồi.")).toBeInTheDocument();
     expect(onFeedback).toHaveBeenCalledWith("turn-1", "wrong_term", "bad term");
   });
 });

@@ -79,9 +79,9 @@ describe("InterpreterConsole", () => {
       });
     });
 
-    expect(screen.getByRole("cell", { name: "dose" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Liều lượng" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "nửa viên" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "half a tablet" })).toBeInTheDocument();
-    expect(await screen.findByText("cloud mode session")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
   });
 });
