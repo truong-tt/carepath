@@ -9,7 +9,7 @@ describe("App", () => {
 
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "CarePath Interpreter" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Hold to talk/ })).not.toBeInTheDocument();
   });
 
@@ -18,10 +18,10 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByRole("navigation", { name: "Đường dẫn sản phẩm" })).toHaveTextContent(
-      "CarePath/Interpreter",
+      "CarePath/Phiên dịch khám bệnh trực tiếp",
     );
     expect(screen.getByText("Bản mô phỏng tương tác")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Tất cả sản phẩm" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Tất cả chức năng" })).toHaveAttribute("href", "/");
 
     fireEvent.click(screen.getByRole("button", { name: "EN" }));
     expect(screen.getByText("Interactive mock simulation")).toBeInTheDocument();

@@ -8,15 +8,17 @@ function expectProductCopy(language: "vi" | "en") {
   for (const key of ["interpreter", "scribe"] satisfies ProductKey[]) {
     const product = copy.products[key];
     expect(screen.getAllByText(product.name).length).toBeGreaterThan(0);
-    expect(screen.getByText(product.body)).toBeInTheDocument();
+    expect(screen.getAllByText(product.body).length).toBeGreaterThan(0);
     expect(screen.getAllByText(product.audience).length).toBeGreaterThan(0);
     expect(screen.getAllByText(product.status).length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByRole("link", { name: product.cta.explore }).length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("link", { name: product.cta.open }),
-    ).toBeInTheDocument();
+    expect(screen.getByText(product.helper)).toBeInTheDocument();
+    expect(screen.getByText(product.preview)).toBeInTheDocument();
+    expect(screen.getByText(product.timing)).toBeInTheDocument();
+    expect(screen.getByText(product.chooserSafety)).toBeInTheDocument();
+    expect(screen.getByRole("link", {
+      name: `${product.name}: ${product.cta.open}`,
+    })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: product.cta.open })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: product.cta.pilot }),
     ).toBeInTheDocument();
@@ -29,7 +31,8 @@ describe("LandingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
+        level: 1,
+        name: "Bạn muốn hỗ trợ việc gì hôm nay?",
       }),
     ).toBeInTheDocument();
     expect(
@@ -42,8 +45,8 @@ describe("LandingPage", () => {
         name: "Từ lời đã nói đến bản nháp có cấu trúc.",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "CarePath Interpreter" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "CarePath Scribe" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
     expectProductCopy("vi");
   });
@@ -51,11 +54,9 @@ describe("LandingPage", () => {
   it("renders the complete page in English", () => {
     render(<LandingPage language="en" />);
 
-    expect(
-      screen.getByRole("heading", {
-        name: "One care journey. Two CarePath products.",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", {
+      name: "Choose the right product for the right point in care.",
+    })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "One shared oversight layer. Two product-specific safety systems.",
@@ -68,10 +69,10 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getAllByText("Interactive simulation — not live interpreting."),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(
       screen.getAllByText("Pilot tool — every draft requires clinician review."),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expectProductCopy("en");
   });
 

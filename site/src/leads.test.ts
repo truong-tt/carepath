@@ -34,7 +34,7 @@ describe("buildLeadDraft", () => {
       scenarioTitle: "",
       transcript: "",
     });
-    expect(draft.message).toContain("CarePath Scribe");
+    expect(draft.message).toContain("Ghi chép bệnh án AI");
     expect(draft.message).not.toContain(scenarios[1].title.vi);
   });
 

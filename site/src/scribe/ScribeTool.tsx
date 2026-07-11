@@ -111,6 +111,7 @@ export default function ScribeTool({
   const copy = copyFor(language);
   const labels = copy.scribeTool;
   const [state, setState] = useState<ToolState>("idle");
+  const [readyToRecord, setReadyToRecord] = useState(false);
   const [health, setHealth] = useState<HealthState>("checking");
   const [file, setFile] = useState<File | null>(null);
   const [context, setContext] = useState("");
@@ -248,7 +249,7 @@ export default function ScribeTool({
           <span className="product-breadcrumb">
             <strong>CarePath</strong>
             <span aria-hidden="true">/</span>
-            <span>Scribe</span>
+            <span>{labels.title}</span>
           </span>
         </a>
         <div className="site-nav__actions">
@@ -279,7 +280,7 @@ export default function ScribeTool({
 
       <main className="tool-shell">
         <header className="tool-header">
-          <p className="kicker">{copy.scribe.brand}</p>
+          <p className="kicker">{labels.helper}</p>
           <h1>{labels.title}</h1>
           <p className="tool-header__intro">{labels.intro}</p>
           <p className={`health-badge health-badge--${health}`}>
@@ -288,7 +289,25 @@ export default function ScribeTool({
           </p>
         </header>
 
-        {state === "idle" && (
+        {state === "idle" && !readyToRecord && (
+          <section className="scribe-panel tool-panel tool-prestart" aria-label={labels.title}>
+            <ol className="progress-rail progress-rail--tool">
+              {labels.preStartSteps.map((step, index) => (
+                <li key={step}>
+                  <span aria-hidden="true">{index + 1}</span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+            <p className="tool-disclaimer">{labels.preStartReminder}</p>
+            <p className="tool-disclaimer">{labels.uploadNotice}</p>
+            <button className="button button--primary" onClick={() => setReadyToRecord(true)} type="button">
+              {labels.continue}
+            </button>
+          </section>
+        )}
+
+        {state === "idle" && readyToRecord && (
           <form className="scribe-panel tool-panel" onSubmit={submit}>
             <label
               className={dragging ? "dropzone is-drag" : "dropzone"}

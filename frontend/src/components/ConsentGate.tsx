@@ -21,24 +21,30 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
   return (
     <main className="page">
       <section className="consent" aria-labelledby="consent-title">
-        <div>
-          <p className="eyebrow">AI translation disclosure</p>
-          <h1 id="consent-title">CarePath Interpreter</h1>
+        <div lang="vi">
+          <p className="eyebrow">Medical Interpreter</p>
+          <h1 id="consent-title">Phiên dịch khám bệnh trực tiếp</h1>
           <p>
-            This tool translates what each person says. It can make mistakes and does not
-            provide medical advice, diagnoses, or drug recommendations.
+            Dịch hai chiều giữa bác sĩ tiếng Việt và bệnh nhân tiếng Anh trong lúc khám.
           </p>
         </div>
         <div lang="vi">
-          <p className="eyebrow">Thông báo sử dụng AI</p>
-          <h2>Công cụ phiên dịch</h2>
-          <p>
-            Công cụ này chỉ phiên dịch lời nói. Kết quả có thể sai và không thay thế lời khuyên
-            y tế, chẩn đoán, hoặc khuyến nghị dùng thuốc.
+          <p className="eyebrow">Các bước sử dụng</p>
+          <ol className="consent-steps">
+            <li>Bác sĩ nói tiếng Việt</li>
+            <li>AI dịch sang tiếng Anh cho bệnh nhân</li>
+            <li>Bệnh nhân trả lời bằng tiếng Anh</li>
+            <li>AI dịch lại sang tiếng Việt cho bác sĩ</li>
+          </ol>
+          <p className="consent-reminder">
+            CarePath chỉ hỗ trợ phiên dịch, không đưa ra chẩn đoán hoặc tư vấn điều trị.
+            <br />
+            <span lang="en">CarePath provides translation support only; it does not provide diagnoses or treatment advice.</span>
           </p>
         </div>
         <form
           className="consent-actions"
+          lang="vi"
           onSubmit={(event) => {
             event.preventDefault();
             if (!canStart) {
@@ -58,7 +64,7 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
               type="checkbox"
               onChange={(event) => setAiDisclosure(event.target.checked)}
             />
-            AI translation may contain errors. / Bản dịch AI có thể có lỗi.
+            Bản dịch AI có thể có lỗi. <span lang="en">AI translation may contain errors.</span>
           </label>
           <label>
             <input
@@ -66,12 +72,11 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
               type="checkbox"
               onChange={(event) => setInterpreterRight(event.target.checked)}
             />
-            A human interpreter can be requested at any time. / Có thể yêu cầu thông dịch viên bất
-            cứ lúc nào.
+            Có thể yêu cầu thông dịch viên bất cứ lúc nào. <span lang="en">A human interpreter can be requested at any time.</span>
           </label>
-          {error ? <p className="error">{error}</p> : null}
+          {error ? <p className="error" role="alert">{error}</p> : null}
           <button disabled={!canStart} type="submit">
-            {isSubmitting ? "Starting..." : "Start session"}
+            {isSubmitting ? "Đang bắt đầu…" : "Tiếp tục phiên dịch"}
           </button>
         </form>
       </section>

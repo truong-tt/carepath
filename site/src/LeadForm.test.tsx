@@ -144,7 +144,7 @@ describe("LeadForm", () => {
       />,
     );
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Sản phẩm quan tâm" }), {
+    fireEvent.change(screen.getByRole("combobox", { name: "Chức năng quan tâm" }), {
       target: { value: "scribe" },
     });
     fillRequiredFields();
@@ -176,7 +176,7 @@ describe("LeadForm", () => {
       />,
     );
 
-    const selector = screen.getByRole("combobox", { name: "Sản phẩm quan tâm" });
+    const selector = screen.getByRole("combobox", { name: "Chức năng quan tâm" });
     expect(selector).toHaveValue("interpreter");
     fireEvent.change(selector, { target: { value: "both" } });
     expect(onInterestChange).toHaveBeenCalledWith("both");

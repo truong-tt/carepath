@@ -13,7 +13,7 @@ const shellCopy = {
   vi: {
     breadcrumb: "Đường dẫn sản phẩm",
     status: "Bản mô phỏng tương tác",
-    allProducts: "Tất cả sản phẩm",
+    allProducts: "Tất cả chức năng",
     language: "Ngôn ngữ thanh sản phẩm",
   },
   en: {
@@ -45,7 +45,9 @@ function ProductShell() {
             </a>
           </li>
           <li aria-hidden="true">/</li>
-          <li aria-current="page">Interpreter</li>
+          <li aria-current="page">
+            {language === "vi" ? "Phiên dịch khám bệnh trực tiếp" : "Medical Interpreter"}
+          </li>
         </ol>
       </nav>
       <p className="product-status">
@@ -89,7 +91,7 @@ function App() {
       const result = await createSession({ consent });
       setSessionId(result.session_id);
     } catch {
-      setError("Could not start the session. Check that the backend is running.");
+      setError("Không thể bắt đầu phiên dịch. Vui lòng kiểm tra kết nối máy chủ.");
     } finally {
       setStarting(false);
     }

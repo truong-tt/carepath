@@ -54,8 +54,12 @@ export function defaultLeadMessage(
     interest === "both"
       ? language === "en"
         ? "CarePath Interpreter and Scribe"
-        : "CarePath Interpreter và Scribe"
-      : `CarePath ${interest === "scribe" ? "Scribe" : "Interpreter"}`;
+        : "Phiên dịch khám bệnh trực tiếp và Ghi chép bệnh án AI"
+      : language === "en"
+        ? `CarePath ${interest === "scribe" ? "Scribe" : "Interpreter"}`
+        : interest === "scribe"
+          ? "Ghi chép bệnh án AI"
+          : "Phiên dịch khám bệnh trực tiếp";
   const scenarioContext =
     interest === "scribe"
       ? ""

@@ -4,9 +4,9 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("button", { name: /Hold to talk/ })).toHaveCount(0);
-  await page.getByLabel("AI translation may contain errors.").check();
-  await page.getByLabel("A human interpreter can be requested at any time.").check();
-  await page.getByRole("button", { name: "Start session" }).click();
+  await page.getByLabel(/Bản dịch AI có thể có lỗi/).check();
+  await page.getByLabel(/Có thể yêu cầu thông dịch viên bất cứ lúc nào/).check();
+  await page.getByRole("button", { name: "Tiếp tục phiên dịch" }).click();
 
   await expect(page.getByRole("heading", { name: "Live interpreter" })).toBeVisible();
   await expect(page.getByRole("status")).toContainText("Connected");

@@ -16,6 +16,10 @@ export type ProductKey = "interpreter" | "scribe";
 
 interface ProductCopy {
   name: string;
+  helper: string;
+  preview: string;
+  timing: string;
+  chooserSafety: string;
   audience: string;
   input: string;
   output: string;
@@ -121,6 +125,8 @@ interface PageCopy {
     input: string;
     output: string;
     workflow: string;
+    useWhen: string;
+    detailLabel: string;
   };
   products: Record<ProductKey, ProductCopy>;
   scribe: {
@@ -133,7 +139,12 @@ interface PageCopy {
   };
   scribeTool: {
     title: string;
+    helper: string;
     intro: string;
+    preStartSteps: [string, string, string, string];
+    preStartReminder: string;
+    uploadNotice: string;
+    continue: string;
     back: string;
     health: Record<"checking" | "ready" | "demo" | "degraded" | "down", string>;
     dropzone: string;
@@ -201,8 +212,8 @@ export const strings: Record<Language, PageCopy> = {
       en: "EN",
     },
     nav: {
-      interpreter: "Interpreter",
-      scribe: "Scribe",
+      interpreter: "Phiên dịch khám bệnh trực tiếp",
+      scribe: "Ghi chép bệnh án AI",
       safety: "An toàn",
       pilot: "Thí điểm",
       menu: "Mở điều hướng",
@@ -265,11 +276,11 @@ export const strings: Record<Language, PageCopy> = {
       clinic: "Cơ sở y tế",
       role: "Vai trò",
       contact: "Email hoặc Zalo",
-      interest: "Sản phẩm quan tâm",
+      interest: "Chức năng quan tâm",
       interestOptions: {
-        interpreter: "CarePath Interpreter",
-        scribe: "CarePath Scribe",
-        both: "Cả hai sản phẩm",
+        interpreter: "Phiên dịch khám bệnh trực tiếp",
+        scribe: "Ghi chép bệnh án AI",
+        both: "Cả hai chức năng",
       },
       message: "Lời nhắn",
       prepare: "Chuẩn bị yêu cầu thí điểm",
@@ -280,29 +291,35 @@ export const strings: Record<Language, PageCopy> = {
       required: "Vui lòng điền trường này.",
     },
     hero: {
-      title: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
-      body: "Interpreter hỗ trợ hội thoại y khoa Việt–Anh với bước chặn rủi ro và xác nhận của bác sĩ. Scribe chuyển tệp âm thanh buổi khám thành bản nháp SOAP để bác sĩ duyệt.",
-      interpreterCta: "Khám phá Interpreter",
-      scribeCta: "Khám phá Scribe",
+      title: "Bạn muốn hỗ trợ việc gì hôm nay?",
+      body: "Chọn một công việc để bắt đầu.",
+      interpreterCta: "Bắt đầu phiên dịch",
+      scribeCta: "Bắt đầu ghi chép",
     },
     gateway: {
-      heading: "Chọn đúng sản phẩm cho đúng thời điểm chăm sóc.",
+      heading: "Bạn muốn hỗ trợ việc gì hôm nay?",
       body: "Hai công việc riêng biệt, cùng giữ bác sĩ ở vị trí quyết định.",
       audience: "Dành cho",
       input: "Đầu vào",
       output: "Đầu ra",
       workflow: "Luồng chính",
+      useWhen: "Dùng khi",
+      detailLabel: "Thông tin chi tiết về hai chức năng",
     },
     products: {
       interpreter: {
-        name: "CarePath Interpreter",
-        audience: "Bác sĩ và cơ sở y tế cần trao đổi Việt–Anh rõ ràng trong buổi khám.",
+        name: "Phiên dịch khám bệnh trực tiếp",
+        helper: "Medical Interpreter",
+        preview: "Bác sĩ nói → Bệnh nhân nghe → Bệnh nhân trả lời → Bác sĩ hiểu",
+        timing: "Trong buổi khám",
+        chooserSafety: "Chỉ phiên dịch, không đưa ra lời khuyên y tế.",
+        audience: "Phù hợp khi bác sĩ và bệnh nhân không cùng ngôn ngữ.",
         input: "Hội thoại Việt–Anh theo từng lượt.",
         output: "Bản dịch hiển thị theo mức rủi ro; nội dung nguy cơ cao chờ bác sĩ xác nhận.",
         status: "Mô phỏng tương tác — chưa phải phiên dịch trực tiếp.",
         disclosure: "Bản mô phỏng không sử dụng micro và không lưu âm thanh.",
         title: "Giữ quyền xác nhận ở phía bác sĩ.",
-        body: "Interpreter chỉ dịch nội dung hội thoại. Nội dung nguy cơ cao hoặc nghiêm trọng bị chặn khỏi người bệnh cho đến khi bác sĩ xác nhận, chỉnh sửa hoặc chuyển sang phiên dịch viên.",
+        body: "Dịch hai chiều giữa bác sĩ tiếng Việt và bệnh nhân tiếng Anh trong lúc khám.",
         workflow: [
           {
             title: "Hội thoại",
@@ -324,20 +341,24 @@ export const strings: Record<Language, PageCopy> = {
           "Luôn có đường chuyển sang phiên dịch viên",
         ],
         cta: {
-          explore: "Khám phá Interpreter",
-          open: "Mở công cụ Interpreter",
-          pilot: "Thí điểm Interpreter",
+          explore: "Tìm hiểu phiên dịch",
+          open: "Bắt đầu phiên dịch",
+          pilot: "Thí điểm phiên dịch",
         },
       },
       scribe: {
-        name: "CarePath Scribe",
-        audience: "Bác sĩ cần giảm thời gian ghi chép sau buổi khám tiếng Việt.",
+        name: "Ghi chép bệnh án AI",
+        helper: "AI Scribe",
+        preview: "Nghe buổi khám → Tạo ghi chú → Bác sĩ kiểm tra",
+        timing: "Sau buổi khám",
+        chooserSafety: "Bác sĩ cần kiểm tra trước khi sử dụng.",
+        audience: "Phù hợp khi bác sĩ muốn giảm thời gian nhập liệu sau khám.",
         input: "Tệp âm thanh buổi khám do cơ sở chủ động tải lên.",
         output: "Bản nháp SOAP có đánh dấu thông tin còn thiếu.",
         status: "Công cụ thí điểm — mọi bản nháp cần bác sĩ duyệt.",
         disclosure: "Tệp âm thanh do cơ sở chủ động tải lên được xử lý để tạo bản nháp; bản nháp không tự đi vào hồ sơ.",
         title: "Từ lời đã nói đến bản nháp có cấu trúc.",
-        body: "Scribe phiên âm hội thoại tiếng Việt, hiệu chỉnh thuật ngữ y khoa và được yêu cầu chỉ sắp xếp nội dung đã nói thành bản nháp SOAP. Bác sĩ vẫn phải đối chiếu bản nháp với hội thoại và loại bỏ nội dung không có căn cứ.",
+        body: "AI nghe buổi khám và tạo ghi chú y khoa có cấu trúc.",
         workflow: [
           {
             title: "Tải lên hội thoại",
@@ -359,14 +380,14 @@ export const strings: Record<Language, PageCopy> = {
           "Bác sĩ duyệt trước khi đưa vào hồ sơ",
         ],
         cta: {
-          explore: "Khám phá Scribe",
-          open: "Mở công cụ Scribe",
-          pilot: "Thí điểm Scribe",
+          explore: "Tìm hiểu ghi chép",
+          open: "Bắt đầu ghi chép",
+          pilot: "Thí điểm ghi chép",
         },
       },
     },
     scribe: {
-      brand: "CarePath Scribe",
+      brand: "Ghi chép bệnh án AI",
       disclosure: "Bản mô phỏng với dữ liệu mẫu, không phải hồ sơ thật",
       steps: {
         raw: {
@@ -392,9 +413,19 @@ export const strings: Record<Language, PageCopy> = {
       note: "Trong bản mô phỏng này, mọi mục đều truy nguyên từ dữ liệu mẫu; khi sử dụng công cụ, bác sĩ vẫn phải đối chiếu bản nháp với hội thoại.",
     },
     scribeTool: {
-      title: "Từ bản ghi âm buổi khám đến bệnh án SOAP",
-      intro: "Tải lên tệp ghi âm buổi khám bằng tiếng Việt. Hệ thống phiên âm, hiệu chỉnh thuật ngữ và soạn bản nháp SOAP để bác sĩ kiểm tra.",
-      back: "Tất cả sản phẩm",
+      title: "Ghi chép bệnh án AI",
+      helper: "AI Scribe",
+      intro: "AI nghe buổi khám và tạo ghi chú y khoa có cấu trúc.",
+      preStartSteps: [
+        "Bật ghi âm buổi khám",
+        "AI chuyển lời nói thành văn bản",
+        "AI tạo ghi chú y khoa có cấu trúc",
+        "Bác sĩ kiểm tra và chỉnh sửa trước khi sử dụng",
+      ],
+      preStartReminder: "AI chỉ hỗ trợ soạn thảo. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
+      uploadNotice: "CarePath dùng tệp ghi âm do cơ sở chọn và tải lên; màn hình này không tự bắt đầu micro.",
+      continue: "Tiếp tục ghi chép",
+      back: "Tất cả chức năng",
       health: {
         checking: "Đang kết nối…",
         ready: "Hệ thống sẵn sàng",
@@ -423,12 +454,12 @@ export const strings: Record<Language, PageCopy> = {
       disclaimer: "Bản demo cho nhân viên y tế. Không dùng cho chẩn đoán lâm sàng chính thức.",
     },
     marquee: [
-      "Interpreter — xác nhận read-back",
-      "Interpreter — chặn nội dung rủi ro",
-      "Interpreter — cảnh báo độ tin cậy thấp",
-      "Scribe — hiệu chỉnh thuật ngữ",
-      "Scribe — đánh dấu thông tin còn thiếu",
-      "Scribe — Bản nháp SOAP chờ duyệt",
+      "Phiên dịch — xác nhận read-back",
+      "Phiên dịch — chặn nội dung rủi ro",
+      "Phiên dịch — cảnh báo độ tin cậy thấp",
+      "Ghi chép — hiệu chỉnh thuật ngữ",
+      "Ghi chép — đánh dấu thông tin còn thiếu",
+      "Ghi chép — bản nháp SOAP chờ duyệt",
     ],
     evidence: {
       title: "Xem cách mỗi sản phẩm giữ điểm cần duyệt ở đúng chỗ.",
@@ -441,14 +472,14 @@ export const strings: Record<Language, PageCopy> = {
       items: [
         {
           kind: "interpreter",
-          product: "CarePath Interpreter",
+          product: "Phiên dịch khám bệnh trực tiếp",
           title: "Lượt nguy cơ được giữ lại cho bác sĩ.",
           body: "Màn hình mô phỏng hiển thị đồng thời câu nguồn, bản dịch, nhãn rủi ro và hành động xác nhận.",
           detail: "Dữ liệu mẫu: dị ứng penicillin được đánh dấu và chưa phát cho người bệnh.",
         },
         {
           kind: "scribe",
-          product: "CarePath Scribe",
+          product: "Ghi chép bệnh án AI",
           title: "Bản nháp cho thấy phần cần kiểm tra.",
           body: "Màn hình mẫu đặt bản gõ thô, thuật ngữ đã sửa và bốn mục SOAP trong cùng một luồng duyệt.",
           detail: "Dữ liệu mẫu: mục Đánh giá vẫn ở trạng thái chờ bác sĩ duyệt.",
@@ -467,11 +498,11 @@ export const strings: Record<Language, PageCopy> = {
       body: "CarePath không thay bác sĩ ra quyết định. Mỗi sản phẩm dừng đầu ra cần xác nhận ở đúng cổng duyệt của quy trình mà nó phục vụ.",
       shared: {
         title: "Giám sát chung cho CarePath",
-        body: "Bốn nguyên tắc áp dụng cho cả Interpreter và Scribe.",
+        body: "Bốn nguyên tắc áp dụng cho cả hai chức năng.",
         items: [
           {
             title: { vi: "Bác sĩ giữ quyền quyết định", en: "Clinician authority" },
-            body: { vi: "Bác sĩ giữ quyền kiểm soát; lượt Interpreter nguy cơ cao và mọi bản nháp Scribe đều chờ bước xác nhận phù hợp.", en: "The clinician stays in control; high-risk Interpreter turns and every Scribe draft wait at the appropriate review gate." },
+            body: { vi: "Bác sĩ giữ quyền kiểm soát; lượt phiên dịch nguy cơ cao và mọi bản nháp ghi chép đều chờ bước xác nhận phù hợp.", en: "The clinician stays in control; high-risk Interpreter turns and every Scribe draft wait at the appropriate review gate." },
           },
           {
             title: { vi: "Thông báo AI rõ ràng", en: "Clear AI disclosure" },
@@ -488,7 +519,7 @@ export const strings: Record<Language, PageCopy> = {
         ],
       },
       interpreter: {
-        title: "An toàn của Interpreter",
+        title: "An toàn khi phiên dịch khám bệnh",
         body: "Nội dung nguy cơ không đi thẳng tới người bệnh.",
         items: [
           {
@@ -513,7 +544,7 @@ export const strings: Record<Language, PageCopy> = {
         ],
       },
       scribe: {
-        title: "An toàn của Scribe",
+        title: "An toàn khi ghi chép bệnh án AI",
         body: "Bản nháp không tự trở thành hồ sơ bệnh án.",
         items: [
           {
@@ -536,14 +567,14 @@ export const strings: Record<Language, PageCopy> = {
       },
     },
     pilot: {
-      title: "Chọn sản phẩm phù hợp với quy trình của bạn.",
-      body: "Yêu cầu thí điểm có thể dành cho Interpreter, Scribe hoặc cả hai. Phạm vi và giá được xác định sau khi cùng xem quy trình thực tế; không có báo giá giả định trên trang này.",
-      transcriptNote: "Nếu chọn Interpreter, kịch bản và bản ghi song ngữ hiện tại sẽ đi cùng yêu cầu.",
+      title: "Chọn chức năng phù hợp với quy trình của bạn.",
+      body: "Yêu cầu thí điểm có thể dành cho phiên dịch, ghi chép hoặc cả hai. Phạm vi và giá được xác định sau khi cùng xem quy trình thực tế; không có báo giá giả định trên trang này.",
+      transcriptNote: "Nếu chọn phiên dịch, kịch bản và bản ghi song ngữ hiện tại sẽ đi cùng yêu cầu.",
     },
     footer: {
       promise: "AI hỗ trợ, bác sĩ giữ quyền quyết định.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
-      honesty: "Interpreter là bản mô phỏng tương tác; Scribe là công cụ thí điểm tạo bản nháp. Cả hai đều cần giám sát của nhân viên y tế.",
+      honesty: "Phiên dịch khám bệnh trực tiếp là bản mô phỏng tương tác; Ghi chép bệnh án AI là công cụ thí điểm tạo bản nháp. Cả hai đều cần giám sát của nhân viên y tế.",
       contact: "Liên hệ chương trình thí điểm",
     },
   },
@@ -645,10 +676,16 @@ export const strings: Record<Language, PageCopy> = {
       input: "Input",
       output: "Output",
       workflow: "Core flow",
+      useWhen: "Use when",
+      detailLabel: "Product details",
     },
     products: {
       interpreter: {
         name: "CarePath Interpreter",
+        helper: "Medical Interpreter",
+        preview: "Doctor speaks → Patient hears → Patient replies → Doctor understands",
+        timing: "During the visit",
+        chooserSafety: "Translation only; it does not provide medical advice.",
         audience: "Clinicians and care teams who need clear Vietnamese–English communication during a visit.",
         input: "Turn-by-turn Vietnamese–English conversation.",
         output: "Translation follows the risk tier; high-risk content waits for clinician confirmation.",
@@ -684,6 +721,10 @@ export const strings: Record<Language, PageCopy> = {
       },
       scribe: {
         name: "CarePath Scribe",
+        helper: "AI Scribe",
+        preview: "Listen to the visit → Create notes → Clinician reviews",
+        timing: "After the visit",
+        chooserSafety: "Clinician review is required before use.",
         audience: "Clinicians who want to reduce documentation time after Vietnamese visits.",
         input: "Visit audio intentionally uploaded by the care team.",
         output: "A SOAP draft with missing information called out.",
@@ -746,7 +787,17 @@ export const strings: Record<Language, PageCopy> = {
     },
     scribeTool: {
       title: "From visit recording to a SOAP note",
+      helper: "AI Scribe",
       intro: "Upload a Vietnamese consultation recording. The system transcribes it, corrects medical terms, and drafts a SOAP note for clinician review.",
+      preStartSteps: [
+        "Record the visit",
+        "AI turns speech into text",
+        "AI creates a structured clinical note",
+        "The clinician checks and edits before use",
+      ],
+      preStartReminder: "AI assists with drafting only. The clinician must review the content before use.",
+      uploadNotice: "CarePath uses the recording file selected and uploaded by the clinic; this screen does not start the microphone.",
+      continue: "Continue to notes",
       back: "All products",
       health: {
         checking: "Connecting…",

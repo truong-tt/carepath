@@ -51,11 +51,15 @@ describe("ScribeTool", () => {
     render(<ScribeTool language="vi" />);
     await screen.findByText("Chế độ demo");
     expect(
-      screen.getAllByRole("link", { name: "Tất cả sản phẩm" }),
+      screen.getAllByRole("link", { name: "Tất cả chức năng" }),
     ).toHaveLength(2);
     expect(
       screen.getByText("Công cụ thí điểm · Cần bác sĩ duyệt"),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
+    expect(screen.getByText("AI chỉ hỗ trợ soạn thảo. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.")).toBeInTheDocument();
+    expect(screen.getByText("CarePath dùng tệp ghi âm do cơ sở chọn và tải lên; màn hình này không tự bắt đầu micro.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục ghi chép" }));
 
     const submit = screen.getByRole("button", { name: "Tạo bệnh án SOAP" });
     expect(submit).toBeDisabled();
@@ -97,6 +101,7 @@ describe("ScribeTool", () => {
     );
 
     render(<ScribeTool language="vi" />);
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục ghi chép" }));
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bệnh án SOAP" }));
 

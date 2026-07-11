@@ -107,10 +107,11 @@ test("initial and confirmation states have no serious axe violations", async ({
   await expectNoSeriousAxeViolations(page);
 });
 
-test("both product choices stay above the fold across release viewports", async ({
+test("both product choices remain discoverable across release viewports", async ({
   page,
 }) => {
   const viewports = [
+    { width: 320, height: 800 },
     { width: 360, height: 800 },
     { width: 390, height: 844 },
     { width: 768, height: 1024 },
@@ -124,18 +125,20 @@ test("both product choices stay above the fold across release viewports", async 
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Một hành trình chăm sóc. Hai sản phẩm CarePath.",
+        name: "Bạn muốn hỗ trợ việc gì hôm nay?",
       }),
     ).toBeVisible();
 
-    for (const name of ["Khám phá Interpreter", "Khám phá Scribe"]) {
-      const choice = page.getByRole("link", { exact: true, name });
+    for (const [key, name] of [
+      ["interpreter", "Phiên dịch khám bệnh trực tiếp: Bắt đầu phiên dịch"],
+      ["scribe", "Ghi chép bệnh án AI: Bắt đầu ghi chép"],
+    ]) {
+      const choice = page.locator(`.product-accordion__panel--${key}`);
       await expect(choice).toBeVisible();
-      const box = await choice.boundingBox();
-      expect(box).not.toBeNull();
-      expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(
-        viewport.height,
-      );
+      await expect(choice).toHaveAttribute("aria-label", name);
+      expect(await choice.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      expect(await choice.evaluate((element) => element.scrollHeight <= element.clientHeight)).toBe(true);
+      expect(await choice.locator(".product-accordion__cta").evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
     }
 
     expect(
@@ -144,6 +147,12 @@ test("both product choices stay above the fold across release viewports", async 
       ),
     ).toBeLessThanOrEqual(0);
 
+    await page.locator("main#top").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".product-accordion__panel--interpreter")).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".product-accordion__panel--scribe")).toBeFocused();
+
     if (viewport.width <= 1023) {
       const menu = page.locator(".site-nav__menu");
       const summary = menu.locator("summary");
@@ -151,18 +160,18 @@ test("both product choices stay above the fold across release viewports", async 
         await summary.focus();
         await page.keyboard.press("Enter");
         await expect(menu).toHaveAttribute("open", "");
-        await expect(menu.getByRole("link", { name: "Interpreter" })).toBeVisible();
-        await expect(menu.getByRole("link", { name: "Scribe" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Ghi chép bệnh án AI" })).toBeVisible();
         await page.keyboard.press("Tab");
         await expect(
-          menu.getByRole("link", { name: "Interpreter" }),
+          menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" }),
         ).toBeFocused();
         await page.keyboard.press("Enter");
         await expect(menu).not.toHaveAttribute("open", "");
       } else {
         await summary.click();
-        await expect(menu.getByRole("link", { name: "Interpreter" })).toBeVisible();
-        await expect(menu.getByRole("link", { name: "Scribe" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Ghi chép bệnh án AI" })).toBeVisible();
       }
     }
 
@@ -180,19 +189,19 @@ test("both product choices stay above the fold across release viewports", async 
   }
 
   await expect(
-    page.getByRole("link", { exact: true, name: "Mở công cụ Interpreter" }),
+    page.locator(".product-accordion__panel--interpreter"),
   ).toHaveAttribute("href", "https://carepath-e2e.example/console/");
   await expect(
-    page.getByRole("link", { exact: true, name: "Mở công cụ Scribe" }),
+    page.locator(".product-accordion__panel--scribe"),
   ).toHaveAttribute("href", "#/scribe");
 
-  await page.getByRole("link", { exact: true, name: "Thí điểm Scribe" }).click();
+  await page.getByRole("link", { exact: true, name: "Thí điểm ghi chép" }).click();
   await expect(
-    page.getByRole("combobox", { name: "Sản phẩm quan tâm" }),
+    page.getByRole("combobox", { name: "Chức năng quan tâm" }),
   ).toHaveValue("scribe");
-  await page.getByRole("link", { exact: true, name: "Thí điểm Interpreter" }).click();
+  await page.getByRole("link", { exact: true, name: "Thí điểm phiên dịch" }).click();
   await expect(
-    page.getByRole("combobox", { name: "Sản phẩm quan tâm" }),
+    page.getByRole("combobox", { name: "Chức năng quan tâm" }),
   ).toHaveValue("interpreter");
 });
 

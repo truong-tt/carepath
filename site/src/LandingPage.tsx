@@ -95,43 +95,9 @@ export default function LandingPage({
       </nav>
 
       <main id="top" tabIndex={-1}>
-        <section className="hero" aria-labelledby="hero-title">
-          <h1 className="hero-title hero-title--wide" id="hero-title">
-            {copy.hero.title}
-          </h1>
-          <div className="hero__lower">
-            <div className="hero__copy">
-              <p className="hero__body">{copy.hero.body}</p>
-              <div className="hero__actions">
-                <a
-                  className="button-link button-link--interpreter"
-                  href="#interpreter"
-                >
-                  {copy.hero.interpreterCta}
-                </a>
-                <a className="button-link button-link--scribe" href="#scribe">
-                  {copy.hero.scribeCta}
-                </a>
-              </div>
-            </div>
-            <div className="hero__art" aria-hidden="true">
-              <div className="hero__route hero__route--interpreter">
-                <span>VI / EN</span>
-                <i />
-                <strong>Interpreter</strong>
-              </div>
-              <div className="hero__route hero__route--scribe">
-                <span>Audio</span>
-                <i />
-                <strong>SOAP</strong>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="product-gateway" aria-labelledby="gateway-title">
           <header className="section-intro section-intro--wide">
-            <h2 id="gateway-title">{copy.gateway.heading}</h2>
+            <h1 id="gateway-title">{copy.gateway.heading}</h1>
             <p>{copy.gateway.body}</p>
           </header>
           <div className="product-accordion">
@@ -140,26 +106,34 @@ export default function LandingPage({
               return (
                 <a
                   className={`product-accordion__panel product-accordion__panel--${key}`}
-                  href={`#${key}`}
+                  aria-label={`${product.name}: ${product.cta.open}`}
+                  href={
+                    key === "interpreter"
+                      ? import.meta.env.VITE_CONSOLE_URL || "/console/"
+                      : "#/scribe"
+                  }
                   key={key}
                 >
                   <div className="product-accordion__heading">
                     <h3>{product.name}</h3>
-                    <span>{product.status}</span>
+                    <span>{product.helper}</span>
                   </div>
-                  <p>{product.audience}</p>
+                  <p>{product.body}</p>
+                  <p className="product-accordion__timing">{product.timing}</p>
                   <dl>
                     <div>
-                      <dt>{copy.gateway.input}</dt>
-                      <dd>{product.input}</dd>
+                      <dt>{copy.gateway.useWhen}</dt>
+                      <dd>{product.audience}</dd>
                     </div>
                     <div>
-                      <dt>{copy.gateway.output}</dt>
-                      <dd>{product.output}</dd>
+                      <dt>{copy.gateway.workflow}</dt>
+                      <dd>{product.preview}</dd>
                     </div>
                   </dl>
+                  <p className="product-accordion__safety">{product.chooserSafety}</p>
                   <strong className="product-accordion__cta">
-                    {product.cta.explore} <span aria-hidden="true">↘</span>
+                    <span aria-hidden="true">{key === "interpreter" ? "↔" : "☷"}</span>
+                    {product.cta.open}
                   </strong>
                 </a>
               );
@@ -169,18 +143,9 @@ export default function LandingPage({
 
         <section
           className="product-story"
-          aria-label={copy.gateway.heading}
+          aria-label={copy.gateway.detailLabel}
           data-product-story
         >
-          <aside className="product-index" data-product-index>
-            <strong>CarePath</strong>
-            <p>{copy.gateway.body}</p>
-            <nav aria-label={copy.gateway.heading}>
-              <a href="#interpreter">Interpreter</a>
-              <a href="#scribe">Scribe</a>
-            </nav>
-          </aside>
-
           <div className="product-chapters">
             <article
               className="product-chapter product-chapter--interpreter"
