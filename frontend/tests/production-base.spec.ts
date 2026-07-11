@@ -28,6 +28,17 @@ test("keeps bilingual consent choices readable at phone width", async ({ page })
   ).toBe(true);
 });
 
+test("keeps onboarding controls visible with forced colors", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.goto("/phien-dich-y-khoa/");
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+
+  await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+  await expect(page.getByLabel(/bản dịch do AI tạo ra có thể có lỗi/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bắt đầu phiên dịch" })).toBeVisible();
+});
+
 test("reaches internal review only through the canonical hash route", async ({ page }) => {
   await page.goto("/phien-dich-y-khoa/#/kiem-duyet");
 
