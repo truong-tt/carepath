@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from sqlmodel import Session as InterpreterDBSession
@@ -336,7 +336,7 @@ def create_soap_note(
 
 
 # Serve the built frontends same-origin so they call both APIs with relative
-# URLs (no CORS): interpreter console at /console, demo site (landing + the
+# URLs (no CORS): interpreter at /phien-dich-y-khoa/, demo site (landing + the
 # #/scribe tool) at /. Mounted last so API routes take precedence; a missing
 # dist folder is skipped with a warning — dev and CI use the Vite dev servers.
 _REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -345,11 +345,19 @@ CONSOLE_DIST_DIR = Path(
 )
 SITE_DIST_DIR = Path(os.getenv("SITE_DIST_DIR") or _REPO_ROOT / "site" / "dist")
 if CONSOLE_DIST_DIR.is_dir():
+    @app.get("/console", include_in_schema=False)
+    @app.get("/console/", include_in_schema=False)
+    def legacy_console_redirect(request: Request) -> RedirectResponse:
+        query = f"?{request.url.query}" if request.url.query else ""
+        return RedirectResponse(f"/phien-dich-y-khoa/{query}")
+
     app.mount(
-        "/console", StaticFiles(directory=CONSOLE_DIST_DIR, html=True), name="console"
+        "/phien-dich-y-khoa",
+        StaticFiles(directory=CONSOLE_DIST_DIR, html=True),
+        name="interpreter",
     )
 else:
-    logger.warning("console dist missing at %s; /console not served", CONSOLE_DIST_DIR)
+    logger.warning("interpreter dist missing at %s; /phien-dich-y-khoa/ not served", CONSOLE_DIST_DIR)
 if SITE_DIST_DIR.is_dir():
     @app.get("/ghi-chep-lam-sang/", include_in_schema=False)
     def clinical_notes_page() -> FileResponse:

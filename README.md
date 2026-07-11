@@ -16,9 +16,9 @@ principle: **the clinician stays in control.**
 Frontends, all served by the same API in production:
 
 - `site/` — the public demo site (landing at `/`, working Scribe tool at
-  `/#/scribe`). Vietnamese default, English toggle, full diacritics enforced
+  `/ghi-chep-lam-sang/`). Vietnamese default, English toggle, full diacritics enforced
   at build time.
-- `frontend/` — the interpreter console, served at `/console/`.
+- `frontend/` — the interpreter app, served at `/phien-dich-y-khoa/`.
 
 One FastAPI process serves both APIs and both frontends. `MERGE-PLAN.md`
 records how the two products were unified; `JUDGE.md` is the review protocol.
@@ -42,8 +42,8 @@ cd frontend; npm ci; npm run build; cd ..
 uvicorn carepath.main:app --app-dir apps/api --reload
 ```
 
-Then open `http://127.0.0.1:8000/` (demo site), `/#/scribe` (Scribe tool),
-`/console/` (interpreter console). `GET /api/v1/health` and `GET /api/health`
+Then open `http://127.0.0.1:8000/` (demo site), `/ghi-chep-lam-sang/` (Scribe tool),
+`/phien-dich-y-khoa/` (interpreter app). `GET /api/v1/health` and `GET /api/health`
 report both modules.
 
 For frontend development, run the Vite dev servers instead

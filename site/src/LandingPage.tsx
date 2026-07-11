@@ -15,6 +15,13 @@ interface LandingPageProps {
 const productOrder: ProductKey[] = ["interpreter", "scribe"];
 const interpreterEvidenceTurn = getScenario("allergy").turns[3];
 
+function interpreterHref(language: Language) {
+  const href = import.meta.env.VITE_CONSOLE_URL || "/phien-dich-y-khoa/";
+  const url = new URL(href, window.location.href);
+  if (url.origin !== window.location.origin) url.searchParams.set("lang", language);
+  return url.origin === window.location.origin ? `${url.pathname}${url.search}` : url.href;
+}
+
 export default function LandingPage({
   language,
   onLanguageChange,
@@ -25,7 +32,7 @@ export default function LandingPage({
   const clinicName = "Phòng khám Đa khoa An Bình";
   const specialty = "Nội tổng quát";
   const scenario = scenarios[0];
-  const interpreterHref = import.meta.env.VITE_CONSOLE_URL || "/console/";
+  const interpreterUrl = interpreterHref(language);
   const scribeHref = "/ghi-chep-lam-sang/";
 
   const navLinks = (
@@ -96,7 +103,7 @@ export default function LandingPage({
                 <a
                   className={`product-accordion__panel product-accordion__panel--${key}`}
                   aria-label={`${product.name}: ${product.cta.open}`}
-                  href={key === "interpreter" ? interpreterHref : scribeHref}
+                  href={key === "interpreter" ? interpreterUrl : scribeHref}
                   key={key}
                 >
                   <div className="product-accordion__heading">

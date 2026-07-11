@@ -142,7 +142,7 @@ test("both product choices remain discoverable across release viewports", async 
 
   await expect(
     page.locator(".product-accordion__panel--interpreter"),
-  ).toHaveAttribute("href", "https://carepath-e2e.example/console/");
+  ).toHaveAttribute("href", "https://carepath-e2e.example/phien-dich-y-khoa/?lang=vi");
   await expect(
     page.locator(".product-accordion__panel--scribe"),
   ).toHaveAttribute("href", "/ghi-chep-lam-sang/");

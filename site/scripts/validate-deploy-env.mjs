@@ -31,8 +31,8 @@ export function validateDeployEnv(env = process.env) {
   if (apiBase && apiBase.pathname !== "/") {
     errors.push("VITE_API_BASE pathname must be /.");
   }
-  if (consoleUrl && consoleUrl.pathname !== "/console/") {
-    errors.push("VITE_CONSOLE_URL pathname must be /console/.");
+  if (consoleUrl && consoleUrl.pathname !== "/phien-dich-y-khoa/") {
+    errors.push("VITE_CONSOLE_URL pathname must be /phien-dich-y-khoa/.");
   }
   if (errors.length) {
     throw new Error(`Invalid Vercel deployment environment:\n- ${errors.join("\n- ")}`);

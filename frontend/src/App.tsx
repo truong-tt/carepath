@@ -11,6 +11,13 @@ import { copy, initialLanguage, persistLanguage, type Language } from "./copy";
 
 function ProductShell({ language, setLanguage }: { language: Language; setLanguage: (language: Language) => void }) {
   const text = copy[language];
+  const publicSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL;
+  const allProductsHref = (() => {
+    if (!publicSiteUrl) return "/";
+    const url = new URL(publicSiteUrl);
+    url.searchParams.set("lang", language);
+    return url.href;
+  })();
 
   return (
     <header className="product-shell" lang={language}>
@@ -33,7 +40,7 @@ function ProductShell({ language, setLanguage }: { language: Language; setLangua
         {text.status}
       </p>
       <div className="product-shell__actions">
-        <a className="all-products" href="/">
+        <a className="all-products" href={allProductsHref}>
           {text.allProducts}
         </a>
         <div className="language-toggle" role="group" aria-label={text.language}>

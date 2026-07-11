@@ -12,7 +12,9 @@ RUN cd site && npm run build
 COPY frontend/package.json frontend/package-lock.json frontend/
 RUN cd frontend && npm ci
 COPY frontend frontend
-# Production build uses base /console/ (see frontend/vite.config.ts).
+# Production build uses base /phien-dich-y-khoa/ (see frontend/vite.config.ts).
+ARG VITE_PUBLIC_SITE_URL
+ENV VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}
 RUN cd frontend && npm run build
 
 # --- Stage 2: Python runtime serving both APIs and the built frontends ---

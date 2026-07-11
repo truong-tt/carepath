@@ -27,7 +27,7 @@ from fastapi.testclient import TestClient
 
 import app.config as interpreter_config
 import app.db as interpreter_db
-from carepath.main import SITE_DIST_DIR, app, get_pipeline, get_settings
+from carepath.main import CONSOLE_DIST_DIR, SITE_DIST_DIR, app, get_pipeline, get_settings
 
 
 class CombinedAppTests(unittest.TestCase):
@@ -69,6 +69,17 @@ class CombinedAppTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200, response.text)
         self.assertIn('id="root"', response.text)
+
+    @unittest.skipUnless(CONSOLE_DIST_DIR.is_dir(), "interpreter build is not available")
+    def test_interpreter_route_and_legacy_console_redirect(self) -> None:
+        with TestClient(app) as client:
+            page = client.get("/phien-dich-y-khoa/")
+            redirect = client.get("/console/?lang=en", follow_redirects=False)
+
+        self.assertEqual(page.status_code, 200, page.text)
+        self.assertIn('id="root"', page.text)
+        self.assertEqual(redirect.status_code, 307)
+        self.assertEqual(redirect.headers["location"], "/phien-dich-y-khoa/?lang=en")
 
 
 if __name__ == "__main__":

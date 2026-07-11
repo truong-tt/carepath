@@ -7,8 +7,8 @@ app_port: 7860
 # CarePath Space
 
 This Space runs the unified CarePath product from the root `Dockerfile`:
-demo site at `/`, Scribe tool at `/#/scribe`, interpreter console at
-`/console/`, scriber API at `/api/v1/*`, interpreter API at `/api/*` + `/ws/*`.
+demo site at `/`, Scribe tool at `/ghi-chep-lam-sang/`, interpreter at
+`/phien-dich-y-khoa/`, scriber API at `/api/v1/*`, interpreter API at `/api/*` + `/ws/*`.
 
 Required Space secrets (scriber; the interpreter runs keyless in mock mode):
 

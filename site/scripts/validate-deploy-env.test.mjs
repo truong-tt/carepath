@@ -6,7 +6,7 @@ import { validateDeployEnv } from "./validate-deploy-env.mjs";
 
 const validEnv = {
   VITE_API_BASE: "https://carepath.hf.space",
-  VITE_CONSOLE_URL: "https://carepath.hf.space/console/",
+  VITE_CONSOLE_URL: "https://carepath.hf.space/phien-dich-y-khoa/",
 };
 
 test("accepts one HTTPS Space origin", () => {
@@ -27,7 +27,7 @@ test("rejects HTTP, split origins, and the wrong console path", () => {
         VITE_API_BASE: "http://api.example.test",
         VITE_CONSOLE_URL: "https://console.example.test/app/",
       }),
-    /must use HTTPS[\s\S]*must share one origin[\s\S]*pathname must be \/console\//,
+    /must use HTTPS[\s\S]*must share one origin[\s\S]*pathname must be \/phien-dich-y-khoa\//,
   );
 });
 
@@ -36,7 +36,7 @@ test("rejects paths, queries, and fragments that would corrupt runtime URLs", ()
     () =>
       validateDeployEnv({
         VITE_API_BASE: "https://carepath.hf.space/wrong?token=secret",
-        VITE_CONSOLE_URL: "https://carepath.hf.space/console/#app",
+        VITE_CONSOLE_URL: "https://carepath.hf.space/phien-dich-y-khoa/#app",
       }),
     /VITE_API_BASE must not include a query or fragment[\s\S]*VITE_CONSOLE_URL must not include a query or fragment[\s\S]*VITE_API_BASE pathname must be \//,
   );
@@ -47,4 +47,7 @@ test("Vercel runs validation before the production build", async () => {
     await readFile(new URL("../vercel.json", import.meta.url), "utf8"),
   );
   assert.equal(config.buildCommand, "npm run validate:deploy && npm run build");
+  assert.deepEqual(config.rewrites, [
+    { source: "/ghi-chep-lam-sang/:path*", destination: "/index.html" },
+  ]);
 });

@@ -3,7 +3,8 @@
 Static, Vietnamese-first buyer site for the two CarePath products. The embedded
 Interpreter experience is a scripted client-only simulation. The Scribe route
 at `/#/scribe` uploads a user-selected audio file to `VITE_API_BASE`; its
-Interpreter console link uses `VITE_CONSOLE_URL`.
+Interpreter link uses `VITE_CONSOLE_URL`; it includes the selected `lang` when
+that URL crosses origins.
 
 ```powershell
 npm.cmd install

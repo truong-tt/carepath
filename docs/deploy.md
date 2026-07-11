@@ -2,7 +2,7 @@
 
 Use `https://carepath-omega.vercel.app` as the public two-product site. One
 Hugging Face Space runs the unified product service: the Scribe tool at
-`/#/scribe`, the Interpreter console at `/console/`, the Scribe API at
+`/ghi-chep-lam-sang/`, the Interpreter app at `/phien-dich-y-khoa/`, the Scribe API at
 `/api/v1/*`, and the Interpreter API at `/api/*` + `/ws/*`. Deploy and verify
 the Space before pointing Vercel at it.
 
@@ -11,7 +11,7 @@ the Space before pointing Vercel at it.
 Reuse the existing Docker Space
 [`tranth3truong/carepath-api`](https://huggingface.co/spaces/tranth3truong/carepath-api),
 served at `https://tranth3truong-carepath-api.hf.space`. Deploy this unified
-repository there; the older Scribe-only revision does not contain `/console/`
+repository there; the older Scribe-only revision does not contain `/phien-dich-y-khoa/`
 or the Interpreter API.
 
 1. Rebuild the existing `tranth3truong/carepath-api` Space with **Docker** as
@@ -30,6 +30,9 @@ app_port: 7860
    frontends in a node stage (the site build enforces the Vietnamese
    diacritics gate), installs both API packages, pre-downloads the Gipformer
    int8 ONNX files, and starts Uvicorn on port `7860`.
+   Set the Docker build arg `VITE_PUBLIC_SITE_URL=https://carepath-omega.vercel.app`
+   so the Interpreter's “Tất cả chức năng” link returns to the public site
+   with the selected language.
 4. Set these Space secrets:
 
 ```text
@@ -85,7 +88,8 @@ In another terminal:
 curl.exe http://127.0.0.1:7860/api/v1/health
 curl.exe http://127.0.0.1:7860/api/health
 curl.exe -o NUL -w "%{http_code}`n" http://127.0.0.1:7860/
-curl.exe -o NUL -w "%{http_code}`n" http://127.0.0.1:7860/console/
+curl.exe -o NUL -w "%{http_code}`n" http://127.0.0.1:7860/ghi-chep-lam-sang/
+curl.exe -o NUL -w "%{http_code}`n" http://127.0.0.1:7860/phien-dich-y-khoa/
 curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
   -F "audio=@C:\path\to\demo.wav" `
   -F "encounter_context=Phòng khám nội tổng quát"
@@ -103,7 +107,7 @@ The `site/` directory is the static marketing deployment at
 
 ```text
 VITE_API_BASE=https://tranth3truong-carepath-api.hf.space
-VITE_CONSOLE_URL=https://tranth3truong-carepath-api.hf.space/console/
+VITE_CONSOLE_URL=https://tranth3truong-carepath-api.hf.space/phien-dich-y-khoa/
 VITE_LEAD_ENDPOINT=<optional lead endpoint>
 VITE_LEAD_EMAIL=<pilot contact email>
 ```
@@ -113,12 +117,12 @@ VITE_LEAD_EMAIL=<pilot contact email>
 
 The Vercel build runs `npm run validate:deploy` before compiling. It fails when
 either URL is missing or invalid, does not use HTTPS, uses a different origin,
-contains a query/fragment, or does not use the exact `/` and `/console/`
+contains a query/fragment, or does not use the exact `/` and `/phien-dich-y-khoa/`
 pathnames. Local
 and combined-service builds still use same-origin fallbacks because the normal
 `npm run build` does not run this deployment-only check.
 
-The Interpreter console stays on the Space because it needs the WebSocket API;
+The Interpreter stays on the Space because it needs the WebSocket API;
 the Vercel landing links to it via `VITE_CONSOLE_URL`. The pilot form remains
 client-side unless `VITE_LEAD_ENDPOINT` is configured.
 
@@ -138,9 +142,9 @@ job succeeds.
 
 1. Open the Space URL: the CarePath landing renders, Vietnamese by default.
 2. Run the scripted interpreter simulation on the landing.
-3. Open `/#/scribe`, upload a short clip, and verify the SOAP draft renders
+3. Open `/ghi-chep-lam-sang/`, upload a short clip, and verify the SOAP draft renders
    with the review banner.
-4. Open `/console/`, accept consent, start a mock session, and send a typed
+4. Open `/phien-dich-y-khoa/`, accept consent, start a mock session, and send a typed
    turn.
 5. Confirm `GET /api/v1/health` reports `llm_provider: ckey` and
    `asr_ready: true`, and `GET /api/health` reports `provider_mode: mock`.
