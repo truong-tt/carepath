@@ -47,6 +47,10 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "1. Phiên âm tự động" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "3. Bản ghi y khoa theo bốn mục SOAP" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
     expectProductCopy("vi");
   });

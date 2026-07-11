@@ -226,7 +226,7 @@ export const strings: Record<Language, PageCopy> = {
       clinic: "Tên cơ sở",
       specialty: "Chuyên khoa",
       chooseScenario: "Chọn kịch bản",
-      progress: ["Kịch bản đã chọn", "Nghe hội thoại", "Xác nhận read-back", "Nhận bản ghi"],
+      progress: ["Kịch bản đã chọn", "Nghe hội thoại", "Đọc lại để xác nhận", "Nhận bản ghi"],
       start: "Bắt đầu",
       continue: "Tiếp tục",
       pause: "Tạm dừng",
@@ -337,7 +337,7 @@ export const strings: Record<Language, PageCopy> = {
         safety: [
           "Chặn lượt nguy cơ cao và nghiêm trọng",
           "Hiện cảnh báo khi độ tin cậy thấp",
-          "Read-back trước khi phát nội dung quan trọng",
+          "Đọc lại để xác nhận trước khi phát nội dung quan trọng",
           "Luôn có đường chuyển sang phiên dịch viên",
         ],
         cta: {
@@ -391,16 +391,16 @@ export const strings: Record<Language, PageCopy> = {
       disclosure: "Bản mô phỏng với dữ liệu mẫu, không phải hồ sơ thật",
       steps: {
         raw: {
-          label: "1. Bản gõ thô từ ASR",
-          caption: "Gạch chân: đoạn máy nghe sai trong bản gõ thô.",
+          label: "1. Phiên âm tự động",
+          caption: "Gạch chân: đoạn hệ thống nghe sai trong bản phiên âm tự động.",
         },
         corrected: {
           label: "2. Sau hiệu chỉnh thuật ngữ",
           caption: "Tô nền: thuật ngữ và con số đã được hiệu chỉnh.",
         },
         soap: {
-          label: "3. Bản nháp SOAP",
-          caption: "Bản nháp xếp theo bốn mục, chờ bác sĩ duyệt từng dòng.",
+          label: "3. Bản ghi y khoa theo bốn mục SOAP",
+          caption: "Bản nháp xếp theo bốn mục SOAP, chờ bác sĩ duyệt từng dòng.",
         },
       },
       status: "Chờ bác sĩ duyệt",
@@ -531,7 +531,7 @@ export const strings: Record<Language, PageCopy> = {
             body: { vi: "Kết quả không chắc chắn luôn được gắn cờ rõ ràng.", en: "Uncertain output is always visibly flagged." },
           },
           {
-            title: { vi: "Read-back hoặc chuyển người", en: "Read-back or human escalation" },
+            title: { vi: "Đọc lại để xác nhận hoặc chuyển người", en: "Read-back or human escalation" },
             body: { vi: "Bác sĩ xác nhận, chỉnh sửa hoặc yêu cầu phiên dịch viên.", en: "The clinician confirms, edits, or requests an interpreter." },
           },
           {

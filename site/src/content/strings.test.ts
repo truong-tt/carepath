@@ -33,6 +33,29 @@ describe("Vietnamese copy", () => {
     );
   });
 
+  it("uses Vietnamese primary product vocabulary while retaining internal keys", () => {
+    const primaryCopy = [
+      ...Object.values(strings.vi.nav),
+      ...Object.values(strings.vi.form.interestOptions),
+      strings.vi.demo.consoleCta,
+      strings.vi.hero.interpreterCta,
+      strings.vi.hero.scribeCta,
+      ...Object.values(strings.vi.products).flatMap((product) => [
+        product.name,
+        product.status,
+        ...Object.values(product.cta),
+      ]),
+    ];
+
+    expect(primaryCopy.join(" ")).not.toMatch(/\b(?:Scribe|Interpreter|Console)\b/);
+    expect(Object.keys(strings.vi.products)).toEqual(["interpreter", "scribe"]);
+    expect(strings.vi.scribe.steps.raw.label).toContain("Phiên âm tự động");
+    expect(strings.vi.scribe.steps.soap.label).toContain(
+      "Bản ghi y khoa theo bốn mục SOAP",
+    );
+    expect(strings.vi.demo.progress).toContain("Đọc lại để xác nhận");
+  });
+
   it("keeps complete Vietnamese and English structures in parity", () => {
     expect(structure(strings.en)).toEqual(structure(strings.vi));
     expect(collectStrings(strings.en).every((value) => value.trim().length > 0)).toBe(true);

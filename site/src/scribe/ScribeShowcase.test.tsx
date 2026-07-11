@@ -8,7 +8,9 @@ describe("ScribeShowcase", () => {
 
     expect(screen.getByText("am lô đi pin")).toBeInTheDocument();
     expect(
-      screen.getByText("Gạch chân: đoạn máy nghe sai trong bản gõ thô."),
+      screen.getByText(
+        "Gạch chân: đoạn hệ thống nghe sai trong bản phiên âm tự động.",
+      ),
     ).toBeInTheDocument();
 
     fireEvent.click(
@@ -17,7 +19,11 @@ describe("ScribeShowcase", () => {
     expect(screen.getByText("amlodipin")).toBeInTheDocument();
     expect(screen.getByText("160/90 mmHg")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "3. Bản nháp SOAP" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "3. Bản ghi y khoa theo bốn mục SOAP",
+      }),
+    );
     expect(screen.getByText("Chờ bác sĩ duyệt")).toBeInTheDocument();
     expect(screen.getByText("Kế hoạch")).toBeInTheDocument();
     expect(
