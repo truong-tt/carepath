@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { copy, type Language } from "../copy";
 import { DemoPreview } from "./DemoPreview";
+import { OnboardingStepper } from "./OnboardingStepper";
 
 export type ConsentPayload = {
   ai_disclosure: boolean;
@@ -20,6 +21,7 @@ type ConsentGateProps = {
 export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }: ConsentGateProps) {
   const [aiDisclosure, setAiDisclosure] = useState(false);
   const [interpreterRight, setInterpreterRight] = useState(false);
+  const [consentSubmitted, setConsentSubmitted] = useState(false);
   const canStart = aiDisclosure && interpreterRight && !isSubmitting;
   const text = copy[language].consent;
   const companion = copy[language === "vi" ? "en" : "vi"].consent;
@@ -34,13 +36,7 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
           <p lang={language === "vi" ? "en" : "vi"}>{companion.description}</p>
         </div>
         <div lang={language}>
-          <p className="eyebrow">{text.steps}</p>
-          <ol className="consent-steps">
-            <li>{text.doctorSpeaks}</li>
-            <li>{text.aiToPatient}</li>
-            <li>{text.patientSpeaks}</li>
-            <li>{text.aiToDoctor}</li>
-          </ol>
+          <OnboardingStepper consentSubmitted={consentSubmitted} language={language} />
           <p className="consent-reminder">
             {text.limitation}
             <br />
@@ -55,6 +51,7 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
             if (!canStart) {
               return;
             }
+            setConsentSubmitted(true);
             onConsent({
               ai_disclosure: true,
               interpreter_right: true,

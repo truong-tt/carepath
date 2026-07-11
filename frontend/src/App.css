@@ -201,11 +201,21 @@ button:disabled {
   font-weight: 600;
 }
 
-.consent-steps {
+.onboarding-stepper ol {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
-  padding-left: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.onboarding-stepper li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #c8d0d9;
+  border-radius: 6px;
 }
 
 .consent-reminder {
