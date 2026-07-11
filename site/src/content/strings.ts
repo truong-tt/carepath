@@ -108,8 +108,11 @@ interface PageCopy {
     contact: string;
     interest: string;
     interestOptions: Record<"interpreter" | "scribe" | "both", string>;
+    specialty: string;
+    includeDemoContext: string;
     message: string;
-    prepare: string;
+    submit: string;
+    openMail: string;
     submitting: string;
     posted: string;
     mailOpened: string;
@@ -297,8 +300,11 @@ export const strings: Record<Language, PageCopy> = {
         scribe: "Ghi chép bệnh án AI",
         both: "Cả hai chức năng",
       },
+      specialty: "Chuyên khoa",
+      includeDemoContext: "Gửi kèm kịch bản mô phỏng và bản chép song ngữ",
       message: "Lời nhắn",
-      prepare: "Chuẩn bị yêu cầu thí điểm",
+      submit: "Gửi yêu cầu thí điểm",
+      openMail: "Mở email đã điền sẵn",
       submitting: "Đang gửi yêu cầu…",
       posted: "Đã gửi yêu cầu thí điểm.",
       mailOpened: "Đã mở bản nháp email. Hãy kiểm tra và gửi thư để hoàn tất.",
@@ -605,7 +611,7 @@ export const strings: Record<Language, PageCopy> = {
     pilot: {
       title: "Chọn chức năng phù hợp với quy trình của bạn.",
       body: "Yêu cầu thí điểm có thể dành cho phiên dịch, ghi chép hoặc cả hai. Phạm vi và giá được xác định sau khi cùng xem quy trình thực tế; không có báo giá giả định trên trang này.",
-      transcriptNote: "Nếu chọn phiên dịch, kịch bản và bản ghi song ngữ hiện tại sẽ đi cùng yêu cầu.",
+      transcriptNote: "Kịch bản mô phỏng và bản chép song ngữ chỉ được gửi kèm khi bạn chọn.",
     },
     footer: {
       promise: "AI hỗ trợ, bác sĩ giữ quyền quyết định.",
@@ -695,8 +701,11 @@ export const strings: Record<Language, PageCopy> = {
         scribe: "CarePath Scribe",
         both: "Both products",
       },
+      specialty: "Specialty",
+      includeDemoContext: "Include the simulation scenario and bilingual transcript",
       message: "Message",
-      prepare: "Prepare pilot request",
+      submit: "Send pilot request",
+      openMail: "Open prefilled email",
       submitting: "Sending request…",
       posted: "Pilot request sent.",
       mailOpened: "An email draft was opened. Review and send it to finish.",
@@ -1003,7 +1012,7 @@ export const strings: Record<Language, PageCopy> = {
     pilot: {
       title: "Choose the product that fits your workflow.",
       body: "A pilot request can cover Interpreter, Scribe, or both. Scope and pricing follow a review of the real workflow; this page does not publish a placeholder quote.",
-      transcriptNote: "For Interpreter interest, the current scenario and bilingual transcript travel with the request.",
+      transcriptNote: "The simulation scenario and bilingual transcript are included only when you choose to send them.",
     },
     footer: {
       promise: "AI assistance, clinician in control.",

@@ -3,7 +3,23 @@ import { scenarios } from "./demo/scenarios";
 import { buildLeadDraft, buildLeadMailto, submitLead } from "./leads";
 
 describe("buildLeadDraft", () => {
-  it("attaches the configured scenario and transcript", () => {
+  it("attaches the configured scenario and transcript only when requested", () => {
+    const draft = buildLeadDraft({
+      clinic: "Phòng khám Minh Tâm",
+      specialty: "Tim mạch",
+      scenario: scenarios[1],
+      transcript: "VI: Không dị ứng\nEN: Not allergic",
+      language: "vi",
+      includeInterpreterContext: true,
+    });
+
+    expect(draft.scenarioId).toBe("allergy");
+    expect(draft.interest).toBe("both");
+    expect(draft.message).toContain("Kiểm tra dị ứng — xác nhận phủ định");
+    expect(draft.transcript).toContain("Not allergic");
+  });
+
+  it("omits interpreter context by default", () => {
     const draft = buildLeadDraft({
       clinic: "Phòng khám Minh Tâm",
       specialty: "Tim mạch",
@@ -12,10 +28,7 @@ describe("buildLeadDraft", () => {
       language: "vi",
     });
 
-    expect(draft.scenarioId).toBe("allergy");
-    expect(draft.interest).toBe("both");
-    expect(draft.message).toContain("Kiểm tra dị ứng — xác nhận phủ định");
-    expect(draft.transcript).toContain("Not allergic");
+    expect(draft).toMatchObject({ scenarioId: "", scenarioTitle: "", transcript: "" });
   });
 
   it("omits interpreter context from Scribe-only leads", () => {

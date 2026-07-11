@@ -37,12 +37,20 @@ test("keyboard-only visitor submits a pilot request", async ({
   await tabTo(page, role);
   await page.keyboard.type("Giam doc phong kham");
 
+  const clinic = page.getByRole("textbox", { name: "Cơ sở y tế" });
+  await tabTo(page, clinic);
+  await page.keyboard.type("Phong kham Minh Anh");
+
+  const specialty = page.getByRole("textbox", { name: "Chuyên khoa" });
+  await tabTo(page, specialty);
+  await page.keyboard.type("Noi tong quat");
+
   const contact = page.getByRole("textbox", { name: "Email hoặc Zalo" });
   await tabTo(page, contact);
   await page.keyboard.type("minhanh@example.com");
 
   const submit = page.getByRole("button", {
-    name: "Chuẩn bị yêu cầu thí điểm",
+    name: "Gửi yêu cầu thí điểm",
   });
   await tabTo(page, submit);
   await page.keyboard.press("Enter");

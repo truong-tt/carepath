@@ -40,6 +40,7 @@ interface LeadDraftInput {
   transcript: string;
   language: Language;
   interest?: ProductInterest;
+  includeInterpreterContext?: boolean;
   fields?: Partial<Pick<LeadDraft, "name" | "role" | "contact" | "message">>;
 }
 
@@ -49,6 +50,7 @@ export function defaultLeadMessage(
   scenario: Scenario,
   language: Language,
   interest: ProductInterest = "both",
+  includeInterpreterContext = false,
 ): string {
   const product =
     interest === "both"
@@ -61,15 +63,17 @@ export function defaultLeadMessage(
           ? "Ghi chép bệnh án AI"
           : "Phiên dịch khám bệnh trực tiếp";
   const scenarioContext =
-    interest === "scribe"
+    !includeInterpreterContext || interest === "scribe"
       ? ""
       : language === "en"
         ? ` using the “${scenario.title.en}” scenario`
         : ` với kịch bản “${scenario.title.vi}”`;
   if (language === "en") {
-    return `I would like to discuss a ${product} pilot for ${clinic} (${specialty})${scenarioContext}.`;
+    const clinicContext = clinic ? ` for ${clinic}${specialty ? ` (${specialty})` : ""}` : "";
+    return `I would like to discuss a ${product} pilot${clinicContext}${scenarioContext}.`;
   }
-  return `Tôi muốn trao đổi về chương trình thí điểm ${product} cho ${clinic} (${specialty})${scenarioContext}.`;
+  const clinicContext = clinic ? ` cho ${clinic}${specialty ? ` (${specialty})` : ""}` : "";
+  return `Tôi muốn trao đổi về chương trình thí điểm ${product}${clinicContext}${scenarioContext}.`;
 }
 
 export function buildLeadDraft({
@@ -79,9 +83,10 @@ export function buildLeadDraft({
   transcript,
   language,
   interest = "both",
+  includeInterpreterContext = false,
   fields = {},
 }: LeadDraftInput): LeadDraft {
-  const includeInterpreterContext = interest !== "scribe";
+  const includeContext = includeInterpreterContext && interest !== "scribe";
   return {
     name: fields.name ?? "",
     clinic,
@@ -89,11 +94,11 @@ export function buildLeadDraft({
     contact: fields.contact ?? "",
     message:
       fields.message ??
-      defaultLeadMessage(clinic, specialty, scenario, language, interest),
-    scenarioId: includeInterpreterContext ? scenario.id : "",
-    scenarioTitle: includeInterpreterContext ? scenario.title[language] : "",
+      defaultLeadMessage(clinic, specialty, scenario, language, interest, includeContext),
+    scenarioId: includeContext ? scenario.id : "",
+    scenarioTitle: includeContext ? scenario.title[language] : "",
     specialty,
-    transcript: includeInterpreterContext ? transcript : "",
+    transcript: includeContext ? transcript : "",
     language,
     interest,
   };

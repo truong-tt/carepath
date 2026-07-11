@@ -1256,6 +1256,7 @@ mark.scribe-mark {
 }
 
 .lead-form__message,
+.lead-form__context,
 .lead-form .button,
 .lead-form > p {
   grid-column: 1 / -1;

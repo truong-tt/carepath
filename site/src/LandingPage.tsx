@@ -29,8 +29,6 @@ export default function LandingPage({
   const menuRef = useRef<HTMLDetailsElement>(null);
   const copy = copyFor(language);
   const [interest, setInterest] = useState<ProductInterest>("both");
-  const clinicName = "Phòng khám Đa khoa An Bình";
-  const specialty = "Nội tổng quát";
   const scenario = scenarios[0];
   const interpreterUrl = interpreterHref(language);
   const scribeHref = "/ghi-chep-lam-sang/";
@@ -248,19 +246,12 @@ export default function LandingPage({
             <p>{copy.pilot.body}</p>
             <div className="pilot__configuration">
               <span>{copy.form.interestOptions[interest]}</span>
-              {interest !== "scribe" && (
-                <>
-                  <span>{clinicName}</span>
-                  <span>{specialty}</span>
-                  <span>{scenario.title[language]}</span>
-                </>
-              )}
             </div>
             <small>{copy.pilot.transcriptNote}</small>
           </div>
           <LeadForm
-            clinic={clinicName}
-            specialty={specialty}
+            clinic=""
+            specialty=""
             scenario={scenario}
             transcript=""
             language={language}

@@ -78,9 +78,8 @@ describe("LandingPage", () => {
   it("keeps the pilot form after the decision gateway", () => {
     render(<LandingPage language="vi" />);
 
-    expect(
-      screen.getByRole("textbox", { name: "Cơ sở y tế" }),
-    ).toHaveValue("Phòng khám Đa khoa An Bình");
+    expect(screen.getByRole("textbox", { name: "Cơ sở y tế" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "Chuyên khoa" })).toHaveValue("");
     expect(screen.getByRole("combobox", { name: "Chức năng quan tâm" })).toHaveValue("both");
   });
 });

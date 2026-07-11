@@ -41,8 +41,11 @@ export default function LeadForm({
   const [localInterest, setLocalInterest] = useState<ProductInterest>("both");
   const interest = controlledInterest ?? localInterest;
   const [name, setName] = useState("");
+  const [clinicName, setClinicName] = useState(clinic);
+  const [specialtyName, setSpecialtyName] = useState(specialty);
   const [role, setRole] = useState("");
   const [contact, setContact] = useState("");
+  const [includeDemoContext, setIncludeDemoContext] = useState(false);
   const [message, setMessage] = useState(() =>
     defaultLeadMessage(clinic, specialty, scenario, language, interest),
   );
@@ -55,16 +58,25 @@ export default function LeadForm({
   useEffect(() => {
     if (!messageDirty) {
       setMessage(
-        defaultLeadMessage(clinic, specialty, scenario, language, interest),
+        defaultLeadMessage(
+          clinicName,
+          specialtyName,
+          scenario,
+          language,
+          interest,
+          includeDemoContext,
+        ),
       );
     }
-  }, [clinic, interest, language, messageDirty, scenario, specialty]);
+  }, [clinicName, includeDemoContext, interest, language, messageDirty, scenario, specialtyName]);
 
   async function sendRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
     for (const [key, value] of Object.entries({
       name,
+      clinic: clinicName,
+      specialty: specialtyName,
       role,
       contact,
       message,
@@ -75,12 +87,13 @@ export default function LeadForm({
     if (Object.keys(nextErrors).length > 0) return;
 
     const payload = buildLeadDraft({
-      clinic,
-      specialty,
+      clinic: clinicName,
+      specialty: specialtyName,
       scenario,
       transcript,
       language,
       interest,
+      includeInterpreterContext: includeDemoContext,
       fields: { name, role, contact, message },
     });
     setStatus("submitting");
@@ -118,8 +131,36 @@ export default function LeadForm({
       </label>
       <label>
         {labels.clinic}
-        <input value={clinic} readOnly />
+        <input
+          value={clinicName}
+          maxLength={160}
+          aria-invalid={Boolean(errors.clinic)}
+          aria-describedby={errors.clinic ? "lead-clinic-error" : undefined}
+          onChange={(event) => setClinicName(event.target.value)}
+        />
+        {errors.clinic && <span className="field-error" id="lead-clinic-error">{errors.clinic}</span>}
       </label>
+      <label>
+        {labels.specialty}
+        <input
+          value={specialtyName}
+          maxLength={100}
+          aria-invalid={Boolean(errors.specialty)}
+          aria-describedby={errors.specialty ? "lead-specialty-error" : undefined}
+          onChange={(event) => setSpecialtyName(event.target.value)}
+        />
+        {errors.specialty && <span className="field-error" id="lead-specialty-error">{errors.specialty}</span>}
+      </label>
+      {interest !== "scribe" && (
+        <label className="lead-form__context">
+          <input
+            checked={includeDemoContext}
+            type="checkbox"
+            onChange={(event) => setIncludeDemoContext(event.target.checked)}
+          />
+          {labels.includeDemoContext}
+        </label>
+      )}
       <label>
         {labels.interest}
         <select
@@ -180,7 +221,11 @@ export default function LeadForm({
         disabled={status === "submitting"}
         type="submit"
       >
-        {status === "submitting" ? labels.submitting : labels.prepare}
+        {status === "submitting"
+          ? labels.submitting
+          : endpoint
+            ? labels.submit
+            : labels.openMail}
       </button>
       <p className={status === "error" ? "form-status is-error" : "form-status"} aria-live="polite">
         {status === "posted"
