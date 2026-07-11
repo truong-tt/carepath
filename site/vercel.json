@@ -3,5 +3,9 @@
   "framework": "vite",
   "buildCommand": "npm run validate:deploy && npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/ghi-chep-lam-sang", "destination": "/index.html" },
+    { "source": "/ghi-chep-lam-sang/", "destination": "/index.html" },
+    { "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" }
+  ]
 }
