@@ -43,6 +43,10 @@ interface SafetyCardCopy {
 }
 
 interface PageCopy {
+  metadata: {
+    title: string;
+    description: string;
+  };
   language: {
     label: string;
     vi: string;
@@ -204,6 +208,10 @@ interface PageCopy {
 
 export const strings: Record<Language, PageCopy> = {
   vi: {
+    metadata: {
+      title: "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp",
+      description: "CarePath hỗ trợ Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp cho cơ sở y tế.",
+    },
     language: {
       label: "Ngôn ngữ",
       vi: "VI",
@@ -581,6 +589,10 @@ export const strings: Record<Language, PageCopy> = {
     },
   },
   en: {
+    metadata: {
+      title: "CarePath | Clinical note drafting and live medical interpretation",
+      description: "CarePath supports clinical note drafting and live medical interpretation for care teams.",
+    },
     language: {
       label: "Language",
       vi: "VI",

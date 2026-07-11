@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import ScribeTool from "./scribe/ScribeTool";
+import { copyFor } from "./content/strings";
 import type { Language } from "./demo/types";
 
 export default function App() {
@@ -15,6 +16,10 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.title = copyFor(language).metadata.title;
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute("content", copyFor(language).metadata.description);
     localStorage.setItem("carepath-demo-language", language);
   }, [language]);
 

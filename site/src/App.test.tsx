@@ -6,15 +6,22 @@ describe("language preference", () => {
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.lang = "vi";
+    document.title = "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp";
   });
 
   it("defaults to Vietnamese and persists a complete English switch", () => {
     render(<App />);
 
     expect(document.documentElement.lang).toBe("vi");
+    expect(document.title).toBe(
+      "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp",
+    );
     fireEvent.click(screen.getByRole("button", { name: "EN" }));
 
     expect(document.documentElement.lang).toBe("en");
+    expect(document.title).toBe(
+      "CarePath | Clinical note drafting and live medical interpretation",
+    );
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
       screen.getByRole("link", {
