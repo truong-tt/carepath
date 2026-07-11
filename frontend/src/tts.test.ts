@@ -16,6 +16,7 @@ describe("canSpeakTurn", () => {
     expect(canSpeakTurn({ ...turn, status: "corrected", corrected_text: "hello there" }, false)).toBe(true);
     expect(canSpeakTurn({ ...turn, low_confidence: true }, false)).toBe(false);
     expect(canSpeakTurn({ ...turn, requires_confirmation: true, status: "awaiting_confirm" }, false)).toBe(false);
+    expect(canSpeakTurn({ ...turn, status: "blocked" }, false)).toBe(false);
     expect(canSpeakTurn({ ...turn, status: "ended" }, false)).toBe(false);
     expect(canSpeakTurn(turn, true)).toBe(false);
   });
