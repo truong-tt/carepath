@@ -25,7 +25,7 @@ from carepath.gec.evaluate import (
 )
 from carepath.gec.gate import run_gate
 from carepath.gec.leakage import duplicate_rejection_reason, ngram_overlap
-from carepath.gec.metrics import TermConfusion, score_pair, term_confusion, word_error_rate
+from carepath.gec.metrics import score_pair, term_confusion, word_error_rate
 from carepath.gec.nbest import dedupe_keep_order, diverse_hypotheses, other_hypotheses
 from carepath.gec.prompts import (
     build_synthetic_generation_messages,

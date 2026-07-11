@@ -22,7 +22,7 @@ import re
 import tempfile
 import unicodedata
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 # Deterministic perturbation recipe. Each entry is (label, kind, amount); the
 # acoustic transform is applied in ``_apply`` so the list stays import-cheap and
