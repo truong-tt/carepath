@@ -170,10 +170,8 @@ interface PageCopy {
   evidence: {
     title: string;
     body: string;
-    carouselLabel: string;
-    previous: string;
-    next: string;
-    slideLabel: string;
+    sampleLabel: string;
+    researchLabel: string;
     source: string;
     items: Array<{
       kind: "interpreter" | "scribe" | "research";
@@ -186,6 +184,7 @@ interface PageCopy {
   safety: {
     title: string;
     body: string;
+    trust: Array<{ title: string; body: string }>;
     shared: SafetyCardCopy;
     interpreter: SafetyCardCopy;
     scribe: SafetyCardCopy;
@@ -455,10 +454,8 @@ export const strings: Record<Language, PageCopy> = {
     evidence: {
       title: "Xem cách mỗi sản phẩm giữ điểm cần duyệt ở đúng chỗ.",
       body: "Các màn hình dưới đây dùng dữ liệu mẫu đã làm sạch. Bằng chứng nghiên cứu dẫn về báo cáo nguồn của CarePath; không có lời chứng thực hoặc tuyên bố kết quả giả định.",
-      carouselLabel: "Bằng chứng sản phẩm CarePath",
-      previous: "Màn trước",
-      next: "Màn tiếp theo",
-      slideLabel: "Màn",
+      sampleLabel: "Dữ liệu mẫu đã làm sạch",
+      researchLabel: "Nguồn nghiên cứu",
       source: "Đọc báo cáo nghiên cứu và nguồn trích dẫn",
       items: [
         {
@@ -487,6 +484,20 @@ export const strings: Record<Language, PageCopy> = {
     safety: {
       title: "Một lớp giám sát chung. Hai cơ chế an toàn riêng.",
       body: "CarePath không thay bác sĩ ra quyết định. Mỗi sản phẩm dừng đầu ra cần xác nhận ở đúng cổng duyệt của quy trình mà nó phục vụ.",
+      trust: [
+        {
+          title: "Bác sĩ kiểm tra trước khi dùng",
+          body: "Bản nháp và nội dung cần xác nhận không tự trở thành quyết định điều trị.",
+        },
+        {
+          title: "Độ không chắc chắn luôn hiển thị",
+          body: "Kết quả thiếu hoặc chưa chắc chắn được gắn cờ rõ ràng.",
+        },
+        {
+          title: "Không thay thế chẩn đoán hoặc tư vấn",
+          body: "CarePath chỉ hỗ trợ quy trình; bác sĩ vẫn quyết định chuyên môn.",
+        },
+      ],
       shared: {
         title: "Giám sát chung cho CarePath",
         body: "Bốn nguyên tắc áp dụng cho cả hai chức năng.",
@@ -820,10 +831,8 @@ export const strings: Record<Language, PageCopy> = {
     evidence: {
       title: "See how each product keeps review points in the right place.",
       body: "These screens use sanitized sample data. Research evidence links to CarePath's source report; there are no invented testimonials or outcome claims.",
-      carouselLabel: "CarePath product evidence",
-      previous: "Previous slide",
-      next: "Next slide",
-      slideLabel: "Slide",
+      sampleLabel: "Sanitized sample data",
+      researchLabel: "Research source",
       source: "Read the research report and cited sources",
       items: [
         {
@@ -852,6 +861,20 @@ export const strings: Record<Language, PageCopy> = {
     safety: {
       title: "One shared oversight layer. Two product-specific safety systems.",
       body: "CarePath does not replace clinician judgment. Each product stops output that requires confirmation at the review gate that belongs to its workflow.",
+      trust: [
+        {
+          title: "Clinician review before use",
+          body: "Drafts and content requiring confirmation never become treatment decisions automatically.",
+        },
+        {
+          title: "Visible uncertainty",
+          body: "Missing or uncertain output is clearly flagged.",
+        },
+        {
+          title: "No replacement for diagnosis or advice",
+          body: "CarePath supports the workflow; the clinician remains responsible for clinical decisions.",
+        },
+      ],
       shared: {
         title: "Shared CarePath oversight",
         body: "Four principles apply to both Interpreter and Scribe.",

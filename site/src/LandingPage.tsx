@@ -22,11 +22,9 @@ export default function LandingPage({
   const menuRef = useRef<HTMLDetailsElement>(null);
   const copy = copyFor(language);
   const [interest, setInterest] = useState<ProductInterest>("both");
-  const [evidenceIndex, setEvidenceIndex] = useState(0);
   const clinicName = "Phòng khám Đa khoa An Bình";
   const specialty = "Nội tổng quát";
   const scenario = scenarios[0];
-  const evidence = copy.evidence.items[evidenceIndex];
   const interpreterHref = import.meta.env.VITE_CONSOLE_URL || "/console/";
   const scribeHref = "#/scribe";
 
@@ -133,6 +131,15 @@ export default function LandingPage({
           </div>
         </section>
 
+        <section className="trust-strip" aria-label={copy.safety.title}>
+          {copy.safety.trust.map((item) => (
+            <article key={item.title}>
+              <h2>{item.title}</h2>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </section>
+
         <section
           className="safety-suite"
           id="safety"
@@ -177,110 +184,54 @@ export default function LandingPage({
           <header className="section-intro">
             <h2 id="evidence-title">{copy.evidence.title}</h2>
             <p>{copy.evidence.body}</p>
+            <a href={sources.research.href} target="_blank" rel="noreferrer">
+              {copy.evidence.source}
+            </a>
           </header>
-          <div
-            className="evidence-carousel"
-            aria-label={copy.evidence.carouselLabel}
-            aria-roledescription="carousel"
-            role="region"
-          >
-            <article
-              className={`evidence-slide evidence-slide--${evidence.kind}`}
-              aria-atomic="true"
-              aria-label={`${copy.evidence.slideLabel} ${evidenceIndex + 1} / ${copy.evidence.items.length}`}
-              aria-live="polite"
-              aria-roledescription="slide"
-            >
-              <div className="evidence-slide__copy">
-                <p>{evidence.product}</p>
-                <h3>{evidence.title}</h3>
-                <p>{evidence.body}</p>
-                {evidence.kind === "research" && (
-                  <a href={sources.research.href} target="_blank" rel="noreferrer">
-                    {copy.evidence.source}
-                  </a>
-                )}
-              </div>
-              <div
-                className="evidence-capture"
-                aria-label={evidence.detail}
-                role="img"
-              >
-                <div className="evidence-capture__bar">
-                  <span>CarePath</span>
-                  <span>{evidence.product}</span>
+          <div className="evidence-proof-grid">
+            {copy.evidence.items.map((item) => (
+              <article className={`evidence-proof evidence-proof--${item.kind}`} key={item.kind}>
+                <div className="evidence-proof__copy">
+                  <p>{item.kind === "research" ? copy.evidence.researchLabel : copy.evidence.sampleLabel}</p>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
                 </div>
-                <div
-                  className={`evidence-capture__content evidence-capture__content--${evidence.kind}`}
-                >
-                  {evidence.kind === "interpreter" && (
-                    <>
-                      <div className="evidence-capture__turn">
-                        <small>EN · {copy.demo.patient}</small>
-                        <p lang="en">{interpreterEvidenceTurn.en}</p>
-                      </div>
-                      <div className="evidence-capture__turn">
-                        <small>VI · {copy.demo.translation}</small>
-                        <p lang="vi">{interpreterEvidenceTurn.vi}</p>
-                      </div>
-                    </>
-                  )}
-                  {evidence.kind === "scribe" && (
-                    <dl>
-                      {soapDraft.slice(0, 2).map((row) => (
-                        <div key={row.key}>
-                          <dt>{copy.scribe.soapLabels[row.key]}</dt>
-                          <dd lang="vi">{row.text}</dd>
+                <div className="evidence-capture" aria-label={item.detail} role="img">
+                  <div className="evidence-capture__bar">
+                    <span>CarePath</span>
+                    <span>{item.product}</span>
+                  </div>
+                  <div className="evidence-capture__content">
+                    {item.kind === "interpreter" && (
+                      <>
+                        <div className="evidence-capture__turn">
+                          <small>EN · {copy.demo.patient}</small>
+                          <p lang="en">{interpreterEvidenceTurn.en}</p>
                         </div>
-                      ))}
-                    </dl>
-                  )}
-                  {evidence.kind === "research" && (
-                    <p className="evidence-capture__source">
-                      docs/research.md<br />
-                      {evidence.body}
-                    </p>
-                  )}
-                  <strong>{evidence.detail}</strong>
+                        <div className="evidence-capture__turn">
+                          <small>VI · {copy.demo.translation}</small>
+                          <p lang="vi">{interpreterEvidenceTurn.vi}</p>
+                        </div>
+                      </>
+                    )}
+                    {item.kind === "scribe" && (
+                      <dl>
+                        {soapDraft.slice(0, 2).map((row) => (
+                          <div key={row.key}>
+                            <dt>{copy.scribe.soapLabels[row.key]}</dt>
+                            <dd lang="vi">{row.text}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                    {item.kind === "research" && (
+                      <p className="evidence-capture__source">docs/research.md</p>
+                    )}
+                    <strong>{item.detail}</strong>
+                  </div>
                 </div>
-              </div>
-            </article>
-            <div className="evidence-carousel__controls">
-              <button
-                aria-label={copy.evidence.previous}
-                onClick={() =>
-                  setEvidenceIndex(
-                    (evidenceIndex - 1 + copy.evidence.items.length) %
-                      copy.evidence.items.length,
-                  )
-                }
-                type="button"
-              >
-                ←
-              </button>
-              <div>
-                {copy.evidence.items.map((item, index) => (
-                  <button
-                    aria-label={`${copy.evidence.slideLabel} ${index + 1}`}
-                    aria-current={index === evidenceIndex ? "true" : undefined}
-                    key={item.kind}
-                    onClick={() => setEvidenceIndex(index)}
-                    type="button"
-                  />
-                ))}
-              </div>
-              <button
-                aria-label={copy.evidence.next}
-                onClick={() =>
-                  setEvidenceIndex(
-                    (evidenceIndex + 1) % copy.evidence.items.length,
-                  )
-                }
-                type="button"
-              >
-                →
-              </button>
-            </div>
+              </article>
+            ))}
           </div>
         </section>
 

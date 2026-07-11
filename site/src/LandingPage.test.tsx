@@ -39,6 +39,12 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ghi chép bệnh án AI" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Bác sĩ kiểm tra trước khi dùng" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Độ không chắc chắn luôn hiển thị" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Không thay thế chẩn đoán hoặc tư vấn" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Đọc báo cáo nghiên cứu và nguồn trích dẫn" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
     expectProductCopy("vi");
   });
@@ -65,6 +71,7 @@ describe("LandingPage", () => {
     expect(
       screen.getAllByText("Pilot tool — every draft requires clinician review."),
     ).toHaveLength(1);
+    expect(screen.getAllByText("Sanitized sample data")).toHaveLength(2);
     expectProductCopy("en");
   });
 

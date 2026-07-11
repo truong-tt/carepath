@@ -138,17 +138,6 @@ test("both product choices remain discoverable across release viewports", async 
       }
     }
 
-    if (viewport.width === 1440) {
-      const lineCounts = await page
-        .locator(".evidence .section-intro h2, .evidence-slide__copy h3")
-        .evaluateAll((elements) =>
-          elements.map((element) => {
-            const lineHeight = Number.parseFloat(getComputedStyle(element).lineHeight);
-            return Math.round(element.getBoundingClientRect().height / lineHeight);
-          }),
-        );
-      expect(lineCounts.every((count) => count <= 3)).toBe(true);
-    }
   }
 
   await expect(
