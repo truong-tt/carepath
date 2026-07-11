@@ -7,9 +7,11 @@ type TranscriptProps = {
   language?: Language;
   turns: TranscriptTurn[];
   onFeedback?: (turnId: string, reason: string, comment: string) => Promise<void>;
+  onRepeat?: (turn: TranscriptTurn) => void;
+  onType?: (turn: TranscriptTurn) => void;
 };
 
-export function Transcript({ language = "vi", turns, onFeedback }: TranscriptProps) {
+export function Transcript({ language = "vi", turns, onFeedback, onRepeat, onType }: TranscriptProps) {
   const text = copy[language].workspace;
   const [openFeedback, setOpenFeedback] = useState<string | null>(null);
   const [reason, setReason] = useState("wrong_term");
@@ -55,6 +57,13 @@ export function Transcript({ language = "vi", turns, onFeedback }: TranscriptPro
                   ? text.blocked
                   : highlightText(turn.corrected_text || turn.translation, turn, language)}
               </p>
+              {turn.low_confidence ? (
+                <section className="low-confidence" role="alert">
+                  <p>{text.lowConfidence}</p>
+                  {onRepeat ? <button type="button" onClick={() => onRepeat(turn)}>{text.repeatTurn}</button> : null}
+                  {onType ? <button type="button" onClick={() => onType(turn)}>{text.typeTurn}</button> : null}
+                </section>
+              ) : null}
               {!blocked && turn.risk_spans.length ? (
                 <ul className="risk-list" aria-label={text.riskSpans}>
                   {turn.risk_spans.map((span, index) => (

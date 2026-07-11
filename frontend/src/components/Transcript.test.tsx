@@ -41,6 +41,18 @@ describe("Transcript", () => {
     expect(screen.queryByText("take 500 mg")).not.toBeInTheDocument();
   });
 
+  it("keeps low-confidence recovery actions on their affected turns", () => {
+    const onRepeat = vi.fn();
+    const onType = vi.fn();
+    render(<Transcript turns={[{ ...baseTurn, id: "low-1", low_confidence: true, requires_confirmation: false, status: "delivered" }, { ...baseTurn, id: "low-2", low_confidence: true, requires_confirmation: false, status: "delivered" }]} onRepeat={onRepeat} onType={onType} />);
+
+    expect(screen.getAllByRole("alert")).toHaveLength(2);
+    fireEvent.click(screen.getAllByRole("button", { name: "Nói lại" })[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Nhập văn bản" })[0]);
+    expect(onRepeat).toHaveBeenCalledWith(expect.objectContaining({ id: "low-2" }));
+    expect(onType).toHaveBeenCalledWith(expect.objectContaining({ id: "low-1" }));
+  });
+
   it("renders non-color risk cues", () => {
     render(
       <Transcript

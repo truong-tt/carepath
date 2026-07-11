@@ -125,6 +125,45 @@ describe("InterpreterConsole", () => {
     expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(JSON.stringify({ type: "end_turn" }));
   });
 
+  it("focuses the affected speaker's recovery controls without recording", () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+    act(() => FakeWebSocket.instances[0].receive({
+      type: "turn_result", low_confidence: true, requires_confirmation: false,
+      turn: { id: "low-1", session_id: "session-1", seq: 1, speaker: "patient", src_lang: "en", tgt_lang: "vi", source_text: "hello", normalized_text: "hello", translation: "xin chào", asr_confidence: 0.4, mt_confidence: 0.9, risk_tier: "low", risk_spans: [], readback: null, status: "delivered", corrected_text: null, created_at: new Date(0).toISOString() },
+    }));
+
+    expect(screen.getByRole("status")).not.toHaveTextContent("Độ tin cậy thấp");
+    fireEvent.click(screen.getByRole("button", { name: "Nhập văn bản" }));
+    expect(screen.getByRole("textbox")).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Người bệnh · English" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Nói lại" }));
+    expect(screen.getByRole("button", { name: "Nhấn giữ để nói" })).toHaveFocus();
+    expect(FakeWebSocket.instances[0].send).not.toHaveBeenCalledWith(expect.stringContaining("start_turn"));
+  });
+
+  it("keeps a failed clinician confirmation open and blocked", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) })
+      .mockResolvedValueOnce({ ok: false }));
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+    act(() => FakeWebSocket.instances[0].receive({
+      type: "turn_result", low_confidence: false, requires_confirmation: true,
+      turn: { id: "critical-1", session_id: "session-1", seq: 1, speaker: "doctor", src_lang: "vi", tgt_lang: "en", source_text: "Uống 500 mg", normalized_text: "Uống 500 mg", translation: "Take 500 mg", asr_confidence: 1, mt_confidence: 1, risk_tier: "critical", risk_spans: [], readback: null, status: "awaiting_confirm", corrected_text: null, created_at: new Date(0).toISOString() },
+    }));
+    fireEvent.click(screen.getByRole("button", { name: "Mở bản xem xét" }));
+    fireEvent.click(screen.getByRole("button", { name: "Xác nhận và phát" }));
+
+    expect(await screen.findByText("Không thể xác nhận lượt dịch.")).toBeInTheDocument();
+    expect(screen.getByText("Uống 500 mg")).toBeInTheDocument();
+    expect(screen.getAllByText("Take 500 mg")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Yêu cầu phiên dịch viên" })).toBeInTheDocument();
+  });
+
   it("renders readback entity text in the confirmation card", async () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
     vi.stubGlobal(

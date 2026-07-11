@@ -36,18 +36,28 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [providerMode, setProviderMode] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [openReview, setOpenReview] = useState<string | null>(null);
+  const [focusTarget, setFocusTarget] = useState<{ speaker: Speaker; target: "talk" | "type" } | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const turnActiveRef = useRef(false);
   const playbackSuppressedRef = useRef(false);
   const reviewRef = useRef<HTMLElement | null>(null);
+  const talkRefs = useRef<Partial<Record<Speaker, HTMLButtonElement>>>({});
+  const inputRefs = useRef<Partial<Record<Speaker, HTMLInputElement>>>({});
 
   useEffect(() => {
     if (openReview) {
       reviewRef.current?.focus();
     }
   }, [openReview]);
+
+  useEffect(() => {
+    if (focusTarget?.speaker === speaker) {
+      (focusTarget.target === "talk" ? talkRefs.current[speaker] : inputRefs.current[speaker])?.focus();
+      setFocusTarget(null);
+    }
+  }, [focusTarget, speaker]);
 
   useEffect(() => {
     void getHealth()
@@ -88,9 +98,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         setTurns((current) => [...current, nextTurn]);
         turnActiveRef.current = false;
         setInputState(data.requires_confirmation ? "review-required" : "delivered");
-        if (data.low_confidence) {
-          setWarning(textRef.current.lowConfidence);
-        } else if (data.requires_confirmation) {
+        if (data.requires_confirmation) {
           setWarning(textRef.current.confirmationRequired);
         } else {
           setWarning(null);
@@ -310,6 +318,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                   aria-pressed={inputState === "recording"}
                   aria-describedby="input-state"
                   disabled={!canSubmit || !voiceReady}
+                  ref={(element) => { talkRefs.current[key] = element ?? undefined; }}
                   onPointerDown={() => void startRecording(key)}
                   onPointerUp={stopRecording}
                   onPointerCancel={stopRecording}
@@ -328,6 +337,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                       placeholder={text.typedPlaceholder}
                       value={typedText}
                       disabled={!canSubmit}
+                      ref={(element) => { inputRefs.current[key] = element ?? undefined; }}
                       onChange={(event) => setTypedText(event.target.value)}
                     />
                   </label>
@@ -342,11 +352,6 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         <span>{inputState === "recording" ? text.recording.replace("{speaker}", speaker === "doctor" ? text.doctor : text.patient) : inputState === "processing" ? text.inputProcessing : inputState === "delivered" ? text.inputDelivered : inputState === "review-required" ? text.inputReviewRequired : inputState === "ready" ? text.inputReady : text[inputState]}</span>
         {warning ? <strong>{warning}</strong> : null}
       </div>
-      {turns.some((turn) => turn.low_confidence) ? (
-        <section className="low-confidence" role="alert">
-          {text.lowConfidence}
-        </section>
-      ) : null}
       <section className="confirmations" aria-label={text.confirmations}>
         {turns
           .filter(
@@ -404,6 +409,8 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
       <Transcript
         language={language}
         turns={turns}
+        onRepeat={(turn) => { setSpeaker(turn.speaker); setFocusTarget({ speaker: turn.speaker, target: "talk" }); }}
+        onType={(turn) => { setSpeaker(turn.speaker); setFocusTarget({ speaker: turn.speaker, target: "type" }); }}
         onFeedback={async (turnId, reason, comment) => {
           await submitFeedback(turnId, { reason, comment });
         }}
