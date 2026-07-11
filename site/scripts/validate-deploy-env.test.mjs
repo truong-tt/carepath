@@ -48,6 +48,8 @@ test("Vercel runs validation before the production build", async () => {
   );
   assert.equal(config.buildCommand, "npm run validate:deploy && npm run build");
   assert.deepEqual(config.rewrites, [
+    { source: "/ghi-chep-lam-sang", destination: "/index.html" },
+    { source: "/ghi-chep-lam-sang/", destination: "/index.html" },
     { source: "/ghi-chep-lam-sang/:path*", destination: "/index.html" },
   ]);
 });
