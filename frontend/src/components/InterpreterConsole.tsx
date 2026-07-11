@@ -160,6 +160,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   }
 
   async function handleConfirm(turn: TranscriptTurn, editedTranslation?: string) {
+    if (closed) return;
     try {
       const confirmed = await confirmTurn(turn.id, editedTranslation);
       const nextTurn = {
@@ -177,6 +178,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   }
 
   async function handleEscalate() {
+    if (closed) return;
     setEscalationLocated(true);
     playbackSuppressedRef.current = true;
     setPlaybackSuppressed(true);
@@ -217,8 +219,8 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
-      const recorder = new MediaRecorder(stream);
       streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
       recorderRef.current = recorder;
       socket.send(JSON.stringify({ type: "start_turn", speaker: nextSpeaker, lang: config.lang }));
       recorder.addEventListener("dataavailable", async (event) => {
@@ -329,7 +331,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           {providerMode === "mock" ? <p className="eyebrow">{text.mockDisclaimer}</p> : null}
           <h1>{text.title}</h1>
         </div>
-        <button className="escalate" type="button" onFocus={() => setEscalationLocated(true)} onClick={() => void handleEscalate()}>
+        <button className="escalate" disabled={closed} type="button" onFocus={() => setEscalationLocated(true)} onClick={() => void handleEscalate()}>
           {text.requestInterpreter}
         </button>
       </header>
@@ -411,7 +413,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                 <article className="confirmation confirmation-mask" key={turn.id}>
                   <p>{text.patientSafeMask}</p>
                   <button type="button" onClick={() => setOpenReview(turn.id)}>{text.openReview}</button>
-                  {turn.risk_tier === "critical" ? <button className="escalate" type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
+                  {turn.risk_tier === "critical" ? <button className="escalate" disabled={closed} type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
                 </article>
               );
             }
@@ -442,8 +444,8 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                   {editIsEmpty ? <p className="error">{text.editRequired}</p> : null}
                 </div>
                 <div className="confirmation-actions">
-                  {edited ? <button disabled={editIsEmpty} type="button" onClick={() => void handleConfirm(turn, edits[turn.id])}>{text.saveEditAndPlay}</button> : <button type="button" onClick={() => void handleConfirm(turn)}>{text.confirmAndPlay}</button>}
-                  {turn.risk_tier === "critical" ? <button className="escalate" type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
+                  {edited ? <button disabled={closed || editIsEmpty} type="button" onClick={() => void handleConfirm(turn, edits[turn.id])}>{text.saveEditAndPlay}</button> : <button disabled={closed} type="button" onClick={() => void handleConfirm(turn)}>{text.confirmAndPlay}</button>}
+                  {turn.risk_tier === "critical" ? <button className="escalate" disabled={closed} type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
                 </div>
               </article>
             );

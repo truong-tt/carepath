@@ -98,6 +98,7 @@ describe("InterpreterConsole", () => {
     await act(async () => undefined);
     expect(onComplete).toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Gửi" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Yêu cầu phiên dịch viên trực tiếp" })).toBeDisabled();
   });
 
   it("withdraws consent without submitting an active audio turn", async () => {
@@ -156,6 +157,22 @@ describe("InterpreterConsole", () => {
     expect(track.stop).toHaveBeenCalled();
     expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(JSON.stringify({ type: "start_turn", speaker: "doctor", lang: "vi" }));
     expect(FakeWebSocket.instances[0].send).toHaveBeenCalledWith(JSON.stringify({ type: "end_turn" }));
+  });
+
+  it("releases the microphone when recorder setup fails", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    const track = { stop: vi.fn() } as unknown as MediaStreamTrack;
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [track] }) } });
+    vi.stubGlobal("MediaRecorder", class { constructor() { throw new Error("unsupported"); } });
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "Nhấn giữ để nói" }), { key: " " });
+    await act(async () => undefined);
+
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(screen.getByRole("status")).toHaveTextContent("Micrô chưa được cấp quyền");
   });
 
   it("focuses the affected speaker's recovery controls without recording", () => {

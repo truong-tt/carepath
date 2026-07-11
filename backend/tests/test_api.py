@@ -1,11 +1,33 @@
 import logging
 
+import anyio
 from fastapi.testclient import TestClient
 
+from app import crud
+from app.api import websocket_session
 from app.config import Settings
 from app.main import app
 from app.providers.mock import MockASRProvider, MockMTProvider, MockReviewerProvider
 from app.providers.registry import ProviderSet
+
+
+class DisconnectOnInitialState:
+    accepted = False
+
+    async def accept(self) -> None:
+        self.accepted = True
+
+    async def send_json(self, _payload: object) -> None:
+        raise RuntimeError("client disconnected")
+
+
+def test_websocket_ignores_disconnect_before_initial_state(db_session) -> None:
+    session = crud.create_session(db_session, {"ok": True})
+    websocket = DisconnectOnInitialState()
+
+    anyio.run(websocket_session, websocket, session.id, db_session)
+
+    assert websocket.accepted is True
 
 
 def test_session_rest_and_websocket_text_turn(db_session) -> None:

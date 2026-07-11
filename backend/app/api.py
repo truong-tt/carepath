@@ -289,18 +289,18 @@ async def websocket_session(
         return
     settings = get_settings()
     providers = get_providers(settings)
-    if crud.get_session(db, session_id) is None:
-        await websocket.close(code=1008, reason="session not found")
-        return
-
-    await websocket.send_json(
-        {
-            "type": "session_state",
-            "turns": [turn_payload(turn) for turn in crud.list_turns(db, session_id)],
-        }
-    )
-
     try:
+        if crud.get_session(db, session_id) is None:
+            await websocket.close(code=1008, reason="session not found")
+            return
+
+        await websocket.send_json(
+            {
+                "type": "session_state",
+                "turns": [turn_payload(turn) for turn in crud.list_turns(db, session_id)],
+            }
+        )
+
         while True:
             message = await websocket.receive()
             if message["type"] == "websocket.disconnect":
@@ -406,7 +406,7 @@ async def websocket_session(
                 await websocket.send_json(
                     {"type": "turn_error", "message": "unknown event type", "retryable": False}
                 )
-    except WebSocketDisconnect:
+    except (RuntimeError, WebSocketDisconnect):
         pass
     finally:
         _in_flight.pop(session_id, None)
