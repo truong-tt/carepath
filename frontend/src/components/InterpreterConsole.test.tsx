@@ -40,7 +40,8 @@ describe("InterpreterConsole", () => {
         json: async () => ({ status: "ok", provider_mode: "cloud" }),
       }),
     );
-    render(<InterpreterConsole sessionId="session-1" />);
+    const { rerender } = render(<InterpreterConsole sessionId="session-1" />);
+    rerender(<InterpreterConsole language="en" sessionId="session-1" />);
 
     act(() => {
       FakeWebSocket.instances[0].receive({
@@ -79,9 +80,11 @@ describe("InterpreterConsole", () => {
       });
     });
 
-    expect(screen.getByRole("cell", { name: "Liều lượng" })).toBeInTheDocument();
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(screen.getByRole("cell", { name: "Dose" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "nửa viên" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "half a tablet" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Live medical interpretation" })).toBeInTheDocument();
+    expect(screen.getByText("Clinician confirmation is required before patient playback.")).toBeInTheDocument();
   });
 });

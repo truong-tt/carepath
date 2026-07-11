@@ -22,7 +22,7 @@ describe("ConsentGate", () => {
     expect(start).toBeDisabled();
 
     fireEvent.click(
-      screen.getByLabelText(/Tôi đã được giải thích rằng có thể yêu cầu thông dịch viên trực tiếp/),
+      screen.getByLabelText(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/),
     );
     expect(start).toBeEnabled();
 

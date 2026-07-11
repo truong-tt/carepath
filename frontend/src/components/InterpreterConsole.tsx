@@ -20,6 +20,8 @@ const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
 
 export function InterpreterConsole({ language = "vi", sessionId }: InterpreterConsoleProps) {
   const text = copy[language].workspace;
+  const textRef = useRef(text);
+  textRef.current = text;
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [speaker, setSpeaker] = useState<Speaker>("doctor");
   const [typedText, setTypedText] = useState("");
@@ -65,16 +67,16 @@ export function InterpreterConsole({ language = "vi", sessionId }: InterpreterCo
         };
         setTurns((current) => [...current, nextTurn]);
         if (data.low_confidence) {
-          setWarning(text.lowConfidence);
+          setWarning(textRef.current.lowConfidence);
         } else if (data.requires_confirmation) {
-          setWarning(text.confirmationRequired);
+          setWarning(textRef.current.confirmationRequired);
         } else {
           setWarning(null);
           speakTurn(data.turn);
         }
       }
       if (data.type === "turn_error") {
-        setWarning(text.turnError);
+        setWarning(textRef.current.turnError);
       }
     });
     return () => {

@@ -26,7 +26,7 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   expect(webSockets).toBe(0);
 
   await page.getByLabel(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/).check();
-  await page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu thông dịch viên trực tiếp/).check();
+  await page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/).check();
   await page.getByRole("button", { name: "Bắt đầu phiên dịch" }).click();
 
   await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
@@ -46,6 +46,6 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toHaveCount(0);
   await expect(page.getByText("Cao · Đã xác nhận")).toBeVisible();
 
-  await page.getByRole("button", { name: "Yêu cầu thông dịch viên trực tiếp" }).click();
-  await expect(page.getByRole("heading", { name: "Đã yêu cầu thông dịch viên trực tiếp" })).toBeVisible();
+  await page.getByRole("button", { name: "Yêu cầu phiên dịch viên trực tiếp" }).click();
+  await expect(page.getByRole("heading", { name: "Đã yêu cầu phiên dịch viên trực tiếp" })).toBeVisible();
 });
