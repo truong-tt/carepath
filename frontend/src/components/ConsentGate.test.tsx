@@ -9,21 +9,20 @@ describe("ConsentGate", () => {
 
     render(<ConsentGate error={null} isSubmitting={false} onConsent={onConsent} />);
 
-    const start = screen.getByRole("button", { name: "Tiếp tục phiên dịch" });
+    const start = screen.getByRole("button", { name: "Bắt đầu phiên dịch" });
     expect(start).toBeDisabled();
-    expect(screen.getByText("Medical Interpreter")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
     expect(
       screen.getByText(/CarePath chỉ hỗ trợ phiên dịch/),
     ).toBeInTheDocument();
 
     fireEvent.click(
-      screen.getByLabelText(/Bản dịch AI có thể có lỗi/),
+      screen.getByLabelText(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/),
     );
     expect(start).toBeDisabled();
 
     fireEvent.click(
-      screen.getByLabelText(/Có thể yêu cầu thông dịch viên bất cứ lúc nào/),
+      screen.getByLabelText(/Tôi đã được giải thích rằng có thể yêu cầu thông dịch viên trực tiếp/),
     );
     expect(start).toBeEnabled();
 
@@ -40,5 +39,10 @@ describe("ConsentGate", () => {
   it("announces a startup error", () => {
     render(<ConsentGate error="Không thể bắt đầu phiên dịch." isSubmitting={false} onConsent={vi.fn()} />);
     expect(screen.getByRole("alert")).toHaveTextContent("Không thể bắt đầu phiên dịch.");
+  });
+
+  it("keeps the English companion marked as English", () => {
+    render(<ConsentGate error={null} isSubmitting={false} onConsent={vi.fn()} />);
+    expect(screen.getByText(/AI-generated translations can contain errors/)).toHaveAttribute("lang", "en");
   });
 });

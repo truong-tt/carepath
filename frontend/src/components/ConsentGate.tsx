@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { Language } from "../copy";
+import { copy, type Language } from "../copy";
 
 export type ConsentPayload = {
   ai_disclosure: boolean;
@@ -20,29 +20,30 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
   const [aiDisclosure, setAiDisclosure] = useState(false);
   const [interpreterRight, setInterpreterRight] = useState(false);
   const canStart = aiDisclosure && interpreterRight && !isSubmitting;
+  const text = copy[language].consent;
+  const companion = copy[language === "vi" ? "en" : "vi"].consent;
 
   return (
     <main className="page" lang={language}>
       <section className="consent" aria-labelledby="consent-title">
-        <div>
-          <p className="eyebrow">Medical Interpreter</p>
-          <h1 id="consent-title">Phiên dịch khám bệnh trực tiếp</h1>
-          <p>
-            Dịch hai chiều giữa bác sĩ tiếng Việt và bệnh nhân tiếng Anh trong lúc khám.
-          </p>
+        <div lang={language}>
+          <p className="eyebrow">{text.eyebrow}</p>
+          <h1 id="consent-title">{text.heading}</h1>
+          <p>{text.description}</p>
+          <p lang={language === "vi" ? "en" : "vi"}>{companion.description}</p>
         </div>
-        <div>
-          <p className="eyebrow">Các bước sử dụng</p>
+        <div lang={language}>
+          <p className="eyebrow">{text.steps}</p>
           <ol className="consent-steps">
-            <li>Bác sĩ nói tiếng Việt</li>
-            <li>AI dịch sang tiếng Anh cho bệnh nhân</li>
-            <li>Bệnh nhân trả lời bằng tiếng Anh</li>
-            <li>AI dịch lại sang tiếng Việt cho bác sĩ</li>
+            <li>{text.doctorSpeaks}</li>
+            <li>{text.aiToPatient}</li>
+            <li>{text.patientSpeaks}</li>
+            <li>{text.aiToDoctor}</li>
           </ol>
           <p className="consent-reminder">
-            CarePath chỉ hỗ trợ phiên dịch, không đưa ra chẩn đoán hoặc tư vấn điều trị.
+            {text.limitation}
             <br />
-            <span lang="en">CarePath provides translation support only; it does not provide diagnoses or treatment advice.</span>
+            <span lang={language === "vi" ? "en" : "vi"}>{companion.limitation}</span>
           </p>
         </div>
         <form
@@ -60,25 +61,28 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
             });
           }}
         >
-          <label>
-            <input
-              checked={aiDisclosure}
-              type="checkbox"
-              onChange={(event) => setAiDisclosure(event.target.checked)}
-            />
-            Bản dịch AI có thể có lỗi. <span lang="en">AI translation may contain errors.</span>
-          </label>
-          <label>
-            <input
-              checked={interpreterRight}
-              type="checkbox"
-              onChange={(event) => setInterpreterRight(event.target.checked)}
-            />
-            Có thể yêu cầu thông dịch viên bất cứ lúc nào. <span lang="en">A human interpreter can be requested at any time.</span>
-          </label>
+          <fieldset>
+            <legend>{text.acknowledgements}</legend>
+            <label lang={language}>
+              <input
+                checked={aiDisclosure}
+                type="checkbox"
+                onChange={(event) => setAiDisclosure(event.target.checked)}
+              />
+              {text.aiDisclosure} <span lang={language === "vi" ? "en" : "vi"}>{companion.aiDisclosure}</span>
+            </label>
+            <label lang={language}>
+              <input
+                checked={interpreterRight}
+                type="checkbox"
+                onChange={(event) => setInterpreterRight(event.target.checked)}
+              />
+              {text.interpreterRight} <span lang={language === "vi" ? "en" : "vi"}>{companion.interpreterRight}</span>
+            </label>
+          </fieldset>
           {error ? <p className="error" role="alert">{error}</p> : null}
           <button disabled={!canStart} type="submit">
-            {isSubmitting ? "Đang bắt đầu…" : "Tiếp tục phiên dịch"}
+            {isSubmitting ? text.starting : error ? text.retry : text.start}
           </button>
         </form>
       </section>

@@ -156,6 +156,17 @@ button:disabled {
   padding-top: 10px;
 }
 
+.consent-actions fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.consent-actions legend {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
 .consent-steps {
   display: grid;
   gap: 10px;
@@ -171,6 +182,7 @@ button:disabled {
   line-height: 1.5;
 }
 
+.consent-actions fieldset,
 .consent-actions label,
 .typed label,
 .admin-filters label {

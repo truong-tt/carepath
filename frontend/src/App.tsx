@@ -75,7 +75,7 @@ function App() {
       const result = await createSession({ consent });
       setSessionId(result.session_id);
     } catch {
-      setError("Không thể bắt đầu phiên dịch. Vui lòng kiểm tra kết nối máy chủ.");
+      setError(copy[language].consent.startError);
     } finally {
       setStarting(false);
     }
