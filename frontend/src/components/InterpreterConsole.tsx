@@ -2,7 +2,7 @@ import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { speakTurn } from "../tts";
 import type { TranscriptTurn, WsEvent } from "../types";
-import { confirmTurn, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
+import { confirmTurn, deleteSession, endSession, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
 import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
 
@@ -12,6 +12,7 @@ type InterpreterConsoleProps = {
   language?: Language;
   sessionId: string;
   voiceReady?: boolean;
+  onComplete?: () => void;
 };
 
 type Speaker = "doctor" | "patient";
@@ -22,7 +23,7 @@ const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
   patient: { lang: "en" },
 };
 
-export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", language = "vi", sessionId, voiceReady = true }: InterpreterConsoleProps) {
+export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", language = "vi", onComplete = () => {}, sessionId, voiceReady = true }: InterpreterConsoleProps) {
   const text = copy[language].workspace;
   const textRef = useRef(text);
   textRef.current = text;
@@ -36,12 +37,15 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [providerMode, setProviderMode] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [openReview, setOpenReview] = useState<string | null>(null);
+  const [closed, setClosed] = useState(false);
+  const [lifecycleError, setLifecycleError] = useState<"end" | "delete" | null>(null);
   const [focusTarget, setFocusTarget] = useState<{ speaker: Speaker; target: "talk" | "type" } | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const turnActiveRef = useRef(false);
   const playbackSuppressedRef = useRef(false);
+  const closedRef = useRef(false);
   const reviewRef = useRef<HTMLElement | null>(null);
   const talkRefs = useRef<Partial<Record<Speaker, HTMLButtonElement>>>({});
   const inputRefs = useRef<Partial<Record<Speaker, HTMLInputElement>>>({});
@@ -82,7 +86,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
       }
     });
     socket.addEventListener("message", (event: MessageEvent<string>) => {
-      if (!isCurrentSocket()) {
+      if (!isCurrentSocket() || closedRef.current) {
         return;
       }
       const data = JSON.parse(event.data) as WsEvent;
@@ -123,6 +127,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   }, [sessionId]);
 
   function sendJson(payload: unknown) {
+    if (closedRef.current) return false;
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       setWarning(text.connectionNotReady);
@@ -219,7 +224,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         }
       });
       recorder.addEventListener("stop", () => {
-        if (socket.readyState === WebSocket.OPEN) {
+        if (!closedRef.current && socket.readyState === WebSocket.OPEN) {
           socket.send(JSON.stringify({ type: "end_turn" }));
         }
         stream.getTracks().forEach((track) => track.stop());
@@ -241,6 +246,29 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
       streamRef.current = null;
       setInputState("ready");
       setWarning(text.microphoneDenied);
+    }
+  }
+
+  function closeLocally() {
+    closedRef.current = true;
+    playbackSuppressedRef.current = true;
+    setPlaybackSuppressed(true);
+    window.speechSynthesis?.cancel();
+    stopRecording();
+    socketRef.current?.close();
+    socketRef.current = null;
+    setClosed(true);
+  }
+
+  async function finish(action: "end" | "delete") {
+    closeLocally();
+    setLifecycleError(null);
+    try {
+      if (action === "end") await endSession(sessionId);
+      else await deleteSession(sessionId);
+      onComplete();
+    } catch {
+      setLifecycleError(action);
     }
   }
 
@@ -277,7 +305,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
     }
   }
 
-  const canSubmit = !turnActiveRef.current && inputState !== "connecting" && inputState !== "disconnected";
+  const canSubmit = !closed && !turnActiveRef.current && inputState !== "connecting" && inputState !== "disconnected";
 
   return (
     <main className="workspace" lang={language}>
@@ -287,7 +315,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           <p>{text.escalationBody}</p>
         </section>
       ) : null}
-      {playbackSuppressed ? (
+      {playbackSuppressed && !closed ? (
         <section className="playback-warning" role="alert">
           <p>{text.playbackSuppressed}</p>
           <button type="button" onClick={resumePlayback}>{text.resumePlayback}</button>
@@ -302,6 +330,12 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           {text.requestInterpreter}
         </button>
       </header>
+      <section className="lifecycle-actions" aria-label={text.lifecycle}>
+        <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.endSession}</button>
+        <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.withdrawConsent}</button>
+        <button disabled={closed} type="button" onClick={() => { if (window.confirm(text.deleteConfirm)) void finish("delete"); }}>{text.deleteSession}</button>
+        {lifecycleError ? <p className="error" role="alert">{text.lifecycleFailed} <button type="button" onClick={() => void finish(lifecycleError)}>{text.retry}</button></p> : null}
+      </section>
       <section className="input-regions" aria-label={text.controls}>
         {(Object.keys(speakerConfig) as Speaker[]).map((key) => (
           <section className="input-region" key={key}>

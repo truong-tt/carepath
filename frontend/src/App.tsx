@@ -105,7 +105,7 @@ function App() {
   } else if (sessionId && !deviceCheck) {
     content = <DeviceCheck language={language} onComplete={setDeviceCheck} />;
   } else if (sessionId) {
-    content = <InterpreterConsole deviceId={deviceCheck?.deviceId} initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} sessionId={sessionId} voiceReady={deviceCheck?.voiceReady} />;
+    content = <InterpreterConsole deviceId={deviceCheck?.deviceId} initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} onComplete={() => { setSessionId(null); setDeviceCheck(null); }} sessionId={sessionId} voiceReady={deviceCheck?.voiceReady} />;
   } else if (!intent) {
     content = <IntentQuiz language={language} onComplete={setIntent} />;
   } else {

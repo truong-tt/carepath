@@ -87,6 +87,39 @@ describe("InterpreterConsole", () => {
     expect(screen.getByRole("button", { name: "Bác sĩ · Tiếng Việt" })).toHaveAttribute("aria-pressed", "false");
   });
 
+  it("stops locally and returns control after ending a session", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    const onComplete = vi.fn();
+    render(<InterpreterConsole onComplete={onComplete} sessionId="session-1" />);
+    openSocket();
+
+    fireEvent.click(screen.getByRole("button", { name: "Kết thúc phiên" }));
+    await act(async () => undefined);
+    expect(onComplete).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Gửi" })).toBeDisabled();
+  });
+
+  it("withdraws consent without submitting an active audio turn", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
+    const track = { stop: vi.fn() } as unknown as MediaStreamTrack;
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [track] }) } });
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    render(<InterpreterConsole sessionId="session-1" />);
+    openSocket();
+
+    const talk = screen.getByRole("button", { name: "Nhấn giữ để nói" });
+    fireEvent.keyDown(talk, { key: " " });
+    await act(async () => undefined);
+    fireEvent.click(screen.getByRole("button", { name: "Rút lại xác nhận" }));
+    await act(async () => undefined);
+
+    expect(track.stop).toHaveBeenCalled();
+    expect(FakeWebSocket.instances[0].send).not.toHaveBeenCalledWith(JSON.stringify({ type: "end_turn" }));
+    expect(screen.getByRole("button", { name: "Gửi" })).toBeDisabled();
+  });
+
   it("prevents overlapping starts while microphone permission is pending", () => {
     vi.stubGlobal("WebSocket", FakeWebSocket);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "ok", provider_mode: "mock" }) }));
