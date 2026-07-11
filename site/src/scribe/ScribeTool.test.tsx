@@ -17,6 +17,9 @@ function soapResponse() {
     ok: true,
     text: async () =>
       JSON.stringify({
+        raw_transcript: "dau dau tu sang nay huyet ap mot sau muoi tren chin muoi",
+        corrected_transcript: "Đau đầu từ sáng nay, huyết áp 160/90 mmHg.",
+        retrieved_terms: ["amlodipin", "tăng huyết áp"],
         soap: {
           subjective: "Đau đầu từ sáng nay.",
           objective: "- Huyết áp **160/90 mmHg**\n- Mạch 88",
@@ -84,12 +87,21 @@ describe("ScribeTool", () => {
 
     expect(await screen.findByText("Đau đầu từ sáng nay.")).toBeInTheDocument();
     expect(screen.getByText("160/90 mmHg")).toBeInTheDocument();
+    expect(screen.getByText("dau dau tu sang nay huyet ap mot sau muoi tren chin muoi")).toBeInTheDocument();
+    expect(screen.getByText("Đau đầu từ sáng nay, huyết áp 160/90 mmHg.")).toBeInTheDocument();
+    expect(screen.getByText("amlodipin")).toBeInTheDocument();
+    expect(screen.getByText("tăng huyết áp")).toBeInTheDocument();
     expect(
       screen.getByText(
         "Bản nháp do AI tạo, cần bác sĩ kiểm tra trước khi đưa vào hồ sơ bệnh án.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Tiền sử dị ứng")).toBeInTheDocument();
+    const resultText = screen.getByLabelText("Bản nháp y khoa theo bốn mục SOAP").textContent ?? "";
+    expect(resultText.indexOf("dau dau tu sang nay")).toBeLessThan(resultText.indexOf("Đau đầu từ sáng nay, huyết áp"));
+    expect(resultText.indexOf("Đau đầu từ sáng nay, huyết áp")).toBeLessThan(resultText.indexOf("amlodipin"));
+    expect(resultText.indexOf("amlodipin")).toBeLessThan(resultText.indexOf("Tiền sử dị ứng"));
+    expect(resultText.indexOf("Tiền sử dị ứng")).toBeLessThan(resultText.indexOf("Bản nháp SOAP — cần bác sĩ kiểm tra"));
 
     const [, soapCall] = fetchMock.mock.calls;
     expect(soapCall[0]).toBe("/api/v1/soap-notes");
@@ -187,6 +199,39 @@ describe("classifyFailure", () => {
     [500, "anything", "unknown"],
   ] as const)("classifies status %i as %s", (status, detail, expected) => {
     expect(classifyFailure(status, detail)).toBe(expected);
+  });
+
+  it("shows clear empty states for optional review fields", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(healthResponse)
+        .mockResolvedValueOnce({
+          ok: true,
+          text: async () => JSON.stringify({
+            raw_transcript: "",
+            corrected_transcript: "",
+            retrieved_terms: [],
+            soap: {
+              subjective: "",
+              objective: "",
+              assessment: "",
+              plan: "",
+              missing_information: [],
+            },
+          }),
+        }),
+    );
+
+    render(<ScribeTool language="vi" />);
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    selectWav();
+    fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
+
+    expect(await screen.findAllByText("Không có nội dung phiên âm để hiển thị.")).toHaveLength(6);
+    expect(screen.getByText("Không có thuật ngữ được đối chiếu.")).toBeInTheDocument();
+    expect(screen.getByText("Không có thông tin còn thiếu được ghi nhận.")).toBeInTheDocument();
   });
 });
 

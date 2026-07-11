@@ -162,6 +162,14 @@ interface PageCopy {
     errors: Record<"unsupported" | "oversize" | "rateLimit" | "asr" | "llm" | "offline" | "unknown", string>;
     retry: string;
     resultTitle: string;
+    reviewTitle: string;
+    rawTranscript: string;
+    correctedTranscript: string;
+    retrievedTerms: string;
+    emptyTranscript: string;
+    emptyTerms: string;
+    emptyMissing: string;
+    draftLabel: string;
     reviewBanner: string;
     missingTitle: string;
     processedIn: string;
@@ -459,6 +467,14 @@ export const strings: Record<Language, PageCopy> = {
       },
       retry: "Thử lại",
       resultTitle: "Bản nháp y khoa theo bốn mục SOAP",
+      reviewTitle: "Đối chiếu trước khi sử dụng",
+      rawTranscript: "Bản phiên âm tự động",
+      correctedTranscript: "Bản phiên âm sau hiệu chỉnh",
+      retrievedTerms: "Thuật ngữ đã đối chiếu",
+      emptyTranscript: "Không có nội dung phiên âm để hiển thị.",
+      emptyTerms: "Không có thuật ngữ được đối chiếu.",
+      emptyMissing: "Không có thông tin còn thiếu được ghi nhận.",
+      draftLabel: "Bản nháp SOAP — cần bác sĩ kiểm tra",
       reviewBanner: "Bản nháp do AI tạo, cần bác sĩ kiểm tra trước khi đưa vào hồ sơ bệnh án.",
       missingTitle: "Thông tin còn thiếu",
       processedIn: "Xử lý trong {seconds} giây",
@@ -849,6 +865,14 @@ export const strings: Record<Language, PageCopy> = {
       },
       retry: "Try again",
       resultTitle: "Four-part SOAP draft",
+      reviewTitle: "Review before use",
+      rawTranscript: "Automated transcript",
+      correctedTranscript: "Corrected transcript",
+      retrievedTerms: "Reviewed terms",
+      emptyTranscript: "No transcript content is available to display.",
+      emptyTerms: "No terms were reviewed.",
+      emptyMissing: "No missing information was recorded.",
+      draftLabel: "SOAP draft — clinician review required",
       reviewBanner: "AI-generated draft. A clinician must review it before it enters the medical record.",
       missingTitle: "Missing information",
       processedIn: "Processed in {seconds} s",
