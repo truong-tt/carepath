@@ -4,15 +4,15 @@ import ScribeTool from "./scribe/ScribeTool";
 import { copyFor } from "./content/strings";
 import type { Language } from "./demo/types";
 
+const CLINICAL_NOTES_PATH = "/ghi-chep-lam-sang/";
+
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem("carepath-demo-language");
     return saved === "en" ? "en" : "vi";
   });
-  // Hash route: "#/scribe" opens the Scribe tool; every other hash is a
-  // landing-page anchor (#demo, #scribe overview, #safety, ...).
-  const [route, setRoute] = useState(() => window.location.hash);
-  const wasScribeTool = useRef(route === "#/scribe");
+  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const wasScribeTool = useRef(false);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -24,12 +24,23 @@ export default function App() {
   }, [language]);
 
   useEffect(() => {
-    const onHashChange = () => setRoute(window.location.hash);
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    if (window.location.hash === "#/scribe" || pathname === "/ghi-chep-lam-sang") {
+      window.history.replaceState(null, "", CLINICAL_NOTES_PATH);
+      setPathname(CLINICAL_NOTES_PATH);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    const onNavigation = () => setPathname(window.location.pathname);
+    window.addEventListener("popstate", onNavigation);
+    window.addEventListener("hashchange", onNavigation);
+    return () => {
+      window.removeEventListener("popstate", onNavigation);
+      window.removeEventListener("hashchange", onNavigation);
+    };
   }, []);
 
-  const isScribeTool = route === "#/scribe";
+  const isScribeTool = pathname === CLINICAL_NOTES_PATH;
 
   useEffect(() => {
     if (isScribeTool) window.scrollTo(0, 0);
@@ -39,9 +50,9 @@ export default function App() {
     let frame: number | undefined;
     if (wasScribeTool.current && !isScribeTool) {
       frame = window.requestAnimationFrame(() => {
-        const anchor = document.getElementById(route.slice(1) || "top") ??
+        const anchor = document.getElementById(window.location.hash.slice(1) || "top") ??
           document.getElementById("top");
-        anchor?.scrollIntoView();
+        anchor?.scrollIntoView?.();
         anchor?.focus({ preventScroll: true });
       });
     }
@@ -49,10 +60,10 @@ export default function App() {
     return () => {
       if (frame !== undefined) window.cancelAnimationFrame(frame);
     };
-  }, [isScribeTool, route]);
+  }, [isScribeTool]);
 
   return isScribeTool ? (
-    <ScribeTool language={language} onLanguageChange={setLanguage} />
+    <ScribeTool backHref="/" language={language} onLanguageChange={setLanguage} />
   ) : (
     <LandingPage language={language} onLanguageChange={setLanguage} />
   );

@@ -26,7 +26,7 @@ export default function LandingPage({
   const specialty = "Nội tổng quát";
   const scenario = scenarios[0];
   const interpreterHref = import.meta.env.VITE_CONSOLE_URL || "/console/";
-  const scribeHref = "#/scribe";
+  const scribeHref = "/ghi-chep-lam-sang/";
 
   const navLinks = (
     <>

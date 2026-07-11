@@ -27,7 +27,7 @@ from fastapi.testclient import TestClient
 
 import app.config as interpreter_config
 import app.db as interpreter_db
-from carepath.main import app, get_pipeline, get_settings
+from carepath.main import SITE_DIST_DIR, app, get_pipeline, get_settings
 
 
 class CombinedAppTests(unittest.TestCase):
@@ -61,6 +61,14 @@ class CombinedAppTests(unittest.TestCase):
                 snapshot = websocket.receive_json()
                 self.assertEqual(snapshot["type"], "session_state")
                 self.assertEqual(snapshot["turns"], [])
+
+    @unittest.skipUnless(SITE_DIST_DIR.is_dir(), "site build is not available")
+    def test_clinical_notes_route_serves_the_site_entrypoint(self) -> None:
+        with TestClient(app) as client:
+            response = client.get("/ghi-chep-lam-sang/")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIn('id="root"', response.text)
 
 
 if __name__ == "__main__":

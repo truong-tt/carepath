@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from sqlmodel import Session as InterpreterDBSession
@@ -351,6 +351,10 @@ if CONSOLE_DIST_DIR.is_dir():
 else:
     logger.warning("console dist missing at %s; /console not served", CONSOLE_DIST_DIR)
 if SITE_DIST_DIR.is_dir():
+    @app.get("/ghi-chep-lam-sang/", include_in_schema=False)
+    def clinical_notes_page() -> FileResponse:
+        return FileResponse(SITE_DIST_DIR / "index.html")
+
     app.mount("/", StaticFiles(directory=SITE_DIST_DIR, html=True), name="site")
 else:
     logger.warning("site dist missing at %s; / not served", SITE_DIST_DIR)

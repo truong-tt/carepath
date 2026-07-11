@@ -100,11 +100,13 @@ function formatBytes(size: number): string {
 }
 
 interface ScribeToolProps {
+  backHref?: string;
   language: Language;
   onLanguageChange?: (language: Language) => void;
 }
 
 export default function ScribeTool({
+  backHref = "#top",
   language,
   onLanguageChange,
 }: ScribeToolProps) {
@@ -244,7 +246,7 @@ export default function ScribeTool({
   return (
     <div className="site-shell">
       <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
-        <a className="site-nav__brand" href="#top" aria-label={labels.back}>
+        <a className="site-nav__brand" href={backHref} aria-label={labels.back}>
           <img src={logoUrl} alt="" />
           <span className="product-breadcrumb">
             <strong>CarePath</strong>
@@ -274,7 +276,7 @@ export default function ScribeTool({
               {copy.language.en}
             </button>
           </div>
-          <a className="nav-cta" href="#top">{labels.back}</a>
+          <a className="nav-cta" href={backHref}>{labels.back}</a>
         </div>
       </nav>
 

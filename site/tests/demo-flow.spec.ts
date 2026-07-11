@@ -145,7 +145,7 @@ test("both product choices remain discoverable across release viewports", async 
   ).toHaveAttribute("href", "https://carepath-e2e.example/console/");
   await expect(
     page.locator(".product-accordion__panel--scribe"),
-  ).toHaveAttribute("href", "#/scribe");
+  ).toHaveAttribute("href", "/ghi-chep-lam-sang/");
 
   await page.getByRole("combobox", { name: "Chức năng quan tâm" }).selectOption("scribe");
   await expect(
@@ -157,20 +157,22 @@ test("both product choices remain discoverable across release viewports", async 
   ).toHaveValue("interpreter");
 });
 
-test("returning from Scribe restores focus to the landing page", async ({ page }) => {
+test("clinical notes use the canonical path and return to the landing page", async ({ page }) => {
   let healthRequested = false;
   await page.route("https://carepath-e2e.example/api/v1/health", async (route) => {
     healthRequested = true;
     await route.fulfill({ status: 200, json: { asr_ready: true, llm_ready: true } });
   });
-  await page.goto("/#/scribe");
+  await page.goto("/ghi-chep-lam-sang/");
   await expect(page.getByText("Hệ thống sẵn sàng")).toBeVisible();
   expect(healthRequested).toBe(true);
   await expectNoSeriousAxeViolations(page);
   await page.locator(".nav-cta").click();
 
-  await expect(page).toHaveURL(/#top$/);
-  await expect(page.locator("main#top")).toBeFocused();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.getByRole("heading", { name: "Bạn muốn hỗ trợ việc gì hôm nay?" }),
+  ).toBeVisible();
 });
 
 test.describe("touch navigation", () => {

@@ -5,6 +5,7 @@ import App from "./App";
 describe("language preference", () => {
   beforeEach(() => {
     localStorage.clear();
+    window.history.replaceState(null, "", "/");
     document.documentElement.lang = "vi";
     document.title = "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp";
   });
@@ -63,7 +64,7 @@ describe("language preference", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("routes #/scribe to the Scribe tool page", async () => {
+  it("replaces the legacy #/scribe route with the canonical clinical-note path", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -84,8 +85,33 @@ describe("language preference", () => {
         name: "Ghi chép bệnh án AI — bản nháp",
       }),
     ).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/ghi-chep-lam-sang/");
+    expect(window.location.hash).toBe("");
 
-    window.location.hash = "";
+    vi.unstubAllGlobals();
+  });
+
+  it("follows browser navigation between the landing page and clinical notes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ asr_ready: true, llm_ready: true }),
+      }),
+    );
+    window.history.replaceState(null, "", "/ghi-chep-lam-sang/");
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
+    ).toBeInTheDocument();
+
+    window.history.pushState(null, "", "/");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+
+    expect(
+      await screen.findByRole("heading", { name: "Bạn muốn hỗ trợ việc gì hôm nay?" }),
+    ).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 });
