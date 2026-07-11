@@ -9,7 +9,7 @@ describe("App", () => {
 
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeInTheDocument();
+    expect(screen.getByText("Hôm nay bạn là ai?")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Hold to talk/ })).not.toBeInTheDocument();
   });
 

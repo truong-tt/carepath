@@ -7,6 +7,7 @@ import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
 
 type InterpreterConsoleProps = {
+  initialSpeaker?: Speaker;
   language?: Language;
   sessionId: string;
 };
@@ -18,12 +19,12 @@ const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
   patient: { lang: "en" },
 };
 
-export function InterpreterConsole({ language = "vi", sessionId }: InterpreterConsoleProps) {
+export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi", sessionId }: InterpreterConsoleProps) {
   const text = copy[language].workspace;
   const textRef = useRef(text);
   textRef.current = text;
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
-  const [speaker, setSpeaker] = useState<Speaker>("doctor");
+  const [speaker, setSpeaker] = useState<Speaker>(initialSpeaker);
   const [typedText, setTypedText] = useState("");
   const [status, setStatus] = useState("connecting");
   const [warning, setWarning] = useState<string | null>(null);

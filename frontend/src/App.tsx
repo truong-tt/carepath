@@ -6,6 +6,7 @@ import { createSession } from "./api";
 import { AdminReview } from "./components/AdminReview";
 import { ConsentGate, type ConsentPayload } from "./components/ConsentGate";
 import { InterpreterConsole } from "./components/InterpreterConsole";
+import { IntentQuiz, type Intent } from "./components/IntentQuiz";
 import { copy, initialLanguage, persistLanguage, type Language } from "./copy";
 
 function ProductShell({ language, setLanguage }: { language: Language; setLanguage: (language: Language) => void }) {
@@ -61,6 +62,7 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const [intent, setIntent] = useState<Intent | null>(null);
 
   useEffect(() => {
     persistLanguage(language);
@@ -85,7 +87,9 @@ function App() {
   if (window.location.pathname === "/admin") {
     content = <AdminReview language={language} />;
   } else if (sessionId) {
-    content = <InterpreterConsole language={language} sessionId={sessionId} />;
+    content = <InterpreterConsole initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} sessionId={sessionId} />;
+  } else if (!intent) {
+    content = <IntentQuiz language={language} onComplete={setIntent} />;
   } else {
     content = <ConsentGate error={error} isSubmitting={starting} language={language} onConsent={handleConsent} />;
   }

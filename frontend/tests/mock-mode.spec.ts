@@ -16,6 +16,10 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("button", { name: /Nhấn giữ để nói/ })).toHaveCount(0);
+  await expect(page.getByText("Hôm nay bạn là ai?")).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await expect(page.getByText("Bạn cần dịch theo chiều nào?")).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
   await page.getByRole("button", { name: "Xem mô phỏng" }).click();
   await expect(page.getByText("Bản dịch được chuyển")).toBeVisible();
   await page.getByRole("button", { name: "Xem tình huống tiếp theo" }).click();

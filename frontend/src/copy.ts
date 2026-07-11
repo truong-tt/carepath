@@ -105,6 +105,16 @@ export const copy = {
       blockedSource: "Uống 500 mg mỗi ngày.",
       blockedTranslation: "Take 500 mg every day.",
     },
+    intent: {
+      roleQuestion: "Hôm nay bạn là ai?",
+      doctor: "Bác sĩ",
+      clinicStaff: "Nhân viên phòng khám",
+      directionQuestion: "Bạn cần dịch theo chiều nào?",
+      viToEn: "Tiếng Việt → Tiếng Anh",
+      enToVi: "Tiếng Anh → Tiếng Việt",
+      continue: "Tiếp tục",
+      skip: "Bỏ qua và dùng lựa chọn đề xuất",
+    },
   },
   en: {
     title: "CarePath | Medical Interpreter",
@@ -207,6 +217,16 @@ export const copy = {
       lowTranslation: "Tôi uống một viên... hay nửa viên?",
       blockedSource: "Take 500 mg every day.",
       blockedTranslation: "Uống 500 mg mỗi ngày.",
+    },
+    intent: {
+      roleQuestion: "Who are you today?",
+      doctor: "Clinician",
+      clinicStaff: "Clinic staff",
+      directionQuestion: "Which direction do you need?",
+      viToEn: "Vietnamese → English",
+      enToVi: "English → Vietnamese",
+      continue: "Continue",
+      skip: "Skip and use recommended choices",
     },
   },
 } as const;
