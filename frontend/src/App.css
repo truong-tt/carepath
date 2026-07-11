@@ -163,6 +163,18 @@ button:disabled {
   margin: 0 auto;
 }
 
+.device-check {
+  display: grid;
+  gap: 14px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.device-check label {
+  display: grid;
+  gap: 6px;
+}
+
 .intent-quiz fieldset {
   display: grid;
   gap: 12px;

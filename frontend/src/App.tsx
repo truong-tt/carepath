@@ -5,6 +5,7 @@ import logoUrl from "./assets/carepath.svg";
 import { createSession } from "./api";
 import { AdminReview } from "./components/AdminReview";
 import { ConsentGate, type ConsentPayload } from "./components/ConsentGate";
+import { DeviceCheck, type DeviceCheckResult } from "./components/DeviceCheck";
 import { InterpreterConsole } from "./components/InterpreterConsole";
 import { IntentQuiz, type Intent } from "./components/IntentQuiz";
 import { copy, initialLanguage, persistLanguage, type Language } from "./copy";
@@ -70,6 +71,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [intent, setIntent] = useState<Intent | null>(null);
+  const [deviceCheck, setDeviceCheck] = useState<DeviceCheckResult | null>(null);
   const [hash, setHash] = useState(() => window.location.hash);
 
   useEffect(() => {
@@ -100,8 +102,10 @@ function App() {
   let content;
   if (hash === "#/kiem-duyet") {
     content = <AdminReview language={language} />;
+  } else if (sessionId && !deviceCheck) {
+    content = <DeviceCheck language={language} onComplete={setDeviceCheck} />;
   } else if (sessionId) {
-    content = <InterpreterConsole initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} sessionId={sessionId} />;
+    content = <InterpreterConsole deviceId={deviceCheck?.deviceId} initialSpeaker={intent?.direction === "en-vi" ? "patient" : "doctor"} language={language} sessionId={sessionId} voiceReady={deviceCheck?.voiceReady} />;
   } else if (!intent) {
     content = <IntentQuiz language={language} onComplete={setIntent} />;
   } else {

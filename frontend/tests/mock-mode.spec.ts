@@ -3,6 +3,15 @@ import { expect, test } from "@playwright/test";
 test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   let clinicalRequests = 0;
   let webSockets = 0;
+  await page.addInitScript(() => {
+    let microphoneRequests = 0;
+    const getUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+    Object.defineProperty(window, "carepathMicrophoneRequests", { get: () => microphoneRequests });
+    navigator.mediaDevices.getUserMedia = async (...args) => {
+      microphoneRequests += 1;
+      return getUserMedia(...args);
+    };
+  });
   page.on("request", (request) => {
     if (request.url().includes("/api/")) {
       clinicalRequests += 1;
@@ -28,10 +37,13 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận", { exact: true })).toBeVisible();
   expect(clinicalRequests).toBe(0);
   expect(webSockets).toBe(0);
+  expect(await page.evaluate(() => (window as Window & { carepathMicrophoneRequests: number }).carepathMicrophoneRequests)).toBe(0);
 
   await page.getByLabel(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/).check();
   await page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/).check();
   await page.getByRole("button", { name: "Bắt đầu phiên dịch" }).click();
+  await expect(page.getByRole("heading", { name: "Kiểm tra micrô trước khi bắt đầu" })).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục bằng văn bản" }).click();
 
   await expect(page.getByRole("heading", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
   await expect(page.getByRole("status")).toContainText("Sẵn sàng");

@@ -7,9 +7,11 @@ import { copy, type Language } from "../copy";
 import { Transcript } from "./Transcript";
 
 type InterpreterConsoleProps = {
+  deviceId?: string;
   initialSpeaker?: Speaker;
   language?: Language;
   sessionId: string;
+  voiceReady?: boolean;
 };
 
 type Speaker = "doctor" | "patient";
@@ -20,7 +22,7 @@ const speakerConfig: Record<Speaker, { lang: "vi" | "en" }> = {
   patient: { lang: "en" },
 };
 
-export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi", sessionId }: InterpreterConsoleProps) {
+export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", language = "vi", sessionId, voiceReady = true }: InterpreterConsoleProps) {
   const text = copy[language].workspace;
   const textRef = useRef(text);
   textRef.current = text;
@@ -163,6 +165,10 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
       return;
     }
     const config = speakerConfig[nextSpeaker];
+    if (!voiceReady) {
+      setWarning(text.microphoneUnavailable);
+      return;
+    }
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       setWarning(text.connectionNotReadyType);
@@ -176,7 +182,7 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
     turnActiveRef.current = true;
     setInputState("recording");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: deviceId ? { deviceId: { exact: deviceId } } : true });
       if (!turnActiveRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         return;
@@ -278,7 +284,7 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
                   type="button"
                   aria-pressed={inputState === "recording"}
                   aria-describedby="input-state"
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || !voiceReady}
                   onPointerDown={() => void startRecording(key)}
                   onPointerUp={stopRecording}
                   onPointerCancel={stopRecording}
