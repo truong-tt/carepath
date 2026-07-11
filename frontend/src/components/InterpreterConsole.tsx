@@ -34,10 +34,18 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   const [escalated, setEscalated] = useState(false);
   const [providerMode, setProviderMode] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
+  const [openReview, setOpenReview] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const turnActiveRef = useRef(false);
+  const reviewRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (openReview) {
+      reviewRef.current?.focus();
+    }
+  }, [openReview]);
 
   useEffect(() => {
     void getHealth()
@@ -143,6 +151,7 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         requires_confirmation: false,
       };
       setTurns((current) => current.map((item) => (item.id === turn.id ? nextTurn : item)));
+      setOpenReview(null);
       setWarning(null);
       speakTurn(confirmed);
     } catch {
@@ -330,69 +339,51 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
               turn.status === "awaiting_confirm" ||
               turn.status === "blocked",
           )
-          .map((turn) => (
-            <article className="confirmation" key={turn.id}>
-              <div>
-                <p className="meta">
-                  {text.confirmationRequiredLabel} · {riskText(text, turn.risk_tier)}
-                  {turn.risk_tier === "critical" ? ` · ${text.interpreterRecommended}` : ""}
-                </p>
-                <p lang={turn.src_lang}>{turn.source_text}</p>
-                <p lang={turn.tgt_lang}>{turn.translation}</p>
-                {turn.readback ? (
-                  <div className="readback">
-                    <p>
-                      <strong>{text.readback}:</strong> <span lang={turn.src_lang}>{turn.readback.back_translation}</span>
-                    </p>
-                    {turn.readback.entities.length ? (
+          .map((turn) => {
+            const edited = edits[turn.id] !== undefined && edits[turn.id] !== turn.translation;
+            const editIsEmpty = edited && !edits[turn.id].trim();
+            if (openReview !== turn.id) {
+              return (
+                <article className="confirmation confirmation-mask" key={turn.id}>
+                  <p>{text.patientSafeMask}</p>
+                  <button type="button" onClick={() => setOpenReview(turn.id)}>{text.openReview}</button>
+                  {turn.risk_tier === "critical" ? <button className="escalate" type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
+                </article>
+              );
+            }
+            return (
+              <article className="confirmation" key={turn.id} ref={reviewRef} tabIndex={-1} aria-label={`${text.confirmations} ${turn.seq}`}>
+                <p className="sr-only" role="status">{text.reviewOpened}</p>
+                <div>
+                  <p className="meta">{text.confirmationRequiredLabel} · {riskText(text, turn.risk_tier)}</p>
+                  <p><strong>{text.speaker}:</strong> {turn.speaker === "doctor" ? text.doctor : text.patient}</p>
+                  <p><strong>{text.sourceLanguage}:</strong> {turn.src_lang === "vi" ? text.vietnamese : text.english}</p>
+                  <p><strong>{text.source}:</strong> <span lang={turn.src_lang}>{turn.source_text}</span></p>
+                  <p><strong>{text.draftTranslation}:</strong> <span lang={turn.tgt_lang}>{turn.translation}</span></p>
+                  <p><strong>{text.riskReason}:</strong> {riskText(text, turn.risk_tier)}</p>
+                  {turn.risk_spans.length ? <ul className="risk-list" aria-label={text.criticalEntities}>{turn.risk_spans.map((span, index) => <li className={`risk-badge ${span.severity}`} key={`${span.kind}-${index}`}>{riskText(text, span.severity)}: {riskKindText(text, span.kind)}</li>)}</ul> : null}
+                  {turn.readback?.entities.length ? (
+                    <div className="readback">
+                      <p><strong>{text.criticalEntities}:</strong></p>
                       <table>
-                        <thead>
-                          <tr>
-                            <th>{text.entity}</th>
-                            <th>{text.source}</th>
-                            <th>{text.translation}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {turn.readback.entities.map((entity, index) => (
-                            <tr key={`${entity.kind}-${index}`}>
-                              <td>{riskKindText(text, entity.kind)}</td>
-                              <td lang={turn.src_lang}>{entity.source_text}</td>
-                              <td lang={turn.tgt_lang}>{entity.translated_text}</td>
-                            </tr>
-                          ))}
-                        </tbody>
+                        <thead><tr><th>{text.entity}</th><th>{text.source}</th><th>{text.translation}</th></tr></thead>
+                        <tbody>{turn.readback.entities.map((entity, index) => <tr key={`${entity.kind}-${index}`}><td>{riskKindText(text, entity.kind)}</td><td lang={turn.src_lang}>{entity.source_text}</td><td lang={turn.tgt_lang}>{entity.translated_text}</td></tr>)}</tbody>
                       </table>
-                    ) : null}
-                    {turn.readback.flags.length ? <p>{text.flags}: {text.riskKind.other}</p> : null}
-                  </div>
-                ) : null}
-                <label className="edit-translation">
-                  {text.editTranslation}
-                  <textarea
-                    value={edits[turn.id] ?? turn.translation}
-                    onChange={(event) =>
-                      setEdits((current) => ({ ...current, [turn.id]: event.target.value }))
-                    }
-                  />
-                </label>
-              </div>
-              <div className="confirmation-actions">
-                <button type="button" onClick={() => void handleConfirm(turn)}>
-                  {text.confirm}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleConfirm(turn, edits[turn.id] ?? turn.translation)}
-                >
-                  {text.saveEdit}
-                </button>
-                <button className="escalate" type="button" onClick={() => void handleEscalate()}>
-                  {text.escalate}
-                </button>
-              </div>
-            </article>
-          ))}
+                    </div>
+                  ) : null}
+                  <label className="edit-translation">
+                    {text.editTranslation}
+                    <textarea value={edits[turn.id] ?? turn.translation} onChange={(event) => setEdits((current) => ({ ...current, [turn.id]: event.target.value }))} />
+                  </label>
+                  {editIsEmpty ? <p className="error">{text.editRequired}</p> : null}
+                </div>
+                <div className="confirmation-actions">
+                  {edited ? <button disabled={editIsEmpty} type="button" onClick={() => void handleConfirm(turn, edits[turn.id])}>{text.saveEditAndPlay}</button> : <button type="button" onClick={() => void handleConfirm(turn)}>{text.confirmAndPlay}</button>}
+                  {turn.risk_tier === "critical" ? <button className="escalate" type="button" onClick={() => void handleEscalate()}>{text.escalate}</button> : null}
+                </div>
+              </article>
+            );
+          })}
       </section>
       <Transcript
         language={language}

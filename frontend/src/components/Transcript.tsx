@@ -42,7 +42,7 @@ export function Transcript({ language = "vi", turns, onFeedback }: TranscriptPro
               <p className="meta">
                 {turn.seq}. {turn.speaker === "doctor" ? text.doctor : text.patient} · {turn.src_lang === "vi" ? text.vietnamese : text.english} → {turn.tgt_lang === "vi" ? text.vietnamese : text.english}
               </p>
-              <p lang={turn.src_lang}>{highlightText(turn.source_text, turn, language)}</p>
+              <p lang={blocked ? language : turn.src_lang}>{blocked ? text.patientSafeMask : highlightText(turn.source_text, turn, language)}</p>
             </div>
             <div>
               <p className="meta">
@@ -55,7 +55,7 @@ export function Transcript({ language = "vi", turns, onFeedback }: TranscriptPro
                   ? text.blocked
                   : highlightText(turn.corrected_text || turn.translation, turn, language)}
               </p>
-              {turn.risk_spans.length ? (
+              {!blocked && turn.risk_spans.length ? (
                 <ul className="risk-list" aria-label={text.riskSpans}>
                   {turn.risk_spans.map((span, index) => (
                     <li className={`risk-badge ${span.severity}`} key={`${span.kind}-${index}`}>

@@ -58,6 +58,7 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await doctorRegion.getByRole("button", { name: "Gửi" }).click();
 
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toBeVisible();
+  await page.getByRole("button", { name: "Mở bản xem xét" }).click();
   await expect(page.getByText("Cao: Liều lượng").first()).toBeVisible();
   await page.getByRole("button", { name: "Xác nhận" }).click();
   await expect(page.getByText("Đã chặn, chờ bác sĩ xác nhận.")).toHaveCount(0);

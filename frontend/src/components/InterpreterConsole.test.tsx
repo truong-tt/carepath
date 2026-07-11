@@ -175,10 +175,18 @@ describe("InterpreterConsole", () => {
     });
 
     expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(screen.queryByText("Take half a tablet")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Open review" }));
+    expect(screen.getByLabelText("Clinician confirmation 1")).toHaveFocus();
     expect(screen.getByRole("cell", { name: "Dose" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "nửa viên" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "half a tablet" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Live medical interpretation" })).toBeInTheDocument();
     expect(screen.getByText("Clinician confirmation is required before patient playback.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Confirm and play" })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Edit translation"), { target: { value: "" } });
+    expect(screen.getByRole("button", { name: "Save edit and play" })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Edit translation"), { target: { value: "Take one half" } });
+    expect(screen.getByRole("button", { name: "Save edit and play" })).toBeEnabled();
   });
 });
