@@ -200,39 +200,41 @@ export function InterpreterConsole({ initialSpeaker = "doctor", language = "vi",
           {text.requestInterpreter}
         </button>
       </header>
-      <section className="controls" aria-label={text.controls}>
+      <section className="input-regions" aria-label={text.controls}>
         {(Object.keys(speakerConfig) as Speaker[]).map((key) => (
-          <button
-            className="talk"
-            key={key}
-            type="button"
-            onPointerDown={() => void startRecording(key)}
-            onPointerUp={stopRecording}
-            onPointerCancel={stopRecording}
-          >
-            {text.holdToTalk}
-            <span>{key === "doctor" ? `${text.doctor} · ${text.vietnamese}` : `${text.patient} · ${text.english}`}</span>
-          </button>
+          <section className="input-region" key={key}>
+            <h2>
+              <button className="region-select" type="button" aria-pressed={speaker === key} onClick={() => setSpeaker(key)}>
+                {key === "doctor" ? `${text.doctor} · ${text.vietnamese}` : `${language === "vi" ? "Người bệnh" : text.patient} · English`}
+              </button>
+            </h2>
+            {speaker === key ? (
+              <>
+                <button
+                  className="talk"
+                  type="button"
+                  onPointerDown={() => void startRecording(key)}
+                  onPointerUp={stopRecording}
+                  onPointerCancel={stopRecording}
+                >
+                  {text.holdToTalk}
+                </button>
+                <form className="typed" onSubmit={submitTyped}>
+                  <label>
+                    {text.typedFallback}
+                    <input
+                      placeholder={text.typedPlaceholder}
+                      value={typedText}
+                      onChange={(event) => setTypedText(event.target.value)}
+                    />
+                  </label>
+                  <button type="submit">{text.send}</button>
+                </form>
+              </>
+            ) : null}
+          </section>
         ))}
       </section>
-      <form className="typed" onSubmit={submitTyped}>
-        <label>
-          {text.speaker}
-          <select value={speaker} onChange={(event) => setSpeaker(event.target.value as Speaker)}>
-            <option value="doctor">{text.doctor} · {text.vietnamese}</option>
-            <option value="patient">{text.patient} · {text.english}</option>
-          </select>
-        </label>
-        <label>
-          {text.typedFallback}
-          <input
-            placeholder={text.typedPlaceholder}
-            value={typedText}
-            onChange={(event) => setTypedText(event.target.value)}
-          />
-        </label>
-        <button type="submit">{text.send}</button>
-      </form>
       <div className="status" role="status">
         <span>{status.startsWith("recording:") ? text.recording.replace("{speaker}", status.endsWith("doctor") ? text.doctor : text.patient) : text[status as "connecting" | "connected" | "disconnected"]}</span>
         {warning ? <strong>{warning}</strong> : null}

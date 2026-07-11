@@ -286,7 +286,7 @@ p {
 }
 
 .topbar,
-.controls,
+.input-regions,
 .typed,
 .status,
 .confirmations,
@@ -308,10 +308,38 @@ p {
   color: #1d2733;
 }
 
-.controls {
+.input-regions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.input-region {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #d7dfe8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.input-region h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.region-select {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.region-select[aria-pressed="true"] {
+  color: #0f766e;
 }
 
 .talk {
@@ -322,13 +350,8 @@ p {
   font-size: 1.1rem;
 }
 
-.talk span {
-  font-size: 0.92rem;
-  opacity: 0.75;
-}
-
 .typed {
-  grid-template-columns: 180px 1fr 120px;
+  grid-template-columns: 1fr auto;
   align-items: end;
 }
 
@@ -535,7 +558,7 @@ td {
   }
 
   .consent,
-  .controls,
+  .input-regions,
   .typed,
   .admin-filters,
   .confirmation,
