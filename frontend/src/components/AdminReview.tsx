@@ -1,6 +1,7 @@
 import { FormEvent, MouseEvent, useState } from "react";
 
 import { API_BASE_URL } from "../api";
+import type { Language } from "../copy";
 
 type Feedback = {
   reason: string;
@@ -53,7 +54,7 @@ function reviewUrl(filters: Filters, format = "json") {
   return `${API_BASE_URL}/api/admin/review?${params.toString()}`;
 }
 
-export function AdminReview() {
+export function AdminReview({ language = "vi" }: { language?: Language }) {
   const [token, setToken] = useState("");
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [rows, setRows] = useState<ReviewRow[]>([]);
@@ -105,7 +106,7 @@ export function AdminReview() {
   }
 
   return (
-    <main className="workspace admin-review">
+    <main className="workspace admin-review" lang={language}>
       <header className="topbar">
         <div>
           <p className="eyebrow">Admin review</p>

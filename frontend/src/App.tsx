@@ -6,37 +6,14 @@ import { createSession } from "./api";
 import { AdminReview } from "./components/AdminReview";
 import { ConsentGate, type ConsentPayload } from "./components/ConsentGate";
 import { InterpreterConsole } from "./components/InterpreterConsole";
+import { copy, initialLanguage, persistLanguage, type Language } from "./copy";
 
-type Language = "vi" | "en";
-
-const shellCopy = {
-  vi: {
-    breadcrumb: "Đường dẫn sản phẩm",
-    status: "Bản mô phỏng tương tác",
-    allProducts: "Tất cả chức năng",
-    language: "Ngôn ngữ thanh sản phẩm",
-  },
-  en: {
-    breadcrumb: "Product breadcrumb",
-    status: "Interactive mock simulation",
-    allProducts: "All products",
-    language: "Product bar language",
-  },
-} as const;
-
-function ProductShell() {
-  const [language, setLanguage] = useState<Language>(() =>
-    localStorage.getItem("carepath-demo-language") === "en" ? "en" : "vi",
-  );
-  const copy = shellCopy[language];
-
-  useEffect(() => {
-    localStorage.setItem("carepath-demo-language", language);
-  }, [language]);
+function ProductShell({ language, setLanguage }: { language: Language; setLanguage: (language: Language) => void }) {
+  const text = copy[language];
 
   return (
     <header className="product-shell" lang={language}>
-      <nav className="product-breadcrumb" aria-label={copy.breadcrumb}>
+      <nav className="product-breadcrumb" aria-label={text.breadcrumb}>
         <ol>
           <li>
             <a className="product-brand" href="/" aria-label="CarePath">
@@ -46,19 +23,19 @@ function ProductShell() {
           </li>
           <li aria-hidden="true">/</li>
           <li aria-current="page">
-            {language === "vi" ? "Phiên dịch khám bệnh trực tiếp" : "Medical Interpreter"}
+            {text.productName}
           </li>
         </ol>
       </nav>
       <p className="product-status">
         <span aria-hidden="true" />
-        {copy.status}
+        {text.status}
       </p>
       <div className="product-shell__actions">
         <a className="all-products" href="/">
-          {copy.allProducts}
+          {text.allProducts}
         </a>
-        <div className="language-toggle" role="group" aria-label={copy.language}>
+        <div className="language-toggle" role="group" aria-label={text.language}>
           <button
             aria-pressed={language === "vi"}
             type="button"
@@ -80,9 +57,16 @@ function ProductShell() {
 }
 
 function App() {
+  const [language, setLanguage] = useState<Language>(initialLanguage);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+
+  useEffect(() => {
+    persistLanguage(language);
+    document.documentElement.lang = language;
+    document.title = copy[language].title;
+  }, [language]);
 
   async function handleConsent(consent: ConsentPayload) {
     setStarting(true);
@@ -99,16 +83,16 @@ function App() {
 
   let content;
   if (window.location.pathname === "/admin") {
-    content = <AdminReview />;
+    content = <AdminReview language={language} />;
   } else if (sessionId) {
-    content = <InterpreterConsole sessionId={sessionId} />;
+    content = <InterpreterConsole language={language} sessionId={sessionId} />;
   } else {
-    content = <ConsentGate error={error} isSubmitting={starting} onConsent={handleConsent} />;
+    content = <ConsentGate error={error} isSubmitting={starting} language={language} onConsent={handleConsent} />;
   }
 
   return (
-    <div className="product-app">
-      <ProductShell />
+    <div className="product-app" lang={language}>
+      <ProductShell language={language} setLanguage={setLanguage} />
       {content}
     </div>
   );

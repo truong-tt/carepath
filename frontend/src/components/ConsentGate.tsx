@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import type { Language } from "../copy";
+
 export type ConsentPayload = {
   ai_disclosure: boolean;
   interpreter_right: boolean;
@@ -10,25 +12,26 @@ export type ConsentPayload = {
 type ConsentGateProps = {
   error: string | null;
   isSubmitting: boolean;
+  language?: Language;
   onConsent: (payload: ConsentPayload) => void;
 };
 
-export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps) {
+export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }: ConsentGateProps) {
   const [aiDisclosure, setAiDisclosure] = useState(false);
   const [interpreterRight, setInterpreterRight] = useState(false);
   const canStart = aiDisclosure && interpreterRight && !isSubmitting;
 
   return (
-    <main className="page">
+    <main className="page" lang={language}>
       <section className="consent" aria-labelledby="consent-title">
-        <div lang="vi">
+        <div>
           <p className="eyebrow">Medical Interpreter</p>
           <h1 id="consent-title">Phiên dịch khám bệnh trực tiếp</h1>
           <p>
             Dịch hai chiều giữa bác sĩ tiếng Việt và bệnh nhân tiếng Anh trong lúc khám.
           </p>
         </div>
-        <div lang="vi">
+        <div>
           <p className="eyebrow">Các bước sử dụng</p>
           <ol className="consent-steps">
             <li>Bác sĩ nói tiếng Việt</li>
@@ -44,7 +47,6 @@ export function ConsentGate({ error, isSubmitting, onConsent }: ConsentGateProps
         </div>
         <form
           className="consent-actions"
-          lang="vi"
           onSubmit={(event) => {
             event.preventDefault();
             if (!canStart) {

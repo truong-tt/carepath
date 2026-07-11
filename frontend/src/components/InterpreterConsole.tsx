@@ -3,9 +3,11 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { speakTurn } from "../tts";
 import type { TranscriptTurn, WsEvent } from "../types";
 import { confirmTurn, escalateSession, getHealth, submitFeedback, websocketUrl } from "../api";
+import type { Language } from "../copy";
 import { Transcript } from "./Transcript";
 
 type InterpreterConsoleProps = {
+  language?: Language;
   sessionId: string;
 };
 
@@ -16,7 +18,7 @@ const speakerConfig: Record<Speaker, { label: string; lang: "vi" | "en" }> = {
   patient: { label: "Patient English", lang: "en" },
 };
 
-export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
+export function InterpreterConsole({ language = "vi", sessionId }: InterpreterConsoleProps) {
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [speaker, setSpeaker] = useState<Speaker>("doctor");
   const [typedText, setTypedText] = useState("");
@@ -178,7 +180,7 @@ export function InterpreterConsole({ sessionId }: InterpreterConsoleProps) {
   }
 
   return (
-    <main className="workspace">
+    <main className="workspace" lang={language}>
       {escalated ? (
         <section className="escalation-card" role="alert" aria-live="assertive">
           <h1>Human interpreter requested</h1>

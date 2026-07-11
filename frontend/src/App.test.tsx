@@ -27,6 +27,24 @@ describe("App", () => {
     expect(screen.getByText("Interactive mock simulation")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All products" })).toBeInTheDocument();
     expect(document.querySelector(".product-shell")).toHaveAttribute("lang", "en");
+    expect(document.documentElement).toHaveAttribute("lang", "en");
+    expect(document.title).toBe("CarePath | Medical Interpreter");
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
+  });
+
+  it("uses a valid language query once and defaults invalid values to Vietnamese", () => {
+    window.history.replaceState({}, "", "?lang=en");
+    localStorage.setItem("carepath-demo-language", "vi");
+    const { unmount } = render(<App />);
+
+    expect(document.documentElement).toHaveAttribute("lang", "en");
+    expect(localStorage.getItem("carepath-demo-language")).toBe("en");
+    unmount();
+
+    window.history.replaceState({}, "", "?lang=invalid");
+    render(<App />);
+    expect(document.documentElement).toHaveAttribute("lang", "vi");
+
+    window.history.replaceState({}, "", "/");
   });
 });
