@@ -1,4 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function startTypedConsole(page: Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByRole("button", { name: "Tiếp tục" }).click();
+  await page.getByLabel(/Tôi đã được giải thích rằng bản dịch do AI tạo ra có thể có lỗi/).check();
+  await page.getByLabel(/Tôi đã được giải thích rằng có thể yêu cầu phiên dịch viên trực tiếp/).check();
+  await page.getByRole("button", { name: "Bắt đầu phiên dịch" }).click();
+  await page.getByRole("button", { name: "Tiếp tục bằng văn bản" }).click();
+  return page.locator(".input-region").filter({ has: page.getByRole("heading", { name: "Bác sĩ · Tiếng Việt" }) });
+}
 
 test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   let clinicalRequests = 0;
@@ -80,4 +91,54 @@ test("consent gates the mock-mode typed interpreter loop", async ({ page }) => {
   await page.getByRole("button", { name: "Mở bản xem xét" }).click();
   await page.getByRole("button", { name: "Xác nhận và phát" }).click();
   expect(await page.evaluate(() => (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls)).toBe(speechCalls);
+});
+
+test("keeps playback fail-closed after a failed escalation until the clinician resumes", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "carepathSpeechCalls", { value: 0, writable: true });
+    Object.defineProperty(window, "carepathSpeechCancels", { value: 0, writable: true });
+    Object.defineProperty(window, "speechSynthesis", {
+      value: {
+        cancel() { (window as Window & { carepathSpeechCancels: number }).carepathSpeechCancels += 1; },
+        speak() { (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls += 1; },
+      },
+    });
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { value: class { lang = ""; constructor(text: string) { void text; } } });
+  });
+  await page.route("**/api/sessions/*/escalate", (route) => route.fulfill({ status: 500 }));
+  const doctorRegion = await startTypedConsole(page);
+  const speechCalls = () => page.evaluate(() => (window as Window & { carepathSpeechCalls: number }).carepathSpeechCalls);
+
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("xin chao truoc khi leo thang");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await expect(page.getByText("[vi->en] xin chao truoc khi leo thang", { exact: true })).toBeVisible();
+  const beforeEscalation = await speechCalls();
+  const beforeEscalationCancels = await page.evaluate(() => (window as Window & { carepathSpeechCancels: number }).carepathSpeechCancels);
+
+  await page.getByRole("button", { name: "Yêu cầu phiên dịch viên trực tiếp" }).click();
+  expect(await page.evaluate(() => (window as Window & { carepathSpeechCancels: number }).carepathSpeechCancels)).toBe(beforeEscalationCancels + 1);
+  await expect(page.getByText("Không thể đánh dấu đã yêu cầu phiên dịch viên.")).toBeVisible();
+
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("xin chao sau that bai");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await expect(page.getByText("[vi->en] xin chao sau that bai", { exact: true })).toBeVisible();
+  expect(await speechCalls()).toBe(beforeEscalation);
+
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("uong 500 mg sau that bai");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await page.getByRole("button", { name: "Mở bản xem xét" }).click();
+  await page.getByRole("button", { name: "Xác nhận và phát" }).click();
+  expect(await speechCalls()).toBe(beforeEscalation);
+
+  await page.getByRole("button", { name: "Tiếp tục phát tự động trên thiết bị này" }).click();
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("xin chao sau tiep tuc");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await expect(page.getByText("[vi->en] xin chao sau tiep tuc", { exact: true })).toBeVisible();
+  expect(await speechCalls()).toBe(beforeEscalation + 1);
+
+  await doctorRegion.getByLabel("Nhập văn bản thay thế").fill("uong 500 mg sau tiep tuc");
+  await doctorRegion.getByRole("button", { name: "Gửi" }).click();
+  await page.getByRole("button", { name: "Mở bản xem xét" }).click();
+  await page.getByRole("button", { name: "Xác nhận và phát" }).click();
+  await expect.poll(speechCalls).toBe(beforeEscalation + 2);
 });
