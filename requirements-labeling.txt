@@ -1,4 +1,0 @@
-# Local data-labeling tools. Use Python 3.12 for this environment.
-# These versions were verified on Windows in this repo.
-faster-whisper==1.2.1
-label-studio==1.23.0

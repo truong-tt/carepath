@@ -151,22 +151,8 @@ from carepath.gec.data import read_jsonl
 from carepath.gec.evaluate import train_error_signal
 print(train_error_signal(read_jsonl(pairs_out)))
 """),
-    (3, "labeled_pairs", False, INSTALL, """\
-# Stage 03: Supplementary real pairs from the Label Studio export  `[CPU]`
-The clinician-corrected export is already a real `raw_asr -> gold_text` pair
-(Whisper draft + human edit). Ingest it as supplementary real data (ViMedCSS stays
-primary). Skipped automatically until the labeling workflow has produced rows.""", """\
-from pathlib import Path
-export = 'data/labeling/training_transcripts.jsonl'
-if Path(export).exists():
-    CTX.run_step(['scripts/gec/make_labeled_pairs.py', '--input', export,
-                  '--output', CTX.durable(P.labeled_pairs), '--datastore', str(P.datastore),
-                  '--retrieval-backend', PROF.retrieval_backend, '--resume'])  # durable: survives a disconnect
-else:
-    print('No labeling export yet — see docs/vietnamese_labeling_guide.md. Skipping.')
-"""),
-    (4, "synth_transcripts", True, INSTALL, """\
-# Stage 04: Synthetic in-domain transcripts  `[GPU-light]`
+    (3, "synth_transcripts", True, INSTALL, """\
+# Stage 03: Synthetic in-domain transcripts  `[GPU-light]`
 Paper §4.1 Step 1 — few-shot an open LLM for new in-domain transcripts, with the
 n-gram leakage guard rejecting near-copies. `synth_count=None` (full) matches the
 real train size (nsyn = n).""", """\
@@ -181,8 +167,8 @@ if PROF.name != 'smoke':
     args.append('--load-in-4bit')
 CTX.run_step(args)
 """),
-    (5, "voice_clone_tts", True, INSTALL_TTS, """\
-# Stage 05: Voice-cloning TTS  `[GPU]`
+    (4, "voice_clone_tts", True, INSTALL_TTS, """\
+# Stage 04: Voice-cloning TTS  `[GPU]`
 Paper §4.1 Step 2 / App. D — synthesize speech with viXTTS conditioned on random
 in-domain reference clips (falls back to single-speaker MMS, labeled as such).""", """\
 args = ['scripts/gec/voice_clone_tts.py', '--input', CTX.durable(P.synth_clean),
@@ -192,8 +178,8 @@ if PROF.synth_tts_limit:
     args += ['--limit', str(PROF.synth_tts_limit)]
 CTX.run_step(args)
 """),
-    (6, "synth_pairs", True, INSTALL, """\
-# Stage 06: Synthetic GEC pairs (+ N-best)  `[CPU/GPU]`
+    (5, "synth_pairs", True, INSTALL, """\
+# Stage 05: Synthetic GEC pairs (+ N-best)  `[CPU/GPU]`
 Paper §4.1 Step 3 — run the ASR over the voice-cloned audio to get synthetic
 `raw_asr -> gold_text` pairs, with the same perturbation N-best as the real pairs.""", """\
 CTX.run_step(['scripts/gec/make_synth_pairs.py', '--input', CTX.durable(P.tts_manifest),
@@ -201,8 +187,8 @@ CTX.run_step(['scripts/gec/make_synth_pairs.py', '--input', CTX.durable(P.tts_ma
               '--n-best', str(PROF.n_best), '--resume'],  # durable: survive a disconnect, no re-ASR
              env_extra={'GIPFORMER_PROVIDER': os.environ.get('GIPFORMER_PROVIDER', 'cuda')})
 """),
-    (7, "leakage_report", True, INSTALL, """\
-# Stage 07: Leakage report — in-domain but not memorized  `[GPU-light]`
+    (6, "leakage_report", True, INSTALL, """\
+# Stage 06: Leakage report — in-domain but not memorized  `[GPU-light]`
 Paper App. C / Table 6 — SentenceBERT cosine + BLEU of synthetic vs real. High
 cosine + low BLEU means the synthetic data is on-domain without copying.""", """\
 CTX.run_step(['scripts/gec/check_leakage.py', '--synthetic', CTX.durable(P.synth_clean),
@@ -210,24 +196,23 @@ CTX.run_step(['scripts/gec/check_leakage.py', '--synthetic', CTX.durable(P.synth
 import json
 print(json.load(open(P.leakage, encoding='utf-8')))
 """),
-    (8, "augment_and_train", True, INSTALL, """\
-# Stage 08: Augment + QLoRA fine-tune (multi-seed)  `[GPU]`
-Paper §5 — merge real (ViMedCSS + labeled) with synthetic (nsyn = n), then train
+    (7, "augment_and_train", True, INSTALL, """\
+# Stage 07: Augment + QLoRA fine-tune (multi-seed)  `[GPU]`
+Paper §5 — merge real ViMedCSS pairs with synthetic (nsyn = n), then train
 the DARAG variants over the profile's seeds (full averages 3). Auto-resumes from
 checkpoints.""", """\
-from pathlib import Path
 # Continue-in-a-teammate's-Colab: pull this stage's inputs from Drive first.
 CTX.restore([str(P.datastore), str(P.real_pairs)])
-CTX.restore_optional([str(P.synth_pairs), str(P.labeled_pairs)])
+CTX.restore_optional([str(P.synth_pairs)])
 # Learn real ASR confusions into the datastore (paper Limitation #1), then refresh
 # every pair's retrieved NEs so the RAC prompt carries the right term.
-harvest = [str(P.real_pairs)] + ([str(P.labeled_pairs)] if Path(P.labeled_pairs).exists() else [])
+harvest = [str(P.real_pairs)]
 if Path(P.synth_pairs).exists():
     harvest.append(str(P.synth_pairs))
 CTX.run_step(['scripts/gec/harvest_aliases.py', '--datastore', str(P.datastore),
               '--pairs', *harvest, '--refresh', '--backend', PROF.retrieval_backend])
 CTX.save([str(P.datastore)])  # enriched datastore feeds eval + the serve bundle
-real = [str(P.real_pairs)] + ([str(P.labeled_pairs)] if Path(P.labeled_pairs).exists() else [])
+real = [str(P.real_pairs)]
 CTX.run_step(['scripts/gec/augment.py', '--real', *real, '--synthetic', str(P.synth_pairs),
               '--output', str(P.augmented), '--nsyn-factor', str(PROF.nsyn_factor)])
 CTX.save([str(P.augmented)])  # persist training data to Drive so a teammate can resume
@@ -238,8 +223,8 @@ if not PROF.all_variants:
     train.append('full')
 CTX.run_step(train)
 """),
-    (9, "predict", True, INSTALL, """\
-# Stage 09: LLM/RAG baseline + trained predictions  `[GPU]`
+    (8, "predict", True, INSTALL, """\
+# Stage 08: LLM/RAG baseline + trained predictions  `[GPU]`
 Run the LLM/RAG baseline and the trained `full` adapter so one file carries every
 column the tables compare (`raw_asr`, `corrected_text`, `gec_pred`).""", """\
 import os
@@ -254,8 +239,8 @@ CTX.run_step(['scripts/gec/predict.py', '--pairs', str(P.llm_rag), '--adapter-di
               '--output', str(P.darag_preds), '--column', 'gec_pred'])
 CTX.save([str(P.darag_preds)])  # hand predictions to the CPU evaluate/export notebook
 """),
-    (10, "evaluate_and_gate", False, INSTALL, """\
-# Stage 10: WER + NE-F1 tables + acceptance gate  `[CPU]`
+    (9, "evaluate_and_gate", False, INSTALL, """\
+# Stage 09: WER + NE-F1 tables + acceptance gate  `[CPU]`
 Paper Tables 3 & 4 — WER (syllable + word) and NE micro-F1, then the gate: ship the
 adapter only if it matches/beats every baseline on val + hard. For `full`, repeat
 predict/evaluate per seed and pass the reports to `evaluate.aggregate_reports` for
@@ -270,13 +255,13 @@ from carepath.gec.evaluate import render_ne_f1_table
 print(render_ne_f1_table(json.load(open(P.darag_ne_f1, encoding='utf-8'))))
 CTX.save([str(P.darag_wer), str(P.darag_ne_f1), str(P.leakage)])
 """),
-    (11, "export_and_serve", False, INSTALL, """\
-# Stage 11: Export the gated adapter into a serve bundle  `[CPU]`
+    (10, "export_and_serve", False, INSTALL, """\
+# Stage 10: Export the gated adapter into a serve bundle  `[CPU]`
 Package the accepted `full` adapter + the enriched datastore + the frozen DARAG
 prompt into a portable `serve_manifest.json` bundle. The FastAPI backend serves it
 with `LLM_PROVIDER=gec_local` `GEC_BUNDLE_PATH=<bundle>` — RAC retrieval and a
 clinical safety gate (fallback to offline) are wired in `carepath.services.gec_local`.
-Run this only after Stage 10's gate accepts the adapter.""", """\
+Run this only after Stage 09's gate accepts the adapter.""", """\
 from pathlib import Path
 CTX.restore([str(P.datastore)])
 adir = str(P.adapters)
@@ -293,34 +278,33 @@ print('Serve with: LLM_PROVIDER=gec_local GEC_BUNDLE_PATH=' + str(P.serve_bundle
 ]
 
 
-# Group the 12 thin stages into 4 notebooks by RUNTIME tier — one notebook runs
+# Group the 11 thin stages into 4 notebooks by RUNTIME tier — one notebook runs
 # on one Colab runtime, so cheap text work stays on free CPU runtimes and every
 # bulk decode/training step gets a GPU (the full-profile ASR decode is ~6x ~150h
 # of audio: weeks on 2 vCPUs, hours with the CUDA provider on an L4). Resume is
 # preserved by each step's --resume / restore / save, not by notebook boundaries,
 # so a disconnect re-enters the notebook and skips finished steps.
 GROUPS = [
-    (0, "data_prep", INSTALL, [0, 1, 3], """\
+    (0, "data_prep", INSTALL, [0, 1], """\
 # CarePath DARAG — 00 Data prep  `[CPU runtime]`
-Setup + NE datastore + supplementary labeled pairs (former stages 00, 01, 03).
-Text-only — minutes on a free Colab CPU runtime. The bulk ASR decode that used to
-live here moved to notebook 01's GPU. Each step resumes, so re-running after a
+Setup + NE datastore. Text-only — minutes on a free Colab CPU runtime. The bulk
+ASR decode lives in notebook 01's GPU. Each step resumes, so re-running after a
 disconnect skips finished work."""),
-    (1, "asr_synthesis", INSTALL_GPU_ASR, [2, 4, 5, 6, 7], """\
+    (1, "asr_synthesis", INSTALL_GPU_ASR, [2, 3, 4, 5, 6], """\
 # 01 ASR pairs + synthesis  `[GPU — L4 is enough]`
 Real ASR pairs first (the pipeline's bulk decode: 6 decodes per clip with N-best,
 CUDA sherpa-onnx), then synthetic transcripts → voice-cloned TTS → synthetic pairs
-→ leakage report (former stages 02, 04–07). Long poles: pair decode + viXTTS, both
+→ leakage report. Long poles: pair decode + viXTTS, both
 resume per item."""),
-    (2, "train_predict", INSTALL, [8, 9], """\
+    (2, "train_predict", INSTALL, [7, 8], """\
 # 02 Train + predict  `[GPU — A100 advised]`
 Harvest real ASR confusions, augment, QLoRA fine-tune the DARAG variants
-(multi-seed), then run predictions (former stages 08–09). Training auto-resumes
+(multi-seed), then run predictions. Training auto-resumes
 from the latest checkpoint."""),
-    (3, "evaluate_export", INSTALL, [10, 11], """\
+    (3, "evaluate_export", INSTALL, [9, 10], """\
 # 03 Evaluate + export  `[CPU runtime]`
 WER + NE-F1 tables, acceptance gate, then bundle the gated adapter for serving
-(former stages 10–11). CPU — run on a free runtime."""),
+CPU — run on a free runtime."""),
 ]
 
 
@@ -357,7 +341,7 @@ def build() -> None:
         }
         path = NOTEBOOKS_DIR / f"{gnum:02d}_{gslug}.ipynb"
         path.write_text(json.dumps(notebook, ensure_ascii=False, indent=1), encoding="utf-8")
-        print(f"wrote {path.name}  (former stages {stage_nums})")
+        print(f"wrote {path.name}  (stages {stage_nums})")
 
 
 if __name__ == "__main__":

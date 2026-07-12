@@ -1,5 +1,5 @@
 [project]
-name = "carepath-interpreter-backend"
+name = "carepath-backend"
 version = "0.1.0"
 description = "Backend for the CarePath Interpreter MVP"
 requires-python = ">=3.12"
