@@ -60,7 +60,7 @@ describe("ScribeTool", () => {
       screen.getByText("Công cụ thí điểm · Cần bác sĩ duyệt"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
+      screen.getByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { copy, type Language } from "../copy";
 import { DemoPreview } from "./DemoPreview";
-import { OnboardingStepper } from "./OnboardingStepper";
+import { OnboardingFrame } from "./OnboardingFrame";
 
 export type ConsentPayload = {
   ai_disclosure: boolean;
@@ -22,27 +22,30 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
   const [aiDisclosure, setAiDisclosure] = useState(false);
   const [interpreterRight, setInterpreterRight] = useState(false);
   const [consentSubmitted, setConsentSubmitted] = useState(false);
-  const canStart = aiDisclosure && interpreterRight && !isSubmitting;
+  const bothChecked = aiDisclosure && interpreterRight;
+  const canStart = bothChecked && !isSubmitting;
   const text = copy[language].consent;
-  const companion = copy[language === "vi" ? "en" : "vi"].consent;
+  const otherLang = language === "vi" ? "en" : "vi";
+  const companion = copy[otherLang].consent;
 
   return (
-    <main className="page" lang={language}>
+    <OnboardingFrame
+      consentSubmitted={consentSubmitted}
+      kicker={text.eyebrow}
+      language={language}
+      title={text.heading}
+      titleId="consent-title"
+    >
       <section className="consent" aria-labelledby="consent-title">
-        <div lang={language}>
-          <p className="eyebrow">{text.eyebrow}</p>
-          <h1 id="consent-title">{text.heading}</h1>
+        <div className="consent-intro" lang={language}>
           <p>{text.description}</p>
-          <p lang={language === "vi" ? "en" : "vi"}>{companion.description}</p>
+          <p lang={otherLang}>{companion.description}</p>
         </div>
-        <div lang={language}>
-          <OnboardingStepper consentSubmitted={consentSubmitted} language={language} />
-          <p className="consent-reminder">
-            {text.limitation}
-            <br />
-            <span lang={language === "vi" ? "en" : "vi"}>{companion.limitation}</span>
-          </p>
-        </div>
+        <p className="consent-reminder">
+          {text.limitation}
+          <br />
+          <span lang={otherLang}>{companion.limitation}</span>
+        </p>
         <DemoPreview language={language} />
         <form
           className="consent-actions"
@@ -70,7 +73,7 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
               />
               <span className="consent-choice-copy">
                 {text.aiDisclosure}
-                <span lang={language === "vi" ? "en" : "vi"}>{companion.aiDisclosure}</span>
+                <span lang={otherLang}>{companion.aiDisclosure}</span>
               </span>
             </label>
             <label lang={language}>
@@ -81,16 +84,22 @@ export function ConsentGate({ error, isSubmitting, language = "vi", onConsent }:
               />
               <span className="consent-choice-copy">
                 {text.interpreterRight}
-                <span lang={language === "vi" ? "en" : "vi"}>{companion.interpreterRight}</span>
+                <span lang={otherLang}>{companion.interpreterRight}</span>
               </span>
             </label>
           </fieldset>
           {error ? <p className="error" role="alert">{error}</p> : null}
-          <button disabled={!canStart} type="submit">
-            {isSubmitting ? text.starting : error ? text.retry : text.start}
-          </button>
+          <div className="consent-start">
+            <button className="primary" disabled={!canStart} type="submit">
+              {isSubmitting ? text.starting : error ? text.retry : text.start}
+            </button>
+            <p className={`consent-start__hint${bothChecked ? " consent-start__hint--ready" : ""}`} lang={language}>
+              {bothChecked ? text.startReadyHint : text.startHint}
+              <span lang={otherLang}>{bothChecked ? companion.startReadyHint : companion.startHint}</span>
+            </p>
+          </div>
         </form>
       </section>
-    </main>
+    </OnboardingFrame>
   );
 }

@@ -316,6 +316,9 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
   }
 
   const canSubmit = !closed && !turnActiveRef.current && inputState !== "connecting" && inputState !== "disconnected";
+  const recording = inputState === "recording";
+  const talkDisabled = (!canSubmit && !recording) || !voiceReady;
+  const pttState = recording ? "recording" : inputState === "processing" ? "processing" : talkDisabled ? "disabled" : "ready";
 
   return (
     <main className="workspace" lang={language}>
@@ -340,18 +343,18 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
           {text.requestInterpreter}
         </button>
       </header>
-      <SessionChecklist
-        language={language}
-        delivered={turns.some((turn) => turn.status === "delivered")}
-        confirmed={turns.some((turn) => turn.status === "confirmed" || turn.status === "corrected")}
-        escalationLocated={escalationLocated}
-      />
       <section className="lifecycle-actions" aria-label={text.lifecycle}>
         <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.endSession}</button>
         <button disabled={closed} type="button" onClick={() => void finish("end")}>{text.withdrawConsent}</button>
         <button disabled={closed} type="button" onClick={() => { if (window.confirm(text.deleteConfirm)) void finish("delete"); }}>{text.deleteSession}</button>
         {lifecycleError ? <p className="error" role="alert">{text.lifecycleFailed} <button type="button" onClick={() => void finish(lifecycleError)}>{text.retry}</button></p> : null}
       </section>
+      <SessionChecklist
+        language={language}
+        delivered={turns.some((turn) => turn.status === "delivered")}
+        confirmed={turns.some((turn) => turn.status === "confirmed" || turn.status === "corrected")}
+        escalationLocated={escalationLocated}
+      />
       <section className="input-regions" aria-label={text.controls}>
         {(Object.keys(speakerConfig) as Speaker[]).map((key) => (
           <section className="input-region" key={key}>
@@ -363,11 +366,11 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
             {speaker === key ? (
               <>
                 <button
-                  className="talk"
+                  className={`talk talk--${pttState}`}
                   type="button"
-                  aria-pressed={inputState === "recording"}
+                  aria-pressed={recording}
                   aria-describedby="input-state"
-                  disabled={(!canSubmit && inputState !== "recording") || !voiceReady}
+                  disabled={talkDisabled}
                   ref={(element) => { talkRefs.current[key] = element ?? undefined; }}
                   onPointerDown={() => void startRecording(key)}
                   onPointerUp={stopRecording}
@@ -378,7 +381,10 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                   onKeyDown={(event) => handlePttKeyDown(event, key)}
                   onKeyUp={handlePttKeyUp}
                 >
-                  {text.holdToTalk}
+                  <span className="talk__icon" aria-hidden="true">
+                    {pttState === "processing" ? <span className="talk__spinner" /> : <MicGlyph />}
+                  </span>
+                  <span className="talk__label">{text.holdToTalk}</span>
                 </button>
                 <form className="typed" onSubmit={submitTyped}>
                   <label>
@@ -394,7 +400,9 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
                   <button disabled={!canSubmit} type="submit">{text.send}</button>
                 </form>
               </>
-            ) : null}
+            ) : (
+              <p className="empty region-empty">{text.regionInactiveHint}</p>
+            )}
           </section>
         ))}
       </section>
@@ -487,6 +495,15 @@ export function InterpreterConsole({ deviceId, initialSpeaker = "doctor", langua
         }}
       />
     </main>
+  );
+}
+
+function MicGlyph() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" focusable="false">
+      <rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

@@ -82,7 +82,7 @@ describe("language preference", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Ghi chép bệnh án AI — bản nháp",
+        name: "Ghi chép bệnh án AI — bản nháp",
       }),
     ).toBeInTheDocument();
     expect(window.location.pathname).toBe("/ghi-chep-lam-sang/");
@@ -103,7 +103,7 @@ describe("language preference", () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
+      await screen.findByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
     ).toBeInTheDocument();
 
     window.history.pushState(null, "", "/");

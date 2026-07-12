@@ -434,7 +434,7 @@ export const strings: Record<Language, PageCopy> = {
       note: "Trong bản mô phỏng này, mọi mục đều truy nguyên từ dữ liệu mẫu; khi sử dụng công cụ, bác sĩ vẫn phải đối chiếu bản nháp với hội thoại.",
     },
     scribeTool: {
-      title: "Ghi chép bệnh án AI — bản nháp",
+      title: "Ghi chép bệnh án AI — bản nháp",
       helper: "Tạo bản nháp y khoa",
       intro: "AI dùng phiên âm tự động để tạo bản nháp y khoa theo bốn mục SOAP; bác sĩ cần kiểm tra trước khi sử dụng.",
       preStartSteps: [
