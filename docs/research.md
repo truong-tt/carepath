@@ -1,4 +1,4 @@
-> Source: https://claude.ai/public/artifacts/3af319d8-e860-4c8c-aa6a-3954395f0bcd (saved 2026-07-08). This is the research basis for PLAN.md — read that first.
+> Source: https://claude.ai/public/artifacts/3af319d8-e860-4c8c-aa6a-3954395f0bcd (saved 2026-07-08). This is the research basis for `history/PLAN.md`; read current product and safety instructions first, then consult the archived plan for MVP context.
 
 # Vietnamese ↔ English Live Clinical Translator — MVP Research & Planning Report
 

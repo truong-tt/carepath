@@ -20,8 +20,8 @@ Frontends, all served by the same API in production:
   at build time.
 - `frontend/` — the interpreter app, served at `/phien-dich-y-khoa/`.
 
-One FastAPI process serves both APIs and both frontends. `MERGE-PLAN.md`
-records how the two products were unified; `JUDGE.md` is the review protocol.
+One FastAPI process serves both APIs and both frontends. The executed
+unification plan and its review protocol are archived in `docs/history/`.
 
 ## Quickstart (keyless demo profile)
 
@@ -60,6 +60,29 @@ cd frontend; npm test; npx playwright test
 cd site; npm test; npm run build; npm run e2e
 ```
 
+## Development Harness
+
+CarePath uses Repository Harness to keep agent work reviewable and its proof
+durable. Before a task, read `AGENTS.md`, `docs/HARNESS.md`, and
+`docs/FEATURE_INTAKE.md`, then inspect the current proof matrix:
+
+```powershell
+.\scripts\bin\harness-cli.exe query matrix
+```
+
+The local Harness database is intentionally ignored by Git. Initialize it once
+per clone, classify the task, and record a trace after validation:
+
+```powershell
+.\scripts\bin\harness-cli.exe init
+.\scripts\bin\harness-cli.exe intake --type "Change request" --summary "<work>" --lane normal
+.\scripts\bin\harness-cli.exe trace --summary "<work>" --outcome completed
+```
+
+`docs/product/` is the current CarePath contract, `docs/stories/` holds
+story-sized work, and `docs/decisions/` records durable tradeoffs. The
+historical plans remain context, not the default source of truth.
+
 ## Real providers
 
 - Scriber ASR: Gipformer ONNX downloads on first use (`ASR_PROVIDER=gipformer`,
@@ -81,5 +104,5 @@ One Hugging Face Space (Docker) serves everything: see `docs/deploy.md`.
 - `site/`, `frontend/` — the two Vite frontends
 - `eval/` — interpreter eval harness; `tests/` — scriber + combined-app tests
 - `scripts/gec`, `notebooks/` — GEC training pipeline; `docs/` — background + deploy
-- `PLAN.md`, `DEMO-SITE-PLAN.md` — historical build plans; `MERGE-PLAN.md` — the
-  executed unification plan; `JUDGE.md` — its review protocol
+- `docs/README.md` — task-first documentation map; `docs/history/` — preserved
+  build plans and unification review history

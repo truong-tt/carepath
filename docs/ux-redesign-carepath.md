@@ -1210,4 +1210,4 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 - Adding a routing, state-management, or localization dependency
 - Reworking authentication beyond making the existing token-gated review page reachable
 - Rebranding runtime assets from the generated CarePath Translate brand board
-- Rewriting historical plans such as PLAN.md, DEMO-SITE-PLAN.md, or MERGE-PLAN.md
+- Rewriting historical plans in `docs/history/`

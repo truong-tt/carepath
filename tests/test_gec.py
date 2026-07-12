@@ -8,9 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps" / "api"))
 
 from carepath.gec import config
 from carepath.gec.data import (
-    LABELED_SOURCE,
     augment_training_pairs,
-    build_labeled_pairs,
     select_variant_rows,
     validate_gec_pair,
     validate_synthetic_transcript,
@@ -291,27 +289,6 @@ class NbestTests(unittest.TestCase):
             self.assertEqual(calls, [5])  # all perturbations in one batched decode
             self.assertEqual(hyps[0], "best")
             self.assertEqual(len(hyps), 5)
-
-
-class LabeledPairsTests(unittest.TestCase):
-    def test_maps_filters_and_counts_as_real(self) -> None:
-        rows = [
-            {"audio_file": "bn001.wav", "raw_asr": "benh nhan do spo2",
-             "gold_text": "bệnh nhân đo SpO2", "quality": "OK", "source": "label_studio"},
-            {"audio_file": "bn002.wav", "raw_asr": "x", "gold_text": "y",
-             "quality": "Bỏ qua", "source": "label_studio"},  # dropped
-        ]
-        pairs = list(build_labeled_pairs(rows, _StubRetriever()))
-        self.assertEqual(len(pairs), 1)
-        pair = pairs[0]
-        self.assertEqual(pair["source_kind"], LABELED_SOURCE)
-        self.assertEqual(pair["split"], "train")
-        self.assertIn("SpO2", pair["gold_terms"])  # mined from gold transcript
-        self.assertTrue(validate_gec_pair(pair).ok)
-        # wo_aug must keep labeled rows (they are real supervision).
-        mixed = [pair, _pair("train", "darag_synthetic_tts", audio_id="s1")]
-        wo_aug, _ = select_variant_rows(mixed, "wo_aug")
-        self.assertEqual([r["source_kind"] for r in wo_aug], [LABELED_SOURCE])
 
 
 class WordWerTests(unittest.TestCase):

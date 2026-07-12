@@ -6,7 +6,7 @@
     # real ViMedCSS run on a GPU box:
     python scripts/gec/run_pipeline.py --profile full --stage all
 
-Stages: ``data`` (datastore + real pairs + labeled pairs), ``synth`` (synthetic
+Stages: ``data`` (datastore + real pairs), ``synth`` (synthetic
 transcripts + TTS + synthetic pairs + leakage), ``train`` (augment + QLoRA), and
 ``eval`` (LLM/RAG baseline + predict + tables + gate). Each stage is independently
 runnable and resumable; ``all`` runs them in order. Paths and run-sizes come from
@@ -33,9 +33,6 @@ from carepath.gec.profiles import get_profile  # noqa: E402
 
 STAGES = ("all", "data", "synth", "train", "eval")
 LEXICON = "data/medical_lexicon.json"
-LABELING_EXPORT = "data/labeling/training_transcripts.jsonl"
-
-
 def run(args: list) -> None:
     run_env = dict(os.environ)
     run_env["PYTHONPATH"] = "apps/api"
@@ -55,14 +52,6 @@ def stage_data(p: ArtifactPaths, prof, dataset: str) -> None:
          "--asr-provider", prof.asr_provider, "--datastore", str(p.datastore),
          "--retrieval-backend", prof.retrieval_backend, "--limit-per-split", limit,
          "--n-best", str(prof.n_best), "--resume"])
-    if Path(LABELING_EXPORT).exists():
-        run(["scripts/gec/make_labeled_pairs.py", "--input", LABELING_EXPORT,
-             "--output", str(p.labeled_pairs), "--datastore", str(p.datastore),
-             "--retrieval-backend", prof.retrieval_backend, "--resume"])
-    else:
-        print(f"(no {LABELING_EXPORT} — skipping supplementary labeled pairs)")
-
-
 def stage_synth(p: ArtifactPaths, prof) -> None:
     count = prof.synth_count
     if count is None:  # paper nsyn = n: match the real train size
@@ -87,8 +76,6 @@ def stage_synth(p: ArtifactPaths, prof) -> None:
 
 def stage_train(p: ArtifactPaths, prof) -> None:
     real_inputs = [str(p.real_pairs)]
-    if p.labeled_pairs.exists():
-        real_inputs.append(str(p.labeled_pairs))
     # Learn real ASR confusions (paper Limitation #1) into the datastore, then
     # refresh every pair's retrieved NEs so the RAC prompt carries the right term.
     harvest_pairs = list(real_inputs)

@@ -33,10 +33,6 @@ class ArtifactPaths:
         return self.root / "gec_pairs" / self._name("vimedcss_gipformer_pairs", "jsonl")
 
     @property
-    def labeled_pairs(self) -> Path:
-        return self.root / "gec_pairs" / self._name("vimedcss_labeled_pairs", "jsonl")
-
-    @property
     def synth_clean(self) -> Path:
         return self.root / "synthetic" / self._name("synthetic_clean", "jsonl")
 

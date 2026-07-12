@@ -24,12 +24,9 @@ from carepath.gec.config import variant_uses_retrieval
 from carepath.gec.metrics import split_terms
 
 REAL_SOURCE = "vimedcss_real"
-LABELED_SOURCE = "vimedcss_labeled"  # human-corrected Label Studio export (real)
 SYNTHETIC_SOURCE = "darag_synthetic_tts"
-# Labeled rows are real supervision, so they count as "real" everywhere the
-# ablations distinguish real from synthetic (e.g. the ``wo_aug`` variant).
-REAL_SOURCES = {REAL_SOURCE, LABELED_SOURCE}
-VALID_SOURCES = {REAL_SOURCE, LABELED_SOURCE, SYNTHETIC_SOURCE}
+REAL_SOURCES = {REAL_SOURCE}
+VALID_SOURCES = {REAL_SOURCE, SYNTHETIC_SOURCE}
 
 GEC_PAIR_REQUIRED_FIELDS = {
     "split",
@@ -255,75 +252,6 @@ def build_synthetic_pairs(
             "tts_provider": row.get("tts_provider"),
             "speaker_reference": row.get("speaker_reference"),
             "audio_path": row.get("audio_path"),
-        }
-
-
-def build_labeled_pairs(
-    labeled_rows: list[dict[str, Any]],
-    retriever,
-    *,
-    audio_root: Path | None = None,
-    asr=None,
-    n_best: int = 1,
-    seed: int = 13,
-    split: str = "train",
-    quality_keep: tuple[str, ...] = ("OK",),
-    completed_ids: set[str] | None = None,
-):
-    """Map the Label Studio export into real GEC pairs (supplementary to ViMedCSS).
-
-    The export
-    (``scripts/labeling/export_label_studio_transcripts.py`` ->
-    ``data/labeling/training_transcripts.jsonl``) already carries a real
-    ``raw_asr`` (Whisper draft) and a clinician-edited ``gold_text``, so each kept
-    row *is* a real hypothesis->gold pair. We keep only ``quality in quality_keep``,
-    mine code-switch terms from the gold transcript for the NE columns, and force
-    them onto the ``train`` split so the frozen ViMedCSS eval splits stay pristine.
-
-    N-best is only added when an ``audio_root`` + ``asr`` are supplied and the
-    referenced ``audio_file`` exists locally (the export stores a relative
-    ``audio_file`` and an ``audio_url``); otherwise ``other_hypotheses`` is empty.
-    """
-
-    from carepath.gec.datastore import extract_code_switch_terms
-
-    completed_ids = completed_ids or set()
-    for row in labeled_rows:
-        raw_asr = str(row.get("raw_asr", "")).strip()
-        gold_text = str(row.get("gold_text", "")).strip()
-        if str(row.get("quality", "OK")) not in quality_keep:
-            continue
-        if not raw_asr or not gold_text:
-            continue
-        audio_file = str(row.get("audio_file") or "")
-        audio_id = f"labeled:{Path(audio_file).stem or _hash(gold_text)}"
-        if audio_id in completed_ids:
-            continue
-
-        others: list[str] = []
-        if audio_root is not None and asr is not None and n_best > 1 and audio_file:
-            clip = Path(audio_root) / audio_file
-            if clip.exists():
-                from carepath.gec import nbest
-
-                others = nbest.other_hypotheses(asr, clip, raw_asr, n_best, seed=seed)
-
-        gold_terms = extract_code_switch_terms(gold_text)
-        retrieved = [item.term for item in retriever.retrieve(f"{raw_asr} {gold_text}")]
-        yield {
-            "split": split,
-            "source_kind": LABELED_SOURCE,
-            "audio_id": audio_id,
-            "raw_asr": raw_asr,
-            "other_hypotheses": others,
-            "gold_text": gold_text,
-            "gold_terms": gold_terms,
-            "retrieved_terms": retrieved,
-            "cs_terms_list": ";".join(gold_terms),
-            "topic": row.get("topic"),
-            "duration_seconds": row.get("duration_seconds"),
-            "asr_model": str(row.get("source", "label_studio")),
-            "asr_metadata": {"source": "label_studio", "quality": row.get("quality")},
         }
 
 
