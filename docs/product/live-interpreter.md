@@ -18,6 +18,9 @@ Scribe is the only public product. `/phien-dich-y-khoa/*` and `/console/*`
 return 404; this does not change the Interpreter API, WebSocket, or safety
 invariants used for internal development.
 
+The Interpreter is on hold for public release. Restrict changes to internal
+bug fixes and safety maintenance until the owner reopens its release work.
+
 ## Safety Invariants
 
 - No microphone capture before recorded consent.

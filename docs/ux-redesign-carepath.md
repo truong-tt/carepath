@@ -34,7 +34,8 @@ that URL can still open the unfinished workflow.
 2. Every browser request to `/phien-dich-y-khoa/*` and `/console/*` returns
    HTTP 404 instead of the Interpreter frontend.
 3. Interpreter APIs, WebSockets, backend safety behavior, and automated tests
-   remain available for internal development; no public page links to them.
+   remain available only for frozen internal maintenance; no public page links
+   to them.
 
 ### Affected routes, pages, and components
 
