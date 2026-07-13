@@ -43,14 +43,22 @@ Vietnamese-first module choices and their safety limits.
 AI** the primary web action and labels **Phiên dịch khám bệnh trực tiếp** as
 in development for the web, while retaining its translate-only safety limit.
 
-2026-07-13 Hugging Face discovery: the existing Space
-`tranth3truong/carepath-api` was Running, but this browser had no
-authenticated owner session. Its Docker configuration, build, and protected
-secrets were not read or changed. The remaining Space setup is blocked until
-the owner signs in; no credentials should be pasted into chat.
+2026-07-13 Hugging Face proof passed: authenticated owner access confirmed the
+existing `tranth3truong/carepath-api` Docker Space and its documented runtime
+secrets. The public build variable `VITE_PUBLIC_SITE_URL` was set to
+`https://carepath-omega.vercel.app`; then a Space-only root commit `6538a14`
+replaced the divergent older revision. The root commit omits non-runtime QA
+images rejected by the Space Git receiver; GitHub retains those files.
 
-Pending owner evidence: Space rebuilt from the root Dockerfile, documented
-live interpreter routes healthy, and the approved 50-note clinician-rating
-threshold reached without storing clinical material in the repository. No
-container provider is registered in Harness, so those checks cannot be run by
-this workspace.
+The rebuilt Space is Running at
+`https://tranth3truong-carepath-api.hf.space`. `GET /api/v1/health` returned
+`asr_ready: true` and `llm_ready: true` with the configured CKey provider;
+`GET /api/health` returned `provider_mode: mock`; and `/`,
+`/ghi-chep-lam-sang/`, and `/phien-dich-y-khoa/` each returned HTTP 200. The
+Interpreter product link returns to the canonical Vercel site with language
+preserved.
+
+Pending owner evidence: the approved 50-note clinician-rating threshold
+reached without storing clinical material in the repository. No container
+provider is registered in Harness, so that clinical evidence cannot be
+collected by this workspace.
