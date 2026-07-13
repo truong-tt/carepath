@@ -33,8 +33,13 @@ Scribe frontend 45 unit, 5 deployment-environment, and 7 browser tests;
 Interpreter console lint, 38 unit tests, build, and browser tests. Term
 artifacts were current and the mock Scribe smoke passed.
 
-Pending owner evidence: Vercel Root Directory set to `scribe/frontend`, Space
-rebuilt from the root Dockerfile, documented live routes healthy, and the
-approved 50-note clinician-rating threshold reached without storing clinical
-material in the repository. No deployment or container provider is registered
-in Harness, so those checks cannot be run by this workspace.
+2026-07-13 Vercel proof passed: the owner saved Root Directory as
+`scribe/frontend`; production deployment `13b65c1` is Ready at
+`https://carepath-omega.vercel.app`; and the live page presents both
+Vietnamese-first module choices and their safety limits.
+
+Pending owner evidence: Space rebuilt from the root Dockerfile, documented
+live interpreter routes healthy, and the approved 50-note clinician-rating
+threshold reached without storing clinical material in the repository. No
+container provider is registered in Harness, so those checks cannot be run by
+this workspace.
