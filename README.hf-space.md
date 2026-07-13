@@ -6,7 +6,8 @@ app_port: 7860
 
 # CarePath Space
 
-This Space runs the unified CarePath product from the root `Dockerfile`:
+This Space runs the unified CarePath product from the root `Dockerfile`, which
+builds `scribe/frontend/` and `interpreter/frontend/`:
 demo site at `/`, Scribe tool at `/ghi-chep-lam-sang/`, interpreter at
 `/phien-dich-y-khoa/`, scriber API at `/api/v1/*`, interpreter API at `/api/*` + `/ws/*`.
 

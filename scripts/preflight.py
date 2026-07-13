@@ -51,7 +51,7 @@ def main() -> int:
             pass
 
     repo_root = Path(__file__).resolve().parents[1]
-    sys.path.insert(0, str(repo_root / "apps" / "api"))
+    sys.path.insert(0, str(repo_root / "scribe"))
 
     from carepath.config import load_settings
     from carepath.logging_config import configure_logging

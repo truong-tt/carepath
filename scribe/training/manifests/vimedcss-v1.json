@@ -1,0 +1,6 @@
+{
+  "dataset_id": "vimedcss-v1",
+  "source_description": "ViMedCSS source proposed for GEC pair construction; the owner must record its licensed provenance and approval before any training run.",
+  "consent_status": "pending_owner_approval",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

@@ -21,9 +21,9 @@ and fail-closed for patient display and TTS.
 
 | Layer | Expected proof |
 | --- | --- |
-| Unit and integration | `cd backend; python -m pytest` |
-| Safety regression | `python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock` |
-| E2E | `cd frontend; npx playwright test` |
+| Unit and integration | `cd interpreter; python -m pytest` |
+| Safety regression | `python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock` |
+| E2E | `cd interpreter/frontend; npx playwright test` |
 
 ## Evidence
 

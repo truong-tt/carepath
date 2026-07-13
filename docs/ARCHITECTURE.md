@@ -1,19 +1,24 @@
 # CarePath Architecture
 
 CarePath is one FastAPI deployment with two separately named clinical workflows.
-The combined entrypoint is `apps/api/carepath/main.py`; it owns the Scribe API,
-imports the Interpreter routers from `backend/app`, and mounts both built Vite
+The combined entrypoint is `scribe/carepath/main.py`; it owns the Scribe API,
+imports the Interpreter routers from `interpreter/app`, and mounts both built Vite
 frontends after API routes.
 
 ## Product Boundaries
 
 | Workflow | Backend boundary | Browser surface |
 | --- | --- | --- |
-| Ghi chép bệnh án AI | `apps/api/carepath`, `/api/v1/*` | `site/` at `/`, including `/ghi-chep-lam-sang/` |
-| Phiên dịch khám bệnh trực tiếp | `backend/app`, `/api/*` and `/ws/*` | `frontend/` at `/phien-dich-y-khoa/` |
+| Ghi chép bệnh án AI | `scribe/carepath`, `/api/v1/*` | `scribe/frontend/` at `/`, including `/ghi-chep-lam-sang/` |
+| Phiên dịch khám bệnh trực tiếp | `interpreter/app`, `/api/*` and `/ws/*` | `interpreter/frontend/` at `/phien-dich-y-khoa/` |
 
 `/console/` redirects to the canonical interpreter path for compatibility. The
 two API namespaces intentionally do not overlap.
+
+`scribe/training/` is exclusively the Scribe's offline DARAG/GEC training and quality
+track. It does not train or serve the Interpreter. `interpreter/eval/` is a
+separate deterministic translation-safety harness that stays with the
+Interpreter.
 
 ## Boundaries That Must Stay Explicit
 

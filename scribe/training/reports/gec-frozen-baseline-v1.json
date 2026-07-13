@@ -1,0 +1,138 @@
+{
+  "schema": "carepath.gec.baseline/1",
+  "run_id": "carepath-gec-frozen-baseline-v1",
+  "config": {
+    "path": "scribe/training/configs/frozen-baseline-v1.json",
+    "sha256": "dc830cda1f0d0b4871385560f951567c0b0d93182ddad77474b0ec1bd9004092"
+  },
+  "fixture": {
+    "path": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
+    "manifest": "scribe/training/eval/fixtures/gec_eval_v1.manifest.json",
+    "dataset_id": "carepath-gec-frozen-eval-v1",
+    "sha256": "31b47c3c2aa4aa601350a7b50acf48f6dc0e84c0236f471f8b598d8a479f6018"
+  },
+  "prediction_columns": [
+    "raw_asr"
+  ],
+  "metrics": {
+    "wer": {
+      "raw_asr": {
+        "frozen": {
+          "n": 12,
+          "wer": 1.4375,
+          "cer": 0.7174,
+          "term_precision": 1.0,
+          "term_recall": 0.75,
+          "term_f1": 0.75,
+          "number_unit_preservation": 0.6667,
+          "overcorrection_rate": 0.0,
+          "wer_word": 1.4375,
+          "exact_match_accuracy": 0.0
+        }
+      }
+    },
+    "stratified": {
+      "diacritics": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 0.875,
+            "cer": 0.2073,
+            "term_precision": 1.0,
+            "term_recall": 1.0,
+            "term_f1": 1.0,
+            "number_unit_preservation": 1.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 0.875,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      },
+      "dosage": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 1.625,
+            "cer": 0.8741,
+            "term_precision": 1.0,
+            "term_recall": 1.0,
+            "term_f1": 1.0,
+            "number_unit_preservation": 0.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 1.625,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      },
+      "drug_name": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 1.125,
+            "cer": 0.2125,
+            "term_precision": 1.0,
+            "term_recall": 0.0,
+            "term_f1": 0.0,
+            "number_unit_preservation": 1.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 1.125,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      },
+      "laterality": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 1.0,
+            "cer": 0.2426,
+            "term_precision": 1.0,
+            "term_recall": 1.0,
+            "term_f1": 1.0,
+            "number_unit_preservation": 1.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 1.0,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      },
+      "negation": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 0.875,
+            "cer": 0.2676,
+            "term_precision": 1.0,
+            "term_recall": 1.0,
+            "term_f1": 1.0,
+            "number_unit_preservation": 1.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 0.875,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      },
+      "numbers": {
+        "raw_asr": {
+          "frozen": {
+            "n": 2,
+            "wer": 3.125,
+            "cer": 2.5,
+            "term_precision": 1.0,
+            "term_recall": 0.5,
+            "term_f1": 0.5,
+            "number_unit_preservation": 0.0,
+            "overcorrection_rate": 0.0,
+            "wer_word": 3.125,
+            "exact_match_accuracy": 0.0
+          }
+        }
+      }
+    },
+    "safety": {
+      "drug_name_accuracy": 0.0,
+      "dosage_accuracy": 0.0,
+      "diacritics_accuracy": 0.0
+    }
+  }
+}

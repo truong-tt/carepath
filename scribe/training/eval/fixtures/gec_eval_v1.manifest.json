@@ -1,0 +1,6 @@
+{
+  "dataset_id": "carepath-gec-frozen-eval-v1",
+  "source_description": "Text-only synthetic safety fixture; contains no patient audio or patient-identifying data.",
+  "consent_status": "not_applicable_fixture",
+  "sha256": "31b47c3c2aa4aa601350a7b50acf48f6dc0e84c0236f471f8b598d8a479f6018"
+}

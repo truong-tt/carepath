@@ -214,7 +214,11 @@ Bilingual: each category includes Vietnamese doctor utterances and English patie
 - **Week 7 — Simulated clinical testing:** run mock Vi-doctor/En-patient conversations; accent (N/C/S) and mask/noise testing; bilingual-reviewer scoring against thresholds; log critical-error and escalation-correctness metrics.
 - **Week 8 — Pilot readiness:** evaluation report vs thresholds; documented known limitations; privacy-policy and consent-flow draft (for counsel review); written pilot protocol with supervising clinicians and interpreter on standby. **Go/no-go gate: zero uncaught critical-harm errors.**
 
-# Codex Implementation Tickets
+# Historical Codex Implementation Tickets
+
+The tickets below describe the original pre-restructure MVP layout. They are
+historical research context only; use `AGENTS.md` and the current `scribe/`,
+`interpreter/`, `shared/`, and `scribe/training/` directories for implementation.
 
 **Epic 1 — Repository setup.** *Title:* Monorepo scaffold with adapter contracts. *Background:* All AI components must be swappable. *Scope:* Monorepo (backend, frontend, shared types); linting/CI; env config; `providers/` package defining abstract adapter interfaces (ASR, MT, TTS, NER, RiskClassifier). *Acceptance:* CI green; abstract interfaces importable; mock implementations registered. *Tests:* interface conformance tests. *Files:* `/backend`, `/frontend`, `/packages/providers`. *Edge cases:* version pinning; secrets never committed.
 

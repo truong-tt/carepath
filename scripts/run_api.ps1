@@ -7,7 +7,7 @@ if (-not (Test-Path ".\.venv\Scripts\python.exe")) {
 }
 
 & ".\.venv\Scripts\python.exe" -m uvicorn carepath.main:app `
-    --app-dir apps/api `
+    --app-dir scribe `
     --reload `
     --host 127.0.0.1 `
     --port 8000

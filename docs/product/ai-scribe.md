@@ -6,7 +6,7 @@ Ghi chép bệnh án AI listens to a consultation and creates a structured clini
 note draft. It is appropriate when a clinician wants to reduce post-visit data
 entry time. The clinician reviews the output before use.
 
-The serving boundary is `apps/api/carepath` under `/api/v1/*`. The public site
+The serving boundary is `scribe/carepath` under `/api/v1/*`. The public site
 provides the workflow from `/ghi-chep-lam-sang/`.
 
 ## Constraints
@@ -17,6 +17,15 @@ provides the workflow from `/ghi-chep-lam-sang/`.
 - Provider failures return an explicit failure or configured safe fallback;
   they do not silently invent clinical content.
 - Vietnamese copy remains NFC-normalized with diacritics preserved.
+- GEC training accepts a dataset only through a versioned manifest with source,
+  consent status, and SHA-256. Training is blocked until the owner approves the
+  manifest; no clinical audio is collected or stored by this repository flow.
+- The committed text-only frozen baseline report is verified in CI. Before an
+  adapter can export, its frozen-fixture drug-name recall and dosage
+  number/unit preservation must not regress against the raw-ASR baseline.
+- A SOAP fine-tuning decision is prohibited until the owner completes the
+  clinician-rating protocol for at least 50 de-identified pilot notes in an
+  approved environment. The rating schema stores no note text or audio here.
 
 ## Proof
 

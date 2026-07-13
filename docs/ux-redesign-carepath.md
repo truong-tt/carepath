@@ -65,10 +65,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/content/strings.ts
-- site/src/content/strings.test.ts
-- site/index.html
-- site/src/LandingPage.test.tsx
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/content/strings.test.ts
+- scribe/frontend/index.html
+- scribe/frontend/src/LandingPage.test.tsx
 
 **Dependencies**
 
@@ -107,14 +107,14 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/LandingPage.tsx
-- site/src/components/ProductChoiceCard.tsx (new)
-- site/src/content/strings.ts
-- site/src/styles.css
-- site/src/landing/useLandingMotion.ts
-- site/src/LandingPage.test.tsx
-- site/tests/demo-flow.spec.ts
-- site/package.json and lockfile only if removing the obsolete homepage motion makes GSAP unused
+- scribe/frontend/src/LandingPage.tsx
+- scribe/frontend/src/components/ProductChoiceCard.tsx (new)
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/styles.css
+- scribe/frontend/src/landing/useLandingMotion.ts
+- scribe/frontend/src/LandingPage.test.tsx
+- scribe/frontend/tests/demo-flow.spec.ts
+- scribe/frontend/package.json and lockfile only if removing the obsolete homepage motion makes GSAP unused
 
 **Dependencies**
 
@@ -155,13 +155,13 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/LandingPage.tsx
-- site/src/content/strings.ts
-- site/src/styles.css
-- site/src/scribe/ScribeShowcase.tsx
-- site/src/demo/DemoPlayer.tsx
-- site/src/LandingPage.test.tsx
-- site/tests/demo-flow.spec.ts
+- scribe/frontend/src/LandingPage.tsx
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/styles.css
+- scribe/frontend/src/scribe/ScribeShowcase.tsx
+- scribe/frontend/src/demo/DemoPlayer.tsx
+- scribe/frontend/src/LandingPage.test.tsx
+- scribe/frontend/tests/demo-flow.spec.ts
 
 **Dependencies**
 
@@ -200,11 +200,11 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/content/strings.ts
-- site/src/scribe/ScribeTool.tsx
-- site/src/scribe/ScribeShowcase.tsx
-- site/src/scribe/ScribeTool.test.tsx
-- site/src/scribe/ScribeShowcase.test.tsx
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/scribe/ScribeTool.tsx
+- scribe/frontend/src/scribe/ScribeShowcase.tsx
+- scribe/frontend/src/scribe/ScribeTool.test.tsx
+- scribe/frontend/src/scribe/ScribeShowcase.test.tsx
 
 **Dependencies**
 
@@ -240,12 +240,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/copy.ts (new)
-- frontend/src/App.tsx
-- frontend/src/App.test.tsx
-- frontend/index.html
-- frontend/src/components/ConsentGate.tsx
-- frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/copy.ts (new)
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/App.test.tsx
+- interpreter/frontend/index.html
+- interpreter/frontend/src/components/ConsentGate.tsx
+- interpreter/frontend/src/components/InterpreterConsole.tsx
 
 **Dependencies**
 
@@ -280,10 +280,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/copy.ts
-- frontend/src/components/ConsentGate.tsx
-- frontend/src/components/ConsentGate.test.tsx
-- frontend/src/App.test.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/components/ConsentGate.tsx
+- interpreter/frontend/src/components/ConsentGate.test.tsx
+- interpreter/frontend/src/App.test.tsx
 
 **Dependencies**
 
@@ -320,11 +320,11 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/copy.ts
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/Transcript.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/components/Transcript.test.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/Transcript.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/components/Transcript.test.tsx
 
 **Dependencies**
 
@@ -363,12 +363,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/App.tsx
-- site/src/pages/ClinicalNotesPage.tsx (new thin wrapper)
-- site/src/App.test.tsx
-- site/tests/demo-flow.spec.ts
-- apps/api/carepath/main.py
-- tests/test_combined_app.py
+- scribe/frontend/src/App.tsx
+- scribe/frontend/src/pages/ClinicalNotesPage.tsx (new thin wrapper)
+- scribe/frontend/src/App.test.tsx
+- scribe/frontend/tests/demo-flow.spec.ts
+- scribe/carepath/main.py
+- scribe/tests/test_combined_app.py
 
 **Dependencies**
 
@@ -395,7 +395,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix site test
     npm.cmd --prefix site run build
     npm.cmd --prefix site run e2e
-    python -m pytest tests/test_combined_app.py
+    python -m pytest scribe/tests/test_combined_app.py
 
 ### CP-ROUTE-02 — Move the Interpreter entry to a task-based canonical route
 
@@ -407,23 +407,23 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/vite.config.ts
-- frontend/package.json
-- frontend/playwright.config.ts
-- frontend/playwright.prod.config.ts (new, or an equivalently small production-base config)
-- apps/api/carepath/main.py
-- site/src/LandingPage.tsx
-- site/vercel.json
-- site/.env.e2e
-- site/.env.example
-- site/scripts/validate-deploy-env.mjs
-- site/scripts/validate-deploy-env.test.mjs
-- tests/test_combined_app.py
+- interpreter/frontend/vite.config.ts
+- interpreter/frontend/package.json
+- interpreter/frontend/playwright.config.ts
+- interpreter/frontend/playwright.prod.config.ts (new, or an equivalently small production-base config)
+- scribe/carepath/main.py
+- scribe/frontend/src/LandingPage.tsx
+- scribe/frontend/vercel.json
+- scribe/frontend/.env.e2e
+- scribe/frontend/.env.example
+- scribe/frontend/scripts/validate-deploy-env.mjs
+- scribe/frontend/scripts/validate-deploy-env.test.mjs
+- scribe/tests/test_combined_app.py
 - Dockerfile
 - .env.example
 - README.md
 - README.hf-space.md
-- site/README.md
+- scribe/frontend/README.md
 - docs/deploy.md
 
 **Dependencies**
@@ -457,7 +457,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix frontend run e2e:prod
     npm.cmd --prefix site run test:deploy-env
     npm.cmd --prefix site run build
-    python -m pytest tests/test_combined_app.py
+    python -m pytest scribe/tests/test_combined_app.py
 
 ### CP-ROUTE-03 — Make internal review reachable without exposing it publicly
 
@@ -469,10 +469,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/App.tsx
-- frontend/src/App.test.tsx
-- frontend/src/components/AdminReview.tsx
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/App.test.tsx
+- interpreter/frontend/src/components/AdminReview.tsx
+- interpreter/frontend/tests/mock-mode.spec.ts
 - docs/deploy.md
 
 **Dependencies**
@@ -513,13 +513,13 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/LandingPage.tsx
-- site/src/LeadForm.tsx
-- site/src/leads.ts
-- site/src/content/strings.ts
-- site/src/LeadForm.test.tsx
-- site/src/leads.test.ts
-- site/tests/demo-flow.spec.ts
+- scribe/frontend/src/LandingPage.tsx
+- scribe/frontend/src/LeadForm.tsx
+- scribe/frontend/src/leads.ts
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/LeadForm.test.tsx
+- scribe/frontend/src/leads.test.ts
+- scribe/frontend/tests/demo-flow.spec.ts
 
 **Dependencies**
 
@@ -556,10 +556,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/scribe/ScribeTool.tsx
-- site/src/scribe/ScribeTool.test.tsx
-- site/src/styles.css
-- site/tests/demo-flow.spec.ts
+- scribe/frontend/src/scribe/ScribeTool.tsx
+- scribe/frontend/src/scribe/ScribeTool.test.tsx
+- scribe/frontend/src/styles.css
+- scribe/frontend/tests/demo-flow.spec.ts
 
 **Dependencies**
 
@@ -596,10 +596,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/src/scribe/ScribeTool.tsx
-- site/src/content/strings.ts
-- site/src/scribe/ScribeTool.test.tsx
-- site/src/styles.css
+- scribe/frontend/src/scribe/ScribeTool.tsx
+- scribe/frontend/src/content/strings.ts
+- scribe/frontend/src/scribe/ScribeTool.test.tsx
+- scribe/frontend/src/styles.css
 
 **Dependencies**
 
@@ -634,10 +634,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -674,10 +674,10 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -707,7 +707,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix frontend test
     npm.cmd --prefix frontend run build
     npm.cmd --prefix frontend run e2e
-    python -m pytest backend/tests/test_api.py::test_websocket_rejects_overlapping_turns backend/tests/test_api.py::test_dropped_turn_does_not_block_reconnect
+    python -m pytest interpreter/tests/test_api.py::test_websocket_rejects_overlapping_turns interpreter/tests/test_api.py::test_dropped_turn_does_not_block_reconnect
 
 ### CP-INT-03 — Add clinician-only review for high and critical risk
 
@@ -719,12 +719,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/Transcript.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/components/Transcript.test.tsx
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/Transcript.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/components/Transcript.test.tsx
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -755,7 +755,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix frontend test
     npm.cmd --prefix frontend run e2e
     python -m pytest
-    python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
+    python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
 
 ### CP-INT-04 — Suppress automated playback after human escalation
 
@@ -767,12 +767,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/tts.ts
-- frontend/src/tts.test.ts (new)
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/tts.ts
+- interpreter/frontend/src/tts.test.ts (new)
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -813,12 +813,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/Transcript.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/components/Transcript.test.tsx
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/Transcript.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/components/Transcript.test.tsx
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -847,7 +847,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix frontend test
     npm.cmd --prefix frontend run e2e
     python -m pytest
-    python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
+    python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
 
 ### CP-INT-06 — Add end, delete, and withdraw-consent lifecycle actions
 
@@ -859,13 +859,13 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/api.ts
-- frontend/src/App.tsx
-- frontend/src/components/ConsentGate.tsx
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/components/InterpreterConsole.test.tsx
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/api.ts
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/components/ConsentGate.tsx
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/components/InterpreterConsole.test.tsx
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -924,12 +924,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/DemoPreview.tsx (new)
-- frontend/src/components/DemoPreview.test.tsx (new)
-- frontend/src/components/ConsentGate.tsx
-- frontend/src/copy.ts
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/DemoPreview.tsx (new)
+- interpreter/frontend/src/components/DemoPreview.test.tsx (new)
+- interpreter/frontend/src/components/ConsentGate.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -965,12 +965,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/IntentQuiz.tsx (new)
-- frontend/src/components/IntentQuiz.test.tsx (new)
-- frontend/src/App.tsx
-- frontend/src/App.test.tsx
-- frontend/src/copy.ts
-- frontend/src/App.css
+- interpreter/frontend/src/components/IntentQuiz.tsx (new)
+- interpreter/frontend/src/components/IntentQuiz.test.tsx (new)
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/App.test.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/App.css
 
 **Dependencies**
 
@@ -1005,12 +1005,12 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/OnboardingStepper.tsx (new)
-- frontend/src/components/OnboardingStepper.test.tsx (new)
-- frontend/src/App.tsx
-- frontend/src/components/ConsentGate.tsx
-- frontend/src/copy.ts
-- frontend/src/App.css
+- interpreter/frontend/src/components/OnboardingStepper.tsx (new)
+- interpreter/frontend/src/components/OnboardingStepper.test.tsx (new)
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/components/ConsentGate.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/App.css
 
 **Dependencies**
 
@@ -1050,13 +1050,13 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/DeviceCheck.tsx (new)
-- frontend/src/components/DeviceCheck.test.tsx (new)
-- frontend/src/App.tsx
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/copy.ts
-- frontend/src/App.css
-- frontend/tests/mock-mode.spec.ts
+- interpreter/frontend/src/components/DeviceCheck.tsx (new)
+- interpreter/frontend/src/components/DeviceCheck.test.tsx (new)
+- interpreter/frontend/src/App.tsx
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/App.css
+- interpreter/frontend/tests/mock-mode.spec.ts
 
 **Dependencies**
 
@@ -1096,11 +1096,11 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- frontend/src/components/SessionChecklist.tsx (new)
-- frontend/src/components/SessionChecklist.test.tsx (new)
-- frontend/src/components/InterpreterConsole.tsx
-- frontend/src/copy.ts
-- frontend/src/App.css
+- interpreter/frontend/src/components/SessionChecklist.tsx (new)
+- interpreter/frontend/src/components/SessionChecklist.test.tsx (new)
+- interpreter/frontend/src/components/InterpreterConsole.tsx
+- interpreter/frontend/src/copy.ts
+- interpreter/frontend/src/App.css
 
 **Dependencies**
 
@@ -1143,14 +1143,14 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
 
 **Files likely affected**
 
-- site/tests/demo-flow.spec.ts
-- site/tests/combined-product.spec.ts (new, if used as the production browser harness)
-- frontend/tests/mock-mode.spec.ts
-- tests/test_combined_app.py
-- site/scripts/validate-deploy-env.test.mjs
+- scribe/frontend/tests/demo-flow.spec.ts
+- scribe/frontend/tests/combined-product.spec.ts (new, if used as the production browser harness)
+- interpreter/frontend/tests/mock-mode.spec.ts
+- scribe/tests/test_combined_app.py
+- scribe/frontend/scripts/validate-deploy-env.test.mjs
 - README.md
 - README.hf-space.md
-- site/README.md
+- scribe/frontend/README.md
 - docs/deploy.md
 - docs/ux-redesign-carepath.md
 
@@ -1201,7 +1201,7 @@ UX/copy stories 4 and 5 can run in parallel after CP-UX-01. Product-specific fun
     npm.cmd --prefix site run build
     npm.cmd --prefix site run test:deploy-env
     npm.cmd --prefix site run lighthouse
-    python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
+    python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
 
 ## Deferred unless separately approved
 

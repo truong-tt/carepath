@@ -31,7 +31,7 @@ ingestion.
 | Layer | Expected proof |
 | --- | --- |
 | Static | Focused Ruff check and zero-reference scan |
-| Integration | `python -m pytest tests/test_gec.py` |
+| Integration | `python -m pytest scribe/training/tests/test_gec.py` |
 | Release | Root `python -m pytest` |
 
 ## Evidence

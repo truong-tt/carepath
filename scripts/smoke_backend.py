@@ -11,7 +11,7 @@ from pathlib import Path
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    sys.path.insert(0, str(repo_root / "apps" / "api"))
+    sys.path.insert(0, str(repo_root / "scribe"))
 
     os.environ.setdefault("ASR_PROVIDER", "mock")
     os.environ.setdefault("ALLOW_MOCK_ASR", "true")

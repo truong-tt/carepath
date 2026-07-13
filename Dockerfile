@@ -3,19 +3,19 @@ FROM node:22-slim AS frontends
 
 WORKDIR /build
 
-COPY site/package.json site/package-lock.json site/
-RUN cd site && npm ci
-COPY site site
+COPY scribe/frontend/package.json scribe/frontend/package-lock.json scribe/frontend/
+RUN cd scribe/frontend && npm ci
+COPY scribe/frontend scribe/frontend
 # site build also runs the Vietnamese diacritics gate.
-RUN cd site && npm run build
+RUN cd scribe/frontend && npm run build
 
-COPY frontend/package.json frontend/package-lock.json frontend/
-RUN cd frontend && npm ci
-COPY frontend frontend
-# Production build uses base /phien-dich-y-khoa/ (see frontend/vite.config.ts).
+COPY interpreter/frontend/package.json interpreter/frontend/package-lock.json interpreter/frontend/
+RUN cd interpreter/frontend && npm ci
+COPY interpreter/frontend interpreter/frontend
+# Production build uses base /phien-dich-y-khoa/ (see interpreter/frontend/vite.config.ts).
 ARG VITE_PUBLIC_SITE_URL
 ENV VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}
-RUN cd frontend && npm run build
+RUN cd interpreter/frontend && npm run build
 
 # --- Stage 2: Python runtime serving both APIs and the built frontends ---
 FROM python:3.12-slim
@@ -32,21 +32,22 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
-COPY apps/api ./apps/api
-COPY backend ./backend
+COPY shared ./shared
+COPY scribe/carepath ./scribe/carepath
+COPY interpreter ./interpreter
 RUN python -m pip install --upgrade pip \
-    && python -m pip install . ./backend
+    && python -m pip install . ./shared ./interpreter
 
 ARG GIPFORMER_QUANTIZE=int8
 ENV GIPFORMER_QUANTIZE=${GIPFORMER_QUANTIZE}
 RUN python -c "from carepath.services.asr import GipformerASR; from huggingface_hub import hf_hub_download; files = GipformerASR.onnx_files['${GIPFORMER_QUANTIZE}']; [hf_hub_download(repo_id=GipformerASR.repo_id, filename=name) for name in (*files.values(), 'tokens.txt')]"
 
 COPY data ./data
-COPY --from=frontends /build/site/dist ./site/dist
-COPY --from=frontends /build/frontend/dist ./frontend/dist
-ENV SITE_DIST_DIR=/app/site/dist \
-    CONSOLE_DIST_DIR=/app/frontend/dist
+COPY --from=frontends /build/scribe/frontend/dist ./scribe/frontend/dist
+COPY --from=frontends /build/interpreter/frontend/dist ./interpreter/frontend/dist
+ENV SITE_DIST_DIR=/app/scribe/frontend/dist \
+    CONSOLE_DIST_DIR=/app/interpreter/frontend/dist
 
 EXPOSE 7860
 
-CMD ["uvicorn", "carepath.main:app", "--app-dir", "apps/api", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "carepath.main:app", "--app-dir", "scribe", "--host", "0.0.0.0", "--port", "7860"]

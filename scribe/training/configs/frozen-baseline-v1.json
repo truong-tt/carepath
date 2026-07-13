@@ -1,0 +1,6 @@
+{
+  "run_id": "carepath-gec-frozen-baseline-v1",
+  "fixture": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
+  "fixture_manifest": "scribe/training/eval/fixtures/gec_eval_v1.manifest.json",
+  "prediction_columns": ["raw_asr"]
+}

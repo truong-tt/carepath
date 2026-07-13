@@ -37,4 +37,26 @@ proposed | accepted | implemented | rejected
 
 ## Items
 
-No backlog items yet.
+## Future Interpreter Risk-Lexicon Consolidation
+
+### Discovered While
+
+CP-RES-006 term-store consolidation.
+
+### Current Pain
+
+The Interpreter safety lexicons are also clinician-editable data, but they
+govern deterministic risk classification rather than medical-term retrieval.
+
+### Suggested Improvement
+
+Evaluate a separate, clinician-approved consolidation only with a safety-fixture
+and evaluation policy change. Do not merge them into the general term source.
+
+### Risk
+
+high-risk.
+
+### Status
+
+proposed

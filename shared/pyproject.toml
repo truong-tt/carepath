@@ -1,0 +1,16 @@
+[project]
+name = "carepath-shared"
+version = "0.1.0"
+description = "Shared CarePath normalization utilities."
+requires-python = ">=3.11,<3.14"
+
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["carepath_shared*"]
+
+[tool.setuptools.package-data]
+carepath_shared = ["terms/*.json"]

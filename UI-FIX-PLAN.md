@@ -1,20 +1,20 @@
-# UI Fix Plan — carepath-omega.vercel.app (site/)
+# UI Fix Plan — carepath-omega.vercel.app (scribe/frontend/)
 
 Plan authored by Fable 5 after reviewing the live deploy and source. Executor: Opus 4.8.
-Scope: the Vite/React app in `site/` only. Do the fixes in order. Keep diffs minimal — no redesigns, no new dependencies.
+Scope: the Vite/React app in `scribe/frontend/` only. Do the fixes in order. Keep diffs minimal — no redesigns, no new dependencies.
 
 ## How findings were verified (and how you re-verify)
 
 The live site was screenshotted and probed with the repo's own Playwright
-(`site/node_modules/playwright-core`, headless Chromium) at 1440/1100/900/800/390px widths.
+(`scribe/frontend/node_modules/playwright-core`, headless Chromium) at 1440/1100/900/800/390px widths.
 Re-run any probe the same way, e.g.:
 
 ```js
-// node, from site/: require('playwright-core'), launch chromium,
+// node, from scribe/frontend/: require('playwright-core'), launch chromium,
 // newPage({ viewport }), goto https://carepath-omega.vercel.app/ (or local `npm run preview`)
 ```
 
-Verify locally against `npm run dev`/`preview` in `site/` — do not deploy to verify.
+Verify locally against `npm run dev`/`preview` in `scribe/frontend/` — do not deploy to verify.
 
 ## Do NOT chase these (verified non-issues)
 
@@ -25,8 +25,8 @@ GSAP scroll animations. Already confirmed fine:
   intentional accent. `document.scrollWidth - clientWidth === 0` at all tested widths — no
   horizontal overflow anywhere.
 - Grey band across the bottom of the safety bento in screenshots = GSAP scrub timeline
-  (`site/src/landing/useLandingMotion.ts:45-68`) caught mid-state. Renders correctly live.
-- Scribe chapter body text is complete in source (`site/src/content/strings.ts:340`); the
+  (`scribe/frontend/src/landing/useLandingMotion.ts:45-68`) caught mid-state. Renders correctly live.
+- Scribe chapter body text is complete in source (`scribe/frontend/src/content/strings.ts:340`); the
   "truncation" seen in captures was the sticky nav bar overlaying a line during scroll-stitching.
 - Marquee is 48px tall and animates correctly; "clipped text" in captures is the same stitching
   artifact.
@@ -41,22 +41,22 @@ Submitting the pilot lead form opens a recipient-less mail draft and then shows 
 
 **Root cause:** Neither `VITE_LEAD_ENDPOINT` nor `VITE_LEAD_EMAIL` is set in the Vercel project.
 `submitLead()` falls through to `buildLeadMailto(payload, email = "")`
-(`site/src/leads.ts:88-130`). The deploy gate `site/scripts/validate-deploy-env.mjs` only
+(`scribe/frontend/src/leads.ts:88-130`). The deploy gate `scribe/frontend/scripts/validate-deploy-env.mjs` only
 validates `VITE_API_BASE` + `VITE_CONSOLE_URL`, so the build passed anyway
-(`site/vercel.json` runs `npm run validate:deploy && npm run build`).
+(`scribe/frontend/vercel.json` runs `npm run validate:deploy && npm run build`).
 
 **Fix (all three parts):**
-1. `site/scripts/validate-deploy-env.mjs`: require at least one lead channel — error if both
+1. `scribe/frontend/scripts/validate-deploy-env.mjs`: require at least one lead channel — error if both
    `VITE_LEAD_ENDPOINT` and `VITE_LEAD_EMAIL` are empty. Extend
-   `site/scripts/validate-deploy-env.test.mjs` accordingly (`npm run test:deploy-env`).
+   `scribe/frontend/scripts/validate-deploy-env.test.mjs` accordingly (`npm run test:deploy-env`).
 2. UI guard, belt-and-suspenders:
-   - `site/src/leads.ts` / `site/src/LeadForm.tsx`: if no endpoint and no email, `submitLead`
+   - `scribe/frontend/src/leads.ts` / `scribe/frontend/src/LeadForm.tsx`: if no endpoint and no email, `submitLead`
      must not open `mailto:` and the form must show the existing error status (`labels.failed`
      path) instead of "mail opened". Never report success for a no-op.
-   - `site/src/LandingPage.tsx:476-478`: don't render the footer mailto link when
+   - `scribe/frontend/src/LandingPage.tsx:476-478`: don't render the footer mailto link when
      `VITE_LEAD_EMAIL` is empty (render the text non-linked, or drop it).
-   - Existing tests mock `leadEmail`/`endpoint` props (`site/src/LeadForm.test.tsx`,
-     `site/src/leads.test.ts`) — add the empty-config case.
+   - Existing tests mock `leadEmail`/`endpoint` props (`scribe/frontend/src/LeadForm.test.tsx`,
+     `scribe/frontend/src/leads.test.ts`) — add the empty-config case.
 3. Tell the user to set `VITE_LEAD_EMAIL` (and optionally `VITE_LEAD_ENDPOINT`) in the Vercel
    project settings — the value is a business decision; do not invent one. The code fix must be
    correct with or without it.
@@ -72,7 +72,7 @@ invisible. Measured panel box: `x = -108, width = 304` — a third of it (includ
 label text) is past the left viewport edge. At 900px the panel floats detached mid-nav
 (`x = 225`) under the centered button.
 
-**Root cause:** `site/src/styles.css:2267-2277` — `.site-nav__menu > div` is
+**Root cause:** `scribe/frontend/src/styles.css:2267-2277` — `.site-nav__menu > div` is
 `position: absolute; right: 0` anchored to `.site-nav__menu` (`position: relative`, line 2248),
 i.e. to the 2.6rem hamburger itself, which sits mid-nav between the brand and the VI/EN toggle.
 The 19rem-wide panel extends leftward from there.
@@ -94,7 +94,7 @@ panel stays open, covering the content just navigated to. Verified: `.site-nav__
 still present after link click.
 
 **Root cause:** Native `<details>` doesn't close on child anchor clicks
-(`site/src/LandingPage.tsx:60-63`).
+(`scribe/frontend/src/LandingPage.tsx:60-63`).
 
 **Fix:** In `LandingPage.tsx`, close the details when a menu link is clicked (e.g. `onClick` on
 the wrapping div or each link that clears the `open` attribute via a ref). Keep it a few lines —
@@ -131,11 +131,11 @@ slide h3 wraps ≤3 lines; ≤1023px layouts (already fine) unchanged.
 - **Marquee labels are 11.84px** (`.marquee__track span`, `font-size: 0.74rem`,
   styles.css:780-791) — uppercase microtext below the 12px floor; bump to `0.78rem`.
 - **Demo controls wrap ragged on mobile:** in `.demo__controls`
-  (`site/src/demo/DemoPlayer.tsx:251`, styles for it in styles.css) "Phát lại" wraps to an orphan
+  (`scribe/frontend/src/demo/DemoPlayer.tsx:251`, styles for it in styles.css) "Phát lại" wraps to an orphan
   row at 390px. Make the wrap intentional (consistent gap; buttons full-width or evenly split at
   ≤760px — match `.product-chapter__actions`' existing pattern at styles.css:2429-2433).
 
-## Verification (run all from `site/`)
+## Verification (run all from `scribe/frontend/`)
 
 1. `npm run lint`, `npm run test`, `npm run test:deploy-env` — all green.
 2. `npm run build` — green WITH lead env vars; FAILS with a clear message when both lead vars are
@@ -150,5 +150,5 @@ slide h3 wraps ≤3 lines; ≤1023px layouts (already fine) unchanged.
 
 ## Out of scope
 
-Backend/`apps/api`, the HF-space console (external `VITE_CONSOLE_URL` target), `frontend/`
+Backend/`scribe/carepath`, the HF-space console (external `VITE_CONSOLE_URL` target), `interpreter/frontend/`
 (separate app), content rewrites, redesigns, new sections, dependencies.

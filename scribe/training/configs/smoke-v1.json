@@ -1,0 +1,23 @@
+{
+  "run_id": "carepath-gec-smoke-v1",
+  "dataset": "tensorxt/ViMedCSS",
+  "manifest": "scribe/training/manifests/vimedcss-v1.json",
+  "frozen_eval_fixture": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
+  "frozen_eval_manifest": "scribe/training/eval/fixtures/gec_eval_v1.manifest.json",
+  "artifact_root": "artifacts",
+  "suffix": "_smoke",
+  "profile": {
+    "name": "smoke",
+    "limit_per_split": 20,
+    "asr_provider": "mock",
+    "retrieval_backend": "lexical",
+    "n_best": 1,
+    "synth_count": 10,
+    "synth_tts_limit": 10,
+    "tts_provider": "mms",
+    "nsyn_factor": 1.0,
+    "max_steps": 20,
+    "seeds": [13],
+    "all_variants": false
+  }
+}

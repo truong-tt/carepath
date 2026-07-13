@@ -4,18 +4,24 @@ CarePath is one unified medical AI product with two clearly separated user-facin
 
 1. **Ghi chép bệnh án AI**
    Internal/technical term: AI Scribe / scriber
-   Backend: `apps/api/carepath`, `/api/v1/*`
+   Backend: `scribe/carepath`, `/api/v1/*`
    Purpose: listen to a consultation and help generate structured clinical notes.
 
 2. **Phiên dịch khám bệnh trực tiếp**
    Internal/technical term: Medical Interpreter / interpreter
-   Backend: `backend/app`, `/api/*` + `/ws/*`
+   Backend: `interpreter/app`, `/api/*` + `/ws/*`
    Purpose: live two-way interpretation between Vietnamese doctors and English-speaking patients.
 
 The app is served by one FastAPI process plus two Vite frontends:
 
-* `site/` at `/`
-* `frontend/` at `/phien-dich-y-khoa/` (`/console/` is a legacy redirect)
+* `scribe/frontend/` at `/`
+* `interpreter/frontend/` at `/phien-dich-y-khoa/` (`/console/` is a legacy redirect)
+
+## Interpreter status
+
+After restructure Phase 7, the Interpreter is on hold. Accept only bug fixes,
+safety fixes, and required operational maintenance there; new product work is
+focused on the Scribe training track unless the owner explicitly reopens it.
 
 `docs/history/PLAN.md` and `docs/history/DEMO-SITE-PLAN.md` are historical build
 plans for the interpreter and demo site. `docs/history/MERGE-PLAN.md` is the
@@ -193,13 +199,13 @@ Do not combine homepage redesign, routing changes, and audio/backend logic chang
 ### Combined service
 
 ```bash
-uvicorn carepath.main:app --app-dir apps/api --reload
+uvicorn carepath.main:app --app-dir scribe --reload
 ```
 
 Requires:
 
 ```bash
-pip install -e ".[dev]" -e "./backend[dev]"
+pip install -e ".[dev]" -e "./shared" -e "./interpreter[dev]"
 ```
 
 ### Scriber and combined tests
@@ -207,19 +213,20 @@ pip install -e ".[dev]" -e "./backend[dev]"
 ```bash
 pytest
 python scripts/smoke_backend.py
+python scripts/build_term_artifacts.py --check
 ```
 
 ### Interpreter backend alone
 
 ```bash
-cd backend && uvicorn app.main:app --reload
+cd interpreter && uvicorn app.main:app --reload
 pytest
 ```
 
 ### Console
 
 ```bash
-cd frontend && npm run dev
+cd interpreter/frontend && npm run dev
 npm test
 npx playwright test
 ```
@@ -227,7 +234,7 @@ npx playwright test
 ### Demo site
 
 ```bash
-cd site && npm run dev
+cd scribe/frontend && npm run dev
 npm test
 npm run build
 npm run e2e
@@ -248,7 +255,7 @@ Mock mode must work with no API keys.
 ### Eval regression
 
 ```bash
-python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
+python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
 ```
 
 ## Conventions
@@ -259,8 +266,13 @@ python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
 * TypeScript must be strict.
 * Components should be small.
 * Keep state minimal: context/zustand is allowed, Redux is not.
-* Risk lexicons and glossary seeds are JSON/CSV data files. Clinicians edit data, not code.
-* Every risk-engine behavior change updates `eval/fixtures/risk_cases.jsonl`.
+* `shared/carepath_shared/terms/medical_terms.json` is the canonical medical
+  term source. Regenerate `data/medical_lexicon.json` and
+  `interpreter/app/glossary/data/seed_glossary.csv` with
+  `python scripts/build_term_artifacts.py`; do not hand-edit generated artifacts.
+* Risk lexicons under `interpreter/app/risk/lexicons/` remain separate
+  interpreter safety data. Clinicians edit data, not code.
+* Every risk-engine behavior change updates `interpreter/eval/fixtures/risk_cases.jsonl`.
 * The fixture run is the test.
 * Zero misses on critical fixtures is a hard gate.
 * Secrets only via env.

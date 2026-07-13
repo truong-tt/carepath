@@ -5,7 +5,7 @@ interpreter experience. These images are documentation, not application assets.
 
 ## Coverage
 
-- `site/` — landing and clinical-note workflow at desktop and mobile viewports.
+- `scribe/frontend/` — landing and clinical-note workflow at desktop and mobile viewports.
 - `interpreter/` — consent, quiz, device check, first-run, blocked-risk, and
   forced-colors states across desktop and mobile viewports.
 

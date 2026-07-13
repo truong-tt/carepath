@@ -1,0 +1,2496 @@
+{
+  "schema_version": 1,
+  "terms": [
+    {
+      "term_vi": "độ bão hòa oxy",
+      "term_en": "SpO2",
+      "kind": "vital_sign",
+      "aliases": [
+        "spo2",
+        "saturation",
+        "oxy máu"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 0,
+          "category": "vital_sign",
+          "term_vi": "độ bão hòa oxy"
+        }
+      }
+    },
+    {
+      "term_vi": "điện tim",
+      "term_en": "ECG",
+      "kind": "procedure",
+      "aliases": [
+        "ekg",
+        "electrocardiogram"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 1,
+          "category": "test",
+          "term_vi": "điện tâm đồ"
+        },
+        "interpreter": {
+          "order": 164
+        }
+      }
+    },
+    {
+      "term_vi": "đường huyết trung bình",
+      "term_en": "HbA1c",
+      "kind": "biomarker",
+      "aliases": [
+        "hba1c",
+        "a1c"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 2,
+          "category": "biomarker",
+          "term_vi": "đường huyết trung bình"
+        }
+      }
+    },
+    {
+      "term_vi": "đường huyết",
+      "term_en": "glucose",
+      "kind": "biomarker",
+      "aliases": [
+        "blood sugar",
+        "đường máu"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 3,
+          "category": "biomarker",
+          "term_vi": "đường huyết"
+        }
+      }
+    },
+    {
+      "term_vi": "insulin",
+      "term_en": "insulin",
+      "kind": "drug",
+      "aliases": [
+        "in-su-lin"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 4,
+          "category": "medication",
+          "term_vi": "insulin"
+        },
+        "interpreter": {
+          "order": 31
+        }
+      }
+    },
+    {
+      "term_vi": "metformin",
+      "term_en": "metformin",
+      "kind": "drug",
+      "aliases": [
+        "met for min",
+        "mét-pho-min"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 5,
+          "category": "medication",
+          "term_vi": "metformin"
+        },
+        "interpreter": {
+          "order": 28
+        }
+      }
+    },
+    {
+      "term_vi": "tăng huyết áp",
+      "term_en": "hypertension",
+      "kind": "condition",
+      "aliases": [
+        "cao huyết áp",
+        "high blood pressure"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 6,
+          "category": "condition",
+          "term_vi": "tăng huyết áp"
+        },
+        "interpreter": {
+          "order": 113
+        }
+      }
+    },
+    {
+      "term_vi": "đái tháo đường",
+      "term_en": "diabetes mellitus",
+      "kind": "condition",
+      "aliases": [
+        "tiểu đường",
+        "diabetes"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 7,
+          "category": "condition",
+          "term_vi": "đái tháo đường"
+        }
+      }
+    },
+    {
+      "term_vi": "bệnh phổi tắc nghẽn mạn tính",
+      "term_en": "COPD",
+      "kind": "condition",
+      "aliases": [
+        "copd",
+        "bệnh phổi tắc nghẽn"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 8,
+          "category": "condition",
+          "term_vi": "bệnh phổi tắc nghẽn mạn tính"
+        }
+      }
+    },
+    {
+      "term_vi": "hen suyễn",
+      "term_en": "asthma",
+      "kind": "condition",
+      "aliases": [
+        "hen suyễn"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 9,
+          "category": "condition",
+          "term_vi": "hen phế quản"
+        },
+        "interpreter": {
+          "order": 117
+        }
+      }
+    },
+    {
+      "term_vi": "chỉ số khối cơ thể",
+      "term_en": "BMI",
+      "kind": "biometric",
+      "aliases": [
+        "body mass index"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 10,
+          "category": "biometric",
+          "term_vi": "chỉ số khối cơ thể"
+        }
+      }
+    },
+    {
+      "term_vi": "creatinin",
+      "term_en": "creatinine",
+      "kind": "biomarker",
+      "aliases": [
+        "creatinin"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 11,
+          "category": "biomarker",
+          "term_vi": "creatinin"
+        }
+      }
+    },
+    {
+      "term_vi": "mức lọc cầu thận ước tính",
+      "term_en": "eGFR",
+      "kind": "biomarker",
+      "aliases": [
+        "egfr",
+        "gfr"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 12,
+          "category": "biomarker",
+          "term_vi": "mức lọc cầu thận ước tính"
+        }
+      }
+    },
+    {
+      "term_vi": "protein phản ứng C",
+      "term_en": "CRP",
+      "kind": "biomarker",
+      "aliases": [
+        "c reactive protein"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 13,
+          "category": "biomarker",
+          "term_vi": "protein phản ứng C"
+        }
+      }
+    },
+    {
+      "term_vi": "bạch cầu",
+      "term_en": "WBC",
+      "kind": "biomarker",
+      "aliases": [
+        "white blood cell",
+        "leukocyte"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 14,
+          "category": "biomarker",
+          "term_vi": "bạch cầu"
+        }
+      }
+    },
+    {
+      "term_vi": "huyết sắc tố",
+      "term_en": "hemoglobin",
+      "kind": "biomarker",
+      "aliases": [
+        "hb"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 15,
+          "category": "biomarker",
+          "term_vi": "huyết sắc tố"
+        }
+      }
+    },
+    {
+      "term_vi": "tiểu cầu",
+      "term_en": "platelet",
+      "kind": "biomarker",
+      "aliases": [
+        "plt"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 16,
+          "category": "biomarker",
+          "term_vi": "tiểu cầu"
+        }
+      }
+    },
+    {
+      "term_vi": "natri",
+      "term_en": "sodium",
+      "kind": "biomarker",
+      "aliases": [
+        "na",
+        "na+"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 17,
+          "category": "biomarker",
+          "term_vi": "natri"
+        }
+      }
+    },
+    {
+      "term_vi": "kali",
+      "term_en": "potassium",
+      "kind": "biomarker",
+      "aliases": [
+        "k",
+        "k+"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 18,
+          "category": "biomarker",
+          "term_vi": "kali"
+        }
+      }
+    },
+    {
+      "term_vi": "men gan ALT",
+      "term_en": "ALT",
+      "kind": "biomarker",
+      "aliases": [
+        "sgpt"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 19,
+          "category": "biomarker",
+          "term_vi": "men gan ALT"
+        }
+      }
+    },
+    {
+      "term_vi": "men gan AST",
+      "term_en": "AST",
+      "kind": "biomarker",
+      "aliases": [
+        "sgot"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 20,
+          "category": "biomarker",
+          "term_vi": "men gan AST"
+        }
+      }
+    },
+    {
+      "term_vi": "siêu âm",
+      "term_en": "ultrasound",
+      "kind": "procedure",
+      "aliases": [
+        "sonography"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 21,
+          "category": "test",
+          "term_vi": "siêu âm"
+        },
+        "interpreter": {
+          "order": 163
+        }
+      }
+    },
+    {
+      "term_vi": "chụp X-quang",
+      "term_en": "X-ray",
+      "kind": "procedure",
+      "aliases": [
+        "xray",
+        "x quang"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 22,
+          "category": "test",
+          "term_vi": "x-quang"
+        },
+        "interpreter": {
+          "order": 162
+        }
+      }
+    },
+    {
+      "term_vi": "chụp cắt lớp vi tính",
+      "term_en": "CT",
+      "kind": "test",
+      "aliases": [
+        "ct scan",
+        "computed tomography"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 23,
+          "category": "test",
+          "term_vi": "chụp cắt lớp vi tính"
+        }
+      }
+    },
+    {
+      "term_vi": "chụp cộng hưởng từ",
+      "term_en": "MRI",
+      "kind": "test",
+      "aliases": [
+        "magnetic resonance imaging"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 24,
+          "category": "test",
+          "term_vi": "chụp cộng hưởng từ"
+        }
+      }
+    },
+    {
+      "term_vi": "viêm phổi",
+      "term_en": "pneumonia",
+      "kind": "condition",
+      "aliases": [
+        "lung infection"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 25,
+          "category": "condition",
+          "term_vi": "viêm phổi"
+        },
+        "interpreter": {
+          "order": 121
+        }
+      }
+    },
+    {
+      "term_vi": "nhịp tim nhanh",
+      "term_en": "tachycardia",
+      "kind": "finding",
+      "aliases": [
+        "tim nhanh"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 26,
+          "category": "finding",
+          "term_vi": "nhịp tim nhanh"
+        }
+      }
+    },
+    {
+      "term_vi": "nhịp tim chậm",
+      "term_en": "bradycardia",
+      "kind": "finding",
+      "aliases": [
+        "tim chậm"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 27,
+          "category": "finding",
+          "term_vi": "nhịp tim chậm"
+        }
+      }
+    },
+    {
+      "term_vi": "huyết áp tâm thu",
+      "term_en": "systolic",
+      "kind": "vital_sign",
+      "aliases": [
+        "tâm thu"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 28,
+          "category": "vital_sign",
+          "term_vi": "huyết áp tâm thu"
+        }
+      }
+    },
+    {
+      "term_vi": "huyết áp tâm trương",
+      "term_en": "diastolic",
+      "kind": "vital_sign",
+      "aliases": [
+        "tâm trương"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 29,
+          "category": "vital_sign",
+          "term_vi": "huyết áp tâm trương"
+        }
+      }
+    },
+    {
+      "term_vi": "testosterone",
+      "term_en": "testosterone",
+      "kind": "hormone",
+      "aliases": [
+        "testosteron"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 30,
+          "category": "hormone",
+          "term_vi": "testosterone"
+        }
+      }
+    },
+    {
+      "term_vi": "dihydrotestosterone",
+      "term_en": "dihydrotestosterone",
+      "kind": "hormone",
+      "aliases": [
+        "dht"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 31,
+          "category": "hormone",
+          "term_vi": "dihydrotestosterone"
+        }
+      }
+    },
+    {
+      "term_vi": "tuyến Bartholin",
+      "term_en": "Bartholin",
+      "kind": "anatomy",
+      "aliases": [
+        "bartholins"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 32,
+          "category": "anatomy",
+          "term_vi": "tuyến Bartholin"
+        }
+      }
+    },
+    {
+      "term_vi": "methionin",
+      "term_en": "methionine",
+      "kind": "biochemistry",
+      "aliases": [
+        "methionin"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 33,
+          "category": "biochemistry",
+          "term_vi": "methionin"
+        }
+      }
+    },
+    {
+      "term_vi": "glutathion",
+      "term_en": "glutathione",
+      "kind": "biochemistry",
+      "aliases": [
+        "glutathion"
+      ],
+      "risk_flags": {},
+      "targets": {
+        "scribe": {
+          "order": 34,
+          "category": "biochemistry",
+          "term_vi": "glutathion"
+        }
+      }
+    },
+    {
+      "term_vi": "Augmentin",
+      "term_en": "Augmentin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 0
+        }
+      }
+    },
+    {
+      "term_vi": "amoxicillin",
+      "term_en": "amoxicillin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "term_vi": "penicillin",
+      "term_en": "penicillin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "term_vi": "azithromycin",
+      "term_en": "azithromycin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "term_vi": "cefuroxim",
+      "term_en": "cefuroxime",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "term_vi": "cefixim",
+      "term_en": "cefixime",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "term_vi": "cephalexin",
+      "term_en": "cephalexin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "term_vi": "ciprofloxacin",
+      "term_en": "ciprofloxacin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 7
+        }
+      }
+    },
+    {
+      "term_vi": "levofloxacin",
+      "term_en": "levofloxacin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 8
+        }
+      }
+    },
+    {
+      "term_vi": "metronidazole",
+      "term_en": "metronidazole",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 9
+        }
+      }
+    },
+    {
+      "term_vi": "doxycycline",
+      "term_en": "doxycycline",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 10
+        }
+      }
+    },
+    {
+      "term_vi": "clarithromycin",
+      "term_en": "clarithromycin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 11
+        }
+      }
+    },
+    {
+      "term_vi": "clindamycin",
+      "term_en": "clindamycin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 12
+        }
+      }
+    },
+    {
+      "term_vi": "vancomycin",
+      "term_en": "vancomycin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 13
+        }
+      }
+    },
+    {
+      "term_vi": "gentamicin",
+      "term_en": "gentamicin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 14
+        }
+      }
+    },
+    {
+      "term_vi": "paracetamol",
+      "term_en": "paracetamol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 15
+        }
+      }
+    },
+    {
+      "term_vi": "acetaminophen",
+      "term_en": "acetaminophen",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 16
+        }
+      }
+    },
+    {
+      "term_vi": "ibuprofen",
+      "term_en": "ibuprofen",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 17
+        }
+      }
+    },
+    {
+      "term_vi": "diclofenac",
+      "term_en": "diclofenac",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 18
+        }
+      }
+    },
+    {
+      "term_vi": "naproxen",
+      "term_en": "naproxen",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 19
+        }
+      }
+    },
+    {
+      "term_vi": "aspirin",
+      "term_en": "aspirin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 20
+        }
+      }
+    },
+    {
+      "term_vi": "tramadol",
+      "term_en": "tramadol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 21
+        }
+      }
+    },
+    {
+      "term_vi": "morphin",
+      "term_en": "morphine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 22
+        }
+      }
+    },
+    {
+      "term_vi": "codein",
+      "term_en": "codeine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 23
+        }
+      }
+    },
+    {
+      "term_vi": "omeprazole",
+      "term_en": "omeprazole",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {
+        "lasa_group": "Losec"
+      },
+      "targets": {
+        "interpreter": {
+          "order": 24
+        }
+      }
+    },
+    {
+      "term_vi": "Losec",
+      "term_en": "Losec",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {
+        "lasa_group": "Losec"
+      },
+      "targets": {
+        "interpreter": {
+          "order": 25
+        }
+      }
+    },
+    {
+      "term_vi": "Lasix",
+      "term_en": "Lasix",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {
+        "lasa_group": "Lasix"
+      },
+      "targets": {
+        "interpreter": {
+          "order": 26
+        }
+      }
+    },
+    {
+      "term_vi": "furosemide",
+      "term_en": "furosemide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {
+        "lasa_group": "Lasix"
+      },
+      "targets": {
+        "interpreter": {
+          "order": 27
+        }
+      }
+    },
+    {
+      "term_vi": "glibenclamide",
+      "term_en": "glibenclamide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 29
+        }
+      }
+    },
+    {
+      "term_vi": "gliclazide",
+      "term_en": "gliclazide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 30
+        }
+      }
+    },
+    {
+      "term_vi": "atorvastatin",
+      "term_en": "atorvastatin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 32
+        }
+      }
+    },
+    {
+      "term_vi": "simvastatin",
+      "term_en": "simvastatin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 33
+        }
+      }
+    },
+    {
+      "term_vi": "rosuvastatin",
+      "term_en": "rosuvastatin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 34
+        }
+      }
+    },
+    {
+      "term_vi": "amlodipine",
+      "term_en": "amlodipine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 35
+        }
+      }
+    },
+    {
+      "term_vi": "nifedipine",
+      "term_en": "nifedipine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 36
+        }
+      }
+    },
+    {
+      "term_vi": "losartan",
+      "term_en": "losartan",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 37
+        }
+      }
+    },
+    {
+      "term_vi": "valsartan",
+      "term_en": "valsartan",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 38
+        }
+      }
+    },
+    {
+      "term_vi": "enalapril",
+      "term_en": "enalapril",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 39
+        }
+      }
+    },
+    {
+      "term_vi": "captopril",
+      "term_en": "captopril",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 40
+        }
+      }
+    },
+    {
+      "term_vi": "bisoprolol",
+      "term_en": "bisoprolol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 41
+        }
+      }
+    },
+    {
+      "term_vi": "metoprolol",
+      "term_en": "metoprolol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 42
+        }
+      }
+    },
+    {
+      "term_vi": "atenolol",
+      "term_en": "atenolol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 43
+        }
+      }
+    },
+    {
+      "term_vi": "hydrochlorothiazide",
+      "term_en": "hydrochlorothiazide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 44
+        }
+      }
+    },
+    {
+      "term_vi": "spironolactone",
+      "term_en": "spironolactone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 45
+        }
+      }
+    },
+    {
+      "term_vi": "warfarin",
+      "term_en": "warfarin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 46
+        }
+      }
+    },
+    {
+      "term_vi": "heparin",
+      "term_en": "heparin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 47
+        }
+      }
+    },
+    {
+      "term_vi": "clopidogrel",
+      "term_en": "clopidogrel",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 48
+        }
+      }
+    },
+    {
+      "term_vi": "apixaban",
+      "term_en": "apixaban",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 49
+        }
+      }
+    },
+    {
+      "term_vi": "rivaroxaban",
+      "term_en": "rivaroxaban",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 50
+        }
+      }
+    },
+    {
+      "term_vi": "salbutamol",
+      "term_en": "salbutamol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 51
+        }
+      }
+    },
+    {
+      "term_vi": "budesonide",
+      "term_en": "budesonide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 52
+        }
+      }
+    },
+    {
+      "term_vi": "prednisolone",
+      "term_en": "prednisolone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 53
+        }
+      }
+    },
+    {
+      "term_vi": "dexamethasone",
+      "term_en": "dexamethasone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 54
+        }
+      }
+    },
+    {
+      "term_vi": "cetirizine",
+      "term_en": "cetirizine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 55
+        }
+      }
+    },
+    {
+      "term_vi": "loratadine",
+      "term_en": "loratadine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 56
+        }
+      }
+    },
+    {
+      "term_vi": "chlorpheniramine",
+      "term_en": "chlorpheniramine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 57
+        }
+      }
+    },
+    {
+      "term_vi": "ondansetron",
+      "term_en": "ondansetron",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 58
+        }
+      }
+    },
+    {
+      "term_vi": "domperidone",
+      "term_en": "domperidone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 59
+        }
+      }
+    },
+    {
+      "term_vi": "loperamide",
+      "term_en": "loperamide",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 60
+        }
+      }
+    },
+    {
+      "term_vi": "oresol",
+      "term_en": "oral rehydration salts",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 61
+        }
+      }
+    },
+    {
+      "term_vi": "vitamin D",
+      "term_en": "vitamin D",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 62
+        }
+      }
+    },
+    {
+      "term_vi": "sắt",
+      "term_en": "iron",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 63
+        }
+      }
+    },
+    {
+      "term_vi": "acid folic",
+      "term_en": "folic acid",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 64
+        }
+      }
+    },
+    {
+      "term_vi": "levothyroxine",
+      "term_en": "levothyroxine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 65
+        }
+      }
+    },
+    {
+      "term_vi": "carbimazole",
+      "term_en": "carbimazole",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 66
+        }
+      }
+    },
+    {
+      "term_vi": "allopurinol",
+      "term_en": "allopurinol",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 67
+        }
+      }
+    },
+    {
+      "term_vi": "colchicine",
+      "term_en": "colchicine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 68
+        }
+      }
+    },
+    {
+      "term_vi": "gabapentin",
+      "term_en": "gabapentin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 69
+        }
+      }
+    },
+    {
+      "term_vi": "pregabalin",
+      "term_en": "pregabalin",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 70
+        }
+      }
+    },
+    {
+      "term_vi": "diazepam",
+      "term_en": "diazepam",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 71
+        }
+      }
+    },
+    {
+      "term_vi": "alprazolam",
+      "term_en": "alprazolam",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 72
+        }
+      }
+    },
+    {
+      "term_vi": "sertraline",
+      "term_en": "sertraline",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 73
+        }
+      }
+    },
+    {
+      "term_vi": "fluoxetine",
+      "term_en": "fluoxetine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 74
+        }
+      }
+    },
+    {
+      "term_vi": "ceftriaxone",
+      "term_en": "ceftriaxone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 75
+        }
+      }
+    },
+    {
+      "term_vi": "meropenem",
+      "term_en": "meropenem",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 76
+        }
+      }
+    },
+    {
+      "term_vi": "adrenaline",
+      "term_en": "epinephrine",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 77
+        }
+      }
+    },
+    {
+      "term_vi": "naloxone",
+      "term_en": "naloxone",
+      "kind": "drug",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 78
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc kháng sinh",
+      "term_en": "antibiotic",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 79
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc giảm đau",
+      "term_en": "pain reliever",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 80
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc hạ sốt",
+      "term_en": "fever reducer",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 81
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc chống dị ứng",
+      "term_en": "antihistamine",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 82
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc huyết áp",
+      "term_en": "blood pressure medicine",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 83
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc tiểu đường",
+      "term_en": "diabetes medicine",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 84
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc chống đông",
+      "term_en": "anticoagulant",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 85
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc nhỏ mắt",
+      "term_en": "eye drops",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 86
+        }
+      }
+    },
+    {
+      "term_vi": "thuốc xịt",
+      "term_en": "inhaler",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 87
+        }
+      }
+    },
+    {
+      "term_vi": "dị ứng thuốc",
+      "term_en": "drug allergy",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 88
+        }
+      }
+    },
+    {
+      "term_vi": "phản vệ",
+      "term_en": "anaphylaxis",
+      "kind": "med_term",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 89
+        }
+      }
+    },
+    {
+      "term_vi": "khó thở",
+      "term_en": "shortness of breath",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 90
+        }
+      }
+    },
+    {
+      "term_vi": "đau ngực",
+      "term_en": "chest pain",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 91
+        }
+      }
+    },
+    {
+      "term_vi": "đau bụng",
+      "term_en": "abdominal pain",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 92
+        }
+      }
+    },
+    {
+      "term_vi": "đau đầu",
+      "term_en": "headache",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 93
+        }
+      }
+    },
+    {
+      "term_vi": "chóng mặt",
+      "term_en": "dizziness",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 94
+        }
+      }
+    },
+    {
+      "term_vi": "buồn nôn",
+      "term_en": "nausea",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 95
+        }
+      }
+    },
+    {
+      "term_vi": "nôn ói",
+      "term_en": "vomiting",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 96
+        }
+      }
+    },
+    {
+      "term_vi": "sốt",
+      "term_en": "fever",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 97
+        }
+      }
+    },
+    {
+      "term_vi": "ho",
+      "term_en": "cough",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 98
+        }
+      }
+    },
+    {
+      "term_vi": "ho ra máu",
+      "term_en": "coughing blood",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 99
+        }
+      }
+    },
+    {
+      "term_vi": "tiêu chảy",
+      "term_en": "diarrhea",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 100
+        }
+      }
+    },
+    {
+      "term_vi": "táo bón",
+      "term_en": "constipation",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 101
+        }
+      }
+    },
+    {
+      "term_vi": "phát ban",
+      "term_en": "rash",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 102
+        }
+      }
+    },
+    {
+      "term_vi": "sưng phù",
+      "term_en": "swelling",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 103
+        }
+      }
+    },
+    {
+      "term_vi": "ngất",
+      "term_en": "fainting",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 104
+        }
+      }
+    },
+    {
+      "term_vi": "co giật",
+      "term_en": "seizure",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 105
+        }
+      }
+    },
+    {
+      "term_vi": "yếu liệt",
+      "term_en": "weakness or paralysis",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 106
+        }
+      }
+    },
+    {
+      "term_vi": "tê bì",
+      "term_en": "numbness",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 107
+        }
+      }
+    },
+    {
+      "term_vi": "đau dữ dội",
+      "term_en": "severe pain",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 108
+        }
+      }
+    },
+    {
+      "term_vi": "đau nhẹ",
+      "term_en": "mild pain",
+      "kind": "symptom",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 109
+        }
+      }
+    },
+    {
+      "term_vi": "mang thai",
+      "term_en": "pregnant",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 110
+        }
+      }
+    },
+    {
+      "term_vi": "có bầu",
+      "term_en": "pregnant",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 111
+        }
+      }
+    },
+    {
+      "term_vi": "cho con bú",
+      "term_en": "breastfeeding",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 112
+        }
+      }
+    },
+    {
+      "term_vi": "hạ huyết áp",
+      "term_en": "low blood pressure",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 114
+        }
+      }
+    },
+    {
+      "term_vi": "đái tháo đường",
+      "term_en": "diabetes",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 115
+        }
+      }
+    },
+    {
+      "term_vi": "tiểu đường",
+      "term_en": "diabetes",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 116
+        }
+      }
+    },
+    {
+      "term_vi": "bệnh tim",
+      "term_en": "heart disease",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 118
+        }
+      }
+    },
+    {
+      "term_vi": "suy thận",
+      "term_en": "kidney failure",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 119
+        }
+      }
+    },
+    {
+      "term_vi": "suy gan",
+      "term_en": "liver failure",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 120
+        }
+      }
+    },
+    {
+      "term_vi": "viêm dạ dày",
+      "term_en": "gastritis",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 122
+        }
+      }
+    },
+    {
+      "term_vi": "đột quỵ",
+      "term_en": "stroke",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 123
+        }
+      }
+    },
+    {
+      "term_vi": "nhồi máu cơ tim",
+      "term_en": "heart attack",
+      "kind": "condition",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 124
+        }
+      }
+    },
+    {
+      "term_vi": "huyết áp",
+      "term_en": "blood pressure",
+      "kind": "vital",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 125
+        }
+      }
+    },
+    {
+      "term_vi": "mạch",
+      "term_en": "pulse",
+      "kind": "vital",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 126
+        }
+      }
+    },
+    {
+      "term_vi": "nhiệt độ",
+      "term_en": "temperature",
+      "kind": "vital",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 127
+        }
+      }
+    },
+    {
+      "term_vi": "đường huyết",
+      "term_en": "blood glucose",
+      "kind": "vital",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 128
+        }
+      }
+    },
+    {
+      "term_vi": "SpO2",
+      "term_en": "oxygen saturation",
+      "kind": "vital",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 129
+        }
+      }
+    },
+    {
+      "term_vi": "uống",
+      "term_en": "oral",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 130
+        }
+      }
+    },
+    {
+      "term_vi": "tiêm",
+      "term_en": "injection",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 131
+        }
+      }
+    },
+    {
+      "term_vi": "truyền tĩnh mạch",
+      "term_en": "intravenous infusion",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 132
+        }
+      }
+    },
+    {
+      "term_vi": "nhỏ mắt",
+      "term_en": "eye drops",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 133
+        }
+      }
+    },
+    {
+      "term_vi": "nhỏ tai",
+      "term_en": "ear drops",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 134
+        }
+      }
+    },
+    {
+      "term_vi": "xịt mũi",
+      "term_en": "nasal spray",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 135
+        }
+      }
+    },
+    {
+      "term_vi": "hít",
+      "term_en": "inhalation",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 136
+        }
+      }
+    },
+    {
+      "term_vi": "bôi ngoài da",
+      "term_en": "topical",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 137
+        }
+      }
+    },
+    {
+      "term_vi": "ngậm dưới lưỡi",
+      "term_en": "sublingual",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 138
+        }
+      }
+    },
+    {
+      "term_vi": "đặt hậu môn",
+      "term_en": "rectal",
+      "kind": "route",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 139
+        }
+      }
+    },
+    {
+      "term_vi": "viên",
+      "term_en": "tablet",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 140
+        }
+      }
+    },
+    {
+      "term_vi": "gói",
+      "term_en": "sachet",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 141
+        }
+      }
+    },
+    {
+      "term_vi": "ống",
+      "term_en": "ampoule",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 142
+        }
+      }
+    },
+    {
+      "term_vi": "giọt",
+      "term_en": "drop",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 143
+        }
+      }
+    },
+    {
+      "term_vi": "muỗng",
+      "term_en": "spoon",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 144
+        }
+      }
+    },
+    {
+      "term_vi": "mililit",
+      "term_en": "milliliter",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 145
+        }
+      }
+    },
+    {
+      "term_vi": "mi-li-lít",
+      "term_en": "milliliter",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 146
+        }
+      }
+    },
+    {
+      "term_vi": "mi-li-gam",
+      "term_en": "milligram",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 147
+        }
+      }
+    },
+    {
+      "term_vi": "microgam",
+      "term_en": "microgram",
+      "kind": "unit",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 148
+        }
+      }
+    },
+    {
+      "term_vi": "ngày một lần",
+      "term_en": "once daily",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 149
+        }
+      }
+    },
+    {
+      "term_vi": "ngày hai lần",
+      "term_en": "twice daily",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 150
+        }
+      }
+    },
+    {
+      "term_vi": "ngày ba lần",
+      "term_en": "three times daily",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 151
+        }
+      }
+    },
+    {
+      "term_vi": "mỗi ngày",
+      "term_en": "every day",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 152
+        }
+      }
+    },
+    {
+      "term_vi": "mỗi sáng",
+      "term_en": "every morning",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 153
+        }
+      }
+    },
+    {
+      "term_vi": "mỗi tối",
+      "term_en": "every evening",
+      "kind": "frequency",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 154
+        }
+      }
+    },
+    {
+      "term_vi": "sau ăn",
+      "term_en": "after food",
+      "kind": "timing",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 155
+        }
+      }
+    },
+    {
+      "term_vi": "trước ăn",
+      "term_en": "before food",
+      "kind": "timing",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 156
+        }
+      }
+    },
+    {
+      "term_vi": "khi đau",
+      "term_en": "when in pain",
+      "kind": "timing",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 157
+        }
+      }
+    },
+    {
+      "term_vi": "trong mười ngày",
+      "term_en": "for ten days",
+      "kind": "duration",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 158
+        }
+      }
+    },
+    {
+      "term_vi": "tái khám",
+      "term_en": "follow-up visit",
+      "kind": "workflow",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 159
+        }
+      }
+    },
+    {
+      "term_vi": "cấp cứu",
+      "term_en": "emergency department",
+      "kind": "workflow",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 160
+        }
+      }
+    },
+    {
+      "term_vi": "xét nghiệm máu",
+      "term_en": "blood test",
+      "kind": "procedure",
+      "aliases": [],
+      "risk_flags": {},
+      "targets": {
+        "interpreter": {
+          "order": 161
+        }
+      }
+    }
+  ]
+}

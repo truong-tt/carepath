@@ -1,0 +1,23 @@
+{
+  "run_id": "carepath-gec-full-v1",
+  "dataset": "tensorxt/ViMedCSS",
+  "manifest": "scribe/training/manifests/vimedcss-v1.json",
+  "frozen_eval_fixture": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
+  "frozen_eval_manifest": "scribe/training/eval/fixtures/gec_eval_v1.manifest.json",
+  "artifact_root": "artifacts",
+  "suffix": "",
+  "profile": {
+    "name": "full",
+    "limit_per_split": null,
+    "asr_provider": "gipformer",
+    "retrieval_backend": "hybrid",
+    "n_best": 5,
+    "synth_count": null,
+    "synth_tts_limit": null,
+    "tts_provider": "xtts",
+    "nsyn_factor": 1.0,
+    "max_steps": 600,
+    "seeds": [13, 7, 42],
+    "all_variants": true
+  }
+}

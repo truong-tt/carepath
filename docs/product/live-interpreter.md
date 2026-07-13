@@ -7,7 +7,7 @@ clinician and an English-speaking patient during a consultation. It is for
 people who do not share a language. It translates only and must not provide
 medical advice, diagnoses, or treatment recommendations.
 
-The serving boundary is `backend/app` under `/api/*` and `/ws/*`, integrated
+The serving boundary is `interpreter/app` under `/api/*` and `/ws/*`, integrated
 into the combined FastAPI process. The browser workflow is served at
 `/phien-dich-y-khoa/`.
 

@@ -3,22 +3,22 @@
 A clinical AI suite for Vietnamese clinics with two distinct products and one
 principle: **the clinician stays in control.**
 
-- **Scribe** (`apps/api/carepath`, routes `/api/v1/*`) — upload consultation
+- **Scribe** (`scribe/carepath`, routes `/api/v1/*`) — upload consultation
   audio, get a Gipformer ONNX transcript with retrieval-assisted term
   correction and a draft Vietnamese SOAP note for clinician review. Works
   keyless with mock ASR + the offline LLM; production uses a CKey
   OpenAI-compatible LLM.
-- **Interpreter** (`backend/app`, routes `/api/*` + `/ws/*`) — live
+- **Interpreter** (`interpreter/app`, routes `/api/*` + `/ws/*`) — live
   Vietnamese ↔ English interpreting with risk gating, read-back confirmation,
   interpreter escalation, and an admin review page. Runs in deterministic
   mock mode with zero API keys; cloud providers are a later track.
 
 Frontends, all served by the same API in production:
 
-- `site/` — the public demo site (landing at `/`, working Scribe tool at
+- `scribe/frontend/` — the public demo site (landing at `/`, working Scribe tool at
   `/ghi-chep-lam-sang/`). Vietnamese default, English toggle, full diacritics enforced
   at build time.
-- `frontend/` — the interpreter app, served at `/phien-dich-y-khoa/`.
+- `interpreter/frontend/` — the interpreter app, served at `/phien-dich-y-khoa/`.
 
 One FastAPI process serves both APIs and both frontends. The executed
 unification plan and its review protocol are archived in `docs/history/`.
@@ -31,15 +31,15 @@ Python 3.12 and Node 22.
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -e ".[dev]" -e ".\backend[dev]"
+pip install -e ".[dev]" -e ".\shared" -e ".\interpreter[dev]"
 Copy-Item .env.local.example .env
 
 # Build the frontends the API will serve
-cd site; npm ci; npm run build; cd ..
-cd frontend; npm ci; npm run build; cd ..
+cd scribe/frontend; npm ci; npm run build; cd ../..
+cd interpreter/frontend; npm ci; npm run build; cd ../..
 
 # One process, everything on http://127.0.0.1:8000
-uvicorn carepath.main:app --app-dir apps/api --reload
+uvicorn carepath.main:app --app-dir scribe --reload
 ```
 
 Then open `http://127.0.0.1:8000/` (demo site), `/ghi-chep-lam-sang/` (Scribe tool),
@@ -47,17 +47,18 @@ Then open `http://127.0.0.1:8000/` (demo site), `/ghi-chep-lam-sang/` (Scribe to
 report both modules.
 
 For frontend development, run the Vite dev servers instead
-(`npm run dev` in `site/` or `frontend/`); the API skips missing dist folders.
+(`npm run dev` in `scribe/frontend/` or `interpreter/frontend/`); the API skips missing dist folders.
 
 ## Tests
 
 ```powershell
 pytest                          # scriber + combined-app suite (repo root)
 python scripts/smoke_backend.py # scriber keyless smoke
-cd backend; pytest              # interpreter suite
-python eval/run_eval.py --set eval/fixtures/eval_starter.tsv --providers mock
-cd frontend; npm test; npx playwright test
-cd site; npm test; npm run build; npm run e2e
+python scripts/build_term_artifacts.py --check # canonical term-data drift gate
+cd interpreter; pytest          # interpreter suite
+python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
+cd interpreter/frontend; npm test; npx playwright test
+cd scribe/frontend; npm test; npm run build; npm run e2e
 ```
 
 ## Development Harness
@@ -98,11 +99,13 @@ One Hugging Face Space (Docker) serves everything: see `docs/deploy.md`.
 
 ## Repo map
 
-- `apps/api/carepath` — scriber runtime API (ASR + retrieval + LLM serving)
-- `apps/api/carepath/gec` — DARAG training/eval package (never imported by serving)
-- `backend/` — interpreter API (risk engine, glossary, sessions, review)
-- `site/`, `frontend/` — the two Vite frontends
-- `eval/` — interpreter eval harness; `tests/` — scriber + combined-app tests
-- `scripts/gec`, `notebooks/` — GEC training pipeline; `docs/` — background + deploy
+- `scribe/carepath` — scriber runtime API (ASR + retrieval + LLM serving)
+- `shared/carepath_shared/terms/medical_terms.json` — canonical term source;
+  regenerate its serving artifacts with `python scripts/build_term_artifacts.py`
+- `scribe/training/gec` — Scribe-only DARAG training/eval package (never imported by serving)
+- `interpreter/` — interpreter API, console, tests, and safety eval
+- `scribe/frontend/` — the public site; `scribe/tests/` — scriber + combined-app tests
+- `scribe/training/scripts`, `scribe/training/notebooks/` — Scribe-only GEC training pipeline;
+  `interpreter/eval/` remains the Interpreter safety harness; `docs/` — background + deploy
 - `docs/README.md` — task-first documentation map; `docs/history/` — preserved
   build plans and unification review history

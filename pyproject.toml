@@ -38,19 +38,19 @@ training = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["apps/api"]
-testpaths = ["tests"]
+pythonpath = ["scribe"]
+testpaths = ["scribe/tests"]
 addopts = "-q"
 
 [tool.ruff.lint.per-file-ignores]
-"notebooks/*.ipynb" = ["E402", "E702"]
-"tests/test_api.py" = ["E402"]
-"tests/test_combined_app.py" = ["E402"]
+"scribe/training/notebooks/*.ipynb" = ["E402", "E702"]
+"scribe/tests/test_api.py" = ["E402"]
+"scribe/tests/test_combined_app.py" = ["E402"]
 
 [build-system]
 requires = ["setuptools>=70", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["apps/api"]
+where = ["scribe"]
 include = ["carepath*"]

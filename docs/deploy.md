@@ -26,8 +26,8 @@ app_port: 7860
 ---
 ```
 
-3. Push this repo to the Space. The root `Dockerfile` builds the two Vite
-   frontends in a node stage (the site build enforces the Vietnamese
+3. Push this repo to the Space. The root `Dockerfile` builds `scribe/frontend/` and
+   `interpreter/frontend/` in a node stage (the site build enforces the Vietnamese
    diacritics gate), installs both API packages, pre-downloads the Gipformer
    int8 ONNX files, and starts Uvicorn on port `7860`.
    Set the Docker build arg `VITE_PUBLIC_SITE_URL=https://carepath-omega.vercel.app`
@@ -97,12 +97,12 @@ curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
 
 ## Canonical Vercel site
 
-The `site/` directory is the static marketing deployment at
+The `scribe/frontend/` directory is the static marketing deployment at
 `https://carepath-omega.vercel.app`:
 
 1. In the Vercel project settings, change **Root Directory** from the removed
-   `apps/web-next` to `site` (framework/build/output come from
-   `site/vercel.json`).
+   `apps/web-next` to `scribe/frontend` (framework/build/output come from
+   `scribe/frontend/vercel.json`).
 2. Set these Vercel environment variables:
 
 ```text

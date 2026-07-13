@@ -1,0 +1,12 @@
+{"id":"drug-001","category":"drug_name","split":"frozen","raw_asr":"benh nhan uong met pho min 500 mg moi ngay","gold_text":"bệnh nhân uống metformin 500 mg mỗi ngày","gold_terms":["metformin"]}
+{"id":"drug-002","category":"drug_name","split":"frozen","raw_asr":"tiem cef tri a xone 1 g","gold_text":"tiêm ceftriaxone 1 g","gold_terms":["ceftriaxone"]}
+{"id":"dose-001","category":"dosage","split":"frozen","raw_asr":"uong nam tram mi li gam paracetamol","gold_text":"uống 500 mg paracetamol","gold_terms":["paracetamol"]}
+{"id":"dose-002","category":"dosage","split":"frozen","raw_asr":"tiem hai phay nam mi li lit insulin","gold_text":"tiêm 2,5 ml insulin","gold_terms":["insulin"]}
+{"id":"laterality-001","category":"laterality","split":"frozen","raw_asr":"dau goi trai","gold_text":"đau gối trái","gold_terms":[]}
+{"id":"laterality-002","category":"laterality","split":"frozen","raw_asr":"sung co chan phai","gold_text":"sưng cổ chân phải","gold_terms":[]}
+{"id":"negation-001","category":"negation","split":"frozen","raw_asr":"co di ung penicillin","gold_text":"không dị ứng penicillin","gold_terms":["penicillin"]}
+{"id":"negation-002","category":"negation","split":"frozen","raw_asr":"khong kho tho","gold_text":"không khó thở","gold_terms":[]}
+{"id":"number-001","category":"numbers","split":"frozen","raw_asr":"sp o hai chin muoi tam phan tram","gold_text":"SpO2 98%","gold_terms":["SpO2"]}
+{"id":"number-002","category":"numbers","split":"frozen","raw_asr":"huyet ap mot tram hai muoi tren tam muoi","gold_text":"huyết áp 120/80 mmHg","gold_terms":[]}
+{"id":"diacritic-001","category":"diacritics","split":"frozen","raw_asr":"benh nhan sot cao","gold_text":"bệnh nhân sốt cao","gold_terms":[]}
+{"id":"diacritic-002","category":"diacritics","split":"frozen","raw_asr":"dau bung va tieu chay","gold_text":"đau bụng và tiêu chảy","gold_terms":[]}
