@@ -23,9 +23,10 @@ provides the workflow from `/ghi-chep-lam-sang/`.
 - The committed text-only frozen baseline report is verified in CI. Before an
   adapter can export, its frozen-fixture drug-name recall and dosage
   number/unit preservation must not regress against the raw-ASR baseline.
-- A SOAP fine-tuning decision is prohibited until the owner completes the
-  clinician-rating protocol for at least 50 de-identified pilot notes in an
-  approved environment. The rating schema stores no note text or audio here.
+- In-house SOAP review may use only synthetic or already-approved
+  de-identified material. It is informational only and does not authorize a
+  SOAP fine-tuning, provider, or safety-policy change. The optional rating
+  schema stores no note text or audio here.
 
 ## Proof
 

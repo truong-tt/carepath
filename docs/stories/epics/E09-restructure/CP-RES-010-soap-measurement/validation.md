@@ -9,7 +9,7 @@ is created or persisted.
 
 | Layer | Cases |
 | --- | --- |
-| Unit | 50-note threshold, serious-hallucination summary, invalid-score rejection |
+| Unit | Quality summary, serious-hallucination summary, invalid-score rejection |
 | Integration | Existing CPU-only training test job discovers the validator test |
 | E2E | Not applicable; no product surface changes |
 | Platform | No external provider required |
@@ -23,6 +23,8 @@ python -m ruff check scribe/training/scripts/validate_soap_ratings.py scribe/tra
 
 ## Acceptance Evidence
 
-2026-07-13: focused proof passed with `38 passed`; no data collection, model
-training, or serving behavior change occurred. The owner has not yet supplied
-the required pilot data or clinical ratings, so no model decision is claimed.
+2026-07-13: `python -m pytest scribe/training/tests` passed with `54 passed,
+1 skipped`; the review-validator focused test passed with `4 passed`, and
+Ruff passed. No data collection, model training, or serving behavior change
+occurred. The tool is limited to optional in-house testing and makes no model
+decision claim.

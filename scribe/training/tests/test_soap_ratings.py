@@ -25,18 +25,18 @@ def _row(note_id: str, **overrides: str) -> dict[str, str]:
 
 
 class SoapRatingsTests(unittest.TestCase):
-    def test_summary_requires_fifty_distinct_notes(self) -> None:
-        rows = [_row(f"note-{index}") for index in range(50)]
+    def test_summary_reports_unique_notes_without_a_readiness_gate(self) -> None:
+        rows = [_row("note-1"), _row("note-1"), _row("note-2")]
         summary = summarize_ratings(rows)
-        self.assertTrue(summary["ready_for_decision"])
-        self.assertEqual(summary["unique_notes"], 50)
+        self.assertEqual(summary["rating_rows"], 3)
+        self.assertEqual(summary["unique_notes"], 2)
+        self.assertNotIn("ready_for_decision", summary)
 
     def test_summary_reports_serious_hallucinations(self) -> None:
         rows = [_row("note-1", hallucination="2", status="unsafe")]
         summary = summarize_ratings(rows)
         self.assertEqual(summary["serious_hallucinations"], 1)
         self.assertEqual(summary["unsafe_notes"], 1)
-        self.assertFalse(summary["ready_for_decision"])
 
     def test_rejects_out_of_range_score(self) -> None:
         with self.assertRaisesRegex(ValueError, "hallucination"):

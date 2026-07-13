@@ -13,7 +13,7 @@ not establish a live deployment or authorize clinical data processing.
 | Integration | Term-artifact drift, training baseline, mock Scribe smoke |
 | E2E | Both Vite frontends' Playwright suites |
 | Platform | Owner verifies Vercel and Space routes after configuration |
-| Clinical | Owner supplies approved, de-identified rubric summary |
+| Clinical | Not required for the current in-house-only scope |
 
 ## Commands
 
@@ -63,7 +63,10 @@ preserved.
 the Space root, `/ghi-chep-lam-sang/`, `/api/v1/health`, and `/api/health`
 continue to return HTTP 200. The public Scribe site on Vercel also returns 200.
 
-Pending owner evidence: the approved 50-note clinician-rating threshold
-reached without storing clinical material in the repository. No container
-provider is registered in Harness, so that clinical evidence cannot be
-collected by this workspace.
+2026-07-13 in-house scope evidence: owner direction removed the external
+50-note clinician-rating target. Decision 0017, the product contract, the
+restructure plan, and the optional review utility now make in-house testing
+informational only. No clinical material is collected or stored in this
+repository, and no model decision is claimed. The focused review-validator
+test passed with `4 passed`; the full training slice passed with `54 passed,
+1 skipped`; and Ruff passed.

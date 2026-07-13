@@ -2,26 +2,27 @@
 
 ## Domain Model
 
-No repository model or product contract changes are required. Deployment
-credentials and health-data consent remain owner-controlled trust boundaries.
+No runtime change is required. The product contract documents that optional
+in-house review is informational only; deployment credentials and health-data
+consent remain owner-controlled trust boundaries.
 
 ## Application Flow
 
 The deployment owner configures Vercel exactly as `docs/deploy.md` specifies,
-then validates the live site and Space health endpoints. Separately, the
-clinical owner obtains approved, de-identified pilot material and at least 50
-clinician rubric ratings before any SOAP model decision.
+then validates the live site and Space health endpoints. Optional in-house
+review may use synthetic or already-approved de-identified material, but it
+does not authorize any SOAP model decision.
 
 ## Interface Contract
 
 The existing Vercel environment validation and Space health endpoints are the
-deployment contract. The score-only SOAP rating schema and validator are the
-clinical-measurement contract.
+deployment contract. The score-only SOAP review schema and validator provide
+in-house quality signals only.
 
 ## Data Model
 
-No clinical material belongs in this repository. Only anonymous score metadata
-that passes the existing validator may be processed in an approved environment.
+No clinical material belongs in this repository. Optional review metadata may
+be processed only outside the source tree using the existing validator.
 
 ## UI / Platform Impact
 
@@ -29,10 +30,12 @@ No local UI change. The Vercel Root Directory must point to `scribe/frontend`.
 
 ## Observability
 
-Capture live deployment status and owner-approved rating summaries outside this
-repository's source tree.
+Capture live deployment status. Optional in-house review summaries stay outside
+this repository's source tree.
 
 ## Alternatives Considered
 
-1. Simulate deployment or clinical evidence: rejected because it would not
-   prove the external environment or satisfy clinical-data safeguards.
+1. Keep the external clinical-rating gate: rejected because it conflicts with
+   the owner-directed in-house testing scope.
+2. Simulate live deployment: rejected because it would not prove the external
+   environment.

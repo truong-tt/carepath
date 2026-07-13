@@ -4,7 +4,8 @@ Date: 2026-07-13
 
 ## Status
 
-Accepted
+Superseded by [0017 In-House Testing Scope](0017-in-house-testing-scope.md)
+on 2026-07-13.
 
 ## Context
 

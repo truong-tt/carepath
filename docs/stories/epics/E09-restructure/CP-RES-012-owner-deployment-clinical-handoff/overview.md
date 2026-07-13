@@ -2,19 +2,18 @@
 
 ## Current Behavior
 
-The repository restructure and local product matrix are complete. Two final
-conditions cannot be performed from the repository: changing Vercel/Space
-settings and collecting legally approved clinical evidence.
+The repository restructure and local product matrix are complete. The owner
+has completed the deployment configuration and live-route verification.
 
 ## Target Behavior
 
-The owner completes the documented deployment settings and the approved,
-de-identified clinician-rating process before calling the whole plan complete.
+The owner records the current in-house testing scope. No external
+clinician-rating target blocks completion of the restructure.
 
 ## Affected Users
 
 - Deployment owner.
-- Clinical owner and clinician reviewers.
+- In-house reviewers.
 
 ## Affected Product Docs
 
@@ -23,5 +22,5 @@ de-identified clinician-rating process before calling the whole plan complete.
 
 ## Non-Goals
 
-- Collect audio, transcripts, patient data, or clinician ratings in this repo.
-- Change Vercel, Hugging Face, or cloud-provider settings without owner access.
+- Collect audio, transcripts, patient data, or review data in this repo.
+- Change a model, provider, or safety policy from in-house review results.

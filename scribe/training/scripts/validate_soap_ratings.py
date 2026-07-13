@@ -1,4 +1,4 @@
-"""Validate a de-identified clinician SOAP-rating export without reading note content."""
+"""Summarize an in-house SOAP review export without reading note content."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ SCORE_LIMITS = {"completeness": (1, 5), "hallucination": (0, 3), "terminology": 
 STATUSES = {"accepted", "needs_correction", "unsafe"}
 
 
-def summarize_ratings(rows: list[dict[str, str]], min_notes: int = 50) -> dict[str, object]:
+def summarize_ratings(rows: list[dict[str, str]]) -> dict[str, object]:
     if not rows:
         raise ValueError("rating export has no rows")
     notes: set[str] = set()
@@ -59,17 +59,15 @@ def summarize_ratings(rows: list[dict[str, str]], min_notes: int = 50) -> dict[s
         "mean_terminology": round(totals["terminology"] / count, 2),
         "serious_hallucinations": serious_hallucinations,
         "unsafe_notes": unsafe,
-        "ready_for_decision": len(notes) >= min_notes,
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path)
-    parser.add_argument("--min-notes", type=int, default=50)
     args = parser.parse_args()
     with args.input.open(encoding="utf-8", newline="") as stream:
-        summary = summarize_ratings(list(csv.DictReader(stream)), args.min_notes)
+        summary = summarize_ratings(list(csv.DictReader(stream)))
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 

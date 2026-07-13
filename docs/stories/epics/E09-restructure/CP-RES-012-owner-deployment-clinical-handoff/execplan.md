@@ -2,8 +2,8 @@
 
 ## Goal
 
-Complete the owner-only end conditions without weakening deployment or clinical
-safety requirements.
+Record the completed owner deployment work and replace the external
+clinician-rating completion gate with an in-house testing scope.
 
 ## Scope
 
@@ -12,32 +12,34 @@ In scope:
 - Owner configures Vercel Root Directory as `scribe/frontend` and supplies the
   documented deployment environment variables.
 - Owner rebuilds the Docker Space and verifies the documented live routes.
-- Clinical owner completes the approved de-identified rating protocol.
+- Product and plan records state that optional in-house SOAP review is
+  informational only.
 
 Out of scope:
 
 - Repository-side deployment automation or clinical-data collection.
-- Any model training or SOAP provider change before the rating threshold.
+- Any model training or SOAP provider change from in-house review results.
 
 ## Risk Classification
 
 Risk flags:
 
-- Deployment, credentials, clinical data, privacy.
+- Deployment, credentials, clinical data, privacy, model-decision policy.
 
 Hard gates:
 
 - No source audio, transcript, identifier, or note text enters the repository.
-- No SOAP model decision before 50 approved clinician ratings.
+- No SOAP model, provider, or safety-policy change from in-house review results
+  without a separate owner decision.
 
 ## Work Phases
 
 1. Owner completes the Vercel and Space configuration in `docs/deploy.md`.
 2. Owner records live route and health-endpoint evidence.
-3. Clinical owner completes legal approval, de-identification, and ratings.
-4. Owner reopens the plan with that evidence for final verification.
+3. Record the deliberate in-house-only scope and its safety limits.
+4. Verify the policy, plan, optional review utility, and Harness evidence.
 
 ## Stop Conditions
 
-Do not proceed without deployment-owner access or approved clinical-data
-authority.
+Pause for owner direction if a request would collect clinical data or make a
+model, provider, or safety-policy change from in-house review results.

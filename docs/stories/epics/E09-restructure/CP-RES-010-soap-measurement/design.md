@@ -8,10 +8,10 @@ contains no clinical source material.
 
 ## Application Flow
 
-The owner exports anonymous score-only rows from the approved review
-environment and runs `validate_soap_ratings.py` locally. The summary reports
-the number of unique notes, mean scores, serious hallucinations, unsafe
-dispositions, and whether the 50-note decision threshold is met.
+An in-house reviewer exports anonymous score-only rows from an approved local
+review environment and runs `validate_soap_ratings.py` locally. The summary
+reports the number of unique notes, mean scores, serious hallucinations, and
+unsafe dispositions. It has no readiness result or decision threshold.
 
 ## Data Model
 
@@ -25,8 +25,10 @@ The CLI prints a JSON summary only; it never writes, logs, or uploads ratings.
 
 ## Alternatives Considered
 
-1. Use synthetic note ratings.
+1. Use synthetic or already-approved de-identified material for in-house
+   testing.
 2. Store full notes and audio beside the code.
-3. Fine-tune before clinician measurement.
+3. Change the model based on in-house measurements alone.
 
-All are rejected because they would create weak or unsafe evidence.
+The first option is accepted for bounded in-house testing. The latter options
+are rejected because they would create privacy or safety risk.
