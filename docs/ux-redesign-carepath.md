@@ -91,58 +91,6 @@ cd scribe\frontend; npm.cmd test; npm.cmd run build; npm.cmd run e2e
   Re-enable the static mount only when the product is ready for public access
   and its pre-start safety flow has passed its normal release checks.
 
-## Current priority update: static header product labels
-
-### Current UX problem
-
-The header labels `Phiên dịch khám bệnh trực tiếp` and `Ghi chép bệnh án AI`
-both link to `#products`. They read as product labels rather than page
-navigation, so clicking them unexpectedly moves the visitor.
-
-### Proposed flow
-
-Render the two product names as static header labels. Keep only `An toàn` and
-`Thí điểm` as in-page header links.
-
-### Affected routes, pages, and components
-
-- `/` — `scribe/frontend/src/LandingPage.tsx`
-- `scribe/frontend/src/styles.css`
-- `scribe/frontend/tests/demo-flow.spec.ts`
-
-### Vietnamese-first copy
-
-- `Phiên dịch khám bệnh trực tiếp`
-- `Ghi chép bệnh án AI`
-
-### Implementation story: CP-UX-10
-
-- Replace the two product-name anchors in the shared header fragment with
-  noninteractive text labels.
-- Preserve the desktop and mobile header presentation.
-
-### Dependencies
-
-- CP-UX-09 public Interpreter block remains unchanged.
-
-### Acceptance criteria
-
-- Clicking or tabbing cannot navigate through either product-name header
-  label.
-- `An toàn` and `Thí điểm` remain working in-page links.
-- The two labels remain visible in desktop and mobile headers.
-
-### Validation commands
-
-```powershell
-cd scribe\frontend; npm.cmd test; npm.cmd run build; npm.cmd run e2e
-```
-
-### Risks and fallback behavior
-
-- This changes header presentation only; it does not change product routes,
-  Scribe actions, Interpreter APIs, or safety behavior.
-
 ## Delivery order
 
 | Order | Story | Type | Depends on |

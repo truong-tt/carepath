@@ -127,30 +127,23 @@ test("both product choices remain discoverable across release viewports", async 
     if (viewport.width <= 1023) {
       const menu = page.locator(".site-nav__menu");
       const summary = menu.locator("summary");
-      const productLabels = [
-        "Phiên dịch khám bệnh trực tiếp",
-        "Ghi chép bệnh án AI",
-      ];
       if (viewport.width === 390) {
         await summary.focus();
         await page.keyboard.press("Enter");
         await expect(menu).toHaveAttribute("open", "");
+        await expect(menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Ghi chép bệnh án AI" })).toBeVisible();
+        await page.keyboard.press("Tab");
+        await expect(
+          menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" }),
+        ).toBeFocused();
+        await page.keyboard.press("Enter");
+        await expect(menu).not.toHaveAttribute("open", "");
+        await expect(page).toHaveURL(/#products$/);
       } else {
         await summary.click();
-      }
-
-      for (const label of productLabels) {
-        await expect(menu.getByText(label, { exact: true })).toBeVisible();
-        await expect(menu.getByRole("link", { name: label, exact: true })).toHaveCount(0);
-      }
-
-      if (viewport.width === 390) {
-        const currentUrl = page.url();
-        await menu.getByText(productLabels[0], { exact: true }).click();
-        await expect(page).toHaveURL(currentUrl);
-        await expect(menu).toHaveAttribute("open", "");
-        await menu.getByRole("link", { name: "An toàn", exact: true }).click();
-        await expect(menu).not.toHaveAttribute("open", "");
+        await expect(menu.getByRole("link", { name: "Phiên dịch khám bệnh trực tiếp" })).toBeVisible();
+        await expect(menu.getByRole("link", { name: "Ghi chép bệnh án AI" })).toBeVisible();
       }
     }
 

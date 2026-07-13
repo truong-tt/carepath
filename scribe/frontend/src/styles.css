@@ -162,7 +162,7 @@ textarea:focus-visible {
   gap: clamp(1rem, 2vw, 1.8rem);
 }
 
-.site-nav__links :is(a, .site-nav__label) {
+.site-nav__links a {
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 600;
@@ -2129,7 +2129,7 @@ mark.scribe-mark {
     box-shadow: var(--shadow);
   }
 
-  .site-nav__menu :is(a, .site-nav__label) {
+  .site-nav__menu a {
     padding: 0.8rem;
     border-bottom: 1px solid var(--line);
     color: var(--text);
