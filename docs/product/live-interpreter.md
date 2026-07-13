@@ -8,16 +8,15 @@ people who do not share a language. It translates only and must not provide
 medical advice, diagnoses, or treatment recommendations.
 
 The serving boundary is `interpreter/app` under `/api/*` and `/ws/*`, integrated
-into the combined FastAPI process. The browser workflow is served at
-`/phien-dich-y-khoa/`.
+into the combined FastAPI process. Its browser frontend is retained for
+internal development but is not publicly served.
 
 ## Public availability
 
-The web Interpreter is currently in development. On the public CarePath site,
-Scribe is the primary feature and Interpreter is presented as a separate
-translation-only workflow with a development notice and a pilot-update action.
-This does not change the direct Interpreter route or any of its safety
-invariants.
+The web Interpreter is currently in development and is not open to users.
+Scribe is the only public product. `/phien-dich-y-khoa/*` and `/console/*`
+return 404; this does not change the Interpreter API, WebSocket, or safety
+invariants used for internal development.
 
 ## Safety Invariants
 

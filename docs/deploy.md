@@ -1,18 +1,18 @@
 # CarePath Unified Deploy
 
-Use `https://carepath-omega.vercel.app` as the public two-product site. One
-Hugging Face Space runs the unified product service: the Scribe tool at
-`/ghi-chep-lam-sang/`, the Interpreter app at `/phien-dich-y-khoa/`, the Scribe API at
-`/api/v1/*`, and the Interpreter API at `/api/*` + `/ws/*`. Deploy and verify
-the Space before pointing Vercel at it.
+Use `https://carepath-omega.vercel.app` as the public Scribe site. One Hugging
+Face Space runs the Scribe tool at `/ghi-chep-lam-sang/`, the Scribe API at
+`/api/v1/*`, and the retained Interpreter API at `/api/*` + `/ws/*`.
+`/phien-dich-y-khoa/*` and `/console/*` are intentionally public 404s while
+the Interpreter remains in development.
 
 ## Hugging Face Space
 
 Reuse the existing Docker Space
 [`tranth3truong/carepath-api`](https://huggingface.co/spaces/tranth3truong/carepath-api),
 served at `https://tranth3truong-carepath-api.hf.space`. Deploy this unified
-repository there; the older Scribe-only revision does not contain `/phien-dich-y-khoa/`
-or the Interpreter API.
+repository there; it retains the Interpreter API but does not serve the
+unfinished Interpreter browser workflow.
 
 1. Rebuild the existing `tranth3truong/carepath-api` Space with **Docker** as
    the SDK. Create a replacement only if that Space is no longer available.
@@ -122,12 +122,10 @@ pathnames. Local
 and combined-service builds still use same-origin fallbacks because the normal
 `npm run build` does not run this deployment-only check.
 
-The Interpreter stays on the Space because it needs the WebSocket API;
-the Vercel landing links to it via `VITE_CONSOLE_URL`. The pilot form remains
-client-side unless `VITE_LEAD_ENDPOINT` is configured.
-
-Authorized reviewers can open `/phien-dich-y-khoa/#/kiem-duyet`. This internal
-route is not linked from public navigation; its review token stays in memory.
+The Interpreter backend stays on the Space because it needs the WebSocket API,
+but its browser frontend is disabled. `VITE_CONSOLE_URL` remains a build-time
+compatibility setting until the public-site validation is simplified. The pilot
+form remains client-side unless `VITE_LEAD_ENDPOINT` is configured.
 
 ## Keep-Alive
 
@@ -147,7 +145,6 @@ job succeeds.
 2. Run the scripted interpreter simulation on the landing.
 3. Open `/ghi-chep-lam-sang/`, upload a short clip, and verify the SOAP draft renders
    with the review banner.
-4. Open `/phien-dich-y-khoa/`, accept consent, start a mock session, and send a typed
-   turn.
+4. Confirm `/phien-dich-y-khoa/` and `/console/` return HTTP 404.
 5. Confirm `GET /api/v1/health` reports `llm_provider: ckey` and
    `asr_ready: true`, and `GET /api/health` reports `provider_mode: mock`.

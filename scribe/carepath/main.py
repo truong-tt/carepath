@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 # Interpreter module (interpreter/): the second CarePath product, served by
@@ -313,29 +313,23 @@ def create_soap_note(
     )
 
 
-# Serve the built frontends same-origin so they call both APIs with relative
-# URLs (no CORS): interpreter at /phien-dich-y-khoa/, demo site (landing + the
-# #/scribe tool) at /. Mounted last so API routes take precedence; a missing
-# dist folder is skipped with a warning — dev and CI use the Vite dev servers.
+# Serve the public Scribe frontend same-origin. Interpreter APIs remain
+# available for development, but no Interpreter browser bundle is public.
+# Mount the site last so API and blocked-path routes take precedence.
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-CONSOLE_DIST_DIR = Path(
-    os.getenv("CONSOLE_DIST_DIR") or _REPO_ROOT / "interpreter" / "frontend" / "dist"
-)
 SITE_DIST_DIR = Path(os.getenv("SITE_DIST_DIR") or _REPO_ROOT / "scribe" / "frontend" / "dist")
-if CONSOLE_DIST_DIR.is_dir():
-    @app.get("/console", include_in_schema=False)
-    @app.get("/console/", include_in_schema=False)
-    def legacy_console_redirect(request: Request) -> RedirectResponse:
-        query = f"?{request.url.query}" if request.url.query else ""
-        return RedirectResponse(f"/phien-dich-y-khoa/{query}")
 
-    app.mount(
-        "/phien-dich-y-khoa",
-        StaticFiles(directory=CONSOLE_DIST_DIR, html=True),
-        name="interpreter",
-    )
-else:
-    logger.warning("interpreter dist missing at %s; /phien-dich-y-khoa/ not served", CONSOLE_DIST_DIR)
+
+@app.api_route("/phien-dich-y-khoa", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/phien-dich-y-khoa/", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/phien-dich-y-khoa/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/console", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/console/", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/console/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+def blocked_interpreter_browser_path() -> PlainTextResponse:
+    return PlainTextResponse("Not Found", status_code=404)
+
+
 if SITE_DIST_DIR.is_dir():
     @app.get("/ghi-chep-lam-sang/", include_in_schema=False)
     def clinical_notes_page() -> FileResponse:

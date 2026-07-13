@@ -8,8 +8,9 @@ app_port: 7860
 
 This Space runs the unified CarePath product from the root `Dockerfile`, which
 builds `scribe/frontend/` and `interpreter/frontend/`:
-demo site at `/`, Scribe tool at `/ghi-chep-lam-sang/`, interpreter at
-`/phien-dich-y-khoa/`, scriber API at `/api/v1/*`, interpreter API at `/api/*` + `/ws/*`.
+demo site at `/`, Scribe tool at `/ghi-chep-lam-sang/`, scriber API at
+`/api/v1/*`, and Interpreter API at `/api/*` + `/ws/*`. Interpreter browser
+paths are disabled for public users while that module remains in development.
 
 Required Space secrets (scriber; the interpreter runs keyless in mock mode):
 

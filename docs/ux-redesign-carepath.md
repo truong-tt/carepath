@@ -19,80 +19,76 @@
 - Preserve every safety invariant in AGENTS.md. A UI failure must never release blocked content or start audio before consent.
 - Persuasion techniques (smart defaults, endowed progress, gamification) may only be applied as permitted by the persuasion boundary matrix in the onboarding section. Legal consent controls are never defaulted, pre-checked, or gamified.
 
-## Current priority update: Scribe-first public launch
+## Current priority update: Scribe-only public availability
 
 ### Current UX problem
 
-The public chooser gives Scribe and Interpreter equal visual and action
-priority even though the web Interpreter is still in development. This can
-suggest that a visitor can begin a production-ready live interpreting session
-from the public site.
+The public site correctly makes Scribe the primary action, but the direct
+Interpreter browser path remains reachable on the Space. A visitor who knows
+that URL can still open the unfinished workflow.
 
 ### Proposed flow
 
-1. The first public decision presents **Ghi chép bệnh án AI** as the primary
-   workflow and makes **Bắt đầu ghi chép** the only primary action.
-2. A smaller, separate Interpreter panel explains its two-way translation
-   purpose, labels the web experience **Đang phát triển**, retains the
-   translate-only safety boundary, and links to the existing pilot form for
-   updates rather than starting a session.
-3. The pilot form remains unchanged except that the Interpreter interest is
-   selected when the development panel action is used.
+1. The public landing keeps **Ghi chép bệnh án AI** and **Bắt đầu ghi chép**
+   as the only route into a working product.
+2. Every browser request to `/phien-dich-y-khoa/*` and `/console/*` returns
+   HTTP 404 instead of the Interpreter frontend.
+3. Interpreter APIs, WebSockets, backend safety behavior, and automated tests
+   remain available for internal development; no public page links to them.
 
 ### Affected routes, pages, and components
 
-- `/` in `scribe/frontend/src/LandingPage.tsx`
-- `scribe/frontend/src/content/strings.ts`
-- `scribe/frontend/src/styles.css`
-- landing-page unit and browser tests
+- `/phien-dich-y-khoa/*` and `/console/*` in `scribe/carepath/main.py`
+- `scribe/tests/test_combined_app.py`
 - `docs/product/live-interpreter.md`
+- `README.md`, `README.hf-space.md`, and `docs/deploy.md`
 
 ### Vietnamese-first copy
 
 - Primary feature: `Ghi chép bệnh án AI`
 - Primary action: `Bắt đầu ghi chép`
-- Interpreter status: `Đang phát triển cho phiên bản web`
-- Interpreter action: `Đăng ký nhận cập nhật`
-- Safety boundary: `Chỉ phiên dịch, không đưa ra lời khuyên y tế.`
+- Blocked route: standard HTTP 404; no unfinished clinical workflow is
+  presented to visitors.
+- Internal documentation: `Phiên dịch khám bệnh trực tiếp hiện chưa mở cho
+  người dùng trên web.`
 
-### Implementation story: CP-UX-08
+### Implementation story: CP-UX-09
 
-- Reorder the chooser with Scribe first and give it the larger visual area.
-- Keep the Interpreter description and safety sentence visible, but replace
-  its start action with an in-page pilot-interest action.
-- Keep routes, API calls, consent, microphone behavior, WebSocket behavior,
-  TTS, risk rules, and the pilot form schema unchanged.
+- Remove the Interpreter static mount and add exact browser-path guards before
+  the public static-site mount.
+- Keep the current Scribe-first landing unchanged because it already has no
+  Interpreter launch link.
+- Keep APIs, WebSockets, consent, microphone behavior, TTS, risk rules, and
+  the pilot form schema unchanged.
 
 ### Dependencies
 
-- CP-UX-01 through CP-UX-03 are already represented in the current public
-  chooser and trust sections.
-- The Space must remain the direct host for the Interpreter route; this story
-  does not change that route.
+- CP-UX-08 provides the existing Scribe-first landing state.
+- CP-ROUTE-02 is superseded for public browser access, but its API and
+  WebSocket boundaries remain unchanged.
 
 ### Acceptance criteria
 
-- The first and largest chooser panel is `Ghi chép bệnh án AI`.
-- `Bắt đầu ghi chép` is the only public start action in the chooser.
-- The Interpreter remains clearly described as a separate translation-only
-  workflow with an explicit development status.
-- Selecting `Đăng ký nhận cập nhật` moves to the existing pilot form with
-  Interpreter selected.
-- The design remains legible and keyboard-operable at 360px, 390px, 768px,
-  and 1440px widths with no horizontal overflow.
-- English mode communicates the same availability and safety limits.
+- The public site has no Interpreter launch link and retains Scribe as the
+  only working-product action.
+- `/phien-dich-y-khoa/`, child paths, `/console`, and `/console/` return 404.
+- `/api/v1/health`, `/api/health`, `/api/*`, and `/ws/*` retain their current
+  contracts and safety behavior.
+- Scribe routes and the Vietnamese public landing still return HTTP 200.
 
 ### Validation commands
 
 ```powershell
+python -m pytest scribe/tests/test_combined_app.py
 cd scribe\frontend; npm.cmd test; npm.cmd run build; npm.cmd run e2e
 ```
 
 ### Risks and fallback behavior
 
-- Availability language must not imply that a live clinical interpreting
-  service is available. If the in-page pilot action fails, the existing form
-  remains usable and no route, audio, or safety behavior changes.
+- Do not disable `/api/*` or `/ws/*`: that would change the Interpreter
+  development and safety contract rather than block its public browser UI.
+  Re-enable the static mount only when the product is ready for public access
+  and its pre-start safety flow has passed its normal release checks.
 
 ## Delivery order
 

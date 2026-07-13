@@ -18,9 +18,10 @@ Frontends, all served by the same API in production:
 - `scribe/frontend/` — the public demo site (landing at `/`, working Scribe tool at
   `/ghi-chep-lam-sang/`). Vietnamese default, English toggle, full diacritics enforced
   at build time.
-- `interpreter/frontend/` — the interpreter app, served at `/phien-dich-y-khoa/`.
+- `interpreter/frontend/` — retained for internal Interpreter development; not
+  publicly served.
 
-One FastAPI process serves both APIs and both frontends. The executed
+One FastAPI process serves both APIs and the public Scribe frontend. The executed
 unification plan and its review protocol are archived in `docs/history/`.
 
 ## Quickstart (keyless demo profile)
@@ -42,9 +43,9 @@ cd interpreter/frontend; npm ci; npm run build; cd ../..
 uvicorn carepath.main:app --app-dir scribe --reload
 ```
 
-Then open `http://127.0.0.1:8000/` (demo site), `/ghi-chep-lam-sang/` (Scribe tool),
-`/phien-dich-y-khoa/` (interpreter app). `GET /api/v1/health` and `GET /api/health`
-report both modules.
+Then open `http://127.0.0.1:8000/` (demo site) or `/ghi-chep-lam-sang/` (Scribe
+tool). `GET /api/v1/health` and `GET /api/health` report both modules; public
+Interpreter browser paths return 404.
 
 For frontend development, run the Vite dev servers instead
 (`npm run dev` in `scribe/frontend/` or `interpreter/frontend/`); the API skips missing dist folders.
