@@ -58,6 +58,11 @@ The rebuilt Space is Running at
 Interpreter product link returns to the canonical Vercel site with language
 preserved.
 
+2026-07-13 public availability update: Space commit `cc678b9` is Running.
+`/phien-dich-y-khoa/`, its asset path, and `/console/` now return HTTP 404;
+the Space root, `/ghi-chep-lam-sang/`, `/api/v1/health`, and `/api/health`
+continue to return HTTP 200. The public Scribe site on Vercel also returns 200.
+
 Pending owner evidence: the approved 50-note clinician-rating threshold
 reached without storing clinical material in the repository. No container
 provider is registered in Harness, so that clinical evidence cannot be

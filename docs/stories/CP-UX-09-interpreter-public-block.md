@@ -2,7 +2,7 @@
 
 ## Status
 
-in progress
+implemented
 
 ## Lane
 
@@ -47,4 +47,9 @@ non-runtime binary QA assets.
 
 ## Evidence
 
-Pending validation.
+2026-07-13: combined-app route proof passed (3 tests); Scribe frontend unit
+(45), build, and browser (7) checks passed; Ruff passed. Space commit
+`cc678b9` is Running. Live HTTP checks returned 404 for
+`/phien-dich-y-khoa/`, its asset path, and `/console/`; `/`,
+`/ghi-chep-lam-sang/`, `/api/v1/health`, `/api/health`, and the Vercel public
+site each returned 200.
