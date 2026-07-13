@@ -27,8 +27,8 @@ export default function LandingPage({
 
   const navLinks = (
     <>
-      <a href="#products">{copy.nav.interpreter}</a>
-      <a href="#products">{copy.nav.scribe}</a>
+      <span className="site-nav__label">{copy.nav.interpreter}</span>
+      <span className="site-nav__label">{copy.nav.scribe}</span>
       <a href="#safety">{copy.nav.safety}</a>
       <a href="#pilot">{copy.nav.pilot}</a>
     </>
