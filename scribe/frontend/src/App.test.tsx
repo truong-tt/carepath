@@ -26,7 +26,7 @@ describe("language preference", () => {
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
       screen.getByRole("link", {
-        name: "CarePath Interpreter: Open Interpreter",
+        name: "CarePath Interpreter: Get Interpreter updates",
       }),
     ).toBeInTheDocument();
     expect(

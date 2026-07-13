@@ -12,15 +12,8 @@ interface LandingPageProps {
   onLanguageChange?: (language: Language) => void;
 }
 
-const productOrder: ProductKey[] = ["interpreter", "scribe"];
+const productOrder: ProductKey[] = ["scribe", "interpreter"];
 const interpreterEvidenceTurn = getScenario("allergy").turns[3];
-
-function interpreterHref(language: Language) {
-  const href = import.meta.env.VITE_CONSOLE_URL || "/phien-dich-y-khoa/";
-  const url = new URL(href, window.location.href);
-  if (url.origin !== window.location.origin) url.searchParams.set("lang", language);
-  return url.origin === window.location.origin ? `${url.pathname}${url.search}` : url.href;
-}
 
 export default function LandingPage({
   language,
@@ -30,7 +23,6 @@ export default function LandingPage({
   const copy = copyFor(language);
   const [interest, setInterest] = useState<ProductInterest>("both");
   const scenario = scenarios[0];
-  const interpreterUrl = interpreterHref(language);
   const scribeHref = "/ghi-chep-lam-sang/";
 
   const navLinks = (
@@ -97,12 +89,14 @@ export default function LandingPage({
           <div className="product-accordion">
             {productOrder.map((key) => {
               const product = copy.products[key];
+              const isInterpreter = key === "interpreter";
               return (
                 <a
                   className={`product-accordion__panel product-accordion__panel--${key}`}
                   aria-label={`${product.name}: ${product.cta.open}`}
-                  href={key === "interpreter" ? interpreterUrl : scribeHref}
+                  href={isInterpreter ? "#pilot" : scribeHref}
                   key={key}
+                  onClick={isInterpreter ? () => setInterest("interpreter") : undefined}
                 >
                   <div className="product-accordion__heading">
                     <h2>{product.name}</h2>

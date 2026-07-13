@@ -319,7 +319,7 @@ export const strings: Record<Language, PageCopy> = {
     },
     gateway: {
       heading: "Bạn muốn hỗ trợ việc gì hôm nay?",
-      body: "Hai công việc riêng biệt, cùng giữ bác sĩ ở vị trí quyết định.",
+      body: "Ghi chép bệnh án AI là chức năng trọng tâm trên web. Phiên dịch đang được phát triển.",
       audience: "Dành cho",
       input: "Đầu vào",
       output: "Đầu ra",
@@ -337,7 +337,7 @@ export const strings: Record<Language, PageCopy> = {
         audience: "Phù hợp khi bác sĩ và bệnh nhân không cùng ngôn ngữ.",
         input: "Hội thoại Việt–Anh theo từng lượt.",
         output: "Bản dịch hiển thị theo mức rủi ro; nội dung nguy cơ cao chờ bác sĩ xác nhận.",
-        status: "Mô phỏng tương tác — chưa phải phiên dịch trực tiếp.",
+        status: "Đang phát triển cho phiên bản web.",
         disclosure: "Bản mô phỏng không sử dụng micro và không lưu âm thanh.",
         title: "Giữ quyền xác nhận ở phía bác sĩ.",
         body: "Dịch hai chiều giữa bác sĩ tiếng Việt và bệnh nhân tiếng Anh trong lúc khám.",
@@ -363,7 +363,7 @@ export const strings: Record<Language, PageCopy> = {
         ],
         cta: {
           explore: "Tìm hiểu phiên dịch",
-          open: "Bắt đầu phiên dịch",
+          open: "Đăng ký nhận cập nhật",
           pilot: "Thí điểm phiên dịch",
         },
       },
@@ -720,7 +720,7 @@ export const strings: Record<Language, PageCopy> = {
     },
     gateway: {
       heading: "Choose the right product for the right point in care.",
-      body: "Two separate jobs, both keeping the clinician in control.",
+      body: "Scribe is the current web focus. Interpreter is under development.",
       audience: "For",
       input: "Input",
       output: "Output",
@@ -738,7 +738,7 @@ export const strings: Record<Language, PageCopy> = {
         audience: "Clinicians and care teams who need clear Vietnamese–English communication during a visit.",
         input: "Turn-by-turn Vietnamese–English conversation.",
         output: "Translation follows the risk tier; high-risk content waits for clinician confirmation.",
-        status: "Interactive simulation — not live interpreting.",
+        status: "In development for the web.",
         disclosure: "The simulation does not use the microphone or store audio.",
         title: "Keep confirmation with the clinician.",
         body: "Interpreter only translates the conversation. High- or critical-risk content stays blocked from the patient until the clinician confirms, edits, or escalates to a human interpreter.",
@@ -764,7 +764,7 @@ export const strings: Record<Language, PageCopy> = {
         ],
         cta: {
           explore: "Explore Interpreter",
-          open: "Open Interpreter",
+          open: "Get Interpreter updates",
           pilot: "Pilot Interpreter",
         },
       },

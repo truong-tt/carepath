@@ -47,6 +47,21 @@ describe("LandingPage", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("TODO-pricing")).not.toBeInTheDocument();
     expectProductCopy("vi");
+
+    const scribe = screen.getByRole("link", {
+      name: "Ghi chép bệnh án AI: Bắt đầu ghi chép",
+    });
+    const interpreter = screen.getByRole("link", {
+      name: "Phiên dịch khám bệnh trực tiếp: Đăng ký nhận cập nhật",
+    });
+    expect(scribe).toHaveAttribute("href", "/ghi-chep-lam-sang/");
+    expect(interpreter).toHaveAttribute("href", "#pilot");
+    expect(
+      [...document.querySelectorAll(".product-accordion__panel")].map((panel) => panel.className),
+    ).toEqual([
+      "product-accordion__panel product-accordion__panel--scribe",
+      "product-accordion__panel product-accordion__panel--interpreter",
+    ]);
   });
 
   it("renders the complete page in English", () => {
@@ -66,7 +81,7 @@ describe("LandingPage", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText("Interactive simulation — not live interpreting."),
+      screen.getAllByText("In development for the web."),
     ).toHaveLength(1);
     expect(
       screen.getAllByText("Pilot tool — every draft requires clinician review."),

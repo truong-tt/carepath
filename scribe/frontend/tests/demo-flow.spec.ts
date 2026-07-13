@@ -102,8 +102,8 @@ test("both product choices remain discoverable across release viewports", async 
     ).toBeVisible();
 
     for (const [key, name] of [
-      ["interpreter", "Phiên dịch khám bệnh trực tiếp: Bắt đầu phiên dịch"],
       ["scribe", "Ghi chép bệnh án AI: Bắt đầu ghi chép"],
+      ["interpreter", "Phiên dịch khám bệnh trực tiếp: Đăng ký nhận cập nhật"],
     ]) {
       const choice = page.locator(`.product-accordion__panel--${key}`);
       await expect(choice).toBeVisible();
@@ -120,9 +120,9 @@ test("both product choices remain discoverable across release viewports", async 
 
     await page.locator("main#top").focus();
     await page.keyboard.press("Tab");
-    await expect(page.locator(".product-accordion__panel--interpreter")).toBeFocused();
-    await page.keyboard.press("Tab");
     await expect(page.locator(".product-accordion__panel--scribe")).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".product-accordion__panel--interpreter")).toBeFocused();
 
     if (viewport.width <= 1023) {
       const menu = page.locator(".site-nav__menu");
@@ -149,11 +149,15 @@ test("both product choices remain discoverable across release viewports", async 
   }
 
   await expect(
-    page.locator(".product-accordion__panel--interpreter"),
-  ).toHaveAttribute("href", "https://carepath-e2e.example/phien-dich-y-khoa/?lang=vi");
-  await expect(
     page.locator(".product-accordion__panel--scribe"),
   ).toHaveAttribute("href", "/ghi-chep-lam-sang/");
+  await expect(
+    page.locator(".product-accordion__panel--interpreter"),
+  ).toHaveAttribute("href", "#pilot");
+
+  await page.locator(".product-accordion__panel--interpreter").click();
+  await expect(page).toHaveURL(/#pilot$/);
+  await expect(page.getByRole("combobox", { name: "Chức năng quan tâm" })).toHaveValue("interpreter");
 
   await page.getByRole("combobox", { name: "Chức năng quan tâm" }).selectOption("scribe");
   await expect(

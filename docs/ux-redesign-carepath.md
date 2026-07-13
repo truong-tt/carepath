@@ -19,6 +19,81 @@
 - Preserve every safety invariant in AGENTS.md. A UI failure must never release blocked content or start audio before consent.
 - Persuasion techniques (smart defaults, endowed progress, gamification) may only be applied as permitted by the persuasion boundary matrix in the onboarding section. Legal consent controls are never defaulted, pre-checked, or gamified.
 
+## Current priority update: Scribe-first public launch
+
+### Current UX problem
+
+The public chooser gives Scribe and Interpreter equal visual and action
+priority even though the web Interpreter is still in development. This can
+suggest that a visitor can begin a production-ready live interpreting session
+from the public site.
+
+### Proposed flow
+
+1. The first public decision presents **Ghi chép bệnh án AI** as the primary
+   workflow and makes **Bắt đầu ghi chép** the only primary action.
+2. A smaller, separate Interpreter panel explains its two-way translation
+   purpose, labels the web experience **Đang phát triển**, retains the
+   translate-only safety boundary, and links to the existing pilot form for
+   updates rather than starting a session.
+3. The pilot form remains unchanged except that the Interpreter interest is
+   selected when the development panel action is used.
+
+### Affected routes, pages, and components
+
+- `/` in `scribe/frontend/src/LandingPage.tsx`
+- `scribe/frontend/src/content/strings.ts`
+- `scribe/frontend/src/styles.css`
+- landing-page unit and browser tests
+- `docs/product/live-interpreter.md`
+
+### Vietnamese-first copy
+
+- Primary feature: `Ghi chép bệnh án AI`
+- Primary action: `Bắt đầu ghi chép`
+- Interpreter status: `Đang phát triển cho phiên bản web`
+- Interpreter action: `Đăng ký nhận cập nhật`
+- Safety boundary: `Chỉ phiên dịch, không đưa ra lời khuyên y tế.`
+
+### Implementation story: CP-UX-08
+
+- Reorder the chooser with Scribe first and give it the larger visual area.
+- Keep the Interpreter description and safety sentence visible, but replace
+  its start action with an in-page pilot-interest action.
+- Keep routes, API calls, consent, microphone behavior, WebSocket behavior,
+  TTS, risk rules, and the pilot form schema unchanged.
+
+### Dependencies
+
+- CP-UX-01 through CP-UX-03 are already represented in the current public
+  chooser and trust sections.
+- The Space must remain the direct host for the Interpreter route; this story
+  does not change that route.
+
+### Acceptance criteria
+
+- The first and largest chooser panel is `Ghi chép bệnh án AI`.
+- `Bắt đầu ghi chép` is the only public start action in the chooser.
+- The Interpreter remains clearly described as a separate translation-only
+  workflow with an explicit development status.
+- Selecting `Đăng ký nhận cập nhật` moves to the existing pilot form with
+  Interpreter selected.
+- The design remains legible and keyboard-operable at 360px, 390px, 768px,
+  and 1440px widths with no horizontal overflow.
+- English mode communicates the same availability and safety limits.
+
+### Validation commands
+
+```powershell
+cd scribe\frontend; npm.cmd test; npm.cmd run build; npm.cmd run e2e
+```
+
+### Risks and fallback behavior
+
+- Availability language must not imply that a live clinical interpreting
+  service is available. If the in-page pilot action fails, the existing form
+  remains usable and no route, audio, or safety behavior changes.
+
 ## Delivery order
 
 | Order | Story | Type | Depends on |

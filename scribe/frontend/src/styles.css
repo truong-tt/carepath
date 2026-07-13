@@ -1666,7 +1666,7 @@ mark.scribe-mark {
 
 .product-accordion {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr);
   margin-top: clamp(2.5rem, 5vw, 4rem);
   border: 1px solid var(--line);
   background: var(--line);
@@ -1686,14 +1686,22 @@ mark.scribe-mark {
 
 .product-accordion__panel--interpreter {
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--teal) 16%, transparent), transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--teal) 9%, transparent), transparent 58%),
     var(--surface);
 }
 
 .product-accordion__panel--scribe {
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--amber) 14%, transparent), transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--amber) 20%, transparent), transparent 58%),
     var(--surface);
+}
+
+.product-accordion__panel--scribe .product-accordion__heading h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.product-accordion__panel--scribe .product-accordion__status {
+  color: var(--amber-text);
 }
 
 .product-accordion__heading {
