@@ -38,6 +38,17 @@ artifacts were current and the mock Scribe smoke passed.
 `https://carepath-omega.vercel.app`; and the live page presents both
 Vietnamese-first module choices and their safety limits.
 
+2026-07-13 public-priority proof passed: deployment `367aae7` is Ready at
+`https://carepath-omega.vercel.app`. The live page makes **Ghi chép bệnh án
+AI** the primary web action and labels **Phiên dịch khám bệnh trực tiếp** as
+in development for the web, while retaining its translate-only safety limit.
+
+2026-07-13 Hugging Face discovery: the existing Space
+`tranth3truong/carepath-api` was Running, but this browser had no
+authenticated owner session. Its Docker configuration, build, and protected
+secrets were not read or changed. The remaining Space setup is blocked until
+the owner signs in; no credentials should be pasted into chat.
+
 Pending owner evidence: Space rebuilt from the root Dockerfile, documented
 live interpreter routes healthy, and the approved 50-note clinician-rating
 threshold reached without storing clinical material in the repository. No
