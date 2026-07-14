@@ -327,6 +327,108 @@ python -m pytest scribe/tests/test_combined_app.py
 - All new strings are NFC-normalized Vietnamese; the build diacritics gate is
   the enforcement.
 
+## Current priority update: privacy and Vietnamese-capability visibility
+
+### Current UX problem
+
+The landing states its strongest trust facts too quietly. The audio-retention
+claim is one bullet in the closing checklist, the no-training claim from the
+product contract never appears, and nothing explains why the system gets
+clinical Vietnamese right. The page also frames review only as an obligation;
+it never shows that marked corrections and listed gaps make that review fast
+and targeted rather than a full re-read.
+
+### Proposed flow
+
+1. Extend the hero small print with the audio-retention fact so privacy is
+   visible before the first action.
+2. Rework the trust section into two evidence panels under one heading:
+   - Vietnamese capability: Vietnamese speech recognition with diacritics
+     preserved, term normalization against the curated Vietnamese medical
+     lexicon including unaccented and shorthand variants, and visible marks
+     for corrections and missing information so review is fast and targeted.
+   - Audio privacy: request-scoped temporary processing deleted after the
+     request, consultation audio never used as training data, and no
+     automatic microphone capture.
+3. Keep the review requirement and the no-advice boundary in the section
+   subline. Never claim review is unnecessary and never state an accuracy
+   figure; CarePath has no measured Vietnam deployment data.
+
+### Affected routes, pages, and components
+
+- `/` in `scribe/frontend/src/LandingPage.tsx` (hero small print, trust
+  section)
+- `scribe/frontend/src/styles.css` (trust panel grid)
+- `scribe/frontend/src/LandingPage.test.tsx` (trust content assertions)
+- No route, API, backend, form, or Scribe-tool changes
+
+### Vietnamese-first copy (new strings)
+
+- Hero small print: `Dùng tệp âm thanh đã được phép sử dụng. Âm thanh không
+  bị giữ lại sau xử lý; bản nháp không tự đi vào hồ sơ.`
+- Trust heading: `Nhận đúng tiếng Việt. Không giữ lại âm thanh.`
+- Trust subline: `CarePath hỗ trợ ghi chép, không tự tạo chẩn đoán, tư vấn
+  hay đơn thuốc. Bác sĩ kiểm tra bản nháp trước khi sử dụng.`
+- Capability panel `Nhận đúng tiếng Việt lâm sàng`:
+  - `Mô hình nhận dạng giọng nói tiếng Việt, giữ nguyên dấu và chính tả.`
+  - `Thuật ngữ y khoa được đối chiếu với bộ từ điển tiếng Việt tuyển chọn,
+    nhận cả cách nói tắt và thiếu dấu.`
+  - `Lời chép gốc, chỗ đã chỉnh và phần còn thiếu đều hiển thị rõ, nên bác
+    sĩ kiểm tra nhanh và đúng trọng tâm.`
+- Privacy panel `Âm thanh của buổi khám không bị giữ lại`:
+  - `Tệp chỉ được xử lý tạm thời trong phạm vi yêu cầu và bị xóa ngay khi
+    xử lý xong.`
+  - `Âm thanh buổi khám không bao giờ được dùng để huấn luyện mô hình.`
+  - `Màn hình không tự bắt đầu micro; chỉ dùng tệp cơ sở chủ động tải lên.`
+
+### Implementation story: CP-UX-13
+
+- Replace the four-bullet trust list with the two labeled panels; absorb the
+  existing bullets so no safety statement is lost.
+- Every claim is verified against the backend and product contract:
+  request-scoped `TemporaryDirectory` processing in `scribe/carepath/main.py`,
+  the no-training rule in `docs/product/ai-scribe.md`, the Gipformer
+  Vietnamese ASR provider, and the curated lexicon with unaccented aliases.
+- No behavior, retention, consent, or API change of any kind.
+
+### Dependencies
+
+- CP-UX-12 supplies the current landing presentation.
+- CP-NOTES-02 supplies the approved request-scoped processing phrasing.
+- `docs/product/ai-scribe.md` is the source for privacy claims.
+
+### Acceptance criteria
+
+- The audio-retention fact is visible in the hero without scrolling.
+- The trust section shows the capability and privacy panels with all six
+  claims, and keeps the review requirement and no-advice boundary visible.
+- No accuracy percentage, no savings promise, and no suggestion that review
+  can be skipped appears anywhere on the page.
+- All prior CP-UX-12 acceptance criteria still hold, including e2e, axe,
+  diacritics, and Lighthouse gates.
+
+### Validation commands
+
+```powershell
+cd scribe\frontend
+npm.cmd run lint
+npm.cmd test
+npm.cmd run test:deploy-env
+npm.cmd run build
+npm.cmd run e2e
+npm.cmd run lighthouse
+cd ..\..
+python -m pytest scribe/tests/test_combined_app.py
+```
+
+### Risks and fallback behavior
+
+- Presentation and copy only. If any claim cannot be verified in code or
+  contract, it is dropped rather than softened; the section degrades to the
+  previous checklist.
+- The capability panel must never grow into an accuracy claim. Adding any
+  measured-quality statement requires pilot data and an owner decision first.
+
 ## Backlog rules
 
 - Implement one story per commit or pull request.

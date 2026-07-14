@@ -59,6 +59,30 @@ describe("LandingPage", () => {
     expect(screen.queryByText(/CarePath tiết kiệm/i)).not.toBeInTheDocument();
   });
 
+  it("surfaces verified privacy and Vietnamese-capability claims with review intact", () => {
+    render(<LandingPage />);
+
+    expect(screen.getByText(/Âm thanh không bị giữ lại sau xử lý/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Nhận đúng tiếng Việt. Không giữ lại âm thanh.",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Tệp chỉ được xử lý tạm thời trong phạm vi yêu cầu/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Âm thanh buổi khám không bao giờ được dùng để huấn luyện mô hình."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/bác sĩ kiểm tra nhanh và đúng trọng tâm/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/không tự tạo chẩn đoán, tư vấn hay đơn thuốc/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Bác sĩ kiểm tra bản nháp trước khi sử dụng/)).toBeInTheDocument();
+  });
+
   it("keeps the pilot form scoped to Scribe interest", () => {
     render(<LandingPage />);
 

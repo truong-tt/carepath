@@ -1670,7 +1670,7 @@ mark.scribe-mark {
 }
 
 .compact-heading > p,
-.trust-section > div > p,
+.trust-section > header > p,
 .start-section__copy > p {
   max-width: 46rem;
   margin: 1.1rem 0 0;
@@ -1696,6 +1696,7 @@ mark.scribe-mark {
 .burden-calculator h3,
 .workflow-comparison h3,
 .evidence-grid h3,
+.trust-grid h3,
 .review-checklist h3 {
   margin: 0;
   font-size: 1.05rem;
@@ -1860,9 +1861,6 @@ mark.scribe-mark {
 
 .trust-section,
 .start-section {
-  display: grid;
-  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
-  gap: clamp(2.5rem, 6vw, 6rem);
   width: min(100% - 2rem, calc(var(--container) + 3rem));
   margin: 0 auto;
   padding: clamp(2.5rem, 6vw, 5rem);
@@ -1873,28 +1871,41 @@ mark.scribe-mark {
   background: var(--surface);
 }
 
-.trust-section > div > p {
-  color: var(--muted);
+.trust-section > header {
+  max-width: 50rem;
 }
 
-.trust-section ul {
+.trust-grid {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  margin: 0;
-  padding: 0;
+  margin-top: 2rem;
   border: 1px solid var(--line);
   background: var(--line);
-  list-style: none;
 }
 
-.trust-section li {
-  padding: 1rem 1.1rem;
+.trust-grid article {
+  padding: clamp(1.4rem, 3vw, 2rem);
   background: var(--surface-2);
+}
+
+.trust-grid ul {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.trust-grid li {
   color: var(--muted);
   font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 .start-section {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(2.5rem, 6vw, 6rem);
   margin-top: 1.25rem;
   scroll-margin-top: 5rem;
   background: var(--deep);
@@ -2034,7 +2045,7 @@ mark.scribe-mark {
 
   .onboarding-hero__body,
   .burden-layout,
-  .trust-section,
+  .trust-grid,
   .start-section {
     grid-template-columns: 1fr;
   }

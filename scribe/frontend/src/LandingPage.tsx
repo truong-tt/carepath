@@ -87,7 +87,8 @@ export default function LandingPage() {
                 </a>
               </div>
               <small>
-                Dùng tệp âm thanh đã được phép sử dụng. Bản nháp không tự đi vào hồ sơ.
+                Dùng tệp âm thanh đã được phép sử dụng. Âm thanh không bị giữ
+                lại sau xử lý; bản nháp không tự đi vào hồ sơ.
               </small>
             </div>
 
@@ -258,19 +259,40 @@ export default function LandingPage() {
         </section>
 
         <section className="trust-section" aria-labelledby="trust-title">
-          <div>
-            <h2 id="trust-title">Bác sĩ kiểm tra trước khi sử dụng.</h2>
+          <header>
+            <h2 id="trust-title">Nhận đúng tiếng Việt. Không giữ lại âm thanh.</h2>
             <p>
-              CarePath hỗ trợ ghi chép, không thay thế nhận định lâm sàng và
-              không tự đưa nội dung vào hồ sơ.
+              CarePath hỗ trợ ghi chép, không tự tạo chẩn đoán, tư vấn hay đơn
+              thuốc. Bác sĩ kiểm tra bản nháp trước khi sử dụng.
             </p>
+          </header>
+          <div className="trust-grid">
+            <article>
+              <h3>Nhận đúng tiếng Việt lâm sàng</h3>
+              <ul>
+                <li>Mô hình nhận dạng giọng nói tiếng Việt, giữ nguyên dấu và chính tả.</li>
+                <li>
+                  Thuật ngữ y khoa được đối chiếu với bộ từ điển tiếng Việt
+                  tuyển chọn, nhận cả cách nói tắt và thiếu dấu.
+                </li>
+                <li>
+                  Lời chép gốc, chỗ đã chỉnh và phần còn thiếu đều hiển thị rõ,
+                  nên bác sĩ kiểm tra nhanh và đúng trọng tâm.
+                </li>
+              </ul>
+            </article>
+            <article>
+              <h3>Âm thanh của buổi khám không bị giữ lại</h3>
+              <ul>
+                <li>
+                  Tệp chỉ được xử lý tạm thời trong phạm vi yêu cầu và bị xóa
+                  ngay khi xử lý xong.
+                </li>
+                <li>Âm thanh buổi khám không bao giờ được dùng để huấn luyện mô hình.</li>
+                <li>Màn hình không tự bắt đầu micro; chỉ dùng tệp cơ sở chủ động tải lên.</li>
+              </ul>
+            </article>
           </div>
-          <ul>
-            <li>Luôn giữ nội dung nguồn để đối chiếu.</li>
-            <li>Phần thiếu hoặc chưa chắc chắn phải được nhìn thấy.</li>
-            <li>Không tự tạo chẩn đoán, tư vấn hoặc đơn thuốc.</li>
-            <li>Âm thanh thô không được lưu sau khi xử lý yêu cầu.</li>
-          </ul>
         </section>
 
         <section className="start-section" id="start" aria-labelledby="start-title">
