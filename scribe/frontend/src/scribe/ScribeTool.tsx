@@ -233,7 +233,6 @@ export default function ScribeTool({
   }
 
   const missing = (result?.soap?.missing_information ?? []).filter(Boolean);
-  const terms = (result?.retrieved_terms ?? []).filter(Boolean);
   const latencySeconds =
     result?.metadata?.latency_ms != null
       ? (result.metadata.latency_ms / 1000).toFixed(1)
@@ -379,37 +378,7 @@ export default function ScribeTool({
               )}
             </div>
             <div className="scribe-doc">
-              <h2 className="tool-review-title">{labels.reviewTitle}</h2>
-              <section className="tool-evidence" aria-labelledby="raw-transcript-title">
-                <h3 id="raw-transcript-title">{labels.rawTranscript}</h3>
-                <RichText text={result?.raw_transcript || labels.emptyTranscript} />
-              </section>
-              <section className="tool-evidence" aria-labelledby="corrected-transcript-title">
-                <h3 id="corrected-transcript-title">{labels.correctedTranscript}</h3>
-                <RichText text={result?.corrected_transcript || labels.emptyTranscript} />
-              </section>
-              <section className="tool-evidence" aria-labelledby="retrieved-terms-title">
-                <h3 id="retrieved-terms-title">{labels.retrievedTerms}</h3>
-                {terms.length > 0 ? (
-                  <ul className="tool-terms">
-                    {terms.map((term) => <li key={term}>{term}</li>)}
-                  </ul>
-                ) : <p>{labels.emptyTerms}</p>}
-              </section>
-              <div className="tool-missing">
-                <strong>{labels.missingTitle}</strong>
-                {missing.length > 0 ? (
-                  <ul>
-                    {missing.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                ) : <p>{labels.emptyMissing}</p>}
-              </div>
               <p className="scribe-status">{labels.draftLabel}</p>
-              {result?.soap?.review_required !== false && (
-                <p className="scribe-status">{labels.reviewBanner}</p>
-              )}
               <dl className="soap-note">
                 {soapRows.map((row) => (
                   <div key={row.key}>
@@ -423,6 +392,16 @@ export default function ScribeTool({
                   </div>
                 ))}
               </dl>
+              <div className="tool-missing">
+                <strong>{labels.missingTitle}</strong>
+                {missing.length > 0 ? (
+                  <ul>
+                    {missing.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : <p>{labels.emptyMissing}</p>}
+              </div>
               <div className="tool-actions">
                 <button className="button button--primary" onClick={copySoap} type="button">
                   {copyState === "done"

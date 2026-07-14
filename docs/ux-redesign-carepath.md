@@ -7,6 +7,62 @@
 1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
 2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
 
+## Current priority update: Simplified Scribe result (CP-UX-14)
+
+### Current UX problem
+
+The generated-note screen exposes raw and corrected transcripts, reviewed
+terms, and duplicate review warnings before the useful clinical draft. Long
+recordings make doctors scroll through evidence they did not ask to see.
+
+### Proposed flow
+
+1. Show one compact notice: `Bản nháp SOAP — cần bác sĩ kiểm tra`.
+2. Show the four SOAP sections in S, O, A, P order.
+3. Show **Thông tin còn thiếu** immediately after SOAP, including its empty state.
+4. Keep processing time, copy, and new-draft actions.
+
+### Affected route, page, and components
+
+- `/ghi-chep-lam-sang/`
+- Scribe result rendering, localized copy, presentation styles, and focused tests
+
+### Vietnamese-first copy
+
+- Safety notice: `Bản nháp SOAP — cần bác sĩ kiểm tra`
+- Missing-information heading: `Thông tin còn thiếu`
+- Remove the visible labels for transcript comparison and reviewed terms.
+
+### Implementation story and dependencies
+
+- `CP-UX-14` is a normal, presentation-only Scribe story.
+- It depends on the existing `/api/v1/soap-notes` response and changes no API,
+  audio, prompt, model, route, or SOAP copy behavior.
+
+### Acceptance criteria
+
+- SOAP and **Thông tin còn thiếu** are the only clinical result content.
+- Raw transcript, corrected transcript, and reviewed terms are not rendered,
+  even when the API returns them.
+- Exactly one compact review notice remains; the duplicate long warning is removed.
+- SOAP precedes **Thông tin còn thiếu** and current empty states remain clear.
+- Rich-text escaping, SOAP-only clipboard output, mobile layout, and accessibility remain intact.
+
+### Validation commands
+
+    npm.cmd --prefix scribe/frontend run lint
+    npm.cmd --prefix scribe/frontend test
+    npm.cmd --prefix scribe/frontend run test:deploy-env
+    npm.cmd --prefix scribe/frontend run build
+    npm.cmd --prefix scribe/frontend run e2e
+    python -m pytest scribe/tests/test_combined_app.py
+
+### Risks and fallback behavior
+
+The API response remains unchanged so transcript evidence is still available to
+internal consumers. Missing or empty SOAP fields continue to use the existing
+safe empty state; no content is invented.
+
 ## Current priority update: Scribe-led public landing
 
 ### Current UX problem

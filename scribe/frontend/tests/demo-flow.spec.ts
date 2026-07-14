@@ -121,6 +121,25 @@ test("clinical notes expose guidance and upload together, then return to the sam
   await page.route("https://carepath-e2e.example/api/v1/health", async (route) => {
     await route.fulfill({ status: 200, json: { asr_ready: true, llm_ready: true } });
   });
+  await page.route("https://carepath-e2e.example/api/v1/soap-notes", async (route) => {
+    await route.fulfill({
+      status: 200,
+      json: {
+        raw_transcript: "ban ghi tho khong duoc hien thi",
+        corrected_transcript: "Bản ghi đã sửa không được hiển thị.",
+        retrieved_terms: ["thuật ngữ ẩn"],
+        soap: {
+          subjective: "Đau đầu từ sáng nay.",
+          objective: "Huyết áp **160/90 mmHg**.",
+          assessment: "Tăng huyết áp chưa kiểm soát.",
+          plan: "Tái khám sau một tuần.",
+          review_required: true,
+          missing_information: ["Tiền sử dị ứng"],
+        },
+        metadata: { latency_ms: 3200 },
+      },
+    });
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/ghi-chep-lam-sang/");
   await expect(page.getByText("Hệ thống sẵn sàng")).toBeVisible();
@@ -136,6 +155,43 @@ test("clinical notes expose guidance and upload together, then return to the sam
   await page.getByRole("link", { name: "Xem ca khám mẫu trước" }).click();
   await expect(page).toHaveURL(/\/#demo$/);
   await expect(page.getByRole("heading", { name: "Thử một ca khám mẫu trước khi tải tệp của bạn." })).toBeVisible();
+  await page.goto("/ghi-chep-lam-sang/");
+
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "kham.wav",
+    mimeType: "audio/wav",
+    buffer: Buffer.from("RIFF"),
+  });
+  await page.getByRole("button", { name: "Tạo bản nháp SOAP" }).click();
+
+  const result = page.getByLabel("Bản nháp y khoa theo bốn mục SOAP");
+  await expect(result.getByText("Bản nháp SOAP — cần bác sĩ kiểm tra")).toHaveCount(1);
+  await expect(result.getByText("Đau đầu từ sáng nay.")).toBeVisible();
+  await expect(result.getByText("160/90 mmHg")).toBeVisible();
+  await expect(result.getByText("Thông tin còn thiếu")).toBeVisible();
+  await expect(result.getByText("Tiền sử dị ứng")).toBeVisible();
+  await expect(result.getByText("Bản phiên âm tự động")).toHaveCount(0);
+  await expect(result.getByText("Bản phiên âm sau hiệu chỉnh")).toHaveCount(0);
+  await expect(result.getByText("Thuật ngữ đã đối chiếu")).toHaveCount(0);
+  await expect(result.getByText("ban ghi tho khong duoc hien thi")).toHaveCount(0);
+  await expect(result.getByText("Bản ghi đã sửa không được hiển thị.")).toHaveCount(0);
+  await expect(result.getByText("thuật ngữ ẩn")).toHaveCount(0);
+  const resultText = (await result.textContent()) ?? "";
+  expect(resultText.indexOf("Đau đầu từ sáng nay.")).toBeLessThan(resultText.indexOf("Tiền sử dị ứng"));
+  await expectNoSeriousAxeViolations(page);
+  await page.screenshot({
+    fullPage: true,
+    path: "../../.codex/qa-evidence/cp-ux-14-result-390.png",
+  });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(result).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  await expectNoSeriousAxeViolations(page);
+  await page.screenshot({
+    fullPage: true,
+    path: "../../.codex/qa-evidence/cp-ux-14-result-1440.png",
+  });
 });
 
 test.describe("touch navigation", () => {

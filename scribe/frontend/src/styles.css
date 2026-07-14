@@ -1086,52 +1086,9 @@ mark.scribe-mark {
   padding-left: 1.2rem;
 }
 
-.tool-missing p,
-.tool-evidence p {
+.tool-missing p {
   margin: 0.5rem 0 0;
   color: var(--muted);
-}
-
-.tool-review-title,
-.tool-evidence h3 {
-  margin: 0;
-}
-
-.tool-review-title {
-  font-size: 1rem;
-}
-
-.tool-evidence {
-  display: grid;
-  gap: 0.5rem;
-  padding: 0.9rem 1.15rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-control);
-  background: var(--surface);
-}
-
-.tool-evidence h3 {
-  font-size: 0.85rem;
-}
-
-.tool-evidence > p {
-  line-height: 1.65;
-}
-
-.tool-terms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tool-terms li {
-  padding: 0.3rem 0.55rem;
-  border-radius: 999px;
-  background: var(--tint);
-  font-size: 0.85rem;
 }
 
 .tool-actions {

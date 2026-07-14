@@ -44,7 +44,7 @@ afterEach(() => {
 });
 
 describe("ScribeTool", () => {
-  it("uploads audio and renders the SOAP draft with review banner", async () => {
+  it("renders only one review notice, SOAP, and missing information", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(healthResponse)
@@ -75,21 +75,19 @@ describe("ScribeTool", () => {
 
     expect(await screen.findByText("Đau đầu từ sáng nay.")).toBeInTheDocument();
     expect(screen.getByText("160/90 mmHg")).toBeInTheDocument();
-    expect(screen.getByText("dau dau tu sang nay huyet ap mot sau muoi tren chin muoi")).toBeInTheDocument();
-    expect(screen.getByText("Đau đầu từ sáng nay, huyết áp 160/90 mmHg.")).toBeInTheDocument();
-    expect(screen.getByText("amlodipin")).toBeInTheDocument();
-    expect(screen.getByText("tăng huyết áp")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Bản nháp do AI tạo, cần bác sĩ kiểm tra trước khi đưa vào hồ sơ bệnh án.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("Bản nháp SOAP — cần bác sĩ kiểm tra")).toHaveLength(1);
     expect(screen.getByText("Tiền sử dị ứng")).toBeInTheDocument();
+    expect(screen.queryByText("Đối chiếu trước khi sử dụng")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bản phiên âm tự động")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bản phiên âm sau hiệu chỉnh")).not.toBeInTheDocument();
+    expect(screen.queryByText("Thuật ngữ đã đối chiếu")).not.toBeInTheDocument();
+    expect(screen.queryByText("dau dau tu sang nay huyet ap mot sau muoi tren chin muoi")).not.toBeInTheDocument();
+    expect(screen.queryByText("Đau đầu từ sáng nay, huyết áp 160/90 mmHg.")).not.toBeInTheDocument();
+    expect(screen.queryByText("amlodipin")).not.toBeInTheDocument();
+    expect(screen.queryByText("tăng huyết áp")).not.toBeInTheDocument();
     const resultText = screen.getByLabelText("Bản nháp y khoa theo bốn mục SOAP").textContent ?? "";
-    expect(resultText.indexOf("dau dau tu sang nay")).toBeLessThan(resultText.indexOf("Đau đầu từ sáng nay, huyết áp"));
-    expect(resultText.indexOf("Đau đầu từ sáng nay, huyết áp")).toBeLessThan(resultText.indexOf("amlodipin"));
-    expect(resultText.indexOf("amlodipin")).toBeLessThan(resultText.indexOf("Tiền sử dị ứng"));
-    expect(resultText.indexOf("Tiền sử dị ứng")).toBeLessThan(resultText.indexOf("Bản nháp SOAP — cần bác sĩ kiểm tra"));
+    expect(resultText.indexOf("Bản nháp SOAP — cần bác sĩ kiểm tra")).toBeLessThan(resultText.indexOf("Đau đầu từ sáng nay."));
+    expect(resultText.indexOf("Đau đầu từ sáng nay.")).toBeLessThan(resultText.indexOf("Tiền sử dị ứng"));
 
     const [, soapCall] = fetchMock.mock.calls;
     expect(soapCall[0]).toBe("/api/v1/soap-notes");
@@ -213,8 +211,7 @@ describe("classifyFailure", () => {
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
-    expect(await screen.findAllByText("Không có nội dung phiên âm để hiển thị.")).toHaveLength(6);
-    expect(screen.getByText("Không có thuật ngữ được đối chiếu.")).toBeInTheDocument();
+    expect(await screen.findAllByText("Không có nội dung phiên âm để hiển thị.")).toHaveLength(4);
     expect(screen.getByText("Không có thông tin còn thiếu được ghi nhận.")).toBeInTheDocument();
   });
 });
