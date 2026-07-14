@@ -42,6 +42,68 @@ interface SafetyCardCopy {
   items: SafetyItem[];
 }
 
+interface LandingCopy {
+  status: { title: string; state: string; body: string };
+  hero: {
+    title: string;
+    body: string;
+    primary: string;
+    secondary: string;
+    visual: {
+      sourceLabel: string;
+      sourceText: string;
+      transcriptLabel: string;
+      transcriptText: string;
+      draftLabel: string;
+      draftText: string;
+    };
+  };
+  process: { label: string; items: string[] };
+  problem: {
+    title: string;
+    body: string;
+    duringTitle: string;
+    duringBody: string;
+    afterTitle: string;
+    afterBody: string;
+    workflowTitle: string;
+    workflowBody: string;
+    reviewTitle: string;
+    reviewBody: string;
+  };
+  workflow: {
+    title: string;
+    body: string;
+    stages: Array<{ title: string; body: string }>;
+  };
+  story: {
+    titleStart: string;
+    titleEnd: string;
+    body: string;
+    rawTitle: string;
+    rawText: string;
+    rawDetail: string;
+    correctedTitle: string;
+    correctedText: string;
+    correctedDetail: string;
+    draftTitle: string;
+    draftDetail: string;
+  };
+  safety: {
+    title: string;
+    body: string;
+    items: Array<{ title: string; body: string }>;
+  };
+  action: {
+    title: string;
+    body: string;
+    primary: string;
+    pilotTitle: string;
+    pilotBody: string;
+    pilotNote: string;
+  };
+}
+
 interface PageCopy {
   metadata: {
     title: string;
@@ -53,12 +115,13 @@ interface PageCopy {
     en: string;
   };
   nav: {
-    interpreter: string;
-    scribe: string;
+    need: string;
+    workflow: string;
     safety: string;
     pilot: string;
     menu: string;
   };
+  landing: LandingCopy;
   demo: {
     brand: string;
     consoleCta: string;
@@ -221,8 +284,8 @@ interface PageCopy {
 export const strings: Record<Language, PageCopy> = {
   vi: {
     metadata: {
-      title: "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp",
-      description: "CarePath hỗ trợ Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp cho cơ sở y tế.",
+      title: "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam",
+      description: "CarePath tạo bản nháp bệnh án có cấu trúc từ tệp âm thanh buổi khám để bác sĩ kiểm tra. Phiên dịch trực tiếp đang phát triển và chưa mở trên web.",
     },
     language: {
       label: "Ngôn ngữ",
@@ -230,11 +293,119 @@ export const strings: Record<Language, PageCopy> = {
       en: "EN",
     },
     nav: {
-      interpreter: "Phiên dịch khám bệnh trực tiếp",
-      scribe: "Ghi chép bệnh án AI",
-      safety: "An toàn",
-      pilot: "Thí điểm",
+      need: "Vì sao cần",
+      workflow: "Cách hoạt động",
+      safety: "Bác sĩ kiểm tra",
+      pilot: "Dùng thử",
       menu: "Mở điều hướng",
+    },
+    landing: {
+      status: {
+        title: "Phiên dịch khám bệnh trực tiếp",
+        state: "Đang phát triển — hiện chưa thể truy cập trên web.",
+        body: "CarePath đang hoàn thiện các luồng an toàn cần thiết trước khi mở lại chức năng này.",
+      },
+      hero: {
+        title: "Tập trung vào người bệnh. Để CarePath soạn bản nháp sau buổi khám.",
+        body: "Tải lên tệp âm thanh buổi khám đã được phép sử dụng. CarePath chép lời, chuẩn hóa thuật ngữ và tạo bản nháp bệnh án có cấu trúc để bác sĩ kiểm tra.",
+        primary: "Bắt đầu ghi chép",
+        secondary: "Xem cách hoạt động",
+        visual: {
+          sourceLabel: "Trong buổi khám",
+          sourceText: "Bệnh nhân đau đầu ba ngày, buồn nôn nhẹ, không sốt.",
+          transcriptLabel: "Lời chép được làm rõ",
+          transcriptText: "Đau đầu 3 ngày · buồn nôn nhẹ · không sốt",
+          draftLabel: "Bản nháp có cấu trúc",
+          draftText: "Triệu chứng và thông tin phủ định được đặt đúng mục để bác sĩ kiểm tra.",
+        },
+      },
+      process: {
+        label: "Tệp âm thanh, chép lời, chuẩn hóa thuật ngữ, bản nháp SOAP, bác sĩ kiểm tra",
+        items: [
+          "Tệp âm thanh",
+          "Chép lời tiếng Việt",
+          "Chuẩn hóa thuật ngữ",
+          "Bản nháp SOAP",
+          "Bác sĩ kiểm tra",
+        ],
+      },
+      problem: {
+        title: "Một buổi khám không nên biến thành hai ca làm việc.",
+        body: "Trong phòng khám, bác sĩ cần lắng nghe, đặt câu hỏi và đưa ra quyết định. Sau đó vẫn còn phần sắp xếp nội dung thành một ghi chú có cấu trúc.",
+        duringTitle: "Trong buổi khám",
+        duringBody: "Tập trung vào câu chuyện, triệu chứng và điều người bệnh đang cần.",
+        afterTitle: "Sau buổi khám",
+        afterBody: "Nhớ lại nội dung, gõ từng mục và kiểm tra xem thông tin quan trọng có bị bỏ sót hay không.",
+        workflowTitle: "Không bắt đầu từ trang trắng",
+        workflowBody: "CarePath biến lời đã nói thành một bản nháp có cấu trúc để bác sĩ bắt đầu từ việc kiểm tra, không phải chép lại.",
+        reviewTitle: "Bác sĩ quyết định bản cuối",
+        reviewBody: "CarePath không tự hoàn tất hồ sơ và không thay thế nhận định lâm sàng.",
+      },
+      workflow: {
+        title: "Một luồng rõ ràng từ tệp âm thanh đến bản nháp.",
+        body: "Mỗi bước đều giữ cho bác sĩ biết dữ liệu đến từ đâu và cần kiểm tra điều gì trước khi sử dụng.",
+        stages: [
+          {
+            title: "Tệp âm thanh đã được phép sử dụng",
+            body: "Cơ sở y tế chủ động chọn và tải lên tệp âm thanh của buổi khám.",
+          },
+          {
+            title: "Chép lời tiếng Việt",
+            body: "Nội dung đã nói được chuyển thành văn bản để bác sĩ có thể đọc lại.",
+          },
+          {
+            title: "Chuẩn hóa thuật ngữ",
+            body: "Tên thuốc và thuật ngữ y khoa được làm rõ nhưng vẫn phải được bác sĩ đối chiếu.",
+          },
+          {
+            title: "Tạo bản nháp có cấu trúc",
+            body: "Thông tin được sắp xếp thành các mục bệnh án, kể cả phần còn thiếu cần chú ý.",
+          },
+          {
+            title: "Bác sĩ kiểm tra",
+            body: "Chỉ bác sĩ mới quyết định nội dung nào được sửa, bổ sung hoặc sử dụng.",
+          },
+        ],
+      },
+      story: {
+        titleStart: "Từ lời đã nói",
+        titleEnd: "đến bản nháp bệnh án có cấu trúc.",
+        body: "Ba lớp thông tin được trình bày riêng để bác sĩ có thể đối chiếu nguồn, phần đã làm rõ và bản nháp cuối.",
+        rawTitle: "Lời chép ban đầu",
+        rawText: "Bệnh nhân đau đầu ba ngày, buồn nôn nhẹ, không sốt.",
+        rawDetail: "Giữ lại nội dung nguồn để bác sĩ đối chiếu.",
+        correctedTitle: "Thuật ngữ được làm rõ",
+        correctedText: "Đau đầu 3 ngày · buồn nôn nhẹ · không sốt",
+        correctedDetail: "Số, thuật ngữ và thông tin phủ định vẫn cần được kiểm tra.",
+        draftTitle: "Bản nháp SOAP",
+        draftDetail: "Thông tin được sắp xếp, không tự biến thành hồ sơ hoàn tất.",
+      },
+      safety: {
+        title: "Bản nháp chỉ được dùng sau khi bác sĩ kiểm tra.",
+        body: "CarePath hỗ trợ công việc ghi chép. Quyền quyết định lâm sàng và trách nhiệm duyệt nội dung luôn thuộc về bác sĩ.",
+        items: [
+          {
+            title: "Luôn hiển thị nội dung nguồn",
+            body: "Bác sĩ có thể so sánh lời chép, phần đã làm rõ và bản nháp.",
+          },
+          {
+            title: "Đánh dấu phần còn thiếu",
+            body: "Thông tin chưa có không được tự điền thành một kết luận chắc chắn.",
+          },
+          {
+            title: "Không tự đưa vào hồ sơ",
+            body: "Bản nháp cần được kiểm tra và xử lý theo quy trình của cơ sở y tế.",
+          },
+        ],
+      },
+      action: {
+        title: "Bắt đầu từ một tệp âm thanh đã được phép sử dụng.",
+        body: "Thử luồng ghi chép hiện có hoặc để lại thông tin nếu cơ sở của bạn muốn trao đổi về chương trình thí điểm.",
+        primary: "Bắt đầu ghi chép",
+        pilotTitle: "Trao đổi về chương trình thí điểm",
+        pilotBody: "Cho CarePath biết bối cảnh của cơ sở để cùng xác định cách thử nghiệm phù hợp.",
+        pilotNote: "Biểu mẫu này chỉ dành cho Ghi chép bệnh án AI.",
+      },
     },
     demo: {
       brand: "CarePath Phiên dịch",
@@ -616,14 +787,14 @@ export const strings: Record<Language, PageCopy> = {
     footer: {
       promise: "AI hỗ trợ, bác sĩ giữ quyền quyết định.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
-      honesty: "Phiên dịch khám bệnh trực tiếp là bản mô phỏng tương tác; Ghi chép bệnh án AI là công cụ thí điểm tạo bản nháp. Cả hai đều cần giám sát của nhân viên y tế.",
+      honesty: "Ghi chép bệnh án AI tạo bản nháp cần bác sĩ kiểm tra. Phiên dịch khám bệnh trực tiếp đang phát triển và chưa mở trên web.",
       contact: "Liên hệ chương trình thí điểm",
     },
   },
   en: {
     metadata: {
-      title: "CarePath | Clinical note drafting and live medical interpretation",
-      description: "CarePath supports clinical note drafting and live medical interpretation for care teams.",
+      title: "CarePath | AI clinical documentation for Vietnamese doctors",
+      description: "CarePath prepares a structured clinical-note draft from permitted consultation audio for clinician review. Live interpretation remains in development and is not open on the web.",
     },
     language: {
       label: "Language",
@@ -631,11 +802,119 @@ export const strings: Record<Language, PageCopy> = {
       en: "EN",
     },
     nav: {
-      interpreter: "Interpreter",
-      scribe: "Scribe",
-      safety: "Safety",
-      pilot: "Pilot",
+      need: "Why it matters",
+      workflow: "How it works",
+      safety: "Clinician review",
+      pilot: "Try it",
       menu: "Open navigation",
+    },
+    landing: {
+      status: {
+        title: "Live medical interpretation",
+        state: "In development — not currently accessible on the web.",
+        body: "CarePath is completing the required safety workflows before this product reopens.",
+      },
+      hero: {
+        title: "Focus on the patient. Let CarePath prepare the draft after the visit.",
+        body: "Upload permitted consultation audio. CarePath transcribes it, normalizes medical terms, and prepares a structured clinical-note draft for clinician review.",
+        primary: "Start documenting",
+        secondary: "See how it works",
+        visual: {
+          sourceLabel: "During the visit",
+          sourceText: "Bệnh nhân đau đầu ba ngày, buồn nôn nhẹ, không sốt.",
+          transcriptLabel: "Clarified transcript",
+          transcriptText: "Headache for 3 days · mild nausea · no fever",
+          draftLabel: "Structured draft",
+          draftText: "Symptoms and negative findings are placed in the right sections for clinician review.",
+        },
+      },
+      process: {
+        label: "Audio file, transcription, term normalization, SOAP draft, clinician review",
+        items: [
+          "Audio file",
+          "Vietnamese transcript",
+          "Term normalization",
+          "SOAP draft",
+          "Clinician review",
+        ],
+      },
+      problem: {
+        title: "One consultation should not become two shifts of work.",
+        body: "During the visit, clinicians need to listen, ask questions, and make decisions. Afterwards, the conversation still has to become a structured note.",
+        duringTitle: "During the visit",
+        duringBody: "Stay with the patient's story, symptoms, and immediate needs.",
+        afterTitle: "After the visit",
+        afterBody: "Recall the conversation, enter each section, and check whether important details were missed.",
+        workflowTitle: "Do not start from a blank page",
+        workflowBody: "CarePath turns spoken content into a structured draft so review begins with evidence instead of retyping.",
+        reviewTitle: "The clinician decides the final note",
+        reviewBody: "CarePath does not complete the record independently or replace clinical judgment.",
+      },
+      workflow: {
+        title: "A clear path from permitted audio to a reviewable draft.",
+        body: "Each step keeps the source visible and makes clear what the clinician must verify before use.",
+        stages: [
+          {
+            title: "Permitted consultation audio",
+            body: "The healthcare organization chooses and uploads the consultation audio file.",
+          },
+          {
+            title: "Vietnamese transcription",
+            body: "Spoken content becomes text that the clinician can read and compare.",
+          },
+          {
+            title: "Medical term normalization",
+            body: "Drug names and medical terms are clarified but still require clinician verification.",
+          },
+          {
+            title: "Structured draft",
+            body: "Information is organized into clinical-note sections, including missing details that need attention.",
+          },
+          {
+            title: "Clinician review",
+            body: "Only the clinician decides what to edit, add, or use.",
+          },
+        ],
+      },
+      story: {
+        titleStart: "From spoken detail",
+        titleEnd: "to a structured clinical-note draft.",
+        body: "Source, clarified content, and the resulting draft remain separate so the clinician can compare each layer.",
+        rawTitle: "Initial transcript",
+        rawText: "Bệnh nhân đau đầu ba ngày, buồn nôn nhẹ, không sốt.",
+        rawDetail: "The source remains visible for comparison.",
+        correctedTitle: "Clarified terminology",
+        correctedText: "Headache for 3 days · mild nausea · no fever",
+        correctedDetail: "Numbers, medical terms, and negative findings still require review.",
+        draftTitle: "SOAP draft",
+        draftDetail: "Information is organized without becoming a completed medical record.",
+      },
+      safety: {
+        title: "The draft is used only after clinician review.",
+        body: "CarePath supports documentation work. Clinical decisions and responsibility for the final content remain with the clinician.",
+        items: [
+          {
+            title: "Source content stays visible",
+            body: "The clinician can compare the transcript, clarified content, and draft.",
+          },
+          {
+            title: "Missing information is marked",
+            body: "Absent details are not silently turned into confident conclusions.",
+          },
+          {
+            title: "No automatic record entry",
+            body: "The draft must follow the healthcare organization's review process.",
+          },
+        ],
+      },
+      action: {
+        title: "Start with an audio file you are permitted to use.",
+        body: "Try the available documentation workflow or leave your details to discuss a pilot for your organization.",
+        primary: "Start documenting",
+        pilotTitle: "Discuss a pilot",
+        pilotBody: "Tell CarePath about your organization so we can identify an appropriate way to test the workflow.",
+        pilotNote: "This form is only for AI clinical documentation.",
+      },
     },
     demo: {
       brand: "CarePath Interpreter",
@@ -1017,7 +1296,7 @@ export const strings: Record<Language, PageCopy> = {
     footer: {
       promise: "AI assistance, clinician in control.",
       posture: "Designed around data minimization, awareness of Decree 13/PDP obligations, and §1557-aligned language-access positioning. This is not a legal certification claim.",
-      honesty: "Interpreter is an interactive simulation; Scribe is a pilot draft tool. Both require healthcare-staff oversight.",
+      honesty: "AI clinical documentation produces a draft for clinician review. Live medical interpretation remains in development and is not open on the web.",
       contact: "Contact the pilot program",
     },
   },

@@ -7,6 +7,99 @@
 1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
 2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
 
+## Current priority update: Scribe-led public landing
+
+### Current UX problem
+
+The public landing technically labels the Interpreter as being in development,
+but still presents it as a peer product choice and sends its card to the pilot
+form. That affordance competes with the only available web workflow and leaves
+the Scribe value story fragmented across unrelated product and safety sections.
+
+### Proposed flow
+
+1. Show a prominent, non-interactive status rail stating that **Phiên dịch khám
+   bệnh trực tiếp** is in development and cannot currently be accessed on the
+   web.
+2. Lead with the documentation burden after a consultation, then show how an
+   approved audio upload becomes a clinician-reviewed structured draft.
+3. Keep **Bắt đầu ghi chép** as the only product-launch action.
+4. Keep the pilot form as a secondary Scribe-only contact path.
+
+### Affected routes, pages, and components
+
+- `/` in `scribe/frontend/src/LandingPage.tsx`
+- Landing copy and metadata in `scribe/frontend/src/content/strings.ts`
+- Landing presentation and reduced-motion behavior in `scribe/frontend/src/styles.css`
+- The reusable pilot form's optional product-interest field
+- `/ghi-chep-lam-sang/` remains unchanged
+
+### Vietnamese-first copy
+
+- Interpreter status: `Đang phát triển — hiện chưa thể truy cập trên web.`
+- Hero: `Tập trung vào người bệnh. Để CarePath soạn bản nháp sau buổi khám.`
+- Hero detail: `Tải lên tệp âm thanh buổi khám đã được phép sử dụng. CarePath
+  chép lời, chuẩn hóa thuật ngữ và tạo bản nháp bệnh án có cấu trúc để bác sĩ
+  kiểm tra.`
+- Primary action: `Bắt đầu ghi chép`
+- Secondary action: `Xem cách hoạt động`
+- Problem chapter: `Một buổi khám không nên biến thành hai ca làm việc.`
+- Safety limit: `Bản nháp chỉ được dùng sau khi bác sĩ kiểm tra.`
+- Final action: `Bắt đầu từ một tệp âm thanh đã được phép sử dụng.`
+
+### Implementation story: CP-UX-10
+
+- Replace the two-product decision accordion with a Scribe-led AIDA narrative.
+- Use the existing Geist font, CarePath mark, sanitized Scribe sample, and
+  existing form; add only GSAP and its React adapter for the approved motion.
+- Add a gapless 12-column problem bento, native horizontal workflow accordion,
+  decorative process marquee, and desktop-only pinned workflow visuals.
+- Lock the landing pilot form to Scribe and hide its product-interest selector.
+- Remove landing-only Interpreter evidence and obsolete selector rules.
+
+### Dependencies
+
+- CP-UX-09 keeps the Interpreter browser routes blocked.
+- CP-BASE-003 supplies the existing public-site test and deployment gates.
+- The Vercel project continues to build from `scribe/frontend` on `main`.
+
+### Acceptance criteria
+
+- Scribe is the only active product journey and its CTA opens
+  `/ghi-chep-lam-sang/`.
+- Interpreter status is visible near the top of the page and contains no link
+  or button.
+- The page explains the post-consultation documentation problem, the Scribe
+  workflow, and mandatory clinician review without unsupported claims.
+- Vietnamese and English layouts work at 320, 360, 390, 768, and 1440 pixels
+  without horizontal overflow.
+- Keyboard navigation, reduced motion, diacritics, and serious Axe checks pass.
+- Existing Scribe functionality works and Interpreter browser routes remain 404.
+
+### Validation commands
+
+```powershell
+cd scribe\frontend
+npm.cmd run lint
+npm.cmd test
+npm.cmd run test:deploy-env
+npm.cmd run build
+npm.cmd run e2e
+npm.cmd run lighthouse
+cd ..\..
+python -m pytest scribe/tests/test_combined_app.py
+```
+
+### Risks and fallback behavior
+
+- GSAP runs only on desktop when reduced motion is not requested; without it,
+  all content remains in normal document flow.
+- The marquee is decorative and stops for reduced motion. Its meaning is also
+  available as static text.
+- No Interpreter route, API, WebSocket, consent, microphone, TTS, or risk logic
+  changes. If the status presentation fails, it remains plain static text and
+  never becomes a launch action.
+
 ## Backlog rules
 
 - Implement one story per commit or pull request.

@@ -182,6 +182,31 @@ describe("LeadForm", () => {
     expect(onInterestChange).toHaveBeenCalledWith("both");
   });
 
+  it("submits a fixed Scribe interest when the landing selector is hidden", async () => {
+    const fetcher = vi.fn(async () => new Response(null, { status: 204 })) as unknown as typeof fetch;
+    render(
+      <LeadForm
+        clinic="Phòng khám Minh Tâm"
+        endpoint="https://leads.example.test/pilot"
+        fetcher={fetcher}
+        hideInterestField
+        interest="scribe"
+        language="vi"
+        scenario={scenarios[0]}
+        specialty="Nội tổng quát"
+        transcript=""
+      />,
+    );
+
+    expect(screen.queryByRole("combobox", { name: "Chức năng quan tâm" })).not.toBeInTheDocument();
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole("button", { name: "Gửi yêu cầu thí điểm" }));
+
+    await waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
+    const [, request] = (fetcher as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(JSON.parse(String(request.body)).interest).toBe("scribe");
+  });
+
   it("includes the simulation context only after explicit opt-in", async () => {
     const fetcher = vi.fn(async () => new Response(null, { status: 204 })) as unknown as typeof fetch;
     render(

@@ -7,7 +7,7 @@ describe("language preference", () => {
     localStorage.clear();
     window.history.replaceState(null, "", "/");
     document.documentElement.lang = "vi";
-    document.title = "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp";
+    document.title = "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam";
   });
 
   it("defaults to Vietnamese and persists a complete English switch", () => {
@@ -15,43 +15,34 @@ describe("language preference", () => {
 
     expect(document.documentElement.lang).toBe("vi");
     expect(document.title).toBe(
-      "CarePath | Ghi chép bệnh án AI và Phiên dịch khám bệnh trực tiếp",
+      "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam",
     );
     fireEvent.click(screen.getByRole("button", { name: "EN" }));
 
     expect(document.documentElement.lang).toBe("en");
     expect(document.title).toBe(
-      "CarePath | Clinical note drafting and live medical interpretation",
+      "CarePath | AI clinical documentation for Vietnamese doctors",
     );
     expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
-      screen.getByRole("link", {
-        name: "CarePath Interpreter: Get Interpreter updates",
+      screen.getByRole("heading", {
+        name: "Focus on the patient. Let CarePath prepare the draft after the visit.",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
-        name: "Choose the right product for the right point in care.",
-      }),
+      screen.getByText("In development — not currently accessible on the web."),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "One shared oversight layer. Two product-specific safety systems.",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "See how each product keeps review points in the right place.",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "Choose the product that fits your workflow.",
+        name: "The draft is used only after clinician review.",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("AI assistance, clinician in control."),
     ).toBeInTheDocument();
+    expect(
+      document.querySelector('a[href*="phien-dich-y-khoa"], a[href*="console"]'),
+    ).toBeNull();
   });
 
   it("ignores an invalid stored preference", () => {
@@ -110,7 +101,9 @@ describe("language preference", () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
 
     expect(
-      await screen.findByRole("heading", { name: "Bạn muốn hỗ trợ việc gì hôm nay?" }),
+      await screen.findByRole("heading", {
+        name: "Tập trung vào người bệnh. Để CarePath soạn bản nháp sau buổi khám.",
+      }),
     ).toBeInTheDocument();
     vi.unstubAllGlobals();
   });

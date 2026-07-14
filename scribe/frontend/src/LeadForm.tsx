@@ -22,6 +22,7 @@ interface LeadFormProps {
   onMailto?: (url: string) => void;
   interest?: ProductInterest;
   onInterestChange?: (interest: ProductInterest) => void;
+  hideInterestField?: boolean;
 }
 
 export default function LeadForm({
@@ -36,6 +37,7 @@ export default function LeadForm({
   onMailto,
   interest: controlledInterest,
   onInterestChange,
+  hideInterestField = false,
 }: LeadFormProps) {
   const labels = copyFor(language).form;
   const [localInterest, setLocalInterest] = useState<ProductInterest>("both");
@@ -161,25 +163,27 @@ export default function LeadForm({
           {labels.includeDemoContext}
         </label>
       )}
-      <label>
-        {labels.interest}
-        <select
-          value={interest}
-          onChange={(event) => {
-            const nextInterest = event.target.value as ProductInterest;
-            if (controlledInterest === undefined) {
-              setLocalInterest(nextInterest);
-            }
-            onInterestChange?.(nextInterest);
-          }}
-        >
-          <option value="interpreter">
-            {labels.interestOptions.interpreter}
-          </option>
-          <option value="scribe">{labels.interestOptions.scribe}</option>
-          <option value="both">{labels.interestOptions.both}</option>
-        </select>
-      </label>
+      {!hideInterestField && (
+        <label>
+          {labels.interest}
+          <select
+            value={interest}
+            onChange={(event) => {
+              const nextInterest = event.target.value as ProductInterest;
+              if (controlledInterest === undefined) {
+                setLocalInterest(nextInterest);
+              }
+              onInterestChange?.(nextInterest);
+            }}
+          >
+            <option value="interpreter">
+              {labels.interestOptions.interpreter}
+            </option>
+            <option value="scribe">{labels.interestOptions.scribe}</option>
+            <option value="both">{labels.interestOptions.both}</option>
+          </select>
+        </label>
+      )}
       <label>
         {labels.role}
         <input
