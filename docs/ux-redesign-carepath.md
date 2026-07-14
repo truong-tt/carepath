@@ -211,6 +211,122 @@ python -m pytest scribe/tests/test_combined_app.py
 - No Interpreter route, API, WebSocket, audio, consent, retention, or safety
   behavior changes.
 
+## Current priority update: professional landing polish
+
+### Current UX problem
+
+The problem-led landing (CP-UX-11) has the right content in the right order,
+but its presentation undercuts onboarding:
+
+1. The hero states the problem yet never shows the product. The draft payoff
+   sits behind the third tab of the guided sample, so a scanning doctor sees
+   no evidence of what CarePath actually produces.
+2. The two hero actions wrap into a vertical stack at desktop widths and read
+   as a rendering fault rather than a hierarchy.
+3. The Interpreter development notice is a full-width dark band directly under
+   the navigation; the most dominant element above the fold announces a
+   product that cannot be used.
+4. The final third of the page is three consecutive dark slabs (trust, start,
+   footer) that merge into one block and bury the trust checklist.
+5. A late `.site-footer` column override defeats the responsive footer rules,
+   so footer text squeezes into unreadable columns at phone widths.
+6. Section paddings differ per chapter, leaving long empty stretches between
+   the calculator, sample, and evidence sections on desktop.
+
+### Proposed flow
+
+Section order, routes, copy contract, and all interactive behavior stay as
+CP-UX-11 delivered them. Only presentation changes:
+
+1. Render the Interpreter status as a quiet bordered notice under the
+   navigation. Same element, same strings, still non-interactive.
+2. Split the hero: problem headline and actions on the left, and a compact
+   conversation-to-draft proof panel on the right that reuses the sanitized
+   sample. Subjective and Objective rows only; Assessment and Plan never
+   appear before the doctor reaches the guided sample. Actions sit on one row
+   on desktop.
+3. Keep calculator, guided sample, and evidence sections unchanged in
+   behavior; align them to one shared section-padding token.
+4. Restyle the trust section as a light panel so the closing start section is
+   the single dark moment before the footer.
+5. Fix the footer override ordering and stack it into readable rows at phone
+   widths.
+
+### Affected routes, pages, and components
+
+- `/` in `scribe/frontend/src/LandingPage.tsx` (hero proof panel replaces the
+  abstract daily-flow table)
+- `scribe/frontend/src/styles.css` (status notice, hero grid, section rhythm,
+  trust section, footer)
+- `scribe/frontend/src/LandingPage.test.tsx` (hero proof assertions)
+- No route, API, form, showcase-interaction, or Scribe-tool changes
+
+### Vietnamese-first copy (new strings only)
+
+- Proof panel title: `Từ cuộc trao đổi đến bản nháp`
+- Conversation label: `Trong ghi âm`
+- Reused sample line: `Tôi bị đau tức ngực thoáng qua từ sáng, hơi khó thở.`
+- Draft label: `Bản nháp cho bác sĩ kiểm tra`
+- Draft rows: existing `Triệu chứng chủ quan` and `Thông tin khách quan`
+  sample content; the Objective row reads
+  `Chưa có kết quả cận lâm sàng trong nội dung ghi âm.`
+- Caption: `Ca khám mẫu đã làm sạch. Nhận định và kế hoạch luôn thuộc về bác sĩ.`
+
+### Implementation story: CP-UX-12
+
+- Replace the hero `daily-flow` table with the conversation-to-draft proof
+  panel; delete the orphaned `daily-flow` styles.
+- De-emphasize the Interpreter status into a bordered notice.
+- One shared section padding; trust section light; footer stacking fixed at
+  its root (remove the post-media-query `.site-footer` override).
+- No new dependency, motion, image, or remote asset. Semantic HTML only.
+
+### Dependencies
+
+- CP-UX-11 supplies the problem-led structure, calculator, and guided sample.
+- CP-UX-09 keeps Interpreter browser routes blocked.
+- CP-BASE-003 supplies the site test and deployment gates.
+
+### Acceptance criteria
+
+- The hero shows a conversation-to-draft glimpse labeled as a cleaned sample;
+  `Chờ bác sĩ nhập hoặc xác nhận.` still never renders before the doctor opens
+  the draft step (existing e2e assertion stays green).
+- Both hero actions render on one row at 1024 px and wider.
+- The Interpreter status keeps its exact strings and zero links or buttons,
+  and no longer uses the dark band treatment.
+- Exactly one dark section (the start section) renders between the evidence
+  grid and the footer.
+- The footer stacks into readable rows at 320, 360, and 390 px.
+- Hero height stays under 800 px at 1440×900; H1 line limits hold; no
+  horizontal overflow from 320 to 1440 px.
+- Lint, unit, deploy-env, build with diacritics gate, Playwright, Lighthouse,
+  and combined-app checks pass.
+
+### Validation commands
+
+```powershell
+cd scribe\frontend
+npm.cmd run lint
+npm.cmd test
+npm.cmd run test:deploy-env
+npm.cmd run build
+npm.cmd run e2e
+npm.cmd run lighthouse
+cd ..\..
+python -m pytest scribe/tests/test_combined_app.py
+```
+
+### Risks and fallback behavior
+
+- Presentation-only: no route, API, consent, microphone, retention, or safety
+  copy changes. The pilot form and showcase interactions are untouched.
+- The proof panel is static text from the existing sanitized sample; if it
+  threatens the hero height budget, the conversation line drops first and the
+  panel degrades to a draft-only card.
+- All new strings are NFC-normalized Vietnamese; the build diacritics gate is
+  the enforcement.
+
 ## Backlog rules
 
 - Implement one story per commit or pull request.

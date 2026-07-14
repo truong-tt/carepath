@@ -91,22 +91,31 @@ export default function LandingPage() {
               </small>
             </div>
 
-            <div className="daily-flow" aria-label="Một ngày khám điển hình">
-              <p>Một ngày khám điển hình</p>
-              <ol>
-                <li>
-                  <span>Trong buổi khám</span>
-                  <strong>Lắng nghe, hỏi và ra quyết định</strong>
-                </li>
-                <li>
-                  <span>Sau mỗi lượt khám</span>
-                  <strong>Nhớ lại và sắp xếp thông tin</strong>
-                </li>
-                <li>
-                  <span>Cuối ngày</span>
-                  <strong>Hoàn tất phần ghi chép còn lại</strong>
-                </li>
-              </ol>
+            <div className="hero-proof" aria-label="Từ cuộc trao đổi đến bản nháp">
+              <p className="hero-proof__title">Từ cuộc trao đổi đến bản nháp</p>
+              <div className="hero-proof__stage">
+                <span>Trong ghi âm</span>
+                <p>
+                  <strong>Bệnh nhân:</strong> Tôi bị đau tức ngực thoáng qua từ
+                  sáng, hơi khó thở.
+                </p>
+              </div>
+              <div className="hero-proof__stage hero-proof__stage--draft">
+                <span>Bản nháp cho bác sĩ kiểm tra</span>
+                <dl>
+                  <div>
+                    <dt>Triệu chứng chủ quan</dt>
+                    <dd>Đau tức ngực thoáng qua từ sáng, khó thở nhẹ. Chưa dùng thuốc.</dd>
+                  </div>
+                  <div>
+                    <dt>Thông tin khách quan</dt>
+                    <dd>Chưa có kết quả cận lâm sàng trong nội dung ghi âm.</dd>
+                  </div>
+                </dl>
+              </div>
+              <p className="hero-proof__caption">
+                Ca khám mẫu đã làm sạch. Nhận định và kế hoạch luôn thuộc về bác sĩ.
+              </p>
             </div>
           </div>
         </section>

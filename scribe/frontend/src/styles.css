@@ -1270,7 +1270,7 @@ mark.scribe-mark {
 
 .site-footer {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr auto;
+  grid-template-columns: 1fr 1.5fr auto;
   gap: clamp(1.5rem, 4vw, 4rem);
   align-items: start;
   margin-top: var(--section-pad);
@@ -1474,25 +1474,25 @@ mark.scribe-mark {
 }
 
 .interpreter-status {
-  display: grid;
-  grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 1fr);
-  gap: clamp(1rem, 4vw, 4rem);
-  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
   width: min(100% - 3rem, var(--container));
   margin: 1.25rem auto 0;
-  padding: 1.1rem clamp(1.1rem, 2.5vw, 2rem);
-  background: var(--deep);
-  color: var(--on-deep);
+  padding: 0.75rem 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .interpreter-status strong {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .interpreter-status span {
-  color: var(--accent-on-deep);
-  font-size: 0.78rem;
-  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .button-link--primary {
@@ -1510,10 +1510,6 @@ mark.scribe-mark {
   border-color: var(--on-deep);
   background: var(--on-deep);
   color: var(--deep);
-}
-
-.site-footer {
-  grid-template-columns: 1fr 1.5fr auto;
 }
 
 .onboarding-hero,
@@ -1541,10 +1537,10 @@ mark.scribe-mark {
 
 .onboarding-hero__body {
   display: grid;
-  grid-template-columns: minmax(18rem, 0.8fr) minmax(24rem, 1.2fr);
-  gap: clamp(2.5rem, 7vw, 7rem);
-  align-items: end;
-  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+  grid-template-columns: minmax(20rem, 1fr) minmax(24rem, 1fr);
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: start;
+  margin-top: clamp(2.25rem, 4.5vw, 3.75rem);
 }
 
 .onboarding-hero__copy > p {
@@ -1571,53 +1567,83 @@ mark.scribe-mark {
   margin-top: 1.7rem;
 }
 
-.daily-flow {
+.hero-proof {
   border: 1px solid var(--line);
   background: var(--surface);
   box-shadow: var(--shadow);
 }
 
-.daily-flow > p {
+.hero-proof__title {
   margin: 0;
-  padding: 0.85rem 1.1rem;
+  padding: 0.8rem 1.1rem;
   border-bottom: 1px solid var(--line);
   color: var(--accent-ink);
   font-size: 0.75rem;
   font-weight: 700;
 }
 
-.daily-flow ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.hero-proof__stage {
+  padding: 1rem 1.1rem;
 }
 
-.daily-flow li {
-  display: grid;
-  grid-template-columns: minmax(8rem, 0.42fr) minmax(0, 1fr);
-  gap: 1rem;
-  padding: 1.1rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.daily-flow li:last-child {
-  border-bottom: 0;
-}
-
-.daily-flow span {
+.hero-proof__stage > span {
+  display: block;
+  margin-bottom: 0.5rem;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.daily-flow strong {
-  font-size: 0.9rem;
-  line-height: 1.45;
+.hero-proof__stage > p {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-left: 3px solid var(--teal);
+  background: var(--surface-2);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.hero-proof__stage--draft {
+  border-top: 1px solid var(--line);
+}
+
+.hero-proof__stage--draft > span {
+  color: var(--accent-ink);
+}
+
+.hero-proof__stage dl {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.hero-proof__stage dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.hero-proof__stage dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.hero-proof__caption {
+  margin: 0;
+  padding: 0.8rem 1.1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
 }
 
 .burden-section,
 .demo-section,
 .evidence-section {
-  padding: clamp(4rem, 8vw, 7rem) 0;
+  padding: clamp(3.5rem, 6vw, 5.5rem) 0;
 }
 
 .burden-section {
@@ -1737,7 +1763,7 @@ mark.scribe-mark {
 
 .workflow-comparison {
   display: grid;
-  align-content: center;
+  align-content: start;
   gap: 0;
 }
 
@@ -1840,13 +1866,15 @@ mark.scribe-mark {
   width: min(100% - 2rem, calc(var(--container) + 3rem));
   margin: 0 auto;
   padding: clamp(2.5rem, 6vw, 5rem);
-  background: var(--deep);
-  color: var(--on-deep);
 }
 
-.trust-section > div > p,
-.start-section__copy > p {
-  color: var(--on-deep-muted);
+.trust-section {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.trust-section > div > p {
+  color: var(--muted);
 }
 
 .trust-section ul {
@@ -1854,21 +1882,27 @@ mark.scribe-mark {
   gap: 1px;
   margin: 0;
   padding: 0;
-  border: 1px solid rgb(244 241 232 / 0.18);
-  background: rgb(244 241 232 / 0.18);
+  border: 1px solid var(--line);
+  background: var(--line);
   list-style: none;
 }
 
 .trust-section li {
   padding: 1rem 1.1rem;
-  background: var(--deep);
-  color: var(--on-deep-muted);
+  background: var(--surface-2);
+  color: var(--muted);
   font-size: 0.88rem;
 }
 
 .start-section {
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   scroll-margin-top: 5rem;
+  background: var(--deep);
+  color: var(--on-deep);
+}
+
+.start-section__copy > p {
+  color: var(--on-deep-muted);
 }
 
 .pilot-disclosure {
@@ -2049,9 +2083,7 @@ mark.scribe-mark {
   }
 
   .interpreter-status {
-    grid-template-columns: 1fr;
     width: min(100% - 1.5rem, var(--container));
-    gap: 0.7rem;
   }
 
   .onboarding-hero,
@@ -2076,13 +2108,13 @@ mark.scribe-mark {
     margin-top: 2rem;
   }
 
-  .daily-flow li,
   .calculator-fields {
     grid-template-columns: 1fr;
   }
 
-  .daily-flow li {
-    gap: 0.25rem;
+  .site-footer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .burden-section,

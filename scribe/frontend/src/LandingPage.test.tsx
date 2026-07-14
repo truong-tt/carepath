@@ -29,6 +29,19 @@ describe("LandingPage", () => {
     ).toBeNull();
   });
 
+  it("shows the conversation-to-draft proof without inventing assessment or plan", () => {
+    render(<LandingPage />);
+
+    expect(screen.getByText("Từ cuộc trao đổi đến bản nháp")).toBeInTheDocument();
+    expect(
+      screen.getByText("Chưa có kết quả cận lâm sàng trong nội dung ghi âm."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nhận định và kế hoạch luôn thuộc về bác sĩ/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Chờ bác sĩ nhập hoặc xác nhận.")).not.toBeInTheDocument();
+  });
+
   it("calculates current documentation time without claiming CarePath savings", () => {
     render(<LandingPage />);
 
