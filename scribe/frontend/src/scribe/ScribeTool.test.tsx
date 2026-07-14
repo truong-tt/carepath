@@ -51,7 +51,7 @@ describe("ScribeTool", () => {
       .mockResolvedValueOnce(soapResponse());
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<ScribeTool language="vi" />);
+    render(<ScribeTool />);
     await screen.findByText("Chế độ demo");
     expect(
       screen.getAllByRole("link", { name: "Tất cả chức năng" }),
@@ -62,23 +62,10 @@ describe("ScribeTool", () => {
     expect(
       screen.getByRole("heading", { name: "Ghi chép bệnh án AI — bản nháp" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "AI chỉ hỗ trợ tạo bản nháp. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Tải tệp ghi âm buổi khám lên")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "AI tạo bản nháp y khoa theo bốn mục SOAP",
-      ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Bác sĩ kiểm tra, chỉnh sửa; bản nháp không tự vào hồ sơ",
-      ),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    expect(screen.getByText("Ba bước để tạo bản nháp")).toBeInTheDocument();
+    expect(screen.getByText("Chọn tệp âm thanh buổi khám đã được phép sử dụng")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Xem ca khám mẫu trước" })).toHaveAttribute("href", "/#demo");
+    expect(screen.queryByRole("button", { name: "Tiếp tục tạo bản nháp" })).not.toBeInTheDocument();
 
     const submit = screen.getByRole("button", { name: "Tạo bản nháp SOAP" });
     expect(submit).toBeDisabled();
@@ -126,8 +113,7 @@ describe("ScribeTool", () => {
         });
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<ScribeTool language="vi" />);
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    render(<ScribeTool />);
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
@@ -155,8 +141,7 @@ describe("ScribeTool", () => {
         }),
     );
 
-    render(<ScribeTool language="vi" />);
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    render(<ScribeTool />);
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
@@ -173,8 +158,7 @@ describe("ScribeTool", () => {
         .mockRejectedValueOnce(new TypeError("Failed to fetch")),
     );
 
-    render(<ScribeTool language="vi" />);
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    render(<ScribeTool />);
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 
@@ -185,8 +169,8 @@ describe("ScribeTool", () => {
 
   it("marks the backend unreachable when health fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
-    render(<ScribeTool language="en" />);
-    expect(await screen.findByText("Server unreachable")).toBeInTheDocument();
+    render(<ScribeTool />);
+    expect(await screen.findByText("Mất kết nối máy chủ")).toBeInTheDocument();
   });
 });
 
@@ -225,8 +209,7 @@ describe("classifyFailure", () => {
         }),
     );
 
-    render(<ScribeTool language="vi" />);
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục tạo bản nháp" }));
+    render(<ScribeTool />);
     selectWav();
     fireEvent.click(screen.getByRole("button", { name: "Tạo bản nháp SOAP" }));
 

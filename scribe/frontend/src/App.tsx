@@ -2,26 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import ScribeTool from "./scribe/ScribeTool";
 import { copyFor } from "./content/strings";
-import type { Language } from "./demo/types";
 
 const CLINICAL_NOTES_PATH = "/ghi-chep-lam-sang/";
 
 export default function App() {
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem("carepath-demo-language");
-    return saved === "en" ? "en" : "vi";
-  });
   const [pathname, setPathname] = useState(() => window.location.pathname);
   const wasScribeTool = useRef(false);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-    document.title = copyFor(language).metadata.title;
+    document.documentElement.lang = "vi";
+    document.title = copyFor("vi").metadata.title;
     document
       .querySelector('meta[name="description"]')
-      ?.setAttribute("content", copyFor(language).metadata.description);
-    localStorage.setItem("carepath-demo-language", language);
-  }, [language]);
+      ?.setAttribute("content", copyFor("vi").metadata.description);
+  }, []);
 
   useEffect(() => {
     if (window.location.hash === "#/scribe" || pathname === "/ghi-chep-lam-sang") {
@@ -63,8 +57,8 @@ export default function App() {
   }, [isScribeTool]);
 
   return isScribeTool ? (
-    <ScribeTool backHref="/" language={language} onLanguageChange={setLanguage} />
+    <ScribeTool backHref="/" />
   ) : (
-    <LandingPage language={language} onLanguageChange={setLanguage} />
+    <LandingPage />
   );
 }

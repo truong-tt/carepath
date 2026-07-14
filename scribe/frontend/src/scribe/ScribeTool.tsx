@@ -9,7 +9,6 @@ import {
 } from "react";
 import logoUrl from "../assets/carepath.svg";
 import { copyFor } from "../content/strings";
-import type { Language } from "../demo/types";
 
 // Same-origin by default: the combined API serves this site and /api/v1/*.
 const API_BASE: string = import.meta.env.VITE_API_BASE ?? "";
@@ -109,19 +108,14 @@ function formatBytes(size: number): string {
 
 interface ScribeToolProps {
   backHref?: string;
-  language: Language;
-  onLanguageChange?: (language: Language) => void;
 }
 
 export default function ScribeTool({
   backHref = "#top",
-  language,
-  onLanguageChange,
 }: ScribeToolProps) {
-  const copy = copyFor(language);
+  const copy = copyFor("vi");
   const labels = copy.scribeTool;
   const [state, setState] = useState<ToolState>("idle");
-  const [readyToRecord, setReadyToRecord] = useState(false);
   const [health, setHealth] = useState<HealthState>("checking");
   const [file, setFile] = useState<File | null>(null);
   const [context, setContext] = useState("");
@@ -253,7 +247,7 @@ export default function ScribeTool({
 
   return (
     <div className="site-shell">
-      <nav className="site-nav" aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}>
+      <nav className="site-nav" aria-label="Điều hướng chính">
         <a className="site-nav__brand" href={backHref} aria-label={labels.back}>
           <img src={logoUrl} alt="" />
           <span className="product-breadcrumb">
@@ -264,26 +258,8 @@ export default function ScribeTool({
         </a>
         <div className="site-nav__actions">
           <span className="product-shell-status">
-            {language === "vi"
-              ? "Công cụ thí điểm · Cần bác sĩ duyệt"
-              : "Pilot tool · Clinician review required"}
+            Công cụ thí điểm · Cần bác sĩ duyệt
           </span>
-          <div className="language-toggle" aria-label={copy.language.label}>
-            <button
-              aria-pressed={language === "vi"}
-              onClick={() => onLanguageChange?.("vi")}
-              type="button"
-            >
-              {copy.language.vi}
-            </button>
-            <button
-              aria-pressed={language === "en"}
-              onClick={() => onLanguageChange?.("en")}
-              type="button"
-            >
-              {copy.language.en}
-            </button>
-          </div>
           <a className="nav-cta" href={backHref}>{labels.back}</a>
         </div>
       </nav>
@@ -299,26 +275,21 @@ export default function ScribeTool({
           </p>
         </header>
 
-        {state === "idle" && !readyToRecord && (
-          <section className="scribe-panel tool-panel tool-prestart" aria-label={labels.title}>
-            <ol className="progress-rail progress-rail--tool">
+        {state === "idle" && (
+          <form className="scribe-panel tool-panel" onSubmit={submit}>
+            <div className="tool-start-guide">
+              <h2>Ba bước để tạo bản nháp</h2>
+              <ol>
               {labels.preStartSteps.map((step, index) => (
                 <li key={step}>
                   <span aria-hidden="true">{index + 1}</span>
                   {step}
                 </li>
               ))}
-            </ol>
-            <p className="tool-disclaimer">{labels.preStartReminder}</p>
-            <p className="tool-disclaimer">{labels.uploadNotice}</p>
-            <button className="button button--primary" onClick={() => setReadyToRecord(true)} type="button">
-              {labels.continue}
-            </button>
-          </section>
-        )}
-
-        {state === "idle" && readyToRecord && (
-          <form className="scribe-panel tool-panel" onSubmit={submit}>
+              </ol>
+              <p>{labels.uploadNotice}</p>
+              <a href="/#demo">Xem ca khám mẫu trước</a>
+            </div>
             <label
               className={dragging ? "dropzone is-drag" : "dropzone"}
               onDragEnter={(event) => {

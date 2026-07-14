@@ -1,114 +1,50 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef, useState } from "react";
 import logoUrl from "./assets/carepath.svg";
 import { copyFor } from "./content/strings";
 import { scenarios } from "./demo/scenarios";
-import type { Language } from "./demo/types";
 import LeadForm from "./LeadForm";
 import { leadContact, zaloHref } from "./leads";
-import { soapDraft } from "./scribe/ScribeShowcase";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-interface LandingPageProps {
-  language: Language;
-  onLanguageChange?: (language: Language) => void;
-}
+import ScribeShowcase from "./scribe/ScribeShowcase";
 
 const scribeHref = "/ghi-chep-lam-sang/";
 
-export default function LandingPage({
-  language,
-  onLanguageChange,
-}: LandingPageProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
+export function formatMinutes(total: number): string {
+  const rounded = Math.max(0, Math.round(total));
+  const hours = Math.floor(rounded / 60);
+  const minutes = rounded % 60;
+  if (hours === 0) return `${minutes} phút`;
+  if (minutes === 0) return `${hours} giờ`;
+  return `${hours} giờ ${minutes} phút`;
+}
+
+export default function LandingPage() {
+  const copy = copyFor("vi");
   const menuRef = useRef<HTMLDetailsElement>(null);
-  const copy = copyFor(language);
-  const landing = copy.landing;
-
-  useGSAP(
-    () => {
-      const media = gsap.matchMedia();
-      media.add(
-        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
-        () => {
-          const section = rootRef.current?.querySelector<HTMLElement>(
-            ".scribe-story",
-          );
-          const heading = rootRef.current?.querySelector<HTMLElement>(
-            ".scribe-story__heading",
-          );
-          if (!section || !heading) return;
-
-          ScrollTrigger.create({
-            trigger: section,
-            start: "top 96px",
-            end: "bottom bottom-=96",
-            pin: heading,
-            pinSpacing: false,
-          });
-
-          gsap.utils
-            .toArray<HTMLElement>(".scribe-story__visual", rootRef.current)
-            .forEach((panel) => {
-              gsap
-                .timeline({
-                  scrollTrigger: {
-                    trigger: panel,
-                    start: "top 88%",
-                    end: "bottom 12%",
-                    scrub: true,
-                  },
-                })
-                .fromTo(
-                  panel,
-                  { filter: "brightness(0.94)", opacity: 0.92, scale: 0.88 },
-                  {
-                    filter: "brightness(1)",
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.55,
-                    ease: "none",
-                  },
-                )
-                .to(panel, {
-                  filter: "brightness(0.96)",
-                  opacity: 0.92,
-                  duration: 0.45,
-                  ease: "none",
-                });
-            });
-        },
-      );
-      return () => media.revert();
-    },
-    { scope: rootRef },
-  );
+  const [patients, setPatients] = useState(28);
+  const [minutesPerPatient, setMinutesPerPatient] = useState(5);
+  const [afterHours, setAfterHours] = useState("sometimes");
+  const [workplace, setWorkplace] = useState("clinic");
+  const dailyMinutes = patients * minutesPerPatient;
 
   const navLinks = (
     <>
-      <a href="#need">{copy.nav.need}</a>
-      <a href="#workflow">{copy.nav.workflow}</a>
-      <a href="#safety">{copy.nav.safety}</a>
-      <a href="#pilot">{copy.nav.pilot}</a>
+      <a href="#calculator">Thời gian ghi chép</a>
+      <a href="#demo">Ca khám mẫu</a>
+      <a href="#evidence">Bằng chứng</a>
+      <a href="#start">Bắt đầu</a>
     </>
   );
 
   return (
-    <div className="site-shell" ref={rootRef}>
-      <nav
-        className="site-nav"
-        aria-label={language === "vi" ? "Điều hướng chính" : "Main navigation"}
-      >
+    <div className="site-shell">
+      <nav className="site-nav" aria-label="Điều hướng chính">
         <a className="site-nav__brand" href="#top" aria-label="CarePath">
           <img src={logoUrl} alt="" />
           <span>CarePath</span>
         </a>
         <div className="site-nav__links">{navLinks}</div>
         <details className="site-nav__menu" ref={menuRef}>
-          <summary>{copy.nav.menu}</summary>
+          <summary>Mở điều hướng</summary>
           <div
             onClick={(event) => {
               if (menuRef.current && (event.target as HTMLElement).closest("a")) {
@@ -119,24 +55,7 @@ export default function LandingPage({
             {navLinks}
           </div>
         </details>
-        <div className="site-nav__actions">
-          <div className="language-toggle" aria-label={copy.language.label}>
-            <button
-              aria-pressed={language === "vi"}
-              onClick={() => onLanguageChange?.("vi")}
-              type="button"
-            >
-              {copy.language.vi}
-            </button>
-            <button
-              aria-pressed={language === "en"}
-              onClick={() => onLanguageChange?.("en")}
-              type="button"
-            >
-              {copy.language.en}
-            </button>
-          </div>
-        </div>
+        <a className="nav-cta" href={scribeHref}>Bắt đầu ghi chép</a>
       </nav>
 
       <aside
@@ -144,195 +63,236 @@ export default function LandingPage({
         aria-labelledby="interpreter-status-title"
         data-interpreter-status
       >
-        <div>
-          <strong id="interpreter-status-title">{landing.status.title}</strong>
-          <span>{landing.status.state}</span>
-        </div>
-        <p>{landing.status.body}</p>
+        <strong id="interpreter-status-title">Phiên dịch khám bệnh trực tiếp</strong>
+        <span>Đang phát triển — hiện chưa thể truy cập trên web.</span>
       </aside>
 
       <main className="landing-main" id="top" tabIndex={-1}>
-        <section className="scribe-hero" aria-labelledby="scribe-hero-title">
-          <h1 className="scribe-hero__title" id="scribe-hero-title">
-            {landing.hero.title}
+        <section className="onboarding-hero" aria-labelledby="onboarding-title">
+          <h1 id="onboarding-title">
+            Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.
           </h1>
-          <div className="scribe-hero__split">
-            <div className="scribe-hero__copy">
-              <p>{landing.hero.body}</p>
-              <div className="scribe-hero__actions">
-                <a className="button-link button-link--primary" href={scribeHref}>
-                  {landing.hero.primary}
+          <div className="onboarding-hero__body">
+            <div className="onboarding-hero__copy">
+              <p>
+                CarePath chuẩn bị ghi chú lâm sàng từ cuộc trao đổi để bác sĩ
+                kiểm tra và xác nhận.
+              </p>
+              <div className="onboarding-hero__actions">
+                <a className="button-link button-link--primary" href="#demo">
+                  Trải nghiệm ca khám mẫu
                 </a>
-                <a className="button-link button-link--secondary" href="#workflow">
-                  {landing.hero.secondary}
+                <a className="button-link button-link--secondary" href="#calculator">
+                  Tính thời gian ghi chép
                 </a>
               </div>
+              <small>
+                Dùng tệp âm thanh đã được phép sử dụng. Bản nháp không tự đi vào hồ sơ.
+              </small>
             </div>
-            <div
-              className="scribe-hero__visual"
-              aria-label={`${landing.hero.visual.sourceLabel}. ${landing.hero.visual.transcriptLabel}. ${landing.hero.visual.draftLabel}.`}
-              role="img"
-            >
-              <article className="scribe-hero__source">
-                <span>{landing.hero.visual.sourceLabel}</span>
-                <p lang="vi">{landing.hero.visual.sourceText}</p>
-                <i aria-hidden="true" />
-              </article>
-              <article className="scribe-hero__transcript">
-                <span>{landing.hero.visual.transcriptLabel}</span>
-                <p>{landing.hero.visual.transcriptText}</p>
-              </article>
-              <article className="scribe-hero__draft">
-                <span>{landing.hero.visual.draftLabel}</span>
-                <p>{landing.hero.visual.draftText}</p>
-                <strong>{copy.scribe.status}</strong>
-              </article>
+
+            <div className="daily-flow" aria-label="Một ngày khám điển hình">
+              <p>Một ngày khám điển hình</p>
+              <ol>
+                <li>
+                  <span>Trong buổi khám</span>
+                  <strong>Lắng nghe, hỏi và ra quyết định</strong>
+                </li>
+                <li>
+                  <span>Sau mỗi lượt khám</span>
+                  <strong>Nhớ lại và sắp xếp thông tin</strong>
+                </li>
+                <li>
+                  <span>Cuối ngày</span>
+                  <strong>Hoàn tất phần ghi chép còn lại</strong>
+                </li>
+              </ol>
             </div>
           </div>
         </section>
 
-        <section className="process-marquee" aria-label={landing.process.label}>
-          <p className="sr-only">{landing.process.label}</p>
-          <div className="process-marquee__track" aria-hidden="true">
-            {[0, 1].map((copyIndex) => (
-              <div className="process-marquee__group" key={copyIndex}>
-                {landing.process.items.map((item) => (
-                  <span key={`${copyIndex}-${item}`}>
-                    {item}
-                    <i />
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="need-section" id="need" aria-labelledby="need-title">
-          <header className="landing-heading">
-            <h2 id="need-title">{landing.problem.title}</h2>
-            <p>{landing.problem.body}</p>
+        <section className="burden-section" id="calculator" aria-labelledby="burden-title">
+          <header className="compact-heading">
+            <h2 id="burden-title">Một buổi khám không nên biến thành hai ca làm việc.</h2>
+            <p>
+              Hãy bắt đầu bằng thời gian bác sĩ đang dành cho ghi chép, không
+              phải bằng một lời hứa tiết kiệm chưa được kiểm chứng.
+            </p>
           </header>
-          <div className="need-bento">
-            <article className="need-bento__burden">
-              <div>
-                <h3>{landing.problem.duringTitle}</h3>
-                <p>{landing.problem.duringBody}</p>
+
+          <div className="burden-layout">
+            <form className="burden-calculator" onSubmit={(event) => event.preventDefault()}>
+              <h3>Ước tính gánh nặng hiện tại</h3>
+              <p>Con số chỉ dựa trên câu trả lời của bạn và không được gửi đi.</p>
+              <div className="calculator-fields">
+                <label>
+                  Số người bệnh mỗi ngày
+                  <input
+                    max="200"
+                    min="0"
+                    onChange={(event) => setPatients(Math.min(200, Math.max(0, Number(event.target.value))))}
+                    type="number"
+                    value={patients}
+                  />
+                </label>
+                <label>
+                  Phút ghi chép cho mỗi người bệnh
+                  <input
+                    max="120"
+                    min="0"
+                    onChange={(event) => setMinutesPerPatient(Math.min(120, Math.max(0, Number(event.target.value))))}
+                    type="number"
+                    value={minutesPerPatient}
+                  />
+                </label>
+                <label>
+                  Bạn thường hoàn tất bệnh án sau giờ làm?
+                  <select onChange={(event) => setAfterHours(event.target.value)} value={afterHours}>
+                    <option value="never">Hiếm khi</option>
+                    <option value="sometimes">Một vài ngày trong tuần</option>
+                    <option value="often">Gần như mỗi ngày</option>
+                  </select>
+                </label>
+                <label>
+                  Nơi làm việc chính
+                  <select onChange={(event) => setWorkplace(event.target.value)} value={workplace}>
+                    <option value="clinic">Phòng khám</option>
+                    <option value="hospital">Bệnh viện</option>
+                    <option value="other">Cơ sở khác</option>
+                  </select>
+                </label>
               </div>
-              <div>
-                <h3>{landing.problem.afterTitle}</h3>
-                <p>{landing.problem.afterBody}</p>
+              <output className="calculator-result" aria-live="polite">
+                <span>Thời gian ghi chép ước tính hiện tại</span>
+                <strong>{formatMinutes(dailyMinutes)} mỗi ngày</strong>
+                <small>{formatMinutes(dailyMinutes * 5)} cho 5 ngày làm việc</small>
+              </output>
+              <p className="calculator-formula">
+                Công thức: {patients} người bệnh × {minutesPerPatient} phút. Tần
+                suất ngoài giờ và nơi làm việc giúp bạn tự đối chiếu bối cảnh,
+                không làm thay đổi phép tính.
+              </p>
+            </form>
+
+            <div className="workflow-comparison">
+              <article>
+                <h3>Khi chưa có bản nháp</h3>
+                <p>Nhớ lại cuộc trao đổi, gõ lại từng mục, rồi tự tìm phần còn thiếu.</p>
+              </article>
+              <article>
+                <h3>Khi dùng CarePath</h3>
+                <p>
+                  Tải tệp đã được phép sử dụng, đọc lại lời chép và bắt đầu từ
+                  một bản nháp có cấu trúc.
+                </p>
+              </article>
+              <p>Bác sĩ vẫn là người sửa, bổ sung và quyết định bản cuối.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="demo-section" id="demo" aria-labelledby="demo-title">
+          <header className="compact-heading compact-heading--wide">
+            <h2 id="demo-title">Thử một ca khám mẫu trước khi tải tệp của bạn.</h2>
+            <p>
+              Đi qua bốn bước ngắn để thấy nội dung nào đến từ cuộc trao đổi,
+              nội dung nào được làm rõ và phần nào bác sĩ phải tự xác nhận.
+            </p>
+          </header>
+          <ScribeShowcase />
+        </section>
+
+        <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
+          <header className="compact-heading compact-heading--wide">
+            <h2 id="evidence-title">Bằng chứng được đặt đúng giới hạn.</h2>
+            <p>
+              Nhu cầu là có thật. Kết quả quốc tế đáng để học hỏi. Hiệu quả của
+              CarePath tại Việt Nam vẫn cần được đo trong thí điểm.
+            </p>
+          </header>
+          <div className="evidence-grid">
+            <article>
+              <h3>Bối cảnh Việt Nam</h3>
+              <p>
+                Một định mức ban hành năm 2015 từng đặt 33–45 lượt khám mỗi ngày
+                tùy hạng bệnh viện, tương đương khoảng 11–15 phút cho mỗi lượt
+                trong 8 giờ. Đây là mốc lịch sử, không phải số đo hiện tại.
+              </p>
+              <a href="https://baohiemxahoi.gov.vn/tintuc/Pages/linh-vuc-bao-hiem-xa-hoi.aspx?CateID=0&ItemID=8449">
+                Xem nguồn Bảo hiểm xã hội Việt Nam
+              </a>
+            </article>
+            <article>
+              <h3>Kinh nghiệm quốc tế</h3>
+              <p>
+                Các nghiên cứu quan sát tại Singapore và Hoa Kỳ ghi nhận ít thời
+                gian ghi chép hơn, nhiều giao tiếp bằng mắt hơn hoặc giảm kiệt
+                sức sau khi dùng công cụ ghi chép môi trường. Đây không phải kết
+                quả của CarePath.
+              </p>
+              <div className="evidence-links">
+                <a href="https://medinform.jmir.org/2026/1/e85580">Nghiên cứu JMIR 2026</a>
+                <a href="https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2839542">
+                  Nghiên cứu JAMA Network Open
+                </a>
               </div>
             </article>
-            <article className="need-bento__workflow">
-              <h3>{landing.problem.workflowTitle}</h3>
-              <p>{landing.problem.workflowBody}</p>
-            </article>
-            <article className="need-bento__review">
-              <h3>{landing.problem.reviewTitle}</h3>
-              <p>{landing.problem.reviewBody}</p>
-            </article>
-          </div>
-        </section>
-
-        <section
-          className="workflow-section"
-          id="workflow"
-          aria-labelledby="workflow-title"
-        >
-          <header className="landing-heading landing-heading--wide">
-            <h2 id="workflow-title">{landing.workflow.title}</h2>
-            <p>{landing.workflow.body}</p>
-          </header>
-          <div className="workflow-accordion">
-            {landing.workflow.stages.map((stage, index) => (
-              <details key={stage.title} open={index === 0}>
-                <summary>{stage.title}</summary>
-                <p>{stage.body}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        <section className="scribe-story" aria-labelledby="story-title">
-          <div className="scribe-story__heading">
-            <h2 id="story-title">
-              {landing.story.titleStart}{" "}
-              <span className="inline-carepath-mark" aria-hidden="true">
-                <img src={logoUrl} alt="" />
-              </span>{" "}
-              {landing.story.titleEnd}
-            </h2>
-            <p>{landing.story.body}</p>
-          </div>
-          <div className="scribe-story__gallery">
-            <article className="scribe-story__visual">
-              <span>{landing.story.rawTitle}</span>
-              <blockquote lang="vi">{landing.story.rawText}</blockquote>
-              <p>{landing.story.rawDetail}</p>
-            </article>
-            <article className="scribe-story__visual scribe-story__visual--corrected">
-              <span>{landing.story.correctedTitle}</span>
-              <blockquote>{landing.story.correctedText}</blockquote>
-              <p>{landing.story.correctedDetail}</p>
-            </article>
-            <article className="scribe-story__visual scribe-story__visual--draft">
-              <span>{landing.story.draftTitle}</span>
-              <dl>
-                {soapDraft.slice(0, 3).map((row) => (
-                  <div key={row.key}>
-                    <dt>{copy.scribe.soapLabels[row.key]}</dt>
-                    <dd lang="vi">{row.text}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p>{landing.story.draftDetail}</p>
+            <article>
+              <h3>Điều CarePath còn phải chứng minh</h3>
+              <p>
+                Chưa có dữ liệu triển khai CarePath tại Việt Nam. Thí điểm cần đo
+                thời gian hoàn tất bệnh án, lỗi bác sĩ phải sửa và mức chấp nhận
+                của người dùng trước khi đưa ra tuyên bố hiệu quả.
+              </p>
             </article>
           </div>
         </section>
 
-        <section
-          className="landing-safety"
-          id="safety"
-          aria-labelledby="landing-safety-title"
-        >
-          <header>
-            <h2 id="landing-safety-title">{landing.safety.title}</h2>
-            <p>{landing.safety.body}</p>
-          </header>
+        <section className="trust-section" aria-labelledby="trust-title">
           <div>
-            {landing.safety.items.map((item) => (
-              <article key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
+            <h2 id="trust-title">Bác sĩ kiểm tra trước khi sử dụng.</h2>
+            <p>
+              CarePath hỗ trợ ghi chép, không thay thế nhận định lâm sàng và
+              không tự đưa nội dung vào hồ sơ.
+            </p>
           </div>
+          <ul>
+            <li>Luôn giữ nội dung nguồn để đối chiếu.</li>
+            <li>Phần thiếu hoặc chưa chắc chắn phải được nhìn thấy.</li>
+            <li>Không tự tạo chẩn đoán, tư vấn hoặc đơn thuốc.</li>
+            <li>Âm thanh thô không được lưu sau khi xử lý yêu cầu.</li>
+          </ul>
         </section>
 
-        <section className="landing-action" id="pilot" tabIndex={-1}>
-          <div className="landing-action__copy">
-            <h2>{landing.action.title}</h2>
-            <p>{landing.action.body}</p>
+        <section className="start-section" id="start" aria-labelledby="start-title">
+          <div className="start-section__copy">
+            <h2 id="start-title">Bắt đầu từ một tệp âm thanh đã được phép sử dụng.</h2>
+            <p>
+              Công cụ sẽ chỉ cho bạn từng bước tải tệp, tạo bản nháp và kiểm tra
+              trước khi sử dụng.
+            </p>
             <a className="button-link button-link--light" href={scribeHref}>
-              {landing.action.primary}
+              Bắt đầu ghi chép
             </a>
           </div>
-          <div className="landing-action__form">
-            <header>
-              <h3>{landing.action.pilotTitle}</h3>
-              <p>{landing.action.pilotBody}</p>
-              <small>{landing.action.pilotNote}</small>
-            </header>
-            <LeadForm
-              clinic=""
-              specialty=""
-              scenario={scenarios[0]}
-              transcript=""
-              language={language}
-              interest="scribe"
-              hideInterestField
-            />
-          </div>
+          <details className="pilot-disclosure">
+            <summary>Dành cho cơ sở muốn thí điểm CarePath</summary>
+            <div>
+              <p>
+                Để lại bối cảnh làm việc nếu cơ sở muốn cùng xác định cách thử
+                nghiệm phù hợp. Biểu mẫu này chỉ dành cho Ghi chép bệnh án AI.
+              </p>
+              <LeadForm
+                clinic=""
+                specialty=""
+                scenario={scenarios[0]}
+                transcript=""
+                language="vi"
+                interest="scribe"
+                hideInterestField
+              />
+            </div>
+          </details>
         </section>
       </main>
 
@@ -341,7 +301,6 @@ export default function LandingPage({
           <img src={logoUrl} alt="" />
           <strong>{copy.footer.promise}</strong>
         </div>
-        <p>{copy.footer.posture}</p>
         <p>{copy.footer.honesty}</p>
         <div>
           <a href={`mailto:${leadContact.email}`}>{copy.footer.contact}</a>

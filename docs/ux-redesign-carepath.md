@@ -1,6 +1,6 @@
 # CarePath Vietnamese-first UX implementation stories
 
-**Status:** implementation backlog only. No application code is implemented by this document.
+**Status:** active UX implementation contract and backlog.
 
 **Objective:** make CarePath Vietnamese-first and make its two products unmistakably different:
 
@@ -99,6 +99,117 @@ python -m pytest scribe/tests/test_combined_app.py
 - No Interpreter route, API, WebSocket, consent, microphone, TTS, or risk logic
   changes. If the status presentation fails, it remains plain static text and
   never becomes a launch action.
+
+## Current priority update: problem-led Vietnamese Scribe onboarding
+
+### Current UX problem
+
+The Scribe-led landing explains the product before it earns attention from the
+doctor's daily problem. Large decorative panels, 8–14rem section gaps, a 31rem
+hero visual, and a 29rem accordion create long stretches with little actionable
+information. The working Scribe route then adds another obstacle: visitors must
+read a separate pre-start screen and click continue before they can even see the
+upload control. The VI/EN switch also adds a choice that is not needed for this
+Vietnamese-first release.
+
+### Proposed flow
+
+1. Keep the non-interactive Interpreter development status near the top.
+2. Lead with `Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.`
+3. Let doctors recognize their day and calculate their current documentation
+   time from four short inputs. Show current burden only, never a promised
+   CarePath saving.
+4. Reuse one guided sample to show conversation → clarified transcript →
+   structured draft → doctor review.
+5. Show evidence in three honest levels: the dated Vietnamese workload norm,
+   international ambient-scribe evidence, and what CarePath still needs to
+   prove locally.
+6. Put trust limits before the action, then offer the working Scribe tool first
+   and the organization pilot form as a secondary disclosure.
+7. On the Scribe route, show brief instructions and the upload control together.
+
+### Affected routes, pages, and components
+
+- `/` in `scribe/frontend/src/LandingPage.tsx`
+- `/ghi-chep-lam-sang/` in `scribe/frontend/src/scribe/ScribeTool.tsx`
+- `scribe/frontend/src/scribe/ScribeShowcase.tsx`
+- Vietnamese landing, sample, metadata, and Scribe-tool copy
+- Focused unit, Playwright, stylesheet, package, and Harness proof files
+
+### Vietnamese-first copy
+
+- Hero: `Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.`
+- Hero detail: `CarePath chuẩn bị ghi chú lâm sàng từ cuộc trao đổi để bác sĩ
+  kiểm tra và xác nhận.`
+- Primary action: `Trải nghiệm ca khám mẫu`
+- Secondary action: `Tính thời gian ghi chép`
+- Calculator result: current daily documentation time only, plus a clearly
+  labelled five-day equivalent.
+- Sample limit: `Nhận định` and `Kế hoạch` display
+  `Chờ bác sĩ nhập hoặc xác nhận.`
+- Tool helper: `Xem ca khám mẫu` links back to `/#demo`.
+
+### Implementation story: CP-UX-11
+
+- Delete the decorative marquee, bento, horizontal accordion, pinned gallery,
+  language toggle, and GSAP dependencies.
+- Use semantic HTML, the existing Geist font, existing logo, existing lead form,
+  and the existing Scribe showcase; add no dependency or remote asset.
+- Add the calculator as local React state with the transparent formula
+  `số bệnh nhân × phút ghi chép mỗi bệnh nhân`.
+- Keep English copy data that other frozen demo code may still consume, but the
+  public App always renders Vietnamese and exposes no language control.
+- Remove the Scribe tool's `readyToRecord` gate without changing validation,
+  upload, progress, error, API, or result behavior.
+
+### Dependencies
+
+- CP-UX-10 supplies the current Scribe-only public route and Scribe-only form.
+- CP-UX-09 keeps both Interpreter browser paths at 404.
+- CP-BASE-003 supplies deployment, accessibility, and responsive test gates.
+
+### Acceptance criteria
+
+- The site starts with the doctor's documentation problem, not a definition of
+  AI Medical Scribe.
+- There is no public EN toggle; all visible onboarding and tool copy is
+  Vietnamese.
+- The calculator works without storage, analytics, network requests, or a
+  CarePath productivity prediction.
+- The guided sample teaches the workflow and leaves diagnosis and treatment
+  decisions to the doctor.
+- The upload control is visible on first entry to the Scribe tool.
+- The landing has no horizontal overflow at 320, 360, 390, 768, and 1440px and
+  no oversized empty instructional panel.
+- Keyboard, Axe, reduced-motion, dark/light, diacritics, Scribe-route, lead,
+  Lighthouse, and Interpreter-404 checks pass.
+
+### Validation commands
+
+```powershell
+cd scribe\frontend
+npm.cmd run lint
+npm.cmd test
+npm.cmd run test:deploy-env
+npm.cmd run build
+npm.cmd run e2e
+npm.cmd run lighthouse
+cd ..\..
+python -m pytest scribe/tests/test_combined_app.py
+```
+
+### Risks and fallback behavior
+
+- The calculator is an estimate based only on answers entered in the browser;
+  if JavaScript is unavailable, the surrounding problem and workflow copy still
+  explains the value without a numeric claim.
+- The workload source is explicitly dated and must not be presented as a current
+  national productivity measurement. International studies are labelled as
+  external evidence, not CarePath outcomes.
+- The sample uses sanitized fixed content and leaves Assessment and Plan blank
+  for clinician input. It never becomes medical advice.
+- No Interpreter route, API, WebSocket, audio, consent, retention, or safety
+  behavior changes.
 
 ## Backlog rules
 

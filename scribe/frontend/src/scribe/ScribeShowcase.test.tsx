@@ -3,42 +3,22 @@ import { describe, expect, it } from "vitest";
 import ScribeShowcase from "./ScribeShowcase";
 
 describe("ScribeShowcase", () => {
-  it("walks raw transcript, correction, and SOAP draft steps", () => {
-    render(<ScribeShowcase language="vi" />);
+  it("teaches the sample flow without inventing assessment or plan", () => {
+    render(<ScribeShowcase />);
 
-    expect(screen.getByText("am lô đi pin")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Gạch chân: đoạn hệ thống nghe sai trong bản phiên âm tự động.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Tôi bị đau tức ngực thoáng qua/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "2. Nội dung được làm rõ" }));
+    expect(screen.getByText("Chưa có kết quả điện tâm đồ")).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "2. Sau hiệu chỉnh thuật ngữ" }),
-    );
-    expect(screen.getByText("amlodipin")).toBeInTheDocument();
-    expect(screen.getByText("160/90 mmHg")).toBeInTheDocument();
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "3. Bản ghi y khoa theo bốn mục SOAP",
-      }),
-    );
-    expect(screen.getByText("Chờ bác sĩ duyệt")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "3. Bản nháp có cấu trúc" }));
+    expect(screen.getAllByText("Chờ bác sĩ nhập hoặc xác nhận.")).toHaveLength(2);
+    expect(screen.getByText("Nhận định")).toBeInTheDocument();
     expect(screen.getByText("Kế hoạch")).toBeInTheDocument();
-    expect(
-      screen.getByText("Tăng huyết áp chưa kiểm soát."),
-    ).toBeInTheDocument();
-  });
 
-  it("localizes the frame while keeping the Vietnamese sample", () => {
-    render(<ScribeShowcase language="en" />);
-
+    fireEvent.click(screen.getByRole("button", { name: "4. Bác sĩ kiểm tra" }));
+    expect(screen.getByText("Trước khi sử dụng bản nháp")).toBeInTheDocument();
     expect(
-      screen.getByText("Simulation with sample data, not a real record"),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "3. SOAP draft" }));
-    expect(screen.getByText("Awaiting clinician review")).toBeInTheDocument();
-    expect(screen.getByText("Subjective")).toBeInTheDocument();
+      screen.getByRole("link", { name: "Mở công cụ và tải tệp âm thanh" }),
+    ).toHaveAttribute("href", "/ghi-chep-lam-sang/");
   });
 });

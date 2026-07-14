@@ -16,7 +16,7 @@ principle: **the clinician stays in control.**
 Frontends, all served by the same API in production:
 
 - `scribe/frontend/` — the public demo site (landing at `/`, working Scribe tool at
-  `/ghi-chep-lam-sang/`). Vietnamese default, English toggle, full diacritics enforced
+  `/ghi-chep-lam-sang/`). Vietnamese-only onboarding, full diacritics enforced
   at build time.
 - `interpreter/frontend/` — retained for internal Interpreter development; not
   publicly served.

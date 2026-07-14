@@ -211,7 +211,7 @@ interface PageCopy {
     title: string;
     helper: string;
     intro: string;
-    preStartSteps: [string, string, string, string];
+    preStartSteps: [string, string, string];
     preStartReminder: string;
     uploadNotice: string;
     continue: string;
@@ -284,8 +284,8 @@ interface PageCopy {
 export const strings: Record<Language, PageCopy> = {
   vi: {
     metadata: {
-      title: "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam",
-      description: "CarePath tạo bản nháp bệnh án có cấu trúc từ tệp âm thanh buổi khám để bác sĩ kiểm tra. Phiên dịch trực tiếp đang phát triển và chưa mở trên web.",
+      title: "CarePath | Bớt gõ bệnh án, thêm thời gian cho người bệnh",
+      description: "CarePath chuẩn bị bản nháp ghi chú lâm sàng từ tệp âm thanh để bác sĩ kiểm tra. Phiên dịch trực tiếp đang phát triển và chưa mở trên web.",
     },
     language: {
       label: "Ngôn ngữ",
@@ -609,10 +609,9 @@ export const strings: Record<Language, PageCopy> = {
       helper: "Tạo bản nháp y khoa",
       intro: "AI dùng phiên âm tự động để tạo bản nháp y khoa theo bốn mục SOAP; bác sĩ cần kiểm tra trước khi sử dụng.",
       preStartSteps: [
-        "Tải tệp ghi âm buổi khám lên",
-        "Phiên âm tự động lời nói thành văn bản",
-        "AI tạo bản nháp y khoa theo bốn mục SOAP",
-        "Bác sĩ kiểm tra, chỉnh sửa; bản nháp không tự vào hồ sơ",
+        "Chọn tệp âm thanh buổi khám đã được phép sử dụng",
+        "Thêm bối cảnh ngắn nếu cần rồi tạo bản nháp",
+        "Đối chiếu lời chép, sửa và xác nhận trước khi sử dụng",
       ],
       preStartReminder: "AI chỉ hỗ trợ tạo bản nháp. Bác sĩ cần kiểm tra lại nội dung trước khi sử dụng.",
       uploadNotice: "Cơ sở chủ động chọn và tải tệp ghi âm lên để tạo bản nháp. Tệp chỉ được xử lý tạm thời trong phạm vi yêu cầu này; màn hình không tự bắt đầu micro.",
@@ -1118,10 +1117,9 @@ export const strings: Record<Language, PageCopy> = {
       helper: "AI Scribe",
       intro: "Upload a Vietnamese consultation recording. The system uses automated transcription, corrects medical terms, and creates a four-part SOAP draft for clinician review.",
       preStartSteps: [
-        "Upload the visit recording",
-        "Automated transcription turns speech into text",
-        "AI creates a four-part SOAP draft",
-        "The clinician checks and edits; the draft never enters the record automatically",
+        "Choose an approved consultation audio file",
+        "Add brief context if needed and create the draft",
+        "Review the transcript, edit, and confirm before use",
       ],
       preStartReminder: "AI assists with drafting only. The clinician must review the draft before use.",
       uploadNotice: "The clinic deliberately selects and uploads the recording file to create a draft. The file is processed temporarily for this request only; this screen does not start the microphone.",

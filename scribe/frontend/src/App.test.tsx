@@ -1,58 +1,33 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
-describe("language preference", () => {
+describe("Vietnamese-only public app", () => {
   beforeEach(() => {
     localStorage.clear();
     window.history.replaceState(null, "", "/");
     document.documentElement.lang = "vi";
-    document.title = "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam";
+    document.title = "CarePath";
   });
 
-  it("defaults to Vietnamese and persists a complete English switch", () => {
+  it("always renders Vietnamese and exposes no language switch", () => {
+    localStorage.setItem("carepath-demo-language", "en");
     render(<App />);
 
     expect(document.documentElement.lang).toBe("vi");
     expect(document.title).toBe(
-      "CarePath | Ghi chép bệnh án AI cho bác sĩ Việt Nam",
+      "CarePath | Bớt gõ bệnh án, thêm thời gian cho người bệnh",
     );
-    fireEvent.click(screen.getByRole("button", { name: "EN" }));
-
-    expect(document.documentElement.lang).toBe("en");
-    expect(document.title).toBe(
-      "CarePath | AI clinical documentation for Vietnamese doctors",
-    );
-    expect(localStorage.getItem("carepath-demo-language")).toBe("en");
     expect(
       screen.getByRole("heading", {
-        name: "Focus on the patient. Let CarePath prepare the draft after the visit.",
+        name: "Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.",
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("In development — not currently accessible on the web."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        name: "The draft is used only after clinician review.",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("AI assistance, clinician in control."),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "VI" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "EN" })).not.toBeInTheDocument();
     expect(
       document.querySelector('a[href*="phien-dich-y-khoa"], a[href*="console"]'),
     ).toBeNull();
-  });
-
-  it("ignores an invalid stored preference", () => {
-    localStorage.setItem("carepath-demo-language", "fr");
-    render(<App />);
-
-    expect(document.documentElement.lang).toBe("vi");
-    expect(
-      screen.getByRole("button", { name: "VI" }),
-    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("replaces the legacy #/scribe route with the canonical clinical-note path", async () => {
@@ -102,7 +77,7 @@ describe("language preference", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Tập trung vào người bệnh. Để CarePath soạn bản nháp sau buổi khám.",
+        name: "Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.",
       }),
     ).toBeInTheDocument();
     vi.unstubAllGlobals();
