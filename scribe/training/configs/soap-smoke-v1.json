@@ -1,0 +1,25 @@
+{
+  "run_id": "carepath-soap-smoke-v1",
+  "manifest": "scribe/training/manifests/soap-public-synthetic-v1.json",
+  "artifact_root": "artifacts/soap",
+  "canonical_terms": "shared/carepath_shared/terms/medical_terms.json",
+  "medev_terms": null,
+  "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+  "base_revision": "main",
+  "sources": [
+    {
+      "source_id": "carepath-soap-smoke-v1",
+      "kind": "synthetic",
+      "path": "scribe/training/soap/fixtures/soap_smoke_v1.jsonl"
+    }
+  ],
+  "profile": {
+    "name": "smoke",
+    "max_rows": 20,
+    "max_steps": 20,
+    "seeds": [13],
+    "selected_seed": 13,
+    "trainer": "mock",
+    "teacher": "synthetic"
+  }
+}

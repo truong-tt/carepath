@@ -65,6 +65,19 @@ class BackupHelperTests(unittest.TestCase):
             save_artifacts(backup, [str(src)])
             self.assertTrue((backup / "metrics.json").exists())
 
+    def test_save_and_restore_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "bundle"
+            source.mkdir()
+            (source / "serve_manifest.json").write_text("{}", encoding="utf-8")
+            backup = root / "drive"
+            backup.mkdir()
+            save_artifacts(backup, [str(source)])
+            restored = root / "restored" / "bundle"
+            restore_artifacts(backup, [str(restored)])
+            self.assertTrue((restored / "serve_manifest.json").exists())
+
     def test_save_local_is_noop(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             src = Path(tmp) / "metrics.json"

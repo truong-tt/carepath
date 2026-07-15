@@ -1,0 +1,59 @@
+{
+  "dataset_id": "carepath-soap-public-v1",
+  "approval_status": "approved_research_only",
+  "usage_scope": "research_only",
+  "promotion_status": "blocked_research_only",
+  "owner_approval": {
+    "date": "2026-07-13",
+    "scope": "private_research_only",
+    "statement": "I approve research-only use of the listed public datasets"
+  },
+  "sources": [
+    {
+      "source_id": "mts-dialog-train",
+      "dataset": "MTS-Dialog training split",
+      "source_url": "https://github.com/abachaa/MTS-Dialog",
+      "download_url": "https://raw.githubusercontent.com/abachaa/MTS-Dialog/3ff0801933608d6f570468c13125125fb5cabdea/Main-Dataset/MTS-Dialog-TrainingSet.csv",
+      "revision": "3ff0801933608d6f570468c13125125fb5cabdea",
+      "license": "CC-BY-4.0",
+      "allowed_splits": ["train"],
+      "sha256": "65a28681dd59fc159681ea026e44610f2af7bc64a0e7f892d763eb03d9f503dc"
+    },
+    {
+      "source_id": "aci-bench-train",
+      "dataset": "ACI-BENCH training split",
+      "source_url": "https://github.com/wyim/aci-bench",
+      "download_url": "https://raw.githubusercontent.com/wyim/aci-bench/b909b2bb9cf1d19de08df15cddde7bd0179665e4/data/challenge_data/train.csv",
+      "revision": "b909b2bb9cf1d19de08df15cddde7bd0179665e4",
+      "license": "CC-BY-4.0",
+      "allowed_splits": ["train"],
+      "known_limitations": ["Synthetic speaker labels can be swapped; dialogue and note alignment still requires factual filtering."],
+      "sha256": "6c778d4ac5e6cc6f1964786f9286e8d765c210f22ed6b57f83aff8497409cea4"
+    },
+    {
+      "source_id": "medev-terms",
+      "dataset": "MedEV terminology alignment extract",
+      "source_url": "https://huggingface.co/datasets/nhuvo/MedEV",
+      "revision": "6afaf6b48c016020a99f4358ece419c697aa3ca9",
+      "license": "Research-and-educational-use statement in the paper; repository license unspecified",
+      "allowed_splits": ["train"],
+      "derivation": "canonical-bilingual-cooccurrence-v1",
+      "input_files": [
+        {
+          "path": "train.en.txt",
+          "download_url": "https://huggingface.co/datasets/nhuvo/MedEV/resolve/6afaf6b48c016020a99f4358ece419c697aa3ca9/train.en.txt?download=true",
+          "sha256": "c2ef096c662ffe7bef21ed21fa87061403d95ed041a7e2b00af41099523748e7",
+          "size": 48576700
+        },
+        {
+          "path": "train.vi.txt",
+          "download_url": "https://huggingface.co/datasets/nhuvo/MedEV/resolve/6afaf6b48c016020a99f4358ece419c697aa3ca9/train.vi.txt?download=true",
+          "sha256": "f09ca8529f69e48f5d5926b7142805ab3306112ef9e2baadd1791923cf026349",
+          "size": 61885569
+        }
+      ],
+      "derived_rows": 175,
+      "sha256": "c081ceba8bc4945bb8959cd4578fa765abb35cb65e4a32b508db3a8c8dd3c7ed"
+    }
+  ]
+}

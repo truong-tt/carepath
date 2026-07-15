@@ -1,5 +1,5 @@
 {
-  "run_id": "carepath-gec-full-v1",
+  "run_id": "carepath-gec-full-v1-legacy",
   "dataset": "tensorxt/ViMedCSS",
   "manifest": "scribe/training/manifests/vimedcss-v1.json",
   "frozen_eval_fixture": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
@@ -7,17 +7,26 @@
   "artifact_root": "artifacts",
   "suffix": "",
   "profile": {
-    "name": "full",
+    "name": "research-full",
     "limit_per_split": null,
     "asr_provider": "gipformer",
     "retrieval_backend": "hybrid",
-    "n_best": 5,
-    "synth_count": null,
-    "synth_tts_limit": null,
-    "tts_provider": "xtts",
-    "nsyn_factor": 1.0,
+    "n_best": 1,
+    "synth_count": 0,
+    "synth_tts_limit": 0,
+    "tts_provider": "none",
+    "nsyn_factor": 0.0,
     "max_steps": 600,
-    "seeds": [13, 7, 42],
-    "all_variants": true
+    "seeds": [13],
+    "all_variants": false,
+    "paid": true,
+    "enable_synthetic": false,
+    "enable_tts": false,
+    "train_mode": "qlora",
+    "candidate_variant": "phonetic",
+    "candidate_seed": 13,
+    "asr_experiment": "phowhisper_lora",
+    "enable_direct_asr": true,
+    "enable_phonetic": true
   }
 }

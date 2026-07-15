@@ -31,6 +31,7 @@ def main() -> None:
     parser.add_argument("--pairs", required=True, help="Augmented GEC pairs JSONL.")
     parser.add_argument("--output-dir", default="artifacts/gec_lora/qwen3_gec")
     parser.add_argument("--variant", default="full", choices=list(VARIANTS))
+    parser.add_argument("--variants", nargs="+", choices=list(VARIANTS))
     parser.add_argument("--all-variants", action="store_true",
                         help="Train full + every ablation into <output-dir>/<variant>.")
     parser.add_argument("--base-model", default=DEFAULT_BASE_MODEL)
@@ -56,10 +57,15 @@ def main() -> None:
     parser.set_defaults(resume=True)
     args = parser.parse_args()
 
-    variants = list(VARIANTS) if args.all_variants else [args.variant]
+    variants = list(VARIANTS) if args.all_variants else (args.variants or [args.variant])
+    multi_variant = len(variants) > 1
     multi_seed = len(args.seeds) > 1
     for variant in variants:
-        variant_dir = Path(args.output_dir) / variant if args.all_variants else Path(args.output_dir)
+        variant_dir = (
+            Path(args.output_dir) / variant
+            if args.all_variants or multi_variant
+            else Path(args.output_dir)
+        )
         for seed in args.seeds:
             # Single seed keeps the flat layout the predict/gate steps expect;
             # multi-seed nests each run so per-seed metrics can be averaged.

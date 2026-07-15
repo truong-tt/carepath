@@ -132,7 +132,7 @@ def train_error_signal(
         "thin_signal": thin,
         "verdict": (
             "THIN error signal — ASR is too accurate on train; lean on synthetic "
-            "augmentation / perturbation N-best, or a weaker ASR for hypotheses "
+            "augmentation / acoustic variants, or a weaker ASR for hypotheses "
             "(paper §3.2 ii/iii)."
             if thin
             else "OK — enough errors in train hypotheses for the GEC model to learn from."

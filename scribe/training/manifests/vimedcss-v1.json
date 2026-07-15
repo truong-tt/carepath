@@ -1,6 +1,26 @@
 {
-  "dataset_id": "vimedcss-v1",
-  "source_description": "ViMedCSS source proposed for GEC pair construction; the owner must record its licensed provenance and approval before any training run.",
-  "consent_status": "pending_owner_approval",
-  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  "dataset_id": "tensorxt/ViMedCSS",
+  "source_description": "Public ViMedCSS data approved by the CarePath owner for private, research-only ASR and GEC experiments.",
+  "consent_status": "approved_research_only",
+  "owner_approval": {
+    "date": "2026-07-13",
+    "scope": "private_research_only",
+    "statement": "I approve research-only use of the listed public datasets"
+  },
+  "source_revision": "b6959a18a08739464733930a872e7125c03e6558",
+  "approved_splits": ["train", "validation", "test", "hard"],
+  "split_fingerprints": {
+    "train": "204ae53cccd24fe310426940d9ea153f9ca73dc74831ba7588029212ceae2d69",
+    "validation": "bd8d10f6531d0d8eb04ac59209290a68ebd6ea1eb3bdb004b0287e12ec28d168",
+    "test": "04413c4e9b8403f43b2e1dd48dd0cfc486c8b4ea7325d01bb0f5148d5b876c34",
+    "hard": "d1f51fbc6108882d88e30138b1adc433995e84de4778207b71ef09a57c8a283d"
+  },
+  "sha256": "cdb9c31ce9da2f04def22f16e04499a1da39d09efda99baa95aa7bec967b2ce0",
+  "license_claimed_by_source": "CC-BY-4.0",
+  "usage_scope": "research_only",
+  "promotion_status": "blocked_research_only",
+  "training_allowed": true,
+  "retrieval_allowed_splits": ["train"],
+  "evaluation_only_splits": ["validation", "test", "hard"],
+  "notes": "Training and RAC may use train only. Validation, test, and hard remain untouched evaluation splits. This approval does not authorize patient data, clinical use, production, or commercial promotion."
 }

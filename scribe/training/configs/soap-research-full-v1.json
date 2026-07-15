@@ -1,0 +1,15 @@
+{
+  "run_id": "carepath-soap-research-full-v1",
+  "manifest": "scribe/training/manifests/soap-public-v1.json",
+  "artifact_root": "artifacts/soap",
+  "canonical_terms": "shared/carepath_shared/terms/medical_terms.json",
+  "medev_terms": "/content/carepath_data/medev/terms.csv",
+  "medev_source_id": "medev-terms",
+  "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+  "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "sources": [
+    {"source_id": "mts-dialog-train", "kind": "mts_dialog", "path": "/content/carepath_data/mts-dialog/train.csv"},
+    {"source_id": "aci-bench-train", "kind": "aci_bench", "path": "/content/carepath_data/aci-bench/train.csv"}
+  ],
+  "profile": {"name": "research-full", "max_rows": null, "max_steps": 600, "seeds": [13], "selected_seed": 13, "trainer": "qlora", "teacher": "ckey"}
+}

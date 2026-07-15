@@ -1,0 +1,17 @@
+{
+  "schema": "carepath.soap.smoke-baseline/1",
+  "fixture_sha256": "35edfedfc5464b14afa526f752e8f9a57e3b2312b31cd1a037441cd2995e5f36",
+  "usage_scope": "research_only",
+  "promotion_status": "blocked_research_only",
+  "expected": {
+    "gate_accepted": true,
+    "systems": {
+      "adapter": {"examples": 2, "factual_f1": 1.0, "unsupported_critical_facts": 0},
+      "base": {"examples": 2, "factual_f1": 0.888889, "omission_rate": 0.2},
+      "teacher_oracle_smoke": {"examples": 2, "factual_f1": 1.0}
+    },
+    "teacher_label": "teacher_oracle_smoke",
+    "teacher_comparison": "fixture_oracle",
+    "demographic_groups": {"gender": ["female", "male"]}
+  }
+}

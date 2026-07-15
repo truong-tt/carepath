@@ -23,6 +23,7 @@ from gec.cliutil import configure_stdout  # noqa: E402
 configure_stdout()
 
 from gec.data import augment_training_pairs, read_jsonl, write_jsonl  # noqa: E402
+from gec.phonetic import add_phonetic_corruption  # noqa: E402
 
 
 def main() -> None:
@@ -36,11 +37,14 @@ def main() -> None:
     parser.add_argument("--synthetic", default=None, help="Synthetic GEC pairs JSONL (train only).")
     parser.add_argument("--output", required=True)
     parser.add_argument("--nsyn-factor", type=float, default=1.0)
+    parser.add_argument("--phonetic-seed", type=int)
     args = parser.parse_args()
 
     real = [row for path in args.real for row in read_jsonl(Path(path))]
     synthetic = read_jsonl(Path(args.synthetic)) if args.synthetic else []
     merged = augment_training_pairs(real, synthetic, nsyn_factor=args.nsyn_factor)
+    if args.phonetic_seed is not None:
+        merged = add_phonetic_corruption(merged, args.phonetic_seed)
     count = write_jsonl(Path(args.output), merged)
     n_synth = sum(1 for r in merged if r.get("source_kind") == "darag_synthetic_tts")
     print(f"Wrote {count} augmented pairs ({n_synth} synthetic train rows) to {args.output}")

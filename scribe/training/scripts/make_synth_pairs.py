@@ -33,7 +33,12 @@ def main() -> None:
     parser.add_argument("--datastore", default="data/medical_lexicon.json")
     parser.add_argument("--retrieval-backend", default="lexical", choices=["lexical", "semantic", "hybrid"])
     parser.add_argument("--limit", type=int, default=None)
-    parser.add_argument("--n-best", type=int, default=1, help="paper N=5; >1 adds perturbation N-best")
+    parser.add_argument(
+        "--n-best",
+        type=int,
+        default=1,
+        help="compatibility option; >1 adds acoustic variants, not decoder beam N-best",
+    )
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
 

@@ -38,8 +38,9 @@ def format_inference_prompt(row: dict[str, Any], use_retrieval: bool = True) -> 
 
     ``row`` must carry ``raw_asr``; ``retrieved_terms`` (falling back to
     ``gold_terms``) supplies the NE list, and an optional ``other_hypotheses``
-    list supplies the N-best evidence (paper N=5). Missing optional fields are
-    simply omitted.
+    list supplies optional alternative evidence. In CarePath these are acoustic
+    variants for paper reproduction, not decoder beam N-best. Missing optional
+    fields are simply omitted.
     """
 
     lines = [f"Best hypothesis: {row['raw_asr']}"]

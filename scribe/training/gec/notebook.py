@@ -18,7 +18,16 @@ from pathlib import Path
 
 from gec import env
 from gec.paths import ArtifactPaths
-from gec.profiles import RunProfile, get_profile
+from gec.profiles import RunProfile
+from gec.run_config import load_pipeline_config
+
+PROFILE_CONFIGS = {
+    "smoke": "smoke-v2.json",
+    "pilot": "pilot-v1.json",
+    "research-full": "research-full-v1.json",
+    "replicate": "replicate-v1.json",
+    "reproduction": "reproduction-v1.json",
+}
 
 
 @dataclass
@@ -27,7 +36,9 @@ class StageContext:
     paths: ArtifactPaths
     backup: Path | None
     in_colab: bool
-    dataset: str = "tensorxt/ViMedCSS"
+    config_path: Path = Path("scribe/training/configs/smoke-v2.json")
+    confirm_paid: bool = False
+    dataset: str = "local:frozen-gec-fixture"
 
     def run_step(self, args: list[str], env_extra: dict | None = None) -> None:
         """Run a ``scribe/training/scripts/*`` CLI with PYTHONPATH set, raising on failure."""
@@ -63,7 +74,10 @@ class StageContext:
             src = self.backup / dst.name
             if src.exists():
                 dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy(src, dst)
+                if src.is_dir():
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
                 print("restored", dst, "from", src)
             else:
                 print("(optional, not on Drive):", dst)
@@ -88,15 +102,68 @@ class StageContext:
         dst.parent.mkdir(parents=True, exist_ok=True)
         return str(dst)
 
+    def run_pipeline(self, stage: str) -> None:
+        """Run the same manifest- and safety-gated orchestrator as headless CI."""
 
-def init_stage(profile: str = "smoke", dataset: str = "tensorxt/ViMedCSS") -> StageContext:
+        args = [
+            "scribe/training/scripts/run_pipeline.py",
+            "--config",
+            str(self.config_path),
+            "--stage",
+            stage,
+        ]
+        if self.confirm_paid:
+            args.append("--confirm-paid")
+        self.run_step(args, env_extra={"CAREPATH_ARTIFACT_ROOT": str(self.paths.root)})
+
+    def run_soap_pipeline(self) -> None:
+        """Run the sibling SOAP orchestrator without duplicating its implementation."""
+
+        soap_profile = "replicate" if self.profile.name == "reproduction" else self.profile.name
+        config = Path("scribe/training/configs") / f"soap-{soap_profile}-v1.json"
+        if not config.exists() and self.profile.name == "smoke":
+            config = Path("scribe/training/configs/soap-smoke-v1.json")
+        args = [
+            "scribe/training/scripts/run_soap_pipeline.py",
+            "--config",
+            str(config),
+            "--stage",
+            "all",
+        ]
+        env_extra = {"CAREPATH_ARTIFACT_ROOT": str(self.paths.root)}
+        if self.confirm_paid:
+            env_extra["CAREPATH_CONFIRM_PAID"] = "1"
+            args.append("--confirm-paid")
+        self.run_step(args, env_extra=env_extra)
+
+
+def init_stage(profile: str = "smoke", confirm_paid: bool = False) -> StageContext:
     """Resolve profile + Drive backup + artifact paths for a stage notebook."""
 
-    prof = get_profile(profile)
+    if profile not in PROFILE_CONFIGS:
+        raise ValueError(f"profile must be one of {sorted(PROFILE_CONFIGS)}")
+    config_path = Path("scribe/training/configs") / PROFILE_CONFIGS[profile]
+    config = load_pipeline_config(config_path)
+    prof = config.profile
+    if prof.paid and not confirm_paid:
+        raise SystemExit(
+            f"Profile '{prof.name}' can consume paid Colab GPU time. Set "
+            "CAREPATH_CONFIRM_PAID=1 only after checking the profile and runtime."
+        )
     in_colab = env.in_colab()
     backup = env.setup_backup(in_colab)
-    suffix = "" if prof.name == "full" else f"_{prof.name}"
-    adapters_root = (backup / "gec_lora" / "qwen3") if backup else None
-    paths = ArtifactPaths(root=Path("artifacts"), suffix=suffix, adapters_root=adapters_root)
-    print(f"profile={prof.name} | n_best={prof.n_best} | seeds={prof.seeds} | adapters={paths.adapters}")
-    return StageContext(profile=prof, paths=paths, backup=backup, in_colab=in_colab, dataset=dataset)
+    artifact_root = backup / config.run_id if backup else config.artifact_root
+    paths = ArtifactPaths(root=artifact_root, suffix=config.suffix)
+    print(
+        f"profile={prof.name} | single_best={prof.n_best == 1} | seeds={prof.seeds} "
+        f"| synthetic={prof.enable_synthetic} | artifacts={paths.root}"
+    )
+    return StageContext(
+        profile=prof,
+        paths=paths,
+        backup=backup,
+        in_colab=in_colab,
+        config_path=config_path,
+        confirm_paid=confirm_paid,
+        dataset=config.dataset,
+    )

@@ -62,6 +62,30 @@ class ArtifactPaths:
         return self.evaluations / self._name("raw_baseline_wer", "json")
 
     @property
+    def asr_benchmark(self) -> Path:
+        return self.evaluations / self._name("asr_benchmark", "json")
+
+    @property
+    def asr_lora_root(self) -> Path:
+        return self.root / "asr_lora" / f"phowhisper_small{self.suffix}"
+
+    @property
+    def asr_predictions(self) -> Path:
+        return self.evaluations / self._name("phowhisper_predictions", "jsonl")
+
+    @property
+    def asr_lora_report(self) -> Path:
+        return self.evaluations / self._name("phowhisper_lora_report", "json")
+
+    @property
+    def candidate_selection(self) -> Path:
+        return self.evaluations / self._name("transcript_candidate_selection", "json")
+
+    @property
+    def phonetic_gate(self) -> Path:
+        return self.evaluations / self._name("phonetic_vs_full_gate", "json")
+
+    @property
     def llm_rag(self) -> Path:
         return self.evaluations / self._name("llm_rag", "jsonl")
 
@@ -110,6 +134,12 @@ class ArtifactPaths:
     def serve_bundle(self) -> Path:
         """Self-describing deploy bundle (manifest + adapter + datastore)."""
         return self.root / f"gec_serve{self.suffix}"
+
+    def candidate_adapter(self, variant: str, seed: int, *, all_variants: bool, multi_seed: bool) -> Path:
+        """Resolve the exact layout written by ``scripts/train.py``."""
+
+        path = self.adapters / variant if all_variants else self.adapters
+        return path / f"seed-{seed}" if multi_seed else path
 
     def restore_set(self) -> list[str]:
         """Artifacts a GPU stage restores from Drive before it can run."""

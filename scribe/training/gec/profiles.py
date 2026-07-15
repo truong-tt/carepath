@@ -1,9 +1,9 @@
-"""Run profiles: one switch for the whole pipeline instead of scattered constants.
+"""Named run profiles for the Colab-first transcript pipeline.
 
-``SMOKE`` is the fast, dependency-light plumbing check (tiny limits, mock ASR,
-single seed). ``FULL`` is the real ViMedCSS run that follows the paper's knobs
-(N=5 N-best, nsyn=n, 3 seeds, all ablation variants). Stage notebooks read every
-run-size value from the active profile so there is a single source of truth.
+The default is deliberately cheap.  Every paid profile needs an explicit
+confirmation, and only the paper-reproduction profile enables synthetic TTS or
+the perturbation hypotheses used by the historical DARAG reproduction.
+Production Gipformer remains a single-best decoder.
 """
 
 from __future__ import annotations
@@ -14,17 +14,27 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class RunProfile:
     name: str
-    limit_per_split: int | None      # rows per split for ASR pairs (None = full)
-    asr_provider: str                # "mock" (smoke) or "gipformer"
-    retrieval_backend: str           # lexical / semantic / hybrid
-    n_best: int                      # paper N=5; 1 disables the other-hypotheses channel
-    synth_count: int | None          # synthetic transcripts (None = match real train size)
-    synth_tts_limit: int | None      # how many to voice-clone (None = all)
-    tts_provider: str                # xtts (clone) or mms (fallback)
-    nsyn_factor: float               # synthetic pairs added = factor * |real train|
+    limit_per_split: int | None
+    asr_provider: str
+    retrieval_backend: str
+    n_best: int
+    synth_count: int | None
+    synth_tts_limit: int | None
+    tts_provider: str
+    nsyn_factor: float
     max_steps: int
-    seeds: tuple[int, ...]           # paper averages 3
-    all_variants: bool               # train full + ablations
+    seeds: tuple[int, ...]
+    all_variants: bool
+    paid: bool = False
+    enable_synthetic: bool = False
+    enable_tts: bool = False
+    train_mode: str = "qlora"
+    candidate_variant: str = "full"
+    candidate_seed: int = 13
+    asr_experiment: str = "gipformer_single_best"
+    enable_direct_asr: bool = False
+    enable_phonetic: bool = False
+    enable_near_miss: bool = False
 
 
 SMOKE = RunProfile(
@@ -33,20 +43,84 @@ SMOKE = RunProfile(
     asr_provider="mock",
     retrieval_backend="lexical",
     n_best=1,
-    synth_count=10,
-    synth_tts_limit=10,
-    tts_provider="mms",
-    nsyn_factor=1.0,
+    synth_count=0,
+    synth_tts_limit=0,
+    tts_provider="none",
+    nsyn_factor=0.0,
     max_steps=20,
     seeds=(13,),
     all_variants=False,
+    train_mode="mock",
+    asr_experiment="mock_single_best",
 )
 
-FULL = RunProfile(
-    name="full",
+PILOT = RunProfile(
+    name="pilot",
+    limit_per_split=1_000,
+    asr_provider="gipformer",
+    retrieval_backend="hybrid",
+    n_best=1,
+    synth_count=0,
+    synth_tts_limit=0,
+    tts_provider="none",
+    nsyn_factor=0.0,
+    max_steps=200,
+    seeds=(13,),
+    all_variants=False,
+    paid=True,
+    asr_experiment="phowhisper_lora",
+    enable_direct_asr=True,
+    enable_phonetic=True,
+    candidate_variant="phonetic",
+)
+
+RESEARCH_FULL = RunProfile(
+    name="research-full",
     limit_per_split=None,
     asr_provider="gipformer",
     retrieval_backend="hybrid",
+    n_best=1,
+    synth_count=0,
+    synth_tts_limit=0,
+    tts_provider="none",
+    nsyn_factor=0.0,
+    max_steps=600,
+    seeds=(13,),
+    all_variants=False,
+    paid=True,
+    asr_experiment="phowhisper_lora",
+    enable_direct_asr=True,
+    enable_phonetic=True,
+    candidate_variant="phonetic",
+)
+
+REPLICATE = RunProfile(
+    name="replicate",
+    limit_per_split=None,
+    asr_provider="gipformer",
+    retrieval_backend="hybrid",
+    n_best=1,
+    synth_count=0,
+    synth_tts_limit=0,
+    tts_provider="none",
+    nsyn_factor=0.0,
+    max_steps=600,
+    seeds=(13, 7, 42),
+    all_variants=False,
+    paid=True,
+    candidate_seed=13,
+    asr_experiment="phowhisper_lora",
+    enable_direct_asr=True,
+    enable_phonetic=True,
+    candidate_variant="phonetic",
+)
+
+REPRODUCTION = RunProfile(
+    name="reproduction",
+    limit_per_split=None,
+    asr_provider="gipformer",
+    retrieval_backend="hybrid",
+    # These are deterministic acoustic variants, not decoder beam N-best.
     n_best=5,
     synth_count=None,
     synth_tts_limit=None,
@@ -55,9 +129,21 @@ FULL = RunProfile(
     max_steps=600,
     seeds=(13, 7, 42),
     all_variants=True,
+    paid=True,
+    enable_synthetic=True,
+    enable_tts=True,
+    candidate_seed=13,
+    asr_experiment="phowhisper_plain_lora_near_miss_not_implemented",
+    enable_direct_asr=True,
+    enable_phonetic=True,
+    candidate_variant="phonetic",
+    enable_near_miss=True,
 )
 
-PROFILES = {SMOKE.name: SMOKE, FULL.name: FULL}
+PROFILES = {
+    profile.name: profile
+    for profile in (SMOKE, PILOT, RESEARCH_FULL, REPLICATE, REPRODUCTION)
+}
 
 
 def get_profile(name: str) -> RunProfile:

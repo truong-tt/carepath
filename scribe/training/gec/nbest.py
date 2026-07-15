@@ -1,19 +1,18 @@
-"""Perturbation-based N-best hypotheses for GEC (paper §3.1/§4.3, N=5).
+"""Deterministic acoustic-variant hypotheses for paper reproduction.
 
 The paper trains the corrector to revise the best hypothesis *using cues from the
 other N-1 hypotheses* obtained by beam-search decoding. CarePath's runtime ASR is
 sherpa-onnx Gipformer, whose offline ``OfflineRecognitionResult`` exposes only the
 single best path — beam search runs internally but the alternative hypotheses are
-never surfaced. So we approximate N-best the only model-agnostic way available:
+never surfaced. These helpers instead create acoustic variants by
 re-decode the *same* Gipformer over light, deterministic audio perturbations and
 collect the distinct transcripts. Most ASR errors that matter here (mangled
 code-switched medical terms) flip under small acoustic changes, so the perturbed
 decodes expose exactly the alternative spellings the corrector needs.
 
-Crucially this same recipe must run at inference time too, so the trained model
-always sees an ``Other hypotheses`` block consistent with training (no train/serve
-skew). ``dedupe_keep_order`` is pure-python and unit-testable; ``diverse_hypotheses``
-lazily imports numpy/soundfile.
+They are not true N-best and are disabled in production-compatible profiles.
+``dedupe_keep_order`` is pure Python and unit-testable; ``diverse_hypotheses``
+lazily imports NumPy and soundfile.
 """
 
 from __future__ import annotations
@@ -140,8 +139,8 @@ def other_hypotheses(
 ) -> list[str]:
     """The non-best hypotheses (``hypotheses[1:]``) for the GEC prompt's other-hyps.
 
-    Returns ``[]`` when ``n_best <= 1`` so callers keep the cheap single-decode path
-    unless they explicitly ask for N-best.
+    Returns ``[]`` when ``n_best <= 1`` so callers keep the production-compatible
+    single-best path unless reproduction explicitly requests acoustic variants.
     """
 
     if n_best <= 1:

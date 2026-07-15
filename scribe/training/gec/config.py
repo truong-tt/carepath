@@ -1,8 +1,8 @@
 """Knobs and defaults for the DARAG GEC pipeline.
 
-Values mirror the paper's hyper-parameters where they transfer (paper §5):
-``k=5`` NE retrieval, ``N=5`` N-best, ``nsyn = n`` (one synthetic utterance per
-real training utterance), ``nsmall = 100`` for the low-resource OOD setting.
+Values mirror the paper's hyper-parameters only in the explicit reproduction
+profile. Production Gipformer exposes one transcript, so normal profiles use a
+single-best input; deterministic acoustic variants are not decoder beam N-best.
 
 Model choices deviate from the paper on purpose: the paper fine-tunes LLaMA-2-7B
 (English); CarePath targets Vietnamese code-switched medical speech, so the base
@@ -37,8 +37,8 @@ ID_SPLITS = ("validation", "test")
 OOD_SPLITS = ("hard",)
 GATE_SPLITS = ("validation", "hard")
 
-# The four DARAG training configurations (paper §5 "Comparison Methods").
-VARIANTS = ("full", "wo_rac", "wo_aug", "only_synth")
+# DARAG configurations plus CarePath's PiDA-inspired text-only candidate.
+VARIANTS = ("full", "phonetic", "wo_rac", "wo_aug", "only_synth")
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ class GecRunConfig:
     """Run-size + method knobs shared across the pipeline."""
 
     top_k_ne: int = 5            # paper k=5 (Appendix J.1: 5 is optimal)
-    n_best: int = 5              # paper N=5 N-best hypotheses
+    n_best: int = 1              # compatibility name; >1 means acoustic variants
     nsyn_factor: float = 1.0     # paper nsyn = n
     nsmall: int = 100            # paper OOD low-resource budget
 

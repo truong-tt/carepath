@@ -19,6 +19,7 @@ from gec.cliutil import configure_stdout  # noqa: E402
 configure_stdout()
 
 from gec.datastore import build_datastore, write_datastore  # noqa: E402
+from gec.manifest import load_manifest  # noqa: E402
 
 
 def main() -> None:
@@ -26,17 +27,25 @@ def main() -> None:
     parser.add_argument("--lexicon", default="data/medical_lexicon.json")
     parser.add_argument("--pairs", nargs="*", default=[])
     parser.add_argument("--dataset", default=None)
-    parser.add_argument("--splits", nargs="+", default=["train", "validation", "test", "hard"])
+    parser.add_argument("--manifest", type=Path)
+    parser.add_argument(
+        "--splits",
+        nargs="+",
+        default=["train"],
+        help="governed RAC source splits; training default is train only",
+    )
     parser.add_argument("--limit-per-split", type=int, default=None)
     parser.add_argument("--output", default="artifacts/retrieval/term_datastore.json")
     args = parser.parse_args()
 
+    manifest = load_manifest(args.manifest, require_approved=True) if args.manifest else None
     payload = build_datastore(
         lexicon_path=Path(args.lexicon),
         pair_paths=[Path(p) for p in args.pairs],
         dataset=args.dataset,
         splits=tuple(args.splits),
         limit_per_split=args.limit_per_split,
+        dataset_manifest=manifest,
     )
     write_datastore(payload, Path(args.output))
     print(f"Wrote {payload['metadata']['term_count']} terms to {args.output}")

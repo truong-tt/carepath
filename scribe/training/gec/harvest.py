@@ -163,3 +163,11 @@ def enrich_datastore(
         meta = payload.setdefault("metadata", {})
         meta["harvested_terms"] = enriched
     return payload
+
+
+def rows_for_alias_mining(
+    pairs: Iterable[dict[str, Any]], split: str = "train"
+) -> list[dict[str, Any]]:
+    """Prevent held-out gold/confusions from teaching the RAC datastore."""
+
+    return [pair for pair in pairs if pair.get("split") == split]

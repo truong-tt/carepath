@@ -111,7 +111,10 @@ def restore_artifacts(backup: Path | None, rel_paths: list[str]) -> None:
         if not src.exists():
             raise SystemExit(f"Missing {src} on Drive. Run Part 1 (data prep) first.")
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(src, dst)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, dst)
         print("restored", dst, "from", src)
 
 
@@ -129,7 +132,10 @@ def save_artifacts(backup: Path | None, rel_paths: list[str]) -> None:
             continue
         dst = backup / src.name
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(src, dst)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, dst)
         print("saved", dst)
 
 

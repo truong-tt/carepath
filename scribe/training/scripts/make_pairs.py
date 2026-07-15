@@ -24,6 +24,7 @@ configure_stdout()
 
 from carepath.config import Settings  # noqa: E402
 from gec.data import build_real_pairs  # noqa: E402
+from gec.manifest import load_manifest  # noqa: E402
 from gec.retrieval import build_ne_retriever  # noqa: E402
 from carepath.services.asr import build_asr_service  # noqa: E402
 
@@ -31,15 +32,28 @@ from carepath.services.asr import build_asr_service  # noqa: E402
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default="tensorxt/ViMedCSS")
+    parser.add_argument("--manifest", type=Path)
     parser.add_argument("--output", default="artifacts/gec_pairs/vimedcss_gipformer_pairs.jsonl")
     parser.add_argument("--splits", nargs="+", default=["train", "validation", "test", "hard"])
     parser.add_argument("--limit-per-split", type=int, default=None)
+    parser.add_argument(
+        "--train-limit",
+        type=int,
+        default=None,
+        help="limit only train; validation/test/hard remain untouched",
+    )
     parser.add_argument("--asr-provider", default="gipformer", choices=["gipformer", "mock"])
     parser.add_argument("--datastore", default="data/medical_lexicon.json")
     parser.add_argument("--retrieval-backend", default="lexical", choices=["lexical", "semantic", "hybrid"])
-    parser.add_argument("--n-best", type=int, default=1, help="paper N=5; >1 adds perturbation N-best")
+    parser.add_argument(
+        "--n-best",
+        type=int,
+        default=1,
+        help="compatibility option; >1 adds acoustic variants, not decoder beam N-best",
+    )
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
+    manifest = load_manifest(args.manifest, require_approved=True) if args.manifest else None
 
     settings = Settings.from_env()
     if args.asr_provider == "mock":
@@ -64,6 +78,8 @@ def main() -> None:
             limit_per_split=args.limit_per_split,
             completed_ids=completed,
             n_best=args.n_best,
+            dataset_manifest=manifest,
+            train_limit=args.train_limit,
         ):
             handle.write(json.dumps(pair, ensure_ascii=False) + "\n")
             handle.flush()

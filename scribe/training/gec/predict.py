@@ -65,23 +65,36 @@ def _predict(
     if limit:
         rows = rows[:limit]
 
+    revision_lock = json.loads(
+        (adapter_dir / "base_revision.json").read_text(encoding="utf-8")
+    )
+    if revision_lock.get("model") != base_model or len(str(revision_lock.get("revision", ""))) != 40:
+        raise ValueError("adapter base model/revision lock does not match inference request")
+    revision = str(revision_lock["revision"])
     tokenizer_source = (
         str(adapter_dir)
         if (adapter_dir / "tokenizer_config.json").exists()
         else base_model
     )
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer_source,
+        revision=revision if tokenizer_source == base_model else None,
+        trust_remote_code=True,
+    )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    bf16 = bool(torch.cuda.is_bf16_supported())
+    compute_dtype = torch.bfloat16 if bf16 else torch.float16
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=compute_dtype,
         bnb_4bit_use_double_quant=True,
     )
     base = AutoModelForCausalLM.from_pretrained(
         base_model,
+        revision=revision,
         quantization_config=bnb_config,
         device_map="auto",
         trust_remote_code=True,

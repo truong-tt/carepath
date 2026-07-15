@@ -23,7 +23,6 @@ dev = [
 training = [
     "accelerate>=0.33.0",
     "bitsandbytes>=0.43.0",
-    "coqui-tts>=0.24.0",
     "datasets[audio]>=2.20.0",
     "evaluate>=0.4.2",
     "jiwer>=3.0.4",
@@ -33,8 +32,18 @@ training = [
     "sentence-transformers>=3.0.0",
     "sentencepiece>=0.2.0",
     "torch>=2.3.0",
-    "transformers>=4.44.0",
+    "transformers>=4.51.0",
     "trl>=0.9.6",
+]
+training-fast = [
+    "unsloth==2026.7.2",
+    "unsloth-zoo==2026.7.2",
+    "transformers==4.56.2",
+    "trl==0.22.2",
+    "datasets[audio]==4.3.0",
+]
+training-tts = [
+    "coqui-tts>=0.24.0",
 ]
 
 [tool.pytest.ini_options]

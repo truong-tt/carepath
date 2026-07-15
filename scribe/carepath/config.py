@@ -86,6 +86,9 @@ class Settings:
     # gec_local provider: serve a trained QLoRA adapter bundle in-process.
     gec_bundle_path: str | None = None
     gec_soap_delegate: str = "offline"
+    # scribe_local provider: private research staging bundle with GEC + SOAP
+    # adapters sharing one base model. Never selected by production defaults.
+    scribe_bundle_path: str | None = None
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -137,6 +140,7 @@ class Settings:
             soap_rate_limit_global_day=_int_env("SOAP_RATE_LIMIT_GLOBAL_DAY", 100),
             gec_bundle_path=os.getenv("GEC_BUNDLE_PATH") or None,
             gec_soap_delegate=os.getenv("GEC_SOAP_DELEGATE", "offline").strip().lower(),
+            scribe_bundle_path=os.getenv("SCRIBE_BUNDLE_PATH") or None,
         )
 
 

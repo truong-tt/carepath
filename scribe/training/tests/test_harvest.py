@@ -17,13 +17,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scribe"))
 
-from gec.harvest import enrich_datastore, harvest_aliases
+from gec.harvest import enrich_datastore, harvest_aliases, rows_for_alias_mining
 from carepath.services.retrieval import MedicalTermRetriever
 
 REAL_PAIRS = Path("artifacts/gec_pairs/vimedcss_gipformer_pairs_smoke.jsonl")
 
 
 class HarvestLogicTests(unittest.TestCase):
+    def test_held_out_confusion_is_never_mined(self) -> None:
+        pairs = [
+            {
+                "split": "train",
+                "gold_text": "nam testosterone thành",
+                "raw_asr": "nam testosterone thành",
+            },
+            {
+                "split": "hard",
+                "gold_text": "nam testosterone thành",
+                "raw_asr": "nam testo thành",
+            },
+        ]
+        mined = harvest_aliases(
+            rows_for_alias_mining(pairs), ["testosterone"], min_count=1
+        )
+        self.assertNotIn("testosterone", mined)
+
     def test_harvests_real_renderings_and_skips_clean(self) -> None:
         pairs = [
             {"gold_text": "5 alpha reductase là một enzyme",
@@ -65,6 +83,8 @@ class HarvestLogicTests(unittest.TestCase):
 class RealArtifactTests(unittest.TestCase):
     def test_harvest_over_real_gipformer_pairs(self) -> None:
         rows = [json.loads(line) for line in REAL_PAIRS.read_text(encoding="utf-8").splitlines() if line]
+        if not any("gipformer" in str(row.get("asr_model", "")).lower() for row in rows):
+            self.skipTest("artifact is not a real Gipformer decode")
         terms = sorted({t for r in rows for t in (r.get("gold_terms") or [])} | {"reductase", "testosterone"})
         out = harvest_aliases(rows, terms, min_count=1)
         # real renderings are captured, and the over-short junk ("hb") is filtered

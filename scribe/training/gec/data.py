@@ -25,8 +25,10 @@ from gec.metrics import split_terms
 
 REAL_SOURCE = "vimedcss_real"
 SYNTHETIC_SOURCE = "darag_synthetic_tts"
+PHONETIC_SOURCE = "pida_phonetic_text"
+PHONETIC_CLEAN_SOURCE = "pida_clean_text"
 REAL_SOURCES = {REAL_SOURCE}
-VALID_SOURCES = {REAL_SOURCE, SYNTHETIC_SOURCE}
+VALID_SOURCES = {REAL_SOURCE, SYNTHETIC_SOURCE, PHONETIC_SOURCE, PHONETIC_CLEAN_SOURCE}
 
 GEC_PAIR_REQUIRED_FIELDS = {
     "split",
@@ -132,6 +134,7 @@ def select_variant_rows(
     * ``wo_rac``     — same rows, NEs stripped from the prompt (use_retrieval=False).
     * ``wo_aug``     — real train rows only (drop synthetic), NEs in prompt.
     * ``only_synth`` — synthetic train rows only, NEs in prompt.
+    * ``phonetic``   — 1:1 clean/PiDA-style corrupted real train rows.
 
     Validation rows (real ``validation`` split) are returned separately by
     ``eval_split_rows`` and are never altered by the variant.
@@ -139,6 +142,19 @@ def select_variant_rows(
 
     use_retrieval = variant_uses_retrieval(variant)
     train_rows = [r for r in augmented_pairs if r.get("split") == "train"]
+    if variant == "phonetic":
+        train_rows = [
+            r
+            for r in train_rows
+            if r.get("source_kind")
+            in {REAL_SOURCE, PHONETIC_CLEAN_SOURCE, PHONETIC_SOURCE}
+        ]
+    else:
+        train_rows = [
+            r
+            for r in train_rows
+            if r.get("source_kind") not in {PHONETIC_CLEAN_SOURCE, PHONETIC_SOURCE}
+        ]
     if variant == "wo_aug":
         train_rows = [r for r in train_rows if r.get("source_kind") in REAL_SOURCES]
     elif variant == "only_synth":
@@ -162,25 +178,33 @@ def build_real_pairs(
     completed_ids: set[str] | None = None,
     n_best: int = 1,
     seed: int = 13,
+    dataset_manifest: dict[str, Any] | None = None,
+    train_limit: int | None = None,
 ):
     """Yield real GEC pairs by running ``asr`` over each ``dataset`` audio clip.
 
     ``retriever`` and ``asr`` are injected so this stays testable; the CLI wires
-    in the gec NE retriever and ``carepath.services.asr``. ``n_best > 1`` adds the
-    paper's other-hypotheses via ``nbest.other_hypotheses`` (perturbation decodes),
-    computed while the temp wav still exists.
+    in the gec NE retriever and ``carepath.services.asr``. ``n_best > 1`` is a
+    compatibility option for the reproduction profile and adds deterministic
+    acoustic variants, not decoder beam N-best.
     """
 
     import soundfile as sf  # type: ignore
     from datasets import Audio, load_dataset  # type: ignore
 
     from gec import nbest
+    from gec.manifest import load_approved_hf_split
 
     completed_ids = completed_ids or set()
     for split in splits:
-        data = load_dataset(dataset, split=split).cast_column("audio", Audio(decode=True))
-        if limit_per_split:
-            data = data.select(range(min(limit_per_split, len(data))))
+        data = (
+            load_approved_hf_split(dataset, split, dataset_manifest)
+            if dataset_manifest
+            else load_dataset(dataset, split=split)
+        ).cast_column("audio", Audio(decode=True))
+        limit = train_limit if split == "train" and train_limit is not None else limit_per_split
+        if limit:
+            data = data.select(range(min(limit, len(data))))
         for row in data:
             audio_id = f"{split}:{row['segment_id']}"
             if audio_id in completed_ids:
@@ -190,7 +214,7 @@ def build_real_pairs(
                 wav_path = Path(temp_dir) / f"{row['segment_id']}.wav"
                 sf.write(str(wav_path), audio["array"], int(audio["sampling_rate"]))
                 result = asr.transcribe(wav_path)
-                # Compute N-best before the temp dir (and wav) is removed.
+                # Compute optional acoustic variants before the temporary wav is removed.
                 others = nbest.other_hypotheses(asr, wav_path, result.text, n_best, seed=seed)
             gold_terms = split_terms(row.get("cs_terms_list", ""))
             retrieval_text = " ".join(p for p in (result.text, row["segment_text"]) if p)

@@ -1,0 +1,22 @@
+{
+  "dataset_id": "leduckhai/VietMed",
+  "source_description": "Untouched VietMed test split for optional out-of-domain ASR evaluation only; never training or retrieval.",
+  "consent_status": "approved_research_only",
+  "owner_approval": {
+    "date": "2026-07-13",
+    "scope": "private_research_only",
+    "statement": "I approve research-only use of the listed public datasets"
+  },
+  "sha256": "bbce06ab8f93a06253de8b71298ef442043948bd97df58afba8a7f0808c0194f",
+  "source_revision": "cc7980cd1392d2d85cf1c692b1d96e8581fc7eec",
+  "approved_splits": ["test"],
+  "split_fingerprints": {
+    "test": "19c9732b3cb32a7375296a01072f5393246bb711afa992afefa84e48310d9393"
+  },
+  "license_claimed_by_source": "MIT",
+  "usage_scope": "research_evaluation_only",
+  "promotion_status": "blocked_research_only",
+  "training_allowed": false,
+  "retrieval_allowed": false,
+  "notes": "Evaluation only. The Hugging Face source card claims MIT while the associated paper is CC BY-NC 4.0, so production and commercial use remain blocked pending a separate rights decision."
+}

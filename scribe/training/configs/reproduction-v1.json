@@ -1,0 +1,33 @@
+{
+  "run_id": "carepath-gec-reproduction-v1",
+  "dataset": "tensorxt/ViMedCSS",
+  "manifest": "scribe/training/manifests/vimedcss-v1.json",
+  "frozen_eval_fixture": "scribe/training/eval/fixtures/gec_eval_v1.jsonl",
+  "frozen_eval_manifest": "scribe/training/eval/fixtures/gec_eval_v1.manifest.json",
+  "artifact_root": "artifacts",
+  "suffix": "_reproduction",
+  "profile": {
+    "name": "reproduction",
+    "limit_per_split": null,
+    "asr_provider": "gipformer",
+    "retrieval_backend": "hybrid",
+    "n_best": 5,
+    "synth_count": null,
+    "synth_tts_limit": null,
+    "tts_provider": "xtts",
+    "nsyn_factor": 1.0,
+    "max_steps": 600,
+    "seeds": [13, 7, 42],
+    "all_variants": true,
+    "paid": true,
+    "enable_synthetic": true,
+    "enable_tts": true,
+    "train_mode": "qlora",
+    "candidate_variant": "phonetic",
+    "candidate_seed": 13,
+    "asr_experiment": "phowhisper_plain_lora_near_miss_not_implemented",
+    "enable_direct_asr": true,
+    "enable_phonetic": true,
+    "enable_near_miss": true
+  }
+}

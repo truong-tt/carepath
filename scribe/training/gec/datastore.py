@@ -75,8 +75,9 @@ def build_datastore(
     pair_paths: list[Path] | None = None,
     transcript_fields: tuple[str, ...] = ("gold_text", "clean_text", "segment_text"),
     dataset: str | None = None,
-    splits: tuple[str, ...] = ("train", "validation", "test", "hard"),
+    splits: tuple[str, ...] = ("train",),
     limit_per_split: int | None = None,
+    dataset_manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a term datastore JSON payload (compatible with the retriever's loader)."""
 
@@ -103,9 +104,14 @@ def build_datastore(
 
     if dataset:
         from datasets import load_dataset  # type: ignore
+        from gec.manifest import load_approved_hf_split
 
         for split in splits:
-            data = load_dataset(dataset, split=split)
+            data = (
+                load_approved_hf_split(dataset, split, dataset_manifest)
+                if dataset_manifest
+                else load_dataset(dataset, split=split)
+            )
             # Text-only job: drop every other column (above all ``audio``) before
             # iterating — the datasets Audio feature decodes each clip on row
             # access, which turns a sub-minute text scan into hours of decode.

@@ -22,7 +22,11 @@ def main() -> None:
     parser.add_argument("--config", type=Path, default=Path("scribe/training/configs/frozen-baseline-v1.json"))
     parser.add_argument("--output", type=Path, default=Path("scribe/training/reports/gec-frozen-baseline-v1.json"))
     parser.add_argument("--write", action="store_true", help="write the deterministic report")
+    parser.add_argument("--check", action="store_true", help="verify without rewriting (default)")
     args = parser.parse_args()
+
+    if args.write and args.check:
+        parser.error("--write and --check are mutually exclusive")
 
     expected = build_baseline_report(args.config)
     if args.write:

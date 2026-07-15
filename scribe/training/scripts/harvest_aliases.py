@@ -27,7 +27,7 @@ from gec.cliutil import configure_stdout  # noqa: E402
 configure_stdout()
 
 from gec.data import read_jsonl, write_jsonl  # noqa: E402
-from gec.harvest import enrich_datastore  # noqa: E402
+from gec.harvest import enrich_datastore, rows_for_alias_mining  # noqa: E402
 from gec.retrieval import build_ne_retriever  # noqa: E402
 
 
@@ -38,6 +38,11 @@ def main() -> None:
     parser.add_argument("--min-count", type=int, default=1,
                         help="min times a rendering must occur to become an alias")
     parser.add_argument("--max-aliases", type=int, default=4)
+    parser.add_argument(
+        "--mine-split",
+        default="train",
+        help="only this split may teach confusion aliases; refresh may still read raw held-out ASR",
+    )
     parser.add_argument("--refresh", action="store_true",
                         help="re-retrieve retrieved_terms over raw_asr with the enriched datastore")
     parser.add_argument("--backend", default="lexical", choices=["lexical", "semantic", "hybrid"])
@@ -51,7 +56,8 @@ def main() -> None:
     for pair_file in args.pairs:
         all_rows.extend(read_jsonl(Path(pair_file)))
 
-    enrich_datastore(payload, all_rows, min_count=args.min_count, max_aliases=args.max_aliases)
+    mining_rows = rows_for_alias_mining(all_rows, args.mine_split)
+    enrich_datastore(payload, mining_rows, min_count=args.min_count, max_aliases=args.max_aliases)
     datastore_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )

@@ -1,0 +1,17 @@
+{
+  "dataset_id": "carepath-soap-public-synthetic-v1",
+  "approval_status": "approved_research_only",
+  "usage_scope": "research_only",
+  "promotion_status": "blocked_research_only",
+  "sources": [
+    {
+      "source_id": "carepath-soap-smoke-v1",
+      "dataset": "CarePath deterministic synthetic smoke fixture",
+      "source_url": "local://scribe/training/soap/fixtures/soap_smoke_v1.jsonl",
+      "revision": "v1",
+      "license": "CC0-1.0",
+      "allowed_splits": ["train"],
+      "sha256": "35edfedfc5464b14afa526f752e8f9a57e3b2312b31cd1a037441cd2995e5f36"
+    }
+  ]
+}
