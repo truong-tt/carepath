@@ -12,14 +12,9 @@ import "@fontsource/geist/latin-600.css";
 import "@fontsource/geist/vietnamese-600.css";
 import "@fontsource/geist/latin-700.css";
 import "@fontsource/geist/vietnamese-700.css";
-import "@fontsource/be-vietnam-pro/latin-400.css";
-import "@fontsource/be-vietnam-pro/vietnamese-400.css";
-import "@fontsource/be-vietnam-pro/latin-500.css";
-import "@fontsource/be-vietnam-pro/vietnamese-500.css";
-import "@fontsource/be-vietnam-pro/latin-700.css";
-import "@fontsource/be-vietnam-pro/vietnamese-700.css";
-import "@fontsource/be-vietnam-pro/latin-800.css";
-import "@fontsource/be-vietnam-pro/vietnamese-800.css";
+// Be Vietnam Pro comes from fonts.css rather than @fontsource's own
+// stylesheets: same files, but font-display: optional. See fonts.css.
+import "./fonts.css";
 import App from "./App";
 import "./styles.css";
 

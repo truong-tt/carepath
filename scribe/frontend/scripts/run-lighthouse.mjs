@@ -47,6 +47,17 @@ try {
     ),
   );
 
+  // Name what moved. A score and a CLS number say the page shifted but not
+  // what shifted, and this gate fails on CI far more readily than it does on a
+  // developer machine -- the platform fallback font differs, so the same swap
+  // costs 0.01 on Windows and 0.30 on the Linux runner. Without this, the only
+  // way to find the element is to guess and push again.
+  const shifts = result.lhr.audits["layout-shifts"]?.details?.items ?? [];
+  for (const shift of shifts) {
+    const score = typeof shift.score === "number" ? shift.score.toFixed(4) : "?";
+    console.log(`layout shift ${score}  ${shift.node?.selector ?? "(unattributed)"}`);
+  }
+
   for (const key of ["performance", "accessibility", "best-practices"]) {
     if ((scores[key] ?? 0) < 95) {
       throw new Error(`Lighthouse ${key} score ${scores[key]} is below 95.`);
