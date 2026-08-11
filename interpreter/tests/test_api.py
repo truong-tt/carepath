@@ -1,3 +1,4 @@
+import json
 import logging
 
 import anyio
@@ -406,3 +407,94 @@ def test_admin_review_escalated_filter(db_session) -> None:
 
         assert response.status_code == 200
         assert response.json()["items"][0]["id"] == turn["id"]
+
+
+def test_parse_client_confidence_clamps_and_rejects() -> None:
+    assert api_module.parse_client_confidence(None) == 1.0
+    assert api_module.parse_client_confidence(0.41) == 0.41
+    assert api_module.parse_client_confidence(0) == 0.0
+    assert api_module.parse_client_confidence(-3) == 0.0
+    assert api_module.parse_client_confidence(7.5) == 1.0
+    assert api_module.parse_client_confidence("0.9") is None
+    assert api_module.parse_client_confidence(True) is None
+    assert api_module.parse_client_confidence({"value": 0.5}) is None
+
+
+def test_text_turn_honours_client_reported_confidence(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "patient",
+                    "lang": "en",
+                    "text": "fifteen milligrams",
+                    "confidence": 0.41,
+                }
+            )
+            result = ws.receive_json()
+
+        assert result["low_confidence"] is True
+        assert result["turn"]["asr_confidence"] == 0.41
+
+
+def test_text_turn_without_confidence_stays_fully_confident(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {"type": "text_turn", "speaker": "doctor", "lang": "vi", "text": "xin chao"}
+            )
+            result = ws.receive_json()
+
+        assert result["turn"]["asr_confidence"] == 1.0
+        assert result["low_confidence"] is False
+
+
+def test_text_turn_rejects_non_numeric_confidence(db_session) -> None:
+    del db_session
+    with TestClient(app) as client:
+        session_id = client.post("/api/sessions", json={"consent": {"ok": True}}).json()[
+            "session_id"
+        ]
+        with client.websocket_connect(f"/ws/sessions/{session_id}") as ws:
+            ws.receive_json()
+            ws.send_json(
+                {
+                    "type": "text_turn",
+                    "speaker": "doctor",
+                    "lang": "vi",
+                    "text": "xin chao",
+                    "confidence": "very sure",
+                }
+            )
+            assert ws.receive_json() == {
+                "type": "turn_error",
+                "message": "invalid confidence value",
+                "retryable": False,
+            }
+
+        assert client.get(f"/api/sessions/{session_id}/transcript").json() == []
+
+
+def test_patient_context_round_trips_in_the_consent_blob(db_session) -> None:
+    """The visit start form stores patient context in the existing consent dict.
+
+    No schema change: the bridge reads it back from consent_json in-process.
+    """
+    context = {"age": 34, "sex": "male", "reason": "skin rash"}
+    session = crud.create_session(
+        db_session, {"ai_disclosure": True, "patient_context": context}
+    )
+
+    stored = crud.require_session(db_session, session.id)
+    assert json.loads(stored.consent_json)["patient_context"] == context

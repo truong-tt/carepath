@@ -146,6 +146,22 @@ async def _send_pipeline_error(
     )
 
 
+def parse_client_confidence(value: Any) -> float | None:
+    """Validate a browser-reported speech confidence, or None if unusable.
+
+    Trust boundary: this arrives from the clinician's browser rather than from a
+    server-side model, so it is clamped into [0, 1] instead of trusted, and
+    anything non-numeric is rejected rather than silently treated as confident.
+    An absent value means a typed turn, where there is no recognition
+    uncertainty to report.
+    """
+    if value is None:
+        return 1.0
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return None
+    return max(0.0, min(1.0, float(value)))
+
+
 def _session_is_ended(db: DBSession, session_id: str) -> bool:
     return crud.require_session(db, session_id).status == "ended"
 
@@ -406,6 +422,16 @@ async def websocket_session(
                         }
                     )
                     continue
+                asr_confidence = parse_client_confidence(event.get("confidence"))
+                if asr_confidence is None:
+                    await websocket.send_json(
+                        {
+                            "type": "turn_error",
+                            "message": "invalid confidence value",
+                            "retryable": False,
+                        }
+                    )
+                    continue
                 try:
                     turn = await anyio.to_thread.run_sync(
                         partial(
@@ -417,7 +443,7 @@ async def websocket_session(
                             speaker=event["speaker"],
                             lang=event["lang"],
                             text=event["text"],
-                            asr_confidence=1.0,
+                            asr_confidence=asr_confidence,
                         )
                     )
                 except Exception as exc:

@@ -19,8 +19,10 @@ DAY_SECONDS = 24 * 60 * 60
 
 def validate_runtime_settings() -> None:
     settings = get_settings()
-    if settings.provider_mode == "cloud" and settings.admin_token == "change-me":
-        raise RuntimeError("ADMIN_TOKEN must be changed when PROVIDER_MODE=cloud")
+    if settings.provider_mode in {"cloud", "ckey"} and settings.admin_token == "change-me":
+        raise RuntimeError(
+            f"ADMIN_TOKEN must be changed when PROVIDER_MODE={settings.provider_mode}"
+        )
 
 
 async def _purge_old_sessions_daily(retention_days: int) -> None:
