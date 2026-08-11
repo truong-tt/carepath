@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import ScribeTool from "./scribe/ScribeTool";
+import VisitScreen from "./visit/VisitScreen";
 import { copyFor } from "./content/strings";
 
 const CLINICAL_NOTES_PATH = "/ghi-chep-lam-sang/";
+const VISIT_PATH = "/kham-song-ngu/";
 
 export default function App() {
   const [pathname, setPathname] = useState(() => window.location.pathname);
@@ -22,6 +24,10 @@ export default function App() {
       window.history.replaceState(null, "", CLINICAL_NOTES_PATH);
       setPathname(CLINICAL_NOTES_PATH);
     }
+    if (pathname === "/kham-song-ngu") {
+      window.history.replaceState(null, "", VISIT_PATH);
+      setPathname(VISIT_PATH);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -35,6 +41,7 @@ export default function App() {
   }, []);
 
   const isScribeTool = pathname === CLINICAL_NOTES_PATH;
+  const isVisit = pathname === VISIT_PATH;
 
   useEffect(() => {
     if (isScribeTool) window.scrollTo(0, 0);
@@ -56,6 +63,7 @@ export default function App() {
     };
   }, [isScribeTool]);
 
+  if (isVisit) return <VisitScreen backHref="/" />;
   return isScribeTool ? (
     <ScribeTool backHref="/" />
   ) : (

@@ -6,6 +6,9 @@
   "rewrites": [
     { "source": "/ghi-chep-lam-sang", "destination": "/index.html" },
     { "source": "/ghi-chep-lam-sang/", "destination": "/index.html" },
-    { "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" }
+    { "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" },
+    { "source": "/kham-song-ngu", "destination": "/index.html" },
+    { "source": "/kham-song-ngu/", "destination": "/index.html" },
+    { "source": "/kham-song-ngu/:path*", "destination": "/index.html" }
   ]
 }

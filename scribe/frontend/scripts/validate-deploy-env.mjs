@@ -23,16 +23,11 @@ export function validateDeployEnv(env = process.env) {
     }
   };
 
+  // VITE_CONSOLE_URL was dropped with the interpreter console: it pointed at
+  // /phien-dich-y-khoa/, which is now a deliberate 404.
   const apiBase = parse("VITE_API_BASE");
-  const consoleUrl = parse("VITE_CONSOLE_URL");
-  if (apiBase && consoleUrl && apiBase.origin !== consoleUrl.origin) {
-    errors.push("VITE_API_BASE and VITE_CONSOLE_URL must share one origin.");
-  }
   if (apiBase && apiBase.pathname !== "/") {
     errors.push("VITE_API_BASE pathname must be /.");
-  }
-  if (consoleUrl && consoleUrl.pathname !== "/phien-dich-y-khoa/") {
-    errors.push("VITE_CONSOLE_URL pathname must be /phien-dich-y-khoa/.");
   }
   if (errors.length) {
     throw new Error(`Invalid Vercel deployment environment:\n- ${errors.join("\n- ")}`);

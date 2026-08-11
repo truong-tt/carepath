@@ -20,11 +20,12 @@ describe("Vietnamese-only public app", () => {
     );
     expect(
       screen.getByRole("heading", {
-        name: "Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.",
+        name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
       }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "VI" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "EN" })).not.toBeInTheDocument();
+    // The page now offers English so a non-Vietnamese judge or patient can read
+    // it; the document root stays vi because that is the clinic's language.
+    expect(screen.getByRole("button", { name: "Switch to English" })).toBeInTheDocument();
     expect(
       document.querySelector('a[href*="phien-dich-y-khoa"], a[href*="console"]'),
     ).toBeNull();
@@ -77,7 +78,7 @@ describe("Vietnamese-only public app", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.",
+        name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
       }),
     ).toBeInTheDocument();
     vi.unstubAllGlobals();
