@@ -1,4 +1,4 @@
-# --- Stage 1: build the static frontends (demo site + interpreter console) ---
+# --- Stage 1: build the static frontend ---
 FROM node:22-slim AS frontends
 
 WORKDIR /build
@@ -9,15 +9,7 @@ COPY scribe/frontend scribe/frontend
 # site build also runs the Vietnamese diacritics gate.
 RUN cd scribe/frontend && npm run build
 
-COPY interpreter/frontend/package.json interpreter/frontend/package-lock.json interpreter/frontend/
-RUN cd interpreter/frontend && npm ci
-COPY interpreter/frontend interpreter/frontend
-# Production build uses base /phien-dich-y-khoa/ (see interpreter/frontend/vite.config.ts).
-ARG VITE_PUBLIC_SITE_URL
-ENV VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}
-RUN cd interpreter/frontend && npm run build
-
-# --- Stage 2: Python runtime serving both APIs and the built frontends ---
+# --- Stage 2: Python runtime serving both APIs and the built frontend ---
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -44,9 +36,7 @@ RUN python -c "from carepath.services.asr import GipformerASR; from huggingface_
 
 COPY data ./data
 COPY --from=frontends /build/scribe/frontend/dist ./scribe/frontend/dist
-COPY --from=frontends /build/interpreter/frontend/dist ./interpreter/frontend/dist
-ENV SITE_DIST_DIR=/app/scribe/frontend/dist \
-    CONSOLE_DIST_DIR=/app/interpreter/frontend/dist
+ENV SITE_DIST_DIR=/app/scribe/frontend/dist
 
 EXPOSE 7860
 
