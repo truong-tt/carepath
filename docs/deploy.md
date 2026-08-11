@@ -44,8 +44,21 @@ APP_ENV=prod
 CORS_ORIGINS=https://carepath-omega.vercel.app
 ```
 
-The interpreter module runs in mock mode by default and needs no secrets.
-When its cloud track lands, it will additionally need `PROVIDER_MODE=cloud`,
+The interpreter defaults to mock mode, which returns `[vi->en] …` echoes. For
+`/kham-song-ngu/` to actually translate on the deployed Space, add one more
+secret:
+
+```text
+PROVIDER_MODE=ckey
+```
+
+It reuses `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` above — one CKey
+account configures both modules. Measured latency across 50 turns: median 15s,
+p90 54s, max 206s, so a live visitor waits. `PROVIDER_MODE=demo` is the
+offline scripted scenario for the pitch laptop, not for a public URL, because
+anything off-script falls back to a visible placeholder.
+
+The `cloud` mode (Anthropic/OpenAI direct) additionally needs
 `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and a non-default `ADMIN_TOKEN`
 (startup refuses `change-me` in cloud mode).
 
@@ -138,10 +151,18 @@ job succeeds.
 
 ## Final Smoke
 
-1. Open the Space URL: the CarePath landing renders, Vietnamese by default.
-2. Run the scripted interpreter simulation on the landing.
+1. Open the Space URL: the landing renders, Vietnamese by default, and the
+   English resolves under each prescription line within about two seconds.
+2. Open `/kham-song-ngu/`, consent, start a visit, and type a Vietnamese dose.
+   Confirm the turn is gated and the patient pane shows nothing until you
+   confirm it.
 3. Open `/ghi-chep-lam-sang/`, upload a short clip, and verify the SOAP draft renders
    with the review banner.
 4. Confirm `/phien-dich-y-khoa/` and `/console/` return HTTP 404.
 5. Confirm `GET /api/v1/health` reports `llm_provider: ckey` and
-   `asr_ready: true`, and `GET /api/health` reports `provider_mode: mock`.
+   `asr_ready: true`, and `GET /api/health` reports `provider_mode: ckey`.
+
+Note the deploy commit shape: the Space's `README.md` carries the
+`sdk: docker` frontmatter, so a plain branch push would overwrite it with the
+repository README and break the Space's build configuration. Deploy by
+building a commit that copies `README.hf-space.md` over `README.md` first.
