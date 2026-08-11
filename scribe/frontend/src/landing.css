@@ -40,7 +40,11 @@
 
   background: var(--p-paper);
   color: var(--p-ink);
-  font-family: "Be Vietnam Pro", "Geist", ui-sans-serif, system-ui, sans-serif;
+  /* No "Geist" in this stack. Geist is itself a font-display: swap web font,
+     so while Be Vietnam Pro was still loading the page fell back to a second
+     loading face and reflowed twice -- which is what the CI runner measured as
+     two separate shifts of the problem section. Fall back to the system. */
+  font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "tnum" 0;
 }
 
