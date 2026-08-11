@@ -1482,7 +1482,9 @@ mark.scribe-mark {
   padding: clamp(4rem, 7vw, 6rem) 0 clamp(4rem, 7vw, 6rem);
 }
 
-.onboarding-hero > h1 {
+/* Descendant, not child: the heading sits inside a column wrapper, and the
+   child combinator silently dropped the page's largest type to the UA default. */
+.onboarding-hero h1 {
   max-width: 72rem;
   margin: 0;
   font-size: clamp(2.7rem, 5.4vw, 4.9rem);
@@ -2113,3 +2115,4 @@ mark.scribe-mark {
     grid-template-columns: 1fr;
   }
 }
+

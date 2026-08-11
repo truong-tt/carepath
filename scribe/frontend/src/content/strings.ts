@@ -774,7 +774,7 @@ export const strings: Record<Language, PageCopy> = {
     footer: {
       promise: "AI hỗ trợ, bác sĩ giữ quyền quyết định.",
       posture: "Thiết kế theo hướng giảm thiểu dữ liệu, nhận biết yêu cầu của Nghị định 13/PDP và định vị phù hợp với nguyên tắc tiếp cận ngôn ngữ của §1557. Đây không phải tuyên bố chứng nhận pháp lý.",
-      honesty: "Ghi chép bệnh án AI tạo bản nháp cần bác sĩ kiểm tra. Phiên dịch khám bệnh trực tiếp đang phát triển và chưa mở trên web.",
+      honesty: "Mọi nội dung CarePath tạo ra đều là bản nháp cần bác sĩ kiểm tra và xác nhận trước khi sử dụng.",
       contact: "Liên hệ chương trình thí điểm",
     },
   },
@@ -1276,7 +1276,7 @@ export const strings: Record<Language, PageCopy> = {
     footer: {
       promise: "AI assistance, clinician in control.",
       posture: "Designed around data minimization, awareness of Decree 13/PDP obligations, and §1557-aligned language-access positioning. This is not a legal certification claim.",
-      honesty: "AI clinical documentation produces a draft for clinician review. Live medical interpretation remains in development and is not open on the web.",
+      honesty: "Everything CarePath produces is a draft the clinician must review and confirm before it is used.",
       contact: "Contact the pilot program",
     },
   },

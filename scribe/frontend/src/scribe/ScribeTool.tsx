@@ -287,7 +287,7 @@ export default function ScribeTool({
               ))}
               </ol>
               <p>{labels.uploadNotice}</p>
-              <a href="/#demo">Xem ca khám mẫu trước</a>
+              <a href="/#how">Xem cách hoạt động</a>
             </div>
             <label
               className={dragging ? "dropzone is-drag" : "dropzone"}

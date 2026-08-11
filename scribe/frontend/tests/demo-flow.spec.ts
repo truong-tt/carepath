@@ -20,19 +20,13 @@ async function expectNoSeriousAxeViolations(page: Page) {
   ).toEqual([]);
 }
 
-test("keyboard-only visitor can inspect the sample and submit Scribe pilot interest", async ({ page }) => {
+test("keyboard-only visitor can submit Scribe pilot interest", async ({ page }) => {
   let payload: Record<string, unknown> | undefined;
   await page.route("**/api/leads", async (route) => {
     payload = route.request().postDataJSON() as Record<string, unknown>;
     await route.fulfill({ status: 204, body: "" });
   });
   await page.goto("/");
-
-  const firstSampleStep = page.getByRole("button", { name: "1. Cuộc trao đổi" });
-  await tabTo(page, firstSampleStep);
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Enter");
-  await expect(page.getByText("Chưa có kết quả điện tâm đồ")).toBeVisible();
 
   const pilot = page.getByText("Dành cho cơ sở muốn thí điểm CarePath");
   await tabTo(page, pilot);
@@ -52,7 +46,7 @@ test("keyboard-only visitor can inspect the sample and submit Scribe pilot inter
   await expect(page.getByRole("combobox", { name: "Chức năng quan tâm" })).toHaveCount(0);
 });
 
-test("Vietnamese onboarding is compact, responsive, and keeps Interpreter unavailable", async ({ page }) => {
+test("the landing page states the patient-safety problem, responsively", async ({ page }) => {
   const viewports = [
     { width: 320, height: 800 },
     { width: 360, height: 800 },
@@ -67,30 +61,49 @@ test("Vietnamese onboarding is compact, responsive, and keeps Interpreter unavai
 
     const title = page.getByRole("heading", {
       level: 1,
-      name: "Dành thời gian cho người bệnh, không phải cho việc gõ bệnh án.",
+      name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
     });
     await expect(title).toBeVisible();
     const lineCount = await title.evaluate((element) => {
       const style = getComputedStyle(element);
       return Math.round(element.getBoundingClientRect().height / Number.parseFloat(style.lineHeight));
     });
-    expect(lineCount).toBeLessThanOrEqual(viewport.width >= 1024 ? 2 : 3);
+    expect(lineCount).toBeLessThanOrEqual(viewport.width >= 1024 ? 4 : 6);
 
-    const status = page.locator("[data-interpreter-status]");
-    await expect(status).toContainText("Phiên dịch khám bệnh trực tiếp");
-    await expect(status).toContainText("Đang phát triển — hiện chưa thể truy cập trên web.");
-    await expect(status.locator("a, button")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "EN" })).toHaveCount(0);
-    await expect(page.locator('a[href*="phien-dich-y-khoa"], a[href*="console"]')).toHaveCount(0);
+    // The "interpreter unavailable" banner contradicted the product once the
+    // bilingual visit shipped, and the documentation-burden calculator sold the
+    // use case that was rejected.
+    await expect(page.locator("[data-interpreter-status]")).toHaveCount(0);
+    await expect(page.getByRole("spinbutton", { name: "Số người bệnh mỗi ngày" })).toHaveCount(0);
 
-    await expect(page.getByRole("link", { name: "Trải nghiệm ca khám mẫu" })).toHaveAttribute("href", "#demo");
-    await expect(page.getByText("2 giờ 20 phút mỗi ngày")).toBeVisible();
-    await expect(page.getByText("Chờ bác sĩ nhập hoặc xác nhận.")).toHaveCount(0);
+    // Evidence, with its limits stated.
+    await expect(page.getByText(/49,1%/)).toBeVisible();
+    await expect(page.getByText(/không phải kết quả của CarePath/)).toBeVisible();
+
+    await expect(page.getByRole("link", { name: "Bắt đầu ca khám" }).first()).toHaveAttribute(
+      "href",
+      "/kham-song-ngu/",
+    );
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     if (viewport.width === 1440) {
-      const heroHeight = await page.locator(".onboarding-hero").evaluate((element) => element.getBoundingClientRect().height);
+      const heroHeight = await page.locator(".p-hero").evaluate((element) => element.getBoundingClientRect().height);
       expect(heroHeight).toBeLessThan(800);
+    }
+
+    // The page's most important sentence must be its largest type. A child
+    // combinator silently dropped the h1 to the browser default once already,
+    // and nothing in the build caught it.
+    const headingSizes = await page.evaluate(() =>
+      [...document.querySelectorAll("h1, h2, h3")].map((element) => ({
+        tag: element.tagName,
+        size: Number.parseFloat(getComputedStyle(element).fontSize),
+      })),
+    );
+    const h1Size = headingSizes.find((heading) => heading.tag === "H1")?.size ?? 0;
+    expect(h1Size).toBeGreaterThan(0);
+    for (const heading of headingSizes) {
+      expect(heading.size).toBeLessThanOrEqual(h1Size);
     }
 
     if (viewport.width === 390 || viewport.width === 1440) {
@@ -103,18 +116,25 @@ test("Vietnamese onboarding is compact, responsive, and keeps Interpreter unavai
   }
 });
 
-test("calculator updates transparently and the guided sample keeps decisions with the doctor", async ({ page }) => {
-  await page.goto("/#calculator");
-  await page.getByRole("spinbutton", { name: "Số người bệnh mỗi ngày" }).fill("28");
-  await page.getByRole("spinbutton", { name: "Phút ghi chép cho mỗi người bệnh" }).fill("5");
-  await expect(page.getByText("2 giờ 20 phút mỗi ngày")).toBeVisible();
-  await expect(page.getByText("11 giờ 40 phút cho 5 ngày làm việc")).toBeVisible();
-  await expect(page.getByText(/Công thức: 28 người bệnh × 5 phút/)).toBeVisible();
+test("a non-Vietnamese reader can switch the whole page to English", async ({ page }) => {
+  await page.goto("/");
 
-  await page.getByRole("button", { name: "3. Bản nháp có cấu trúc" }).click();
-  await expect(page.getByText("Chờ bác sĩ nhập hoặc xác nhận.")).toHaveCount(2);
-  await page.getByRole("button", { name: "4. Bác sĩ kiểm tra" }).click();
-  await expect(page.getByText("Tự nhập hoặc xác nhận Nhận định và Kế hoạch.")).toBeVisible();
+  await page.getByRole("button", { name: "Switch to English" }).click();
+
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Foreign patients leave the clinic holding paper they cannot read.",
+    }),
+  ).toBeVisible();
+  await expect(page.getByText(/49.1%/)).toBeVisible();
+  await expect(page.getByText(/22.8 million/)).toBeVisible();
+  // Limits travel with the claims.
+  await expect(page.getByText(/not from CarePath/)).toBeVisible();
+  await expect(page.getByText(/No clinical trial/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Chuyển sang tiếng Việt" }).click();
+  await expect(page.getByText(/Chưa có thử nghiệm lâm sàng/)).toBeVisible();
 });
 
 test("clinical notes expose guidance and upload together, then return to the sample", async ({ page }) => {
@@ -152,9 +172,11 @@ test("clinical notes expose guidance and upload together, then return to the sam
     path: "../../.codex/qa-evidence/cp-ux-11-tool-390.png",
   });
 
-  await page.getByRole("link", { name: "Xem ca khám mẫu trước" }).click();
-  await expect(page).toHaveURL(/\/#demo$/);
-  await expect(page.getByRole("heading", { name: "Thử một ca khám mẫu trước khi tải tệp của bạn." })).toBeVisible();
+  await page.getByRole("link", { name: "Xem cách hoạt động" }).click();
+  await expect(page).toHaveURL(/\/#how$/);
+  await expect(
+    page.getByRole("heading", { name: "Đọc — đối chiếu — bác sĩ xác nhận." }),
+  ).toBeVisible();
   await page.goto("/ghi-chep-lam-sang/");
 
   await page.locator('input[type="file"]').setInputFiles({
@@ -197,32 +219,46 @@ test("clinical notes expose guidance and upload together, then return to the sam
 test.describe("touch navigation", () => {
   test.use({ hasTouch: true });
 
-  test("keeps the menu in view and closes it after navigation", async ({ page }) => {
+  // The disclosure menu is gone: the four anchors wrap to their own row rather
+  // than hide behind a hamburger. What still has to hold is that they stay
+  // reachable and inside the viewport at every narrow width.
+  test("keeps the section links reachable on a phone", async ({ page }) => {
     for (const width of [320, 390, 760, 900]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      const menu = page.locator(".site-nav__menu");
-      await menu.locator("summary").tap();
-      const panel = await menu.locator(":scope > div").boundingBox();
-      expect(panel).not.toBeNull();
-      expect(panel?.x ?? -1).toBeGreaterThanOrEqual(0);
-      expect((panel?.x ?? 0) + (panel?.width ?? 0)).toBeLessThanOrEqual(width);
-      await menu.getByRole("link", { name: "Ca khám mẫu" }).tap();
-      await expect(menu).not.toHaveAttribute("open", "");
-      await expect(page).toHaveURL(/#demo$/);
+      const link = page.locator(".p-nav__links").getByRole("link", { name: "Bằng chứng" });
+      await link.scrollIntoViewIfNeeded();
+      const box = await link.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box?.x ?? -1).toBeGreaterThanOrEqual(0);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width);
+      await link.tap();
+      await expect(page).toHaveURL(/#evidence$/);
     }
   });
 });
 
-test.describe("reduced motion", () => {
-  test.use({ reducedMotion: "reduce" });
+// Built on newContext rather than test.use: the describe-scoped test.use did
+// not reach the browser here — matchMedia("(prefers-reduced-motion: reduce)")
+// read false inside it, so this assertion passed for years by never running
+// against the preference it names.
+test("keeps content static for a visitor who asked for reduced motion", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:4173/");
 
-  test("keeps content static without marquee or pinning", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator(".process-marquee, .scribe-story")).toHaveCount(0);
-    await expect(page.locator(".onboarding-hero")).toHaveCSS("transform", "none");
-    expect(await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running").length)).toBe(0);
-  });
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
+    true,
+  );
+  await expect(page.locator(".process-marquee, .scribe-story")).toHaveCount(0);
+  await expect(page.locator(".p-hero")).toHaveCSS("transform", "none");
+  expect(
+    await page.evaluate(
+      () => document.getAnimations().filter((animation) => animation.playState === "running").length,
+    ),
+  ).toBe(0);
+
+  await context.close();
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -230,7 +266,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     const context = await browser.newContext({ colorScheme });
     const page = await context.newPage();
     await page.goto("http://127.0.0.1:4173/");
-    await expect(page.getByRole("link", { name: "Trải nghiệm ca khám mẫu" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Bắt đầu ca khám" }).first()).toBeVisible();
     await expectNoSeriousAxeViolations(page);
     await context.close();
   });

@@ -64,7 +64,7 @@ describe("ScribeTool", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Ba bước để tạo bản nháp")).toBeInTheDocument();
     expect(screen.getByText("Chọn tệp âm thanh buổi khám đã được phép sử dụng")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Xem ca khám mẫu trước" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "Xem cách hoạt động" })).toHaveAttribute("href", "/#how");
     expect(screen.queryByRole("button", { name: "Tiếp tục tạo bản nháp" })).not.toBeInTheDocument();
 
     const submit = screen.getByRole("button", { name: "Tạo bản nháp SOAP" });
