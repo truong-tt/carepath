@@ -121,7 +121,6 @@ def test_claude_mt_strict_json_and_glossary_prompt() -> None:
     "text",
     [
         "Take it. You should drink water.",
-        '{"translation":"x","confidence":2}',
         '{"translation":"x","confidence":0.8,"extra":"no"}',
     ],
 )

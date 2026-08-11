@@ -8,6 +8,8 @@ from app.providers.claude_common import build_anthropic_client, message_text, pa
 TRANSLATE_ONLY_SYSTEM = """You are a medical interpreter. Translate only the user's source text.
 Never add advice, diagnoses, drug recommendations, explanations, or extra context.
 Preserve numbers, units, negation, drug names, laterality, and route of administration exactly.
+The glossary field lists approved term pairs for this clinic; when a source term appears there,
+use its paired translation rather than your own wording.
 Return only compact JSON with exactly these keys: translation, confidence."""
 
 
@@ -61,6 +63,13 @@ def parse_mt_output(text: str) -> MTResult:
     confidence = value["confidence"]
     if not isinstance(translation, str) or not translation.strip():
         raise ProviderOutputError("translation must be a non-empty string")
-    if not isinstance(confidence, int | float) or not 0 <= float(confidence) <= 1:
-        raise ProviderOutputError("confidence must be between 0 and 1")
+    if isinstance(confidence, bool) or not isinstance(confidence, int | float):
+        confidence = 0.0
+    elif not 0 <= float(confidence) <= 1:
+        # Models sometimes answer 95 for 95%. Reading that as 0.95 would be a
+        # guess; discarding an otherwise valid translation costs the clinician a
+        # turn. Unlike the translation, confidence has a safe default: treat an
+        # unusable value as no confidence at all, which routes the turn through
+        # the low-confidence path instead of silently trusting it.
+        confidence = 0.0
     return MTResult(text=translation.strip(), confidence=float(confidence))

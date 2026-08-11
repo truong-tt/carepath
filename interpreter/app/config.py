@@ -8,9 +8,14 @@ DEFAULT_CORS_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
 
 
 class Settings(BaseSettings):
-    provider_mode: Literal["mock", "cloud"] = "mock"
+    provider_mode: Literal["mock", "cloud", "ckey", "demo"] = "mock"
     anthropic_api_key: str = ""
     openai_api_key: str = ""
+    # Shared with the scribe half on purpose: one CKey account, one set of
+    # LLM_* env vars configures both modules.
+    llm_base_url: str = "https://api.xah.io/v1"
+    llm_api_key: str = ""
+    llm_model: str = "gpt-5.4"
     admin_token: str = "change-me"
     confidence_threshold: float = Field(default=0.7, ge=0, le=1)
     retention_days: int = Field(default=30, ge=0)

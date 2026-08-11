@@ -1,0 +1,215 @@
+{
+  "name": "international-outpatient-rash",
+  "description": "Foreign patient with a drug rash at a Vietnamese outpatient clinic. Source text is written naturally; the loader normalizes it the same way the pipeline does before matching.",
+  "turns": [
+    {
+      "document": true,
+      "src": "vi",
+      "tgt": "en",
+      "source": "Chẩn đoán: Viêm họng cấp — Dị ứng thuốc (nghi ngờ)",
+      "translation": "Diagnosis: acute pharyngitis - suspected drug allergy",
+      "confidence": 0.95,
+      "review": {
+        "back_translation": "Chẩn đoán: viêm họng cấp - nghi ngờ dị ứng thuốc",
+        "entities": [
+          {
+            "kind": "allergen",
+            "source_text": "Dị ứng thuốc",
+            "translated_text": "drug allergy"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "document": true,
+      "src": "vi",
+      "tgt": "en",
+      "source": "Amoxicillin 500 mg Uống 1 viên, ngày 2 lần, sau ăn",
+      "translation": "Amoxicillin 500 mg - take 1 tablet, 2 times a day, after food",
+      "confidence": 0.94,
+      "review": {
+        "back_translation": "Amoxicillin 500 mg - uống 1 viên, 2 lần một ngày, sau khi ăn",
+        "entities": [
+          {
+            "kind": "drug",
+            "source_text": "Amoxicillin",
+            "translated_text": "Amoxicillin"
+          },
+          {
+            "kind": "dose",
+            "source_text": "500 mg",
+            "translated_text": "500 mg"
+          },
+          {
+            "kind": "frequency",
+            "source_text": "ngày 2 lần",
+            "translated_text": "2 times a day"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "document": true,
+      "src": "vi",
+      "tgt": "en",
+      "source": "Paracetamol 500 mg Uống khi sốt trên 38,5 độ C",
+      "translation": "Paracetamol 500 mg - take when fever is above 38,5 degrees C",
+      "confidence": 0.94,
+      "review": {
+        "back_translation": "Paracetamol 500 mg - uống khi sốt trên 38,5 độ C",
+        "entities": [
+          {
+            "kind": "dose",
+            "source_text": "500 mg",
+            "translated_text": "500 mg"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "document": true,
+      "src": "vi",
+      "tgt": "en",
+      "source": "Lời dặn: Uống nhiều nước. Không tự ý ngưng thuốc. Tái khám sau 5 ngày.",
+      "translation": "Advice: drink plenty of water. Do not stop the medicine on your own. Follow-up after 5 days.",
+      "confidence": 0.95,
+      "review": {
+        "back_translation": "Lời dặn: uống nhiều nước. Không tự ngưng thuốc. Tái khám sau 5 ngày.",
+        "entities": [
+          {
+            "kind": "negation",
+            "source_text": "Không tự ý ngưng thuốc",
+            "translated_text": "Do not stop the medicine on your own"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "src": "en",
+      "tgt": "vi",
+      "source": "Good morning doctor",
+      "translation": "Chào buổi sáng bác sĩ",
+      "confidence": 0.97
+    },
+    {
+      "src": "vi",
+      "tgt": "en",
+      "source": "Chào anh, hôm nay anh thấy trong người thế nào?",
+      "translation": "Good morning. How are you feeling today?",
+      "confidence": 0.96
+    },
+    {
+      "src": "en",
+      "tgt": "vi",
+      "source": "I am allergic to amoxicillin, I developed a rash after taking it",
+      "translation": "Tôi bị dị ứng amoxicillin, tôi bị nổi mẩn sau khi dùng thuốc",
+      "confidence": 0.95,
+      "review": {
+        "back_translation": "I am allergic to amoxicillin, I got a rash after taking the medicine",
+        "entities": [
+          {
+            "kind": "allergen",
+            "source_text": "amoxicillin",
+            "translated_text": "amoxicillin"
+          },
+          {
+            "kind": "symptom",
+            "source_text": "rash",
+            "translated_text": "nổi mẩn"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "src": "en",
+      "tgt": "vi",
+      "source": "I was taking 500 milligrams twice a day",
+      "translation": "Tôi uống 500 mg, ngày hai lần",
+      "confidence": 0.94,
+      "review": {
+        "back_translation": "I take 500 mg, twice a day",
+        "entities": [
+          {
+            "kind": "dose",
+            "source_text": "500 milligrams",
+            "translated_text": "500 mg"
+          },
+          {
+            "kind": "frequency",
+            "source_text": "twice a day",
+            "translated_text": "ngày hai lần"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "src": "vi",
+      "tgt": "en",
+      "source": "Bác sĩ sẽ ngừng thuốc này và kê thuốc khác cho anh",
+      "translation": "I will stop this medicine and prescribe a different one for you",
+      "confidence": 0.95,
+      "review": {
+        "back_translation": "Tôi sẽ ngừng thuốc này và kê một thuốc khác cho anh",
+        "entities": [
+          {
+            "kind": "drug",
+            "source_text": "thuốc này",
+            "translated_text": "this medicine"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "src": "en",
+      "tgt": "vi",
+      "source": "I take 15 milligrams",
+      "translation": "Tôi uống 15 mg",
+      "confidence": 0.42,
+      "review": {
+        "back_translation": "I take fifteen milligrams",
+        "entities": [
+          {
+            "kind": "dose",
+            "source_text": "15 milligrams",
+            "translated_text": "15 mg"
+          }
+        ],
+        "flags": [
+          "dose_uncertain"
+        ]
+      }
+    },
+    {
+      "src": "en",
+      "tgt": "vi",
+      "source": "Sorry, I take 500 milligrams",
+      "translation": "Xin lỗi, tôi uống 500 mg",
+      "confidence": 0.93,
+      "review": {
+        "back_translation": "Sorry, I take 500 mg",
+        "entities": [
+          {
+            "kind": "dose",
+            "source_text": "500 milligrams",
+            "translated_text": "500 mg"
+          }
+        ],
+        "flags": []
+      }
+    },
+    {
+      "src": "vi",
+      "tgt": "en",
+      "source": "Anh hãy nghỉ ngơi và quay lại khám vào tuần sau",
+      "translation": "Please rest and come back for a check-up next week",
+      "confidence": 0.95
+    }
+  ]
+}

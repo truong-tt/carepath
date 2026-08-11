@@ -1,8 +1,25 @@
-import pytest
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
+import os
 
-from app.db import init_db, set_engine
+# Force hermetic settings BEFORE anything imports app.config or app.main, both
+# of which read settings at module scope. Settings loads ../.env, so without
+# this a developer with real credentials on disk runs the suite in cloud mode
+# and the tests make live network calls. Environment variables take precedence
+# over the env file in pydantic-settings, so setting them here wins.
+os.environ["PROVIDER_MODE"] = "mock"
+os.environ["ANTHROPIC_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["LLM_API_KEY"] = ""
+os.environ["ADMIN_TOKEN"] = "change-me"
+os.environ["DATABASE_URL"] = "sqlite://"
+
+import pytest  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
+from sqlmodel import Session, SQLModel, create_engine  # noqa: E402
+
+from app.config import get_settings  # noqa: E402
+from app.db import init_db, set_engine  # noqa: E402
+
+get_settings.cache_clear()
 
 
 @pytest.fixture()
