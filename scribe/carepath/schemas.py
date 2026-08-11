@@ -66,10 +66,46 @@ class SoapNote(BaseModel):
     review_required: bool = True
 
 
+class PatientSummary(BaseModel):
+    """Plain-language after-visit summary written for the patient, in English.
+
+    Every field must be grounded in what was actually said during the visit.
+    This is a record of the consultation, never advice: ``follow_up`` restates
+    the clinician's own instructions rather than adding new ones.
+    """
+
+    what_we_discussed: str
+    medications: str
+    follow_up: str
+    allergies_noted: list[str] = Field(default_factory=list)
+    review_required: bool = True
+
+
 class SoapNoteResponse(BaseModel):
     id: str
     raw_transcript: str
     corrected_transcript: str
     retrieved_terms: list[str]
     soap: SoapNote
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class SpeechRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=800)
+    lang: str = "vi"
+
+
+class VisitNoteResponse(BaseModel):
+    """Both documents produced at the end of a bilingual visit.
+
+    ``unconfirmed_turn_count`` is reported rather than hidden: turns the
+    clinician never confirmed contribute their original speech to the note, not
+    their machine translation, and the count says how many.
+    """
+
+    visit_id: str
+    turn_count: int
+    unconfirmed_turn_count: int
+    clinical_note: SoapNote
+    patient_summary: PatientSummary
     metadata: dict[str, Any] = Field(default_factory=dict)

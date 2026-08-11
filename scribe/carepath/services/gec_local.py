@@ -101,6 +101,17 @@ class LocalGecLLM:
             corrected_text, retrieved_terms, encounter_context=encounter_context
         )
 
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ):
+        # Nor is it a patient-summary model; delegate for the same reason.
+        return self.soap_delegate.generate_patient_summary(
+            transcript_en, retrieved_terms, encounter_context=encounter_context
+        )
+
     # -- internals ---------------------------------------------------------
     def _build_prompt(self, raw_text: str, retrieved_terms: list[RetrievedTerm]) -> str:
         p = self.manifest["prompt"]

@@ -4,6 +4,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from carepath.services.tts import DEFAULT_TTS_REPO
+
 
 def load_env_file(path: Path = Path(".env")) -> None:
     """Load simple KEY=VALUE entries without overriding real environment vars."""
@@ -78,6 +80,19 @@ class Settings:
     # so it is always safe to request.
     gipformer_provider: str = "cpu"
     llm_fallback_offline: bool = True
+    # Off by default: measured 2026-08-11, CKey's gpt-5.4 hangs past a 60s
+    # timeout when sent response_format=json_object but answers in ~8s without
+    # it. The prompts demand strict JSON and the parsers validate it, so the
+    # flag buys nothing here. Turn it on for a gateway that needs the hint.
+    llm_json_response_format: bool = False
+    # Server-side Vietnamese speech. A default Windows or macOS install has no
+    # vi-VN voice, so the browser cannot speak the clinician's language.
+    tts_provider: str = "piper"
+    tts_repo_id: str = DEFAULT_TTS_REPO
+    # Deliberately short and repo-relative: espeak-ng reads its data with a
+    # native call that fails past the Windows MAX_PATH limit, and the HF cache
+    # path is already ~250 characters.
+    tts_model_dir: Path = Path("models/vi-tts")
     cors_origins: tuple[str, ...] = ()
     team_code: str | None = None
     soap_rate_limit_per_ip_hour: int = 3
@@ -133,6 +148,10 @@ class Settings:
                 "SEMANTIC_MODEL_NAME", "bkai-foundation-models/vietnamese-bi-encoder"
             ).strip(),
             llm_fallback_offline=_bool_env("LLM_FALLBACK_OFFLINE", True),
+            llm_json_response_format=_bool_env("LLM_JSON_RESPONSE_FORMAT", False),
+            tts_provider=os.getenv("TTS_PROVIDER", "piper").strip().lower(),
+            tts_repo_id=os.getenv("TTS_REPO_ID", DEFAULT_TTS_REPO).strip(),
+            tts_model_dir=Path(os.getenv("TTS_MODEL_DIR", "models/vi-tts")),
             cors_origins=_csv_env("CORS_ORIGINS"),
             team_code=os.getenv("TEAM_CODE") or None,
             soap_rate_limit_per_ip_hour=_int_env("SOAP_RATE_LIMIT_PER_IP_HOUR", 3),

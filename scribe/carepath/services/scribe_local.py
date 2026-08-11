@@ -157,6 +157,21 @@ class LocalScribeLLM:
         _validate_soap(soap, facts, corrected_text, retrieved_terms)
         return SoapResult(soap=soap, provider=self.provider_name)
 
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ):
+        """Refuse: this bundle ships gec and soap adapters only.
+
+        Consistent with the rest of this provider, an unsupported task fails
+        closed rather than being answered by an adapter not trained for it. A
+        configured offline fallback will serve the summary instead.
+        """
+        del transcript_en, retrieved_terms, encounter_context
+        raise LLMError("scribe_local has no patient-summary adapter")
+
     def _generate(self, adapter: str, user_prompt: str) -> str:
         if self._generate_fn is not None:
             return self._generate_fn(adapter, user_prompt)

@@ -9,7 +9,7 @@ from dataclasses import dataclass, replace
 from typing import Any, Protocol
 
 from carepath.config import Settings
-from carepath.schemas import SoapNote
+from carepath.schemas import PatientSummary, SoapNote
 from carepath.services.retrieval import RetrievedTerm
 
 logger = logging.getLogger("carepath.llm")
@@ -32,6 +32,12 @@ class SoapResult:
     provider: str
 
 
+@dataclass(frozen=True)
+class PatientSummaryResult:
+    summary: PatientSummary
+    provider: str
+
+
 class ClinicalLLM(Protocol):
     def readiness(self) -> tuple[bool, dict[str, object]]:
         ...
@@ -50,6 +56,14 @@ class ClinicalLLM(Protocol):
         retrieved_terms: list[RetrievedTerm],
         encounter_context: str | None = None,
     ) -> "SoapResult":
+        ...
+
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> "PatientSummaryResult":
         ...
 
 
@@ -104,12 +118,50 @@ class OpenAICompatibleLLM:
         parsed.setdefault("missing_information", [])
         return SoapResult(soap=SoapNote(**parsed), provider=self.provider_name)
 
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> PatientSummaryResult:
+        content = self._chat_json(
+            system=PATIENT_SUMMARY_SYSTEM_PROMPT,
+            user=build_patient_summary_prompt(
+                transcript_en, retrieved_terms, encounter_context
+            ),
+        )
+        parsed = extract_json_object(content)
+        missing = [
+            key
+            for key in ("what_we_discussed", "medications", "follow_up")
+            if not str(parsed.get(key, "")).strip()
+        ]
+        if missing:
+            # Raise LLMError (not ValidationError) so FallbackClinicalLLM can
+            # degrade to the offline summary instead of failing the request.
+            raise LLMError(f"patient summary response missing fields: {', '.join(missing)}")
+        allergies = parsed.get("allergies_noted") or []
+        if not isinstance(allergies, list):
+            raise LLMError("patient summary allergies_noted must be a list")
+        return PatientSummaryResult(
+            summary=PatientSummary(
+                what_we_discussed=str(parsed["what_we_discussed"]).strip(),
+                medications=str(parsed["medications"]).strip(),
+                follow_up=str(parsed["follow_up"]).strip(),
+                allergies_noted=[str(item).strip() for item in allergies if str(item).strip()],
+                review_required=True,
+            ),
+            provider=self.provider_name,
+        )
+
     def _chat_json(self, system: str, user: str) -> str:
         if not self.settings.llm_api_key:
             raise LLMError(f"LLM_API_KEY is required for {self.provider_name} provider")
 
         try:
-            return self._request_chat(system, user, use_response_format=True)
+            return self._request_chat(
+                system, user, use_response_format=self.settings.llm_json_response_format
+            )
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
             if _can_retry_without_response_format(exc.code, body):
@@ -206,6 +258,50 @@ class OfflineClinicalLLM:
         )
         return SoapResult(soap=soap, provider="offline")
 
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> PatientSummaryResult:
+        """Derive the summary structurally rather than generating prose.
+
+        No model is involved, so nothing here may invent content: every field is
+        either copied from the transcript or is fixed safe text.
+        """
+        del encounter_context
+        # Clause-split per line. normalize_transcript_spacing collapses all
+        # whitespace including newlines, so running it over the whole transcript
+        # first would fuse every speaker turn into one clause.
+        lines = [line.strip() for line in transcript_en.splitlines() if line.strip()]
+        transcript = "\n".join(lines)
+        clauses = [
+            clause for line in lines for clause in _split_clauses(normalize_transcript_spacing(line))
+        ]
+
+        medication_terms = [
+            item.term for item in retrieved_terms if item.category in _PATIENT_MEDICATION_CATEGORIES
+        ]
+        medication_clauses = [
+            clause for clause in clauses if _DOSE_MEASUREMENT.search(clause)
+        ]
+        allergies = [clause for clause in clauses if _mentions_allergy(clause)]
+
+        medications = "; ".join(dict.fromkeys(medication_clauses)) or (
+            ", ".join(dict.fromkeys(medication_terms))
+            or "No medication was named in this visit."
+        )
+        return PatientSummaryResult(
+            summary=PatientSummary(
+                what_we_discussed=transcript or "No conversation was recorded for this visit.",
+                medications=medications,
+                follow_up=_PATIENT_FOLLOW_UP_FALLBACK,
+                allergies_noted=list(dict.fromkeys(allergies)),
+                review_required=True,
+            ),
+            provider="offline",
+        )
+
 
 class FallbackClinicalLLM:
     """Wrap a network LLM so a provider failure never breaks the demo.
@@ -255,6 +351,23 @@ class FallbackClinicalLLM:
             logger.warning("LLM SOAP generation failed; using offline fallback: %s", exc)
             result = self.fallback.generate_soap(
                 corrected_text, retrieved_terms, encounter_context=encounter_context
+            )
+            return replace(result, provider="offline_fallback")
+
+    def generate_patient_summary(
+        self,
+        transcript_en: str,
+        retrieved_terms: list[RetrievedTerm],
+        encounter_context: str | None = None,
+    ) -> PatientSummaryResult:
+        try:
+            return self.primary.generate_patient_summary(
+                transcript_en, retrieved_terms, encounter_context=encounter_context
+            )
+        except LLMError as exc:
+            logger.warning("LLM patient summary failed; using offline fallback: %s", exc)
+            result = self.fallback.generate_patient_summary(
+                transcript_en, retrieved_terms, encounter_context=encounter_context
             )
             return replace(result, provider="offline_fallback")
 
@@ -311,6 +424,65 @@ Rules:
 - Return one JSON object with subjective, objective, assessment, plan,
   missing_information, and review_required.
 """.strip()
+
+
+PATIENT_SUMMARY_SYSTEM_PROMPT = """
+You write the English after-visit summary a patient takes home after a
+consultation that was interpreted between a Vietnamese clinician and an
+English-speaking patient.
+Rules:
+- Write plain English a non-medical reader understands. Expand jargon.
+- Use only what was said in the transcript. Never add advice, diagnoses,
+  medications, doses, or follow-up instructions that are not there.
+- Preserve medication names, numbers, units, and frequencies exactly.
+- follow_up must restate only instructions the clinician actually gave. If the
+  clinician gave none, say so instead of inventing any.
+- allergies_noted lists only allergies or drug reactions the patient reported.
+- Never tell the patient what to do beyond what the clinician said.
+- Always set review_required to true.
+- Return one JSON object with what_we_discussed, medications, follow_up,
+  allergies_noted, and review_required.
+""".strip()
+
+
+# Lexicon categories that name something a patient would recognise as a medicine.
+_PATIENT_MEDICATION_CATEGORIES = {"medication", "drug"}
+
+_PATIENT_FOLLOW_UP_FALLBACK = (
+    "Follow the instructions your clinician gave you during this visit. "
+    "This summary was produced automatically and must be reviewed by your "
+    "clinician before you rely on it."
+)
+
+_ALLERGY_CUES = ("allerg", "anaphyla", "reaction to", "rash after", "side effect")
+
+
+def _mentions_allergy(clause: str) -> bool:
+    lowered = clause.lower()
+    return any(cue in lowered for cue in _ALLERGY_CUES)
+
+
+def build_patient_summary_prompt(
+    transcript_en: str,
+    retrieved_terms: list[RetrievedTerm],
+    encounter_context: str | None,
+) -> str:
+    return json.dumps(
+        {
+            "task": "write_english_after_visit_summary",
+            "encounter_context": encounter_context,
+            "consultation_transcript": transcript_en,
+            "retrieved_terms": [item.term for item in retrieved_terms],
+            "output_schema": {
+                "what_we_discussed": "string",
+                "medications": "string",
+                "follow_up": "string",
+                "allergies_noted": ["string"],
+                "review_required": True,
+            },
+        },
+        ensure_ascii=False,
+    )
 
 
 def build_correction_prompt(
@@ -495,6 +667,18 @@ _SUBJECTIVE_KEYWORDS = (
 # A number directly followed by a clinical unit is an objective measurement.
 _MEASUREMENT = re.compile(
     r"\d+(?:[.,]\d+)?\s*(?:%|mmhg|mg/dl|bpm|lần/phút|mmol|°c)",
+    flags=re.IGNORECASE,
+)
+
+# Dose units, distinct from the vital-sign units above: a number followed by one
+# of these marks a clause as being about a medicine rather than a measurement.
+# Spelled-out units matter here -- a patient says "500 milligrams", and the
+# interpreter transcript keeps their words.
+_DOSE_MEASUREMENT = re.compile(
+    r"\d+(?:[.,]\d+)?\s*(?:"
+    r"milligram|microgram|millilitre|milliliter|gram|"
+    r"mg|mcg|µg|ml|iu|unit|tablet|capsule|viên|g"
+    r")s?\b",
     flags=re.IGNORECASE,
 )
 

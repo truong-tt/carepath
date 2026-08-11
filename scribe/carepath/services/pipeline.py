@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from carepath.config import Settings
-from carepath.schemas import SoapNote
+from carepath.schemas import PatientSummary, SoapNote
 from carepath.services.asr import ASRService, build_asr_service
 from carepath.services.llm import ClinicalLLM, LLMError, build_llm
 from carepath.services.retrieval import RetrievedTerm, TermRetriever, build_retriever
@@ -22,6 +22,15 @@ class PipelineOutput:
     corrected_transcript: str
     retrieved_terms: list[RetrievedTerm]
     soap: SoapNote
+    metadata: dict[str, object]
+
+
+@dataclass(frozen=True)
+class VisitOutput:
+    id: str
+    soap: SoapNote
+    patient_summary: PatientSummary
+    retrieved_terms: list[RetrievedTerm]
     metadata: dict[str, object]
 
 
@@ -137,6 +146,59 @@ class CarePathPipeline:
             metadata={
                 "gec_mode": correction.provider,
                 "soap_mode": soap_result.provider,
+                "llm_provider": self.settings.llm_provider,
+                "latency_ms": latency_ms,
+            },
+        )
+
+
+    def process_visit(
+        self,
+        clinician_transcript: str,
+        patient_transcript: str,
+        encounter_context: str | None = None,
+    ) -> VisitOutput:
+        """Draft both end-of-visit documents from an interpreted consultation.
+
+        Unlike :meth:`process_text` this skips the transcript-correction stage:
+        a visit transcript is confirmed human speech and machine translation,
+        not raw ASR output, so there are no recognition errors to repair and
+        running a correction pass would only risk rewriting clinical text.
+        """
+        start = time.perf_counter()
+        retrieved_terms = self.retriever.retrieve(
+            " ".join(part for part in (clinician_transcript, encounter_context) if part),
+            self.settings.retrieval_top_k,
+        )
+        soap_result = self.llm.generate_soap(
+            clinician_transcript, retrieved_terms, encounter_context=encounter_context
+        )
+        soap = soap_result.soap
+        soap.review_required = True
+
+        patient_terms = self.retriever.retrieve(patient_transcript, self.settings.retrieval_top_k)
+        summary_result = self.llm.generate_patient_summary(
+            patient_transcript, patient_terms, encounter_context=encounter_context
+        )
+        summary = summary_result.summary
+        summary.review_required = True
+
+        latency_ms = int((time.perf_counter() - start) * 1000)
+        logger.info(
+            "visit pipeline done soap_mode=%s summary_mode=%s terms=%d latency_ms=%d",
+            soap_result.provider,
+            summary_result.provider,
+            len(retrieved_terms),
+            latency_ms,
+        )
+        return VisitOutput(
+            id=str(uuid.uuid4()),
+            soap=soap,
+            patient_summary=summary,
+            retrieved_terms=retrieved_terms,
+            metadata={
+                "soap_mode": soap_result.provider,
+                "summary_mode": summary_result.provider,
                 "llm_provider": self.settings.llm_provider,
                 "latency_ms": latency_ms,
             },
