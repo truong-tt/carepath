@@ -68,7 +68,6 @@
 .landing h2,
 .landing h3 {
   margin: 0;
-  text-wrap: balance;
 }
 
 /* Sized to the column it actually sits in, not to the viewport. The headline is
@@ -381,7 +380,9 @@
 }
 
 .p-row__vi {
-  font-weight: 600;
+  /* 700, not 600: font-synthesis is none and 600 is not among the loaded
+     weights, so it silently resolved to something else. */
+  font-weight: 700;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
