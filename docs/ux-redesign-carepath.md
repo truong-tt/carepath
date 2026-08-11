@@ -7,6 +7,194 @@
 1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
 2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
 
+## Current priority update: landing page rebuilt in Vietnamese clinical print (CP-UX-16)
+
+### Current UX problem
+
+The landing page had been *reframed* (CP-UX-15 replaced the story with the
+foreign patient, the harm evidence and the priced incumbents) but not
+redesigned. It reused the previous visual system: two
+`repeat(auto-fit, minmax(17rem, 1fr))` grids of same-size cards, each a heading
+plus a paragraph. The copy answered the judges' "problem identification is
+weak"; the page did not perform it.
+
+An inventory also found three defects, two introduced by CP-UX-15:
+
+1. `.onboarding-hero > h1` used a child combinator, but the heading had been
+   wrapped in a `<div>`. The page's most important sentence rendered at the
+   browser default 32px while two `h2`s rendered at 62px.
+2. `.evidence-section h2` had no rule at all.
+3. `.sr-only` was used in `visit/VisitScreen.tsx` but defined in neither
+   stylesheet, so a screen-reader-only label was visible on the demo surface.
+
+### Proposed flow
+
+Unchanged section order — problem, mechanism, evidence, boundaries, start —
+because that order is what answers the critique. What changed is the rendition:
+
+* **The document leads.** The first viewport is a Vietnamese prescription
+  rendered as a real form, with English resolving beneath each line. The
+  visitor meets the patient's problem before being told about it.
+* **The three problem cards become one comparison** — 29,5% against 49,1% —
+  because two numbers that only mean something next to each other do not belong
+  in separate boxes. The other two figures become sourced notes.
+* **The three evidence cards become a results table** with the limits carried
+  in the same structure, in the journal convention the direction borrows from.
+
+Visual world: Vietnamese clinical print. Official form blue carries whole
+fields; seal vermilion is reserved for safety moments so it means inside the
+page what it means inside the product. Ink on paper white, replacing the cream
+ground. Set in Be Vietnam Pro.
+
+### Affected routes/pages/components
+
+* `src/LandingPage.tsx` — recomposed.
+* `src/content/landing.ts` — reshaped to the composition, not a card list.
+* `src/landing.css` — new, all tokens scoped under `.landing`.
+* `src/styles.css` — landing block removed; Scribe-tool rules untouched.
+* `src/main.tsx` — Be Vietnam Pro added alongside Geist.
+* `src/visit/VisitScreen.tsx` — gate-card attribution fix (below).
+
+### Vietnamese-first copy
+
+No claim was softened or dropped. The evidence figures, the negation 98%, and
+the "Điều CarePath chưa chứng minh" limits are re-typeset, not rewritten. New
+copy is the document itself (a prescription including a negation line, since
+negation is the metric that is not 100%) and the section eyebrows.
+
+### Implementation stories
+
+R0 defects → R2 world and type → R3 recomposition → R4 one motion moment →
+R5 tests and claims. R1 (stripping dead CSS) was deferred: deleting a third of
+a stylesheet two days before a demo has near-zero value and non-zero risk to
+the Scribe tool page.
+
+### Acceptance criteria
+
+1. The `h1` is the largest heading on the page, asserted in e2e.
+2. axe reports no serious violations in light *and* dark.
+3. The primary action is visible without scrolling at 1440×800.
+4. The section links stay reachable and in-viewport at 320–900px.
+5. `/kham-song-ngu/` renders exactly as rehearsed.
+
+### Validation commands
+
+```bash
+cd scribe/frontend && npm run lint && npm test && npm run build && npm run e2e && npm run build
+```
+
+`npm run build` twice is deliberate: `npm run e2e` rebuilds `dist/` against
+`https://carepath-e2e.example` and silently breaks the served app.
+
+### Risks and fallback behavior
+
+`visit.css` shares `:root` with the landing page, so every new token is scoped
+under `.landing` and `--critical`/`--amber`/`--teal` keep their values and
+meanings. Verified at runtime: `--p-blue` does not resolve on
+`document.documentElement`, and the visit screen still computes Geist, the teal
+primary button, and the original token values.
+
+### Outcome
+
+All five acceptance criteria met. Frontend: lint clean, 76 unit tests, 8 e2e.
+Backend regression: combined `pytest`, `shared/tests`, `interpreter` (186
+passed, 1 skipped), `ruff`, and `scripts/smoke_backend.py` all pass.
+
+Four defects were found and fixed by verification rather than by review:
+
+* axe read the fading English as a contrast failure. Removing `opacity` from
+  the keyframes — animating only `clip-path` and `translate` — keeps the text
+  at its final colour on every frame.
+* Under `prefers-reduced-motion`, the shared reduce block collapses
+  `animation-duration` but not `animation-delay`, and a 0.01ms animation still
+  reports as running until the first frame ticks. The landing rule now sets
+  `animation: none`.
+* The reduced-motion e2e test used a describe-scoped `test.use`, which did not
+  reach the browser here — `matchMedia("(prefers-reduced-motion: reduce)")` read
+  `false` inside it. The assertion had been passing without ever testing the
+  preference it names. Rebuilt on `browser.newContext`, which does work here,
+  and it now asserts the media query matches before asserting on animations.
+* `<figure>` carries a UA `margin: 1em 40px`, which indented the document by
+  80px.
+
+The rehearsal of `/kham-song-ngu/` also surfaced a live defect unrelated to the
+redesign: the clinician gate card was hardcoded to `Bệnh nhân nói`, attributing
+a dose the *doctor* had just spoken back to the patient — and a prescription
+line to nobody. Doses come from the doctor, so it was wrong on the case the
+gate exists for. Fixed with a speaker→label map and a regression test.
+
+## Current priority update: Document capture in the bilingual visit (CP-UX-15)
+
+### Current UX problem
+
+The bilingual visit screen only accepts speech. But a foreign patient's language
+problem does not end when the conversation does — they leave holding a
+Vietnamese prescription, lab sheet or discharge slip they cannot read, and the
+patient-safety literature puts medication reconciliation and discharge among the
+highest-risk moments for limited-English-proficiency patients. The screen has no
+way to bring that paper into the visit.
+
+### Proposed flow
+
+1. In the clinician column, a capture affordance sits beside the existing voice
+   and typed inputs: `Chụp giấy tờ` (photograph a document).
+2. On a tablet or phone the control opens the camera directly; on desktop it
+   accepts a file or a drag-and-drop.
+3. While reading, the control shows a determinate-feeling busy state naming what
+   is happening, not a bare spinner.
+4. Each line read from the document appears as an ordinary turn, so entity
+   chips, the risk badge and the confirmation gate apply to paperwork exactly as
+   they do to speech.
+5. Failure is explicit and recoverable: the document is not partially added, and
+   the clinician is told to retake or use the typed path.
+
+### Affected route, page, and components
+
+- `/kham-song-ngu/`
+- `scribe/frontend/src/visit/` — capture control, icon set, visit styles, tests
+- Backed by `POST /api/v1/visits/{visit_id}/documents`, no change to the turn
+  contract
+
+### Vietnamese-first copy
+
+- Control: `Chụp giấy tờ`
+- Hint: `Đơn thuốc, phiếu xét nghiệm, giấy ra viện`
+- Busy: `Đang đọc giấy tờ…`
+- Empty read: `Không đọc được chữ nào. Chụp lại rõ hơn hoặc gõ nội dung.`
+- Failure: `Không đọc được giấy tờ. Thử lại hoặc gõ nội dung.`
+- Result notice: `Đã đọc {n} dòng. Bác sĩ xác nhận trước khi đưa cho bệnh nhân.`
+
+### Implementation story and dependencies
+
+- `CP-UX-15` depends on `POST /api/v1/visits/{id}/documents` (shipped).
+- Document lines become `TurnRecord`s with `speaker="document"`, so no new
+  rendering, risk or confirmation behavior is introduced.
+
+### Acceptance criteria
+
+1. The control opens the camera on a touch device and a file picker on desktop.
+2. A read prescription renders its lines as turns with entity chips.
+3. A line carrying a dose or drug name is gated and masked until confirmed.
+4. A failed or empty read adds no turns and states the recovery.
+5. Icons in this surface are authored SVG, not emoji.
+6. Keyboard reachable, visible focus, and legible at 320px.
+7. Vietnamese diacritics survive the build gate.
+
+### Validation commands
+
+```
+npm.cmd --prefix scribe/frontend run lint
+npm.cmd --prefix scribe/frontend test -- --run
+npm.cmd --prefix scribe/frontend run build
+python -m pytest scribe/tests/test_documents.py
+```
+
+### Risks and fallback
+
+- Reading a document on the live gateway takes roughly 13s per line; the demo
+  runs on scripted mode. If it is slow, the typed and voice paths still work.
+- OCR quality on handwriting is unproven; printed documents read well.
+
 ## Current priority update: Simplified Scribe result (CP-UX-14)
 
 ### Current UX problem

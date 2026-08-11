@@ -18,8 +18,9 @@ Frontends, all served by the same API in production:
 - `scribe/frontend/` — the public demo site (landing at `/`, working Scribe tool at
   `/ghi-chep-lam-sang/`). Vietnamese-only onboarding, full diacritics enforced
   at build time.
-- `interpreter/frontend/` — retained for internal Interpreter development; not
-  publicly served.
+  The bilingual visit for foreign patients lives here too, at
+  `/kham-song-ngu/`. There is no separate interpreter console; it was deleted
+  once the visit screen replaced it.
 
 One FastAPI process serves both APIs and the public Scribe frontend. The executed
 unification plan and its review protocol are archived in `docs/history/`.
@@ -35,9 +36,8 @@ python -m pip install --upgrade pip
 pip install -e ".[dev]" -e ".\shared" -e ".\interpreter[dev]"
 Copy-Item .env.local.example .env
 
-# Build the frontends the API will serve
+# Build the frontend the API will serve
 cd scribe/frontend; npm ci; npm run build; cd ../..
-cd interpreter/frontend; npm ci; npm run build; cd ../..
 
 # One process, everything on http://127.0.0.1:8000
 uvicorn carepath.main:app --app-dir scribe --reload
@@ -47,8 +47,8 @@ Then open `http://127.0.0.1:8000/` (demo site) or `/ghi-chep-lam-sang/` (Scribe
 tool). `GET /api/v1/health` and `GET /api/health` report both modules; public
 Interpreter browser paths return 404.
 
-For frontend development, run the Vite dev servers instead
-(`npm run dev` in `scribe/frontend/` or `interpreter/frontend/`); the API skips missing dist folders.
+For frontend development, run the Vite dev server instead
+(`npm run dev` in `scribe/frontend/`); the API skips a missing dist folder.
 
 ## Tests
 
@@ -58,7 +58,6 @@ python scripts/smoke_backend.py # scriber keyless smoke
 python scripts/build_term_artifacts.py --check # canonical term-data drift gate
 cd interpreter; pytest          # interpreter suite
 python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
-cd interpreter/frontend; npm test; npx playwright test
 cd scribe/frontend; npm test; npm run build; npm run e2e
 ```
 

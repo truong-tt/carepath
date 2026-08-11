@@ -26,13 +26,10 @@ app_port: 7860
 ---
 ```
 
-3. Push this repo to the Space. The root `Dockerfile` builds `scribe/frontend/` and
-   `interpreter/frontend/` in a node stage (the site build enforces the Vietnamese
-   diacritics gate), installs both API packages, pre-downloads the Gipformer
-   int8 ONNX files, and starts Uvicorn on port `7860`.
-   Set the Docker build arg `VITE_PUBLIC_SITE_URL=https://carepath-omega.vercel.app`
-   so the Interpreter's “Tất cả chức năng” link returns to the public site
-   with the selected language.
+3. Push this repo to the Space. The root `Dockerfile` builds `scribe/frontend/`
+   in a node stage (that build enforces the Vietnamese diacritics gate),
+   installs both API packages, pre-downloads the Gipformer int8 ONNX files, and
+   starts Uvicorn on port `7860`.
 4. Set these Space secrets:
 
 ```text
@@ -107,7 +104,6 @@ The `scribe/frontend/` directory is the static marketing deployment at
 
 ```text
 VITE_API_BASE=https://tranth3truong-carepath-api.hf.space
-VITE_CONSOLE_URL=https://tranth3truong-carepath-api.hf.space/phien-dich-y-khoa/
 VITE_LEAD_ENDPOINT=<optional lead endpoint>
 VITE_LEAD_EMAIL=<pilot contact email>
 ```
@@ -116,16 +112,17 @@ VITE_LEAD_EMAIL=<pilot contact email>
    Vercel API or WebSocket rewrites; the Space owns those routes.
 
 The Vercel build runs `npm run validate:deploy` before compiling. It fails when
-either URL is missing or invalid, does not use HTTPS, uses a different origin,
-contains a query/fragment, or does not use the exact `/` and `/phien-dich-y-khoa/`
-pathnames. Local
-and combined-service builds still use same-origin fallbacks because the normal
-`npm run build` does not run this deployment-only check.
+`VITE_API_BASE` is missing or invalid, does not use HTTPS, contains a
+query/fragment, or is not the bare `/` pathname. It also fails when an SPA route
+in `src/App.tsx` has no matching rewrite in `vercel.json` — without one, a direct
+visit to that route is a hard 404. Local and combined-service builds still use
+same-origin fallbacks because the normal `npm run build` skips this
+deployment-only check.
 
-The Interpreter backend stays on the Space because it needs the WebSocket API,
-but its browser frontend is disabled. `VITE_CONSOLE_URL` remains a build-time
-compatibility setting until the public-site validation is simplified. The pilot
-form remains client-side unless `VITE_LEAD_ENDPOINT` is configured.
+The interpreter console was deleted once `/kham-song-ngu/` replaced it; its
+backend stays on the Space for the WebSocket API, and `/phien-dich-y-khoa/` and
+`/console/` return an explicit 404. The pilot form remains client-side unless
+`VITE_LEAD_ENDPOINT` is configured.
 
 ## Keep-Alive
 

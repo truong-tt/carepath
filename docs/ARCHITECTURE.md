@@ -10,10 +10,12 @@ frontends after API routes.
 | Workflow | Backend boundary | Browser surface |
 | --- | --- | --- |
 | Ghi chép bệnh án AI | `scribe/carepath`, `/api/v1/*` | `scribe/frontend/` at `/`, including `/ghi-chep-lam-sang/` |
-| Phiên dịch khám bệnh trực tiếp | `interpreter/app`, `/api/*` and `/ws/*` | `interpreter/frontend/` at `/phien-dich-y-khoa/` |
+| Khám bệnh nhân nước ngoài | `interpreter/app`, `/api/*` and `/ws/*` | `scribe/frontend/` at `/kham-song-ngu/` |
 
-`/console/` redirects to the canonical interpreter path for compatibility. The
-two API namespaces intentionally do not overlap.
+Both browser surfaces now ship from `scribe/frontend/`. The separate interpreter
+console was deleted when the bilingual visit replaced it; `/phien-dich-y-khoa/`
+and `/console/` return an explicit 404 for anyone holding an old link. The two
+API namespaces intentionally do not overlap.
 
 `scribe/training/` is exclusively the Scribe's offline DARAG/GEC training and quality
 track. It does not train or serve the Interpreter. `interpreter/eval/` is a
