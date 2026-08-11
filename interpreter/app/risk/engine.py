@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import Any
 
 from app.glossary.store import SEED_CSV
-from app.normalize import fold_for_match
+from app.normalize import fold_for_match, strip_diacritics
 from app.providers.base import GlossaryEntry
 
 LEXICON_DIR = Path(__file__).with_name("lexicons")
 SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2, "critical": 3}
-NUMBER_RE = re.compile(r"\d+(?:\.\d+)?")
+NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)?")
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,19 +44,55 @@ def lasa_display_terms() -> tuple[str, ...]:
     return tuple(term for pair in load_lexicon("lasa_pairs.json") for term in pair)
 
 
-def _span(text: str, term: str, kind: str, severity: str) -> dict[str, Any] | None:
-    folded_text = fold_for_match(text)
-    folded_term = fold_for_match(term)
-    if " " not in folded_term and re.fullmatch(r"\w+", folded_term):
-        match = re.search(rf"\b{re.escape(folded_term)}\b", folded_text)
-        start = match.start() if match else -1
-    else:
-        start = folded_text.find(folded_term)
-    if start < 0:
+def _search(text: str, term: str, *, fold: bool) -> tuple[int, int] | None:
+    haystack = fold_for_match(text) if fold else text.casefold()
+    needle = fold_for_match(term) if fold else term.casefold()
+    if not needle:
         return None
+    # Word-anchor anything made only of word characters and spaces, including
+    # multi-word terms: an unanchored search lets "nhỏ tai" match inside a
+    # longer word run.
+    if re.fullmatch(r"[\w\s]+", needle):
+        match = re.search(rf"\b{re.escape(needle)}\b", haystack)
+    else:
+        match = re.search(re.escape(needle), haystack)
+    return (match.start(), match.end()) if match else None
+
+
+def _folded_match_is_trustworthy(text: str, start: int, end: int) -> bool:
+    """True when the matched region of the original text carries no diacritics.
+
+    Folding is lossy in Vietnamese: "nhỏ tai" (ear drops) and "nhớ tái" (as in
+    "nhớ tái khám", remember to come back) both fold to "nho tai". A folded match
+    is therefore only trustworthy where the text had no tone marks to begin
+    with, which is what undiacritized ASR output looks like. Accepting it
+    against properly accented Vietnamese turns ordinary sentences into false
+    high-risk gates.
+
+    Checking the matched region rather than the whole turn keeps recall on
+    partially accented text, where only some words lost their marks.
+    """
+    if len(fold_for_match(text)) != len(text):
+        # Casefolding changed the length, so folded offsets do not index the
+        # original text. Accept the match: over-flagging is the safe direction.
+        return True
+    region = text[start:end]
+    return strip_diacritics(region) == region
+
+
+def _span(text: str, term: str, kind: str, severity: str) -> dict[str, Any] | None:
+    # Diacritic-sensitive match first; it is unambiguous.
+    found = _search(text, term, fold=False)
+    if found is None:
+        found = _search(text, term, fold=True)
+        if found is not None and not _folded_match_is_trustworthy(text, *found):
+            found = None
+    if found is None:
+        return None
+    start, end = found
     return {
         "start": start,
-        "end": start + len(folded_term),
+        "end": end,
         "kind": kind,
         "severity": severity,
         "term": term,
@@ -113,8 +149,26 @@ def _count_terms(text: str, terms: list[str]) -> int:
     return total
 
 
+# Vietnamese number words become digits in normalize_text; English ones do not.
+# Comparing the two raw made "1 giọt" vs "one eye drop" a critical number
+# mismatch, so ordinary correct translations were escalated. Only small counts
+# are folded -- anything larger stays unmatched and is still reported.
+EN_NUMBER_WORDS = {
+    "one": "1", "once": "1", "two": "2", "twice": "2", "three": "3", "thrice": "3",
+    "four": "4", "five": "5", "six": "6", "seven": "7", "eight": "8", "nine": "9",
+    "ten": "10", "eleven": "11", "twelve": "12", "half": "0.5",
+}
+EN_NUMBER_RE = re.compile(r"\b(" + "|".join(EN_NUMBER_WORDS) + r")\b", re.IGNORECASE)
+
+
 def _numbers(text: str) -> list[str]:
-    return NUMBER_RE.findall(text)
+    """Numeric values in the text, comparable across the two languages.
+
+    Spelled-out English counts are folded to digits and a Vietnamese decimal
+    comma is read as a decimal point, so "38,5" and "38.5" are one value.
+    """
+    spelled = EN_NUMBER_RE.sub(lambda m: EN_NUMBER_WORDS[m.group(1).lower()], text)
+    return [value.replace(",", ".") for value in NUMBER_RE.findall(spelled)]
 
 
 def _dose_spans(text: str) -> list[dict[str, Any]]:

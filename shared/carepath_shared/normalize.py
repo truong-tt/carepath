@@ -32,6 +32,10 @@ NUMBER_FOLLOWERS = {
     "vien",
     "goi",
     "ong",
+    # "giot" (drop) was missing while every other dose form was present, so
+    # "nhỏ mắt một giọt" never became "1 giọt" and the dose detector never saw a
+    # number: eye and ear drop dosing bypassed the confirmation gate entirely.
+    "giot",
     "lan",
     "ngay",
     "tuan",
