@@ -7,7 +7,339 @@
 1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
 2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
 
-## Current priority update: public demo hub and one design world (CP-UX-17)
+## Current priority update: a front door for the paperwork (CP-UX-19)
+
+### 1. Current UX problem
+
+**The document reader is built and has no way in.**
+
+`DocumentCapture` posts to `POST /api/v1/visits/{visit_id}/documents`
+(`scribe/frontend/src/visit/DocumentCapture.tsx:38`). The backend transcribes the
+image and then puts every line through the same pipeline as a spoken turn —
+translation, risk engine, reviewer, clinician gate — and holds the bytes in
+memory, never on disk (`scribe/carepath/main.py:445`). `DocumentReview` renders
+the result for line-by-line confirmation. The feature works.
+
+It is mounted inside the **doctor's column of an already-started visit**
+(`scribe/frontend/src/visit/VisitScreen.tsx:557`), behind
+`disabled={connection !== "open"}`. So to translate a đơn thuốc a clinician must:
+
+1. open `/kham-song-ngu/`,
+2. enter the patient's age, sex and reason for visit,
+3. tick the consent box for an interpreted consultation,
+4. start a session, which opens a WebSocket,
+5. scroll to the doctor's column and find the camera control.
+
+The endpoint is visit-scoped, so there is no shortcut: no visit id, no read.
+
+The routes are `/`, `/thu-nghiem/`, `/kham-song-ngu/`, `/ghi-chep-lam-sang/`.
+None of them is about paperwork. **The landing page's entire argument is that
+harm concentrates on paper — `Ba lúc dễ gây hại nhất đều diễn ra trên giấy` —
+and every door it opens is a conversation.** A clinic owner who reads that page
+and wants to try the thing it argues for cannot find it.
+
+**A second, unrelated defect on the demo hub.** `DocumentPanel` renders its
+heading and explanation regardless of what it can offer, so the discharge panel
+at `allowSample={false} allowUpload={false}` produces a section with no control
+at all (`scribe/frontend/src/demo/DemoHub.tsx:304`). That is the live state
+today: `/api/health` reports `provider_mode: "demo"`, which resolves to
+capability `sample`.
+
+### 2. Proposed flow
+
+**A new route, `/dich-giay-to/`, where translating paperwork is the task.**
+
+Not a mode of the visit screen and not a panel on the demo hub — its own door,
+reachable from the landing page beside `Bắt đầu ca khám`.
+
+The order on the screen:
+
+1. **Consent.** The existing checkbox, wording unchanged. It says the patient was
+   told CarePath is a fallible translation aid, that the clinician remains
+   professionally responsible, and that the patient may request a human
+   interpreter — all true of paperwork. Age, sex and reason become optional,
+   because reading a document does not need them.
+2. **Capture.** `DocumentCapture`, reused unchanged.
+3. **Review.** `DocumentReview`, reused unchanged, for the lines the gate holds.
+4. **The sheet.** The confirmed result on the spine — Vietnamese left, English
+   right, held lines as the gap — identical in grammar to `/` and
+   `/thu-nghiem/` (DEC-0022). Print-clean, so it can be handed over.
+
+**No backend work, and no microphone.** Every call already exists as plain HTTP:
+`POST /api/sessions` returns a session id and takes only `{consent}`
+(`interpreter/app/api.py:182`); the document endpoint returns turns directly;
+`POST /api/turns/{turn_id}/confirm` confirms a line. The WebSocket in
+`useVisitSocket` carries speech turns and is simply never opened here. That is
+what makes this route safe as a public door: there is no audio path in it at all.
+
+**Honest waiting.** `main.py` records a measured cost: one translation call per
+line, roughly 13s/line on the live provider, so a six-line prescription takes
+over a minute. The waiting state names the line count and the elapsed time and
+says why it is slow. Batching the lines into one call is a real optimisation and
+a backend change; it is out of scope here and stays recorded as such.
+
+**Demo hub.** A panel with nothing to offer is hidden rather than rendered
+empty, and the capability notice names which functions are runnable now.
+
+### 3. Affected routes, pages, components
+
+| Surface | File | Change |
+| --- | --- | --- |
+| `/dich-giay-to/` | `src/paperwork/PaperworkScreen.tsx` | new; composes three existing calls |
+| `/dich-giay-to/` | `src/paperwork/paperwork.css` | new |
+| `/dich-giay-to/` | `src/content/paperwork.ts` | new; all copy |
+| routing | `src/App.tsx` | one more pathname check, matching the existing pattern |
+| all | `src/styles.css` | receive the `.p-reg` family from `landing.css` |
+| `/` | `src/landing.css`, `src/content/landing.ts` | a third CTA in the start section |
+| `/thu-nghiem/` | `src/demo/DemoHub.tsx` | hide the control-less panel |
+
+Untouched: the risk engine, the confirmation gate, consent *logic*, microphone
+behaviour, TTS eligibility, the WebSocket contract, and every existing route.
+
+### 4. Vietnamese-first copy
+
+```text
+h1              Dịch giấy tờ cho người bệnh
+Landing CTA     Dịch giấy tờ cho người bệnh
+Lede            Chụp đơn thuốc, phiếu xét nghiệm hoặc giấy ra viện. CarePath
+                dịch từng dòng và giữ lại dòng có liều thuốc cho tới khi bác sĩ
+                xác nhận.
+Empty           Chưa có giấy tờ nào. Chụp hoặc tải ảnh để bắt đầu.
+Waiting         Đang dịch từng dòng…
+Slow path       Bản dịch chạy từng dòng nên có thể mất hơn một phút.
+Ready           {n} dòng đã sẵn sàng đưa cho người bệnh.
+Held            Giữ lại — chờ bác sĩ xác nhận
+Consent         (unchanged, reused verbatim from the visit screen)
+```
+
+No figure and no claim is added. The landing's two honesty sections are not
+touched.
+
+### 5. Implementation stories
+
+1. **S1 — shared primitive.** Move `.p-reg` and its responsive collapse from
+   `landing.css` to `styles.css`.
+2. **S2 — the route.** `PaperworkScreen`, its copy, its stylesheet, the
+   `App.tsx` pathname check.
+3. **S3 — the door.** The landing's third CTA.
+4. **S4 — demo hub.** Hide the control-less panel; sharpen the capability notice.
+5. **S5 — proof.** New e2e, screenshots, trace.
+
+### 6. Dependencies
+
+S1 blocks S2. S3 and S4 are independent of both. S5 depends on all.
+
+### 7. Acceptance criteria
+
+1. `/dich-giay-to/` reaches a usable capture state having opened **no WebSocket**
+   and called **no `getUserMedia`**.
+2. Consent is required before anything is read, in the visit screen's exact
+   wording.
+3. Read lines render on the spine at the same grid column as `/` and
+   `/thu-nghiem/`; held lines are the right register left empty.
+4. A held line's English has **zero DOM occurrences** before confirmation.
+5. Confirming a line moves it into the patient sheet.
+6. The waiting state names the line count and elapsed time and does not claim to
+   be faster than it is.
+7. No demo hub panel renders without at least one usable control.
+8. axe reports no serious violations on `/dich-giay-to/`, light and dark.
+9. Every existing e2e assertion still passes; no existing route changes.
+10. Vietnamese text stays NFC-normalised with diacritics preserved.
+
+### 8. Validation commands
+
+```bash
+cd scribe/frontend
+npm run lint && npm test && npm run build && npm run e2e && npm run build
+```
+
+```bash
+node C:\Users\ADMIN\.claude\skills\impeccable\scripts\detect.mjs --json src
+```
+
+### 9. Risks and fallback behaviour
+
+| Risk | Fallback |
+| --- | --- |
+| A public route creating sessions is abusable | It hits the same endpoint `/kham-song-ngu/` already exposes publicly, so exposure is unchanged. If quota becomes necessary it belongs in the Vercel layer, as `/api/demo/*` already does — not in a new backend path. |
+| 13s/line makes the route feel broken | The waiting state states the cost. Batching is recorded as a backend optimisation and deliberately not attempted here. |
+| The backend is in a mode that cannot read documents | Reuse `useDemoCapability`'s health check and fail closed with the same honesty the demo hub uses — never show a scripted result as if it were the user's document. |
+| Consent wording framed for a consultation reads oddly for paperwork | Accepted deliberately: the sentence is about fallibility, responsibility and the right to an interpreter, all of which hold. Changing safety copy is hard-gated and would need its own decision. |
+| A patient sheet that can be printed implies clinical authority | The sheet carries the same clinician-responsibility line the footer does, and unconfirmed lines cannot appear on it at all. |
+
+## Shipped: the comparison spine (CP-UX-18)
+
+### 1. Current UX problem
+
+CP-UX-17 unified the design world onto Vietnamese clinical print, retired the
+second (Geist/teal) system, and made the product testable. What it did not do is
+make the public surface *good to look at*. Audited against its own world, the
+page is a competent template wearing a print costume:
+
+**Four sections are the same component four times.** `.p-moments`, `.p-try`,
+`.p-steps` and `.p-refuse` are all
+`grid-template-columns: repeat(auto-fit, minmax(14–15rem, 1fr))` with a heading
+and a paragraph in each cell. Ruled borders instead of card borders does not
+change what it is: an equal-cell scaffold, applied to four passages that carry
+four different kinds of argument. A timeline, three demo doors, a procedure and
+a list of refusals should not share a shape.
+
+**An uppercase eyebrow sits above every heading.** `.p-label` stacks micro-type
+over each `h2`. The information is right — official Vietnamese documents do mark
+their fields — but stacking it above the heading is the generic marketing
+kicker, not a form's margin annotation.
+
+**The hero document is propped up by a costume shadow.**
+`box-shadow: 0.45rem 0.45rem 0 var(--p-blue-tint)` (`landing.css:283`) and the
+shared `--shadow` token are zero-blur offset blocks. That is a neobrutalist
+device in a world that never chose neobrutalism; it is standing in for a
+structure the page does not otherwise have.
+
+**A Unicode glyph is doing an icon's job.** `.p-refuse li::before { content: "✕" }`
+renders in whatever the platform supplies, at a weight unrelated to the type
+around it.
+
+**Dark mode was never designed.** It is inherited token flips: `--p-paper`
+becomes `#0b1017` and the committed field becomes `--p-blue: #1d4d8f`, a mid
+navy fog on near-black with no boundary. The seal becomes `#ff6b64`, a coral
+that reads as a consumer alert rather than a seal. Nothing about the dark
+surface was composed; it was derived.
+
+**And the deepest problem: the page's form does not carry its argument.**
+Everything load-bearing here is two things next to each other — Vietnamese
+against English, 29,5% against 49,1%, shown against withheld — and the layout
+expresses none of that. The comparison is the product. It is currently just
+another section.
+
+### 2. Proposed flow
+
+**Direction B, "Bản đối chiếu": subvert the print world by making the comparison
+the structure.** One vertical rule at a fixed grid column runs the whole public
+surface. Vietnamese always left of it. English always right of it. And withheld
+content is a **visible gap in the right column, at a consistent position**.
+
+The absence acquires a shape, in the same place, on every surface — landing
+hero, demo hub, conversation panel, visit screen. A doctor learns one visual
+grammar for *not yet confirmed*, and a visitor experiences the withholding
+before a word explains it. The seal marks the edge of the gap; it never fills
+it, so seal vermilion keeps meaning exactly what `styles.css` says it means:
+the product is withholding something here.
+
+This is a subversion, not a deepening. The print world stays — ruled forms,
+official navy fields, the seal — but it stops being *depicted* and starts being
+*structural*. Where CP-UX-17 drew a picture of paperwork, CP-UX-18 builds the
+page out of the product's own mechanism.
+
+Consequences that follow from the spine:
+
+- The four equal-cell grids become **registers**: field mark in the margin
+  column, title left of the rule, body right of it. Four sections stop looking
+  like one component.
+- `.p-label` moves into the margin column, first-baseline-aligned to its
+  heading. Same information, no kicker.
+- The offset shadow is deleted. The spine supplies the structure it was faking.
+- The `✕` glyph becomes one authored inline SVG mark at a single stroke weight.
+- The one authored motion moment — `p-resolve` — is retargeted to travel
+  rightward *from the spine*, so English visibly fills the column the emptiness
+  occupied. It remains the only animation on the page.
+- Dark mode is composed rather than derived: neutral paper instead of blue-black,
+  a hairline edge token so the committed field reads as a field, a dedicated
+  spine-rule token at higher luminance than `--p-rule` because the spine is now
+  load-bearing, and a retuned seal. Every value computed against WCAG, not
+  eyeballed.
+
+### 3. Affected routes, pages, components
+
+| Surface | File | Change |
+| --- | --- | --- |
+| all | `scribe/frontend/src/styles.css` | spine grid tokens, designed dark palette, drop `--shadow` |
+| `/` | `scribe/frontend/src/landing.css` | recompose on the spine; delete the four card grids |
+| `/` | `scribe/frontend/src/LandingPage.tsx` | grid wrappers, margin-mark column, authored SVG mark |
+| `/thu-nghiem/` | `scribe/frontend/src/demo/demo.css` | gated row becomes the positional gap |
+| `/thu-nghiem/` | `scribe/frontend/src/demo/DemoHub.tsx`, `ConversationPanel.tsx` | row markup onto the spine |
+| `/kham-song-ngu/` | `scribe/frontend/src/visit/visit.css` | consume the new tokens |
+| `/` | `scribe/frontend/src/content/landing.ts` | one withheld marker string (below) |
+
+Untouched: the risk engine, the confirmation gate, consent, microphone
+behaviour, TTS eligibility, the WebSocket contract, and every route path.
+
+### 4. Vietnamese-first copy
+
+Exactly one copy addition. The hero document currently resolves all four lines
+to English, which describes the withholding without performing it. The last row
+gains a withheld marker and loses its `en` string from the DOM:
+
+```text
+vi: Giữ lại — chờ bác sĩ xác nhận
+en: Withheld — awaiting doctor confirmation
+```
+
+Everything else in `content/landing.ts` and `content/demo.ts` is unchanged. All
+sourced figures keep their sources; the Divi et al. citation stays adjacent to
+the 29,5%/49,1% comparison it credits; `Điều CarePath chưa chứng minh` and
+`Những việc CarePath không làm` stay in full. No superlatives are added.
+
+### 5. Implementation stories
+
+1. **S1 — tokens.** Contrast script; computed dark palette; spine grid tokens in
+   `:root`; `--shadow` removed.
+2. **S2 — landing spine.** Hero split across the rule; the four registers; the
+   comparison aligned to the same column; margin marks; SVG refusal mark;
+   `p-resolve` retargeted.
+3. **S3 — demo spine.** Gated row rendered as the positional gap in both demo
+   components, gating logic byte-identical.
+4. **S4 — visit token pass.** `visit.css` consumes the new tokens; no rule
+   rewrites, so the hard-gated surfaces stay off the diff.
+5. **S5 — proof.** Full check chain, screenshots at four widths in both schemes,
+   gate proof, hero height budget, Harness trace.
+
+### 6. Dependencies
+
+S1 blocks S2, S3 and S4 (they consume its tokens). S2 and S3 are independent of
+each other. S4 depends on S1 only. S5 depends on all.
+
+### 7. Acceptance criteria
+
+- Vietnamese content sits left of the spine and English right of it on every
+  public surface, at the same grid column.
+- Withheld content renders as a gap in the right column at that same position,
+  and its English is **absent from the DOM** until the doctor view is opened.
+- No section of the landing page uses an equal-cell auto-fit card grid.
+- No `.p-label` renders as a stacked eyebrow above a heading.
+- No zero-blur offset shadow anywhere in the public surface.
+- No Unicode glyph stands in for an icon.
+- Dark mode values are composed, and every used token pair clears WCAG (body
+  ≥ 4.5:1, large ≥ 3:1) in both schemes, with the computed table recorded.
+- Every existing e2e assertion still passes, including `--p-blue: #0f2e5c`,
+  `--p-seal: #c41e22`, `--r-panel: 0`, `h1` largest on the page, `.p-hero`
+  under 800px at 1440, and zero running animations under reduced motion.
+- Vietnamese text stays NFC-normalised with diacritics preserved.
+
+### 8. Validation commands
+
+```bash
+cd scribe/frontend
+npm run lint && npm test && npm run build && npm run e2e && npm run build
+```
+
+```bash
+node C:\Users\ADMIN\.claude\skills\impeccable\scripts\detect.mjs --json src
+```
+
+`npm run build` is the diacritics gate. Screenshots at 360, 390, 768 and 1440 in
+light and dark are captured by the Playwright run into `docs/qa-evidence/`.
+
+### 9. Risks and fallback behaviour
+
+| Risk | Fallback |
+| --- | --- |
+| The hero restructure pushes `.p-hero` past the 800px budget at 1440 | Tighten claim-band and row padding. Never hide content to fit. |
+| A heading leading change collides Vietnamese stacked diacritics | Any leading change is re-measured with canvas `actualBoundingBoxAscent`/`Descent` on the real string. 1.172 is the measured floor; headings hold 1.18. |
+| The spine collapses illegibly on a 360px phone | Below 40rem the spine rotates to a left indent rule and withheld content becomes a full-width band, preserving the "something is missing" reading. |
+| A retuned dark seal fails contrast under `.p-cta` (`color: var(--p-paper)`) | The seal stays light in dark mode; the contrast script gates the value before it lands. |
+| Restyling a patient-display surface weakens a safety reading | Gating stays a conditional render, byte-identical. An e2e assertion holds that the gated English has zero DOM occurrences before the toggle. |
+
+## Superseded priority: public demo hub and one design world (CP-UX-17)
 
 ### Current UX problem
 

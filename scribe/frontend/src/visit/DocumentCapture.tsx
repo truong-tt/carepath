@@ -19,10 +19,17 @@ export default function DocumentCapture({
   visitId,
   onTurns,
   disabled = false,
+  onStart,
+  onFail,
 }: {
   visitId: string;
   onTurns: (turns: VisitTurn[]) => void;
   disabled?: boolean;
+  /* The read takes ~13s per line, so a caller that owns the whole screen needs
+     to say so somewhere other than this control. Optional: inside a visit the
+     surrounding conversation is still usable and the local state is enough. */
+  onStart?: () => void;
+  onFail?: () => void;
 }) {
   const [state, setState] = useState<CaptureState>("idle");
   const [dragging, setDragging] = useState(false);
@@ -32,6 +39,7 @@ export default function DocumentCapture({
   async function send(file: File | null | undefined) {
     if (!file || disabled) return;
     setState("reading");
+    onStart?.();
     const body = new FormData();
     body.append("image", file);
     try {
@@ -43,6 +51,7 @@ export default function DocumentCapture({
       const turns = (await response.json()) as VisitTurn[];
       if (turns.length === 0) {
         setState("empty");
+        onFail?.();
         return;
       }
       setLastCount(turns.length);
@@ -51,6 +60,7 @@ export default function DocumentCapture({
     } catch {
       // Nothing is partially added: the request either produced turns or none.
       setState("error");
+      onFail?.();
     } finally {
       if (inputRef.current) inputRef.current.value = "";
     }

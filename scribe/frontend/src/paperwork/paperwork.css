@@ -1,0 +1,353 @@
+/* =====================================================================
+   Paperwork route — /dich-giay-to/
+
+   Same world as the landing and the demo hub, and the same spine: the shared
+   register lives in styles.css and this file only composes with it. What must
+   not drift is the grid column — a doctor learns the position of a withheld
+   line once, and it has to mean the same thing here (DEC-0022).
+
+   Almost everything visible on this screen is borrowed: `.p-nav`, `.p-cta`,
+   `.p-reg`, `.p-mark`, `.p-ord`, `.p-lede`, `DocumentCapture` and
+   `DocumentReview` all arrive as they are. What is local is the composition and
+   the two states this route has that no other surface does — the long wait, and
+   the patient sheet.
+   ===================================================================== */
+
+.paper {
+  background: var(--p-paper);
+  color: var(--p-ink);
+  min-height: 100vh;
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+.paper__main {
+  display: grid;
+  gap: clamp(1.75rem, 3vw, 2.75rem);
+  padding-block: clamp(1.75rem, 3.5vw, 3rem);
+}
+
+.paper .p-nav__back {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--p-on-blue);
+  text-decoration: none;
+}
+
+.paper .p-nav__back:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.paper h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.028em;
+  /* Vietnamese leading, measured — see the note on `.landing h1`. The ratio is
+     size-independent, so this number does not move with the clamp above. */
+  line-height: 1.18;
+}
+
+.paper__head .p-lede {
+  padding-top: 0.4rem;
+}
+
+/* --- consent, before anything is read -------------------------------- */
+
+.paper__consent {
+  display: grid;
+  justify-items: start;
+  gap: 1.1rem;
+  max-width: var(--p-measure);
+  padding-top: 1.2rem;
+  border-top: var(--p-rule-strong);
+}
+
+.paper__consent-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  line-height: 1.6;
+}
+
+.paper__consent-check input {
+  margin-top: 0.3rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--p-seal);
+}
+
+.paper__cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.paper__fine {
+  margin: 0;
+  max-width: var(--p-measure);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--p-ink-faint);
+}
+
+/* --- capture ---------------------------------------------------------- */
+
+.paper__capture {
+  display: grid;
+  gap: 0.9rem;
+  padding-top: 1.2rem;
+  border-top: var(--p-rule-strong);
+}
+
+/* --- the wait --------------------------------------------------------
+   Translation runs one call per line, ~13s/line on the live provider, so a
+   six-line prescription is over a minute. A bare spinner reads as a hang. The
+   elapsed count is what makes the wait legible as work rather than as failure,
+   and after fifteen seconds the screen says why it is slow instead of leaving
+   the clinician to guess. */
+
+.paper__wait {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 0;
+  max-width: var(--p-measure);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--p-ink-soft);
+}
+
+.paper__spin {
+  flex: 0 0 auto;
+  margin-top: 0.4rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid var(--p-blue-ink);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: paper-spin 900ms linear infinite;
+}
+
+@keyframes paper-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper__spin {
+    animation: none;
+    border-right-color: var(--p-blue-tint);
+  }
+}
+
+.paper__elapsed {
+  display: block;
+  margin-top: 0.3rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--p-ink-faint);
+}
+
+/* --- failures --------------------------------------------------------
+   A strong rule in the critical colour, not a seal-tinted left bar: the seal
+   marks the edge of a withheld line and nothing else. A failure is not a
+   withholding. */
+
+.paper__error {
+  margin: 0;
+  padding-top: 0.8rem;
+  border-top: 2px solid var(--p-seal);
+  max-width: var(--p-measure);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--p-seal-ink);
+}
+
+.paper__notice {
+  max-width: var(--p-measure);
+  padding-top: 0.9rem;
+  border-top: var(--p-rule-strong);
+  line-height: 1.6;
+  color: var(--p-ink-soft);
+}
+
+.paper__notice--off {
+  border-top-color: var(--p-seal);
+}
+
+.paper__notice h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--p-ink);
+}
+
+.paper__notice .p-cta {
+  display: inline-flex;
+  margin-top: 1rem;
+}
+
+/* --- risk annotations, in the margin where the form's marks go -------- */
+
+.paper__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paper__chips li {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--p-rule);
+  border-color: var(--p-spine-line);
+  color: var(--p-ink-faint);
+}
+
+/* --- the clinician's review pane -------------------------------------
+   `DocumentReview` is reused as-is, but it was composed for the visit screen,
+   where it is one card among a running conversation. Here it is most of the
+   screen, and its card reads as a foreign object dropped into a ruled form.
+
+   Scoped to `.paper` on purpose: the visit screen keeps its own composition
+   untouched. Only the frame changes — the source, the translation, the risk
+   chips and the confirm control are the component's, and none of the gate's
+   behaviour is styled here. */
+
+.paper .visit-docreview {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
+.paper .visit-docreview__head {
+  padding-bottom: 0.85rem;
+  border-bottom: var(--p-rule-strong);
+  background: none;
+}
+
+.paper .visit-docreview__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paper .visit-docrow {
+  display: grid;
+  grid-template-columns: var(--p-grid);
+  align-content: start;
+  padding: 0.9rem 0 1.2rem;
+  border: 0;
+  border-bottom: var(--p-rule);
+  border-radius: 0;
+  background: none;
+}
+
+/* The Vietnamese as printed, the risk marks, and the decision — everything the
+   clinician acts on — stay left of the spine. */
+.paper .visit-docrow__source,
+.paper .paper__chips,
+.paper .visit-docrow__checks,
+.paper .visit-docrow__actions {
+  grid-column: vi;
+  padding-right: var(--p-col-gap);
+}
+
+/* The right register holds only what the patient would receive, and it spans
+   the whole row so the spine runs its full height. That is the same rule as
+   everywhere else: what is on the right is the patient's text, and an empty
+   right register means it is being withheld. */
+.paper .visit-docrow__target,
+.paper .visit-docrow__edit {
+  grid-column: en / end;
+  grid-row: 1 / -1;
+  align-self: start;
+  padding-left: var(--p-col-gap);
+  border-left: var(--p-spine);
+}
+
+.paper .visit-docrow__actions {
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 64rem) {
+  .paper .visit-docrow {
+    grid-template-columns: var(--p-grid-2);
+  }
+}
+
+@media (max-width: 44rem) {
+  .paper .visit-docrow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .paper .visit-docrow > * {
+    grid-column: 1;
+    grid-row: auto;
+    padding-left: 0;
+    padding-right: 0;
+    border-left: 0;
+  }
+
+  /* The spine rotates: the patient's text keeps its rule, now on the left at an
+     indent, so it stays visibly the other register rather than another line. */
+  .paper .visit-docrow__target,
+  .paper .visit-docrow__edit {
+    margin: 0.5rem 0 0 0.1rem;
+    padding-left: 0.85rem;
+    border-left: var(--p-spine);
+  }
+}
+
+/* --- the sheet the patient is handed ---------------------------------
+   Built from released turns only. A held line is not listed here at all: its
+   absence from this sheet is the withholding, and that is enforced by the gate
+   upstream rather than by a style. */
+
+.paper__sheet-head {
+  padding-bottom: 0.9rem;
+}
+
+.paper__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paper__vi {
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.paper__en {
+  line-height: 1.5;
+  color: var(--p-blue-ink);
+  overflow-wrap: anywhere;
+}
+
+.paper__sheet-note {
+  margin-top: 1rem;
+}
+
+/* Handed over on paper as often as on screen. */
+@media print {
+  .p-nav,
+  .paper__capture,
+  .paper__consent,
+  .paper__wait,
+  .paper__error,
+  .visit-docreview {
+    display: none;
+  }
+
+  .paper {
+    padding: 0;
+  }
+}

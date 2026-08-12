@@ -66,9 +66,22 @@ test("a visitor sees the limits before running anything", async ({ page }) => {
   await expect(limits).toContainText("Không lưu ảnh");
 
   // Above the first panel, not in a footer after the result.
-  const limitsBox = await limits.boundingBox();
-  const panelBox = await page.getByRole("region", { name: /Ảnh đơn thuốc/ }).boundingBox();
-  expect(limitsBox!.y).toBeLessThan(panelBox!.y);
+  //
+  // Measured in one evaluate rather than as two `boundingBox()` calls. Those
+  // are viewport-relative and were taken a round-trip apart, so any scrolling
+  // between them — `html { scroll-behavior: smooth }` is set globally — moved
+  // the second reading and failed the comparison at random. The assertion is
+  // unchanged; only the measurement is now atomic and document-relative.
+  const order = await page.evaluate(() => {
+    const box = (selector: string) => {
+      const element = document.querySelector(selector);
+      return element ? element.getBoundingClientRect().top + window.scrollY : null;
+    };
+    return { limits: box(".d-limits"), panel: box(".d-panel") };
+  });
+  expect(order.limits).not.toBeNull();
+  expect(order.panel).not.toBeNull();
+  expect(order.limits!).toBeLessThan(order.panel!);
 });
 
 test("the withheld line hides its English until the doctor view is opened", async ({ page }) => {

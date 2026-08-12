@@ -8,12 +8,37 @@ import "./landing.css";
 import { leadContact, zaloHref } from "./leads";
 
 const visitHref = "/kham-song-ngu/";
+const paperworkHref = "/dich-giay-to/";
 const scribeHref = "/ghi-chep-lam-sang/";
+
+/* The refusals were marked with a `✕` from `content:` — a Unicode glyph
+   rendering at whatever weight the platform happened to supply, unrelated to
+   the type around it. One drawn mark instead, at the stroke weight the rules
+   use. */
+function RefuseMark() {
+  return (
+    <svg
+      className="p-refuse__mark"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="square"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 3 L13 13 M13 3 L3 13" />
+    </svg>
+  );
+}
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>("vi");
   const t = LANDING[lang];
   const footer = copyFor("vi").footer;
+  // A held row carries no `en` key at all, so the tuple is a union of two
+  // shapes. Widened once here rather than narrowed at every use.
+  const docRows: readonly { vi: string; en?: string }[] = t.docRows;
 
   return (
     <div className="landing" lang={lang}>
@@ -46,28 +71,32 @@ export default function LandingPage() {
 
       <main id="top" tabIndex={-1}>
         {/* The document leads. A visitor meets the patient's problem — a piece
-            of paper in a language they don't have — before being told about it. */}
+            of paper in a language they don't have — before being told about it,
+            and meets it split across the spine, so the two lines whose English
+            is being withheld are visible as gaps in the first viewport. */}
         <section className="p-wrap p-hero" aria-labelledby="hero-title">
-          <div className="p-hero__claim">
-            <h1 id="hero-title">
-              {t.heroLead}
-              <em>{t.heroMark}</em>
-            </h1>
-            <p className="p-hero__body">{t.heroBody}</p>
-            <p className="p-hero__actions">
-              <a className="p-cta" href={visitHref}>
-                {t.heroPrimary}
-              </a>
-              <a className="p-cta p-cta--ghost" href="#problem">
-                {t.heroSecondary}
-              </a>
-            </p>
-          </div>
-
-          <div className="p-hero__doc">
-            <span className="p-label">{t.docLabel}</span>
-            <figure className="p-doc">
-            <figcaption className="p-doc__head">
+          <div className="p-reg">
+            <div className="p-hero__claim">
+              <h1 id="hero-title">
+                {t.heroLead}
+                <em>{t.heroMark}</em>
+              </h1>
+              <p className="p-hero__body">{t.heroBody}</p>
+              <p className="p-hero__actions">
+                <a className="p-cta" href={visitHref}>
+                  {t.heroPrimary}
+                </a>
+                <a className="p-cta p-cta--ghost" href="#problem">
+                  {t.heroSecondary}
+                </a>
+              </p>
+            </div>
+            {/* The sheet's identity sits in the right register, bottom-aligned
+                to the claim — so it heads the column its own lines are about to
+                fill, and the two halves of the first viewport are one object
+                rather than a headline with an empty half beside it. */}
+            <div className="p-reg__en p-hero__sheet">
+              <span className="p-mark">{t.docLabel}</span>
               <span className="p-doc__org">{t.docOrg}</span>
               <span className="p-doc__title">{t.docTitle}</span>
               <span className="p-doc__meta">
@@ -75,65 +104,94 @@ export default function LandingPage() {
                   <span key={item}>{item}</span>
                 ))}
               </span>
-            </figcaption>
+            </div>
+          </div>
+
+          <figure className="p-doc">
             <ol className="p-doc__rows">
-              {t.docRows.map((row, index) => (
-                <li className="p-row" key={row.vi}>
-                  <span className="p-row__no">{index + 1}</span>
-                  <span className="p-row__vi" lang="vi">
+              {docRows.map((row, index) => (
+                <li
+                  className={`p-reg p-reg--ruled${index === 0 ? " p-reg--top" : ""}`}
+                  key={row.vi}
+                >
+                  <span className="p-reg__mark p-ord">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="p-reg__vi p-row__vi" lang="vi">
                     {row.vi}
+                  </span>
+                  {/* A held row has no English at all — not hidden, absent.
+                      What sits in the cell is the edge of the gap and the
+                      reason for it, never a stand-in for the missing string. */}
+                  {row.en ? (
                     <span
-                      className="p-row__en"
+                      className="p-reg__en p-row__en"
                       lang="en"
                       style={{ "--i": index } as CSSProperties}
                     >
                       {row.en}
                     </span>
-                  </span>
+                  ) : (
+                    <span className="p-reg__en p-held">
+                      <span className="p-held__mark">{t.docHeldMark}</span>
+                      <span className="p-held__why">{t.docHeldNote}</span>
+                    </span>
+                  )}
                 </li>
               ))}
             </ol>
-            <div className="p-doc__foot">
-              <span className="p-seal" aria-hidden="true">
-                {t.docSeal}
+
+            <figcaption className="p-reg p-doc__foot">
+              <span className="p-reg__mark">
+                <span className="p-seal" aria-hidden="true">
+                  {t.docSeal}
+                </span>
               </span>
-              <span>{t.docFoot}</span>
-            </div>
-            </figure>
-          </div>
+              <p className="p-reg__wide">{t.docFoot}</p>
+            </figcaption>
+          </figure>
         </section>
 
         {/* One committed field, one comparison. Two numbers that only mean
-            something next to each other do not belong in separate boxes. */}
+            something next to each other belong either side of the rule the
+            whole page uses to mean exactly that. */}
         <section className="p-field" id="problem" aria-labelledby="problem-title">
           <div className="p-wrap p-section">
-            <div className="p-section__head">
-              <span className="p-label">{t.problemLabel}</span>
-              <h2 id="problem-title">{t.problemTitle}</h2>
-              <p className="p-lede">{t.problemBody}</p>
+            <div className="p-reg p-section__head">
+              <span className="p-reg__mark p-mark">{t.problemLabel}</span>
+              <h2 className="p-reg__vi" id="problem-title">
+                {t.problemTitle}
+              </h2>
+              <p className="p-reg__en p-lede">{t.problemBody}</p>
             </div>
 
-            <div className="p-compare">
-              <div className="p-compare__side p-compare__side--base">
+            <div className="p-reg p-reg--ruled p-reg--top">
+              <span className="p-reg__mark p-mark" aria-hidden="true" />
+              <div className="p-reg__vi p-compare p-compare--base">
                 <strong className="p-compare__fig">{t.compareBase.figure}</strong>
                 <span className="p-compare__cap">{t.compareBase.caption}</span>
               </div>
-              <div className="p-compare__side p-compare__side--risk">
+              <div className="p-reg__en p-compare p-compare--risk">
                 <strong className="p-compare__fig">{t.compareRisk.figure}</strong>
                 <span className="p-compare__cap">{t.compareRisk.caption}</span>
               </div>
             </div>
 
+            <ul className="p-list">
+              {t.problemNotes.map((note) => (
+                <li className="p-reg p-reg--ruled" key={note.lead}>
+                  <span className="p-reg__mark p-mark" aria-hidden="true" />
+                  <p className="p-reg__vi p-note">
+                    <b>{note.lead}</b>
+                  </p>
+                  <p className="p-reg__en p-note">{note.body}</p>
+                </li>
+              ))}
+            </ul>
+
             {/* The comparison is the strongest claim on the page and it is not
                 ours. It carries its citation next to it, not in a footer. */}
-            <p className="p-cite">{t.compareSource}</p>
-
-            {t.problemNotes.map((note) => (
-              <p className="p-note" key={note.lead}>
-                <b>{note.lead}</b>
-                {note.body}
-              </p>
-            ))}
+            <p className="p-cite p-indent">{t.compareSource}</p>
           </div>
         </section>
 
@@ -142,52 +200,65 @@ export default function LandingPage() {
             happen after it, on paper. Numbered as a sequence because it is
             one — this is a timeline, not three features. */}
         <section className="p-wrap p-section" id="moments" aria-labelledby="moments-title">
-          <div className="p-section__head">
-            <span className="p-label">{t.momentsLabel}</span>
-            <h2 id="moments-title">{t.momentsTitle}</h2>
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.momentsLabel}</span>
+            <h2 className="p-reg__wide" id="moments-title">
+              {t.momentsTitle}
+            </h2>
           </div>
-          <ol className="p-moments">
-            {t.moments.map((moment) => (
-              <li key={moment.when}>
-                <h3>{moment.when}</h3>
-                <p>{moment.body}</p>
+          <ol className="p-list">
+            {t.moments.map((moment, index) => (
+              <li className="p-reg p-reg--ruled" key={moment.when}>
+                <span className="p-reg__mark p-ord">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className="p-reg__vi">{moment.when}</h3>
+                <p className="p-reg__en">{moment.body}</p>
               </li>
             ))}
           </ol>
-          <p className="p-moments__note">{t.momentsNote}</p>
+          <p className="p-moments__note p-indent">{t.momentsNote}</p>
         </section>
 
         <section className="p-field" id="try" aria-labelledby="try-title">
           <div className="p-wrap p-section">
-            <div className="p-section__head">
-              <span className="p-label">{t.tryLabel}</span>
-              <h2 id="try-title">{t.tryTitle}</h2>
-              <p className="p-lede">{t.tryBody}</p>
+            <div className="p-reg p-section__head">
+              <span className="p-reg__mark p-mark">{t.tryLabel}</span>
+              <h2 className="p-reg__vi" id="try-title">
+                {t.tryTitle}
+              </h2>
+              <p className="p-reg__en p-lede">{t.tryBody}</p>
             </div>
-            <ul className="p-try">
+            <ul className="p-list">
               {t.tryItems.map((item) => (
-                <li key={item.title}>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
+                <li className="p-reg p-reg--ruled" key={item.title}>
+                  <span className="p-reg__mark p-mark" aria-hidden="true" />
+                  <h3 className="p-reg__vi">{item.title}</h3>
+                  <p className="p-reg__en">{item.body}</p>
                 </li>
               ))}
             </ul>
-            <a className="p-cta p-try__cta" href="/thu-nghiem/">
+            <a className="p-cta p-try__cta p-indent" href="/thu-nghiem/">
               {t.tryCta}
             </a>
           </div>
         </section>
 
         <section className="p-wrap p-section" id="how" aria-labelledby="how-title">
-          <div className="p-section__head">
-            <span className="p-label">{t.howLabel}</span>
-            <h2 id="how-title">{t.howTitle}</h2>
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.howLabel}</span>
+            <h2 className="p-reg__wide" id="how-title">
+              {t.howTitle}
+            </h2>
           </div>
-          <ol className="p-steps">
-            {t.howSteps.map((step) => (
-              <li key={step.title}>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
+          <ol className="p-list">
+            {t.howSteps.map((step, index) => (
+              <li className="p-reg p-reg--ruled" key={step.title}>
+                <span className="p-reg__mark p-ord">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className="p-reg__vi">{step.title}</h3>
+                <p className="p-reg__en">{step.body}</p>
               </li>
             ))}
           </ol>
@@ -196,17 +267,21 @@ export default function LandingPage() {
         {/* Measured results as a results table, with the limits carried in the
             same structure — the journal convention this page borrows from. */}
         <section className="p-wrap p-section" id="evidence" aria-labelledby="evidence-title">
-          <div className="p-section__head">
-            <span className="p-label">{t.evidenceLabel}</span>
-            <h2 id="evidence-title">{t.evidenceTitle}</h2>
-            <p className="p-lede">{t.evidenceBody}</p>
-            <p className="p-lede">
-              <b>{t.priceNote.lead}</b>
-              {t.priceNote.body}
-            </p>
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.evidenceLabel}</span>
+            <h2 className="p-reg__vi" id="evidence-title">
+              {t.evidenceTitle}
+            </h2>
+            <div className="p-reg__en">
+              <p className="p-lede">{t.evidenceBody}</p>
+              <p className="p-lede">
+                <b>{t.priceNote.lead}</b>
+                {t.priceNote.body}
+              </p>
+            </div>
           </div>
 
-          <table className="p-table">
+          <table className="p-table p-indent">
             <caption>{t.tableCaption}</caption>
             <thead>
               <tr>
@@ -230,62 +305,86 @@ export default function LandingPage() {
             </tbody>
           </table>
 
-          <div className="p-limits">
-            <h3>{t.limitsTitle}</h3>
-            <ul>
-              {t.limits.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+          <div className="p-reg p-limits">
+            <span className="p-reg__mark p-mark" aria-hidden="true" />
+            <div className="p-reg__wide">
+              <h3>{t.limitsTitle}</h3>
+              <ul>
+                {t.limits.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
+        {/* Single statements, one per row, so no spine is drawn here. An empty
+            right register has one meaning on this page and this is not it. */}
         <section className="p-wrap p-section" aria-labelledby="safety-title">
-          <div className="p-section__head">
-            <span className="p-label">{t.safetyLabel}</span>
-            <h2 id="safety-title">{t.safetyTitle}</h2>
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.safetyLabel}</span>
+            <h2 className="p-reg__wide" id="safety-title">
+              {t.safetyTitle}
+            </h2>
           </div>
-          <ul className="p-refuse">
+          <ul className="p-list">
             {t.safetyItems.map((item) => (
-              <li key={item}>{item}</li>
+              <li className="p-reg p-reg--ruled" key={item}>
+                <span className="p-reg__mark">
+                  <RefuseMark />
+                </span>
+                <span className="p-reg__wide p-refuse__text">{item}</span>
+              </li>
             ))}
           </ul>
         </section>
 
         <section className="p-field" id="start" aria-labelledby="start-title">
           <div className="p-wrap p-section">
-            <div className="p-section__head">
-              <span className="p-label">{t.startLabel}</span>
-              <h2 id="start-title">{t.startTitle}</h2>
-              <p className="p-lede">{t.startBody}</p>
+            <div className="p-reg p-section__head">
+              <span className="p-reg__mark p-mark">{t.startLabel}</span>
+              <h2 className="p-reg__vi" id="start-title">
+                {t.startTitle}
+              </h2>
+              <p className="p-reg__en p-lede">{t.startBody}</p>
             </div>
-            <div className="p-start">
-              <div className="p-start__actions">
-                <a className="p-cta" href={visitHref}>
-                  {t.startCta}
-                </a>
-                <a className="p-cta p-cta--ghost" href={scribeHref}>
-                  {t.startScribe}
-                </a>
-              </div>
-              <details className="p-pilot">
-                <summary>{t.pilotSummary}</summary>
-                <div>
-                  {/* `interest="scribe"` was left over from the two-product
-                      site. This page is about the bilingual visit, and a pilot
-                      enquiry arriving tagged as the wrong product routes the
-                      lead wrong. The selector is visible again so the clinic
-                      says which one it wants. */}
-                  <LeadForm
-                    language="vi"
-                    interest="both"
-                    scenario={scenarios[0]}
-                    clinic=""
-                    specialty=""
-                    transcript=""
-                  />
+            <div className="p-reg">
+              <span className="p-reg__mark p-mark" aria-hidden="true" />
+              <div className="p-reg__wide">
+                <div className="p-start__actions">
+                  <a className="p-cta" href={visitHref}>
+                    {t.startCta}
+                  </a>
+                  {/* The page's whole argument is that harm concentrates on
+                      paper. Until now every door it opened was a conversation:
+                      the document reader existed but was reachable only from
+                      inside a started visit. This is the paperwork door. */}
+                  <a className="p-cta p-cta--ghost" href={paperworkHref}>
+                    {t.startPaperwork}
+                  </a>
+                  <a className="p-cta p-cta--ghost" href={scribeHref}>
+                    {t.startScribe}
+                  </a>
                 </div>
-              </details>
+                <details className="p-pilot">
+                  <summary>{t.pilotSummary}</summary>
+                  <div>
+                    {/* `interest="scribe"` was left over from the two-product
+                        site. This page is about the bilingual visit, and a pilot
+                        enquiry arriving tagged as the wrong product routes the
+                        lead wrong. The selector is visible again so the clinic
+                        says which one it wants. */}
+                    <LeadForm
+                      language="vi"
+                      interest="both"
+                      scenario={scenarios[0]}
+                      clinic=""
+                      specialty=""
+                      transcript=""
+                    />
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
         </section>

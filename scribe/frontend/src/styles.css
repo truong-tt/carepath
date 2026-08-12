@@ -30,7 +30,9 @@
   --p-paper-2: #eef1f6;
   --p-ink: #10141a;
   --p-ink-soft: #414a57;
-  --p-ink-faint: #6b7686;
+  /* Was #6b7686, which measured 4.07:1 against --p-paper-2 — the document
+     meta line and the tinted-paper captions were below AA the whole time. */
+  --p-ink-faint: #636e7e;
 
   /* --- the committed field --- */
   --p-blue: #0f2e5c;
@@ -38,6 +40,11 @@
   --p-blue-tint: #dbe4f0;
   --p-on-blue: #eef3fa;
   --p-on-blue-soft: rgb(238 243 250 / 0.74);
+  /* A hairline at the field's boundary. In light the field is dark enough to
+     cut its own edge; in dark it needs one drawn, or it reads as fog. */
+  --p-field-edge: var(--p-blue-deep);
+  /* The seal, as ink on the field. Vermilion itself is 1.7:1 there. */
+  --p-seal-on-field: #ff9a86;
   /* Blue as INK on paper, which is not the same colour as blue as a FIELD.
      --p-blue is a background: in dark mode it is a mid navy that sits at 2.3:1
      against dark paper, so blue text and blue rules must use this instead. */
@@ -59,6 +66,26 @@
   --p-rule-strong: 2px solid var(--p-ink);
   --p-gutter: clamp(1.25rem, 4vw, 3.5rem);
   --p-measure: 62ch;
+
+  /* --- the spine ------------------------------------------------------
+     One vertical rule at a fixed column runs the whole public surface.
+     Vietnamese sits left of it, English right of it, and withheld content is
+     the right column left empty — see DEC-0022. The rule is therefore a
+     meaningful graphic, not a separator: it holds 3:1 against both paper
+     values, where --p-rule is only asked to hold 1.4:1. Do not collapse the
+     two tokens; a hairline that disappears takes the gap's edge with it.
+
+     Geometry: [mark] carries the form's field annotation, [vi] the Vietnamese,
+     [en] the English or its absence. */
+  --p-spine-line: #7f8c9d;
+  --p-spine: 1px solid var(--p-spine-line);
+  --p-mark: 7.5rem;
+  --p-col-gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  --p-grid: [mark] var(--p-mark) [vi] minmax(0, 1fr) [en] minmax(0, 1fr) [end];
+  /* Two columns, no margin annotation — the tablet band. */
+  --p-grid-2: [vi] minmax(0, 1fr) [en] minmax(0, 1fr) [end];
+  /* The spine crossing the committed field, where paper rules are invisible. */
+  --p-spine-on-field: 1px solid rgb(238 243 250 / 0.55);
 
   /* --- legacy semantic names, repointed at the print world ---------------
      Kept so the tool stylesheets need no edit. New work should use --p-*. */
@@ -84,8 +111,10 @@
   --amber-text: var(--p-amber);
   --input-bg: var(--p-paper);
   --nav-bg: rgb(255 255 255 / 0.92);
-  /* Flat offset, not a blur: paper stacked on paper. */
-  --shadow: 0.45rem 0.45rem 0 var(--p-blue-tint);
+  /* Was `0.45rem 0.45rem 0` — a zero-blur offset block, which is a
+     neobrutalist device this world never chose. Paper stacked on paper casts a
+     short, soft, offset shadow; it does not cast a solid rectangle. */
+  --shadow: 0 10px 30px -22px rgb(8 29 61 / 0.55);
 
   /* fixed dark panels — the committed field */
   --deep: var(--p-blue);
@@ -100,33 +129,316 @@
   --section-pad: clamp(4rem, 7vw, 6rem);
 }
 
+/* Dark is not an inversion of light and it is not a flip of these tokens; it is
+   the same document under a different light. Three things were wrong before and
+   are decided here rather than derived:
+
+   1. Paper was #0b1017 — blue-black. A navy field on blue-black paper has no
+      boundary, so the committed field read as fog rather than as a field. Paper
+      is now neutral and separates from the field by hue as well as luminance,
+      and --p-field-edge draws the boundary the light scheme gets for free.
+   2. The seal was #ff6b64, a coral that reads as a consumer alert. It is pulled
+      back toward vermilion. It cannot go darker than this: .p-cta paints
+      --p-paper on it, and that pair has to clear 4.5:1.
+   3. The spine rule is load-bearing (DEC-0022) and gets its own value at 3:1,
+      not the decorative hairline's.
+
+   Every value below was computed against WCAG before it was typed. If you
+   change one, recompute the pairs it participates in — none of this is
+   eyeballed. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --p-paper: #0b1017;
-    --p-paper-2: #141b25;
-    --p-ink: #eef2f7;
-    --p-ink-soft: #b3bdcb;
-    --p-ink-faint: #8c97a6;
-    --p-blue: #1d4d8f;
-    --p-blue-deep: #060d16;
-    --p-blue-tint: #16253c;
+    --p-paper: #0e1116;
+    --p-paper-2: #171b21;
+    --p-ink: #e8ecf1;
+    --p-ink-soft: #aeb7c2;
+    --p-ink-faint: #8b95a1;
+    --p-blue: #17375f;
+    --p-blue-deep: #0a1929;
+    --p-blue-tint: #1b2636;
     --p-on-blue: #eef3fa;
-    --p-blue-ink: #a9c6ec;
-    --p-seal: #ff6b64;
-    --p-seal-ink: #ff8b84;
-    --p-seal-tint: #2a1416;
+    --p-blue-ink: #9dc2ee;
+    --p-field-edge: #2b4a75;
+    --p-seal: #ff7a6e;
+    --p-seal-ink: #ff9a90;
+    --p-seal-tint: #2a1518;
+    --p-seal-on-field: #ffab99;
     --p-amber: #f0b45c;
     --p-amber-tint: #2a2013;
-    --p-rule: 1px solid #2b3646;
+    --p-rule: 1px solid #2f3640;
     --p-rule-strong: 2px solid var(--p-ink);
+    --p-spine-line: #5e6773;
 
-    --line: #2b3646;
+    --line: #2f3640;
     --critical-text: var(--p-seal-ink);
     --amber-text: var(--p-amber);
-    --nav-bg: rgb(11 16 23 / 0.92);
-    --shadow: 0.45rem 0.45rem 0 var(--p-blue-tint);
-    --accent-on-deep: #a9c6ec;
+    --nav-bg: rgb(14 17 22 / 0.92);
+    /* Deeper and softer than the light scheme's: on dark paper a shadow is
+       read as absence of light, so it needs more spread and less opacity. */
+    --shadow: 0 12px 34px -24px rgb(0 0 0 / 0.9);
+    --accent-on-deep: var(--p-blue-ink);
   }
+}
+
+/* =====================================================================
+   Shared print primitives.
+
+   These used to live in landing.css. They are not the landing's composition —
+   they are the world's vocabulary, and the demo hub, the visit screen and the
+   paperwork route all render them. Vite bundles every stylesheet into one file,
+   so the old arrangement happened to work; it was still a lie about where the
+   dependency lay, and a new surface had to import the landing's composition to
+   get a button.
+
+   The register is the load-bearing one. Three cells — a margin annotation, the
+   statement, and its resolution — with the spine as the resolution cell's left
+   border, so consecutive rows draw one continuous line. Withheld content is
+   that resolution cell left empty, at the same grid column on every surface
+   (DEC-0022). Do not fork this per route.
+   ===================================================================== */
+
+/* --- the register ----------------------------------------------------
+   The one layout primitive on this page. Three cells: a margin annotation, the
+   statement, and its resolution. The spine is the resolution cell's left
+   border, so consecutive rows draw one continuous line without any element
+   spanning the section's height. */
+
+.p-reg {
+  display: grid;
+  grid-template-columns: var(--p-grid);
+  align-items: start;
+}
+
+.p-reg__mark {
+  grid-column: mark;
+  padding-right: var(--p-col-gap);
+}
+
+.p-reg__vi {
+  grid-column: vi;
+  padding-right: var(--p-col-gap);
+  min-width: 0;
+}
+
+.p-reg__en {
+  grid-column: en / end;
+  padding-left: var(--p-col-gap);
+  border-left: var(--p-spine);
+  min-width: 0;
+}
+
+/* Content that is not itself a register still starts where the registers do.
+   The mark column is a margin: nothing but annotations belongs in it, and a
+   block that begins at the container edge reads as a ragged left edge against
+   every heading on the page. */
+.p-indent {
+  margin-left: var(--p-mark);
+}
+
+@media (max-width: 64rem) {
+  .p-indent {
+    margin-left: 0;
+  }
+}
+
+/* A single statement spans both registers and no rule is drawn. */
+.p-reg__wide {
+  grid-column: vi / end;
+  padding-right: var(--p-col-gap);
+  min-width: 0;
+}
+
+/* Ruled rows: the rule crosses the spine, as it does on a printed form. */
+.p-reg--ruled > * {
+  border-bottom: var(--p-rule);
+  padding-block: 1.15rem 1.3rem;
+}
+
+/* The register opens against a strong rule, as a form's field block does.
+   `:first-child` is safe inside `.p-list` because list items are its only
+   children; anywhere else the modifier is set explicitly, because sibling
+   element types vary between sections and a structural selector silently
+   misses. `.p-doc__rows` is deliberately excluded — the document head already
+   closes with a strong rule and a second one would double it. */
+.p-reg--top > *,
+.p-list > .p-reg--ruled:first-child > * {
+  border-top: var(--p-rule-strong);
+}
+
+/* On the committed field, paper rules vanish; the field carries its own. */
+.p-field .p-reg__en {
+  border-left: var(--p-spine-on-field);
+}
+
+.p-field .p-reg--ruled > * {
+  border-bottom-color: rgb(238 243 250 / 0.35);
+}
+
+.p-field .p-reg--top > *,
+.p-field .p-list > .p-reg--ruled:first-child > * {
+  border-top: 2px solid var(--p-on-blue-soft);
+}
+
+/* The form's field annotation. It used to stack above every heading as an
+   uppercase eyebrow, which is the generic marketing kicker rather than the
+   margin note an official form actually carries. It lives in the margin now. */
+.p-mark {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--p-ink-faint);
+}
+
+.p-field .p-mark {
+  color: var(--p-on-blue-soft);
+}
+
+/* The ordinal, where a sequence genuinely carries information. */
+.p-ord {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  color: var(--p-ink-faint);
+}
+
+@media (max-width: 64rem) {
+  .p-reg {
+    grid-template-columns: var(--p-grid-2);
+  }
+
+  /* The annotation folds to a line of its own above the pair, still reading as
+     a margin note because it keeps its own row rather than hugging a heading. */
+  .p-reg__mark {
+    grid-column: vi / end;
+    padding-right: 0;
+    padding-bottom: 0.55rem;
+  }
+
+  .p-reg--ruled > .p-reg__mark {
+    border-bottom: 0;
+    padding-bottom: 0.55rem;
+  }
+}
+
+/* The spine rotates. Two columns become one, and the resolution cell keeps its
+   rule on the left at an indent — so a withheld row is still a marked, empty
+   band at the position the English would have taken. */
+@media (max-width: 44rem) {
+  .p-reg {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .p-reg__mark,
+  .p-reg__vi,
+  .p-reg__en,
+  .p-reg__wide {
+    grid-column: 1;
+    padding-right: 0;
+  }
+
+  .p-reg__en {
+    margin-top: 0.55rem;
+    margin-left: 0.1rem;
+    padding-left: 0.85rem;
+  }
+
+  .p-reg--ruled > .p-reg__vi,
+  .p-reg--ruled > .p-reg__mark {
+    border-bottom: 0;
+    padding-block: 0;
+  }
+
+  .p-reg--ruled > .p-reg__mark {
+    padding-top: 1.15rem;
+  }
+
+  .p-reg--ruled > .p-reg__vi {
+    padding-top: 0.4rem;
+  }
+
+  .p-reg--ruled > .p-reg__en,
+  .p-reg--ruled > .p-reg__wide {
+    padding-block: 0 1.3rem;
+  }
+
+  .p-reg--ruled > *:last-child {
+    border-bottom: var(--p-rule);
+  }
+
+  .p-field .p-reg--ruled > *:last-child {
+    border-bottom-color: rgb(238 243 250 / 0.35);
+  }
+}
+
+
+.p-lede {
+  font-size: clamp(1rem, 1.35vw, 1.14rem);
+  line-height: 1.62;
+  color: var(--p-ink-soft);
+}
+
+.p-wrap {
+  width: min(100% - 2.5rem, 78rem);
+  margin-inline: auto;
+}
+
+.p-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.15rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  color: var(--p-paper);
+  background: var(--p-seal);
+  border: 2px solid var(--p-seal);
+}
+
+.p-cta:hover {
+  background: var(--p-seal-ink);
+  border-color: var(--p-seal-ink);
+}
+
+.p-cta--ghost {
+  color: var(--p-ink);
+  background: transparent;
+  border-color: var(--p-ink);
+}
+
+.p-cta--ghost:hover {
+  color: var(--p-paper);
+  background: var(--p-ink);
+}
+
+/* The gap's edge. Nothing stands in for the withheld English — the string is
+   absent from the DOM, not hidden — so what is marked here is the boundary of
+   an absence and the reason for it. */
+.p-held {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.p-held__mark {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 0.24rem 0.45rem;
+  border: 1.5px solid var(--p-seal);
+  color: var(--p-seal-ink);
+}
+
+.p-held__why {
+  font-size: 0.85rem;
+  color: var(--p-ink-faint);
 }
 
 * {
@@ -369,7 +681,7 @@ textarea:focus-visible {
 .demo__privacy {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--accent-ink);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   color: var(--accent-ink);
   font-size: 0.74rem;
   font-weight: 600;
@@ -659,7 +971,7 @@ textarea:focus-visible {
 .risk-list li {
   padding: 0.28rem 0.55rem;
   border: 1px solid color-mix(in srgb, var(--amber) 60%, transparent);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   color: var(--amber-text);
   font-size: 0.72rem;
   font-weight: 600;
@@ -883,7 +1195,7 @@ textarea {
 }
 
 mark.scribe-mark {
-  border-radius: 0.2rem;
+  border-radius: var(--r-control);
   background: transparent;
   color: inherit;
 }
@@ -952,7 +1264,7 @@ mark.scribe-mark {
   margin: 0;
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--amber);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   color: var(--amber-text);
   font-size: 0.74rem;
   font-weight: 700;
@@ -1004,7 +1316,7 @@ mark.scribe-mark {
   margin: 1.2rem 0 0;
   padding: 0.35rem 0.75rem;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -1078,7 +1390,7 @@ mark.scribe-mark {
   margin: 0;
   padding: 0.55rem 0.9rem;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   background: var(--tint);
   font-size: 0.85rem;
   overflow-wrap: anywhere;
@@ -1087,7 +1399,7 @@ mark.scribe-mark {
 .file-chip button {
   padding: 0.2rem 0.6rem;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -1228,7 +1540,7 @@ mark.scribe-mark {
 .pilot__configuration span {
   padding: 0.4rem 0.7rem;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   font-size: 0.74rem;
   font-weight: 600;
 }

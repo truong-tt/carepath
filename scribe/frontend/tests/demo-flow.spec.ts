@@ -119,6 +119,38 @@ test("the landing page states the patient-safety problem, responsively", async (
   }
 });
 
+// DEC-0022: withheld content is the right register left empty, at a fixed grid
+// column, on every public surface. The two prescription lines carrying a dose
+// are held on the landing hero, and "held" has to mean the English is ABSENT —
+// a CSS-hidden string is still shipped to the patient's browser and is one
+// override away from being read out. This assertion is the durable proof of
+// that decision and must not be weakened to a visibility check.
+test("the hero withholds the dose lines rather than hiding them", async ({ page }) => {
+  await page.goto("/");
+
+  const held = page.locator(".p-held");
+  await expect(held).toHaveCount(2);
+  await expect(held.first()).toBeVisible();
+
+  const html = (await page.content()).toLowerCase();
+  expect(html).not.toContain("take 1 tablet");
+  expect(html).not.toContain("fever is above");
+
+  // The lines that carry no dose still resolve, so the gap reads as a choice
+  // rather than as a page that failed to translate anything.
+  await expect(page.getByText("Do not drink alcohol while taking this medicine")).toBeVisible();
+
+  // The gap sits to the right of the spine, and the Vietnamese to its left.
+  const geometry = await page.evaluate(() => {
+    const row = document.querySelector(".p-doc__rows .p-reg") as HTMLElement | null;
+    const vi = row?.querySelector(".p-reg__vi")?.getBoundingClientRect();
+    const en = row?.querySelector(".p-reg__en")?.getBoundingClientRect();
+    return vi && en ? { viRight: vi.right, enLeft: en.left } : null;
+  });
+  expect(geometry).not.toBeNull();
+  expect(geometry!.enLeft).toBeGreaterThanOrEqual(geometry!.viRight);
+});
+
 test("a non-Vietnamese reader can switch the whole page to English", async ({ page }) => {
   await page.goto("/");
 

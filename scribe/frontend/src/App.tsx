@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import DemoHub from "./demo/DemoHub";
+import PaperworkScreen from "./paperwork/PaperworkScreen";
 import ScribeTool from "./scribe/ScribeTool";
 import VisitScreen from "./visit/VisitScreen";
 
 const CLINICAL_NOTES_PATH = "/ghi-chep-lam-sang/";
 const VISIT_PATH = "/kham-song-ngu/";
 const DEMO_PATH = "/thu-nghiem/";
+const PAPERWORK_PATH = "/dich-giay-to/";
 
 export default function App() {
   const [pathname, setPathname] = useState(() => window.location.pathname);
@@ -34,6 +36,10 @@ export default function App() {
       window.history.replaceState(null, "", DEMO_PATH);
       setPathname(DEMO_PATH);
     }
+    if (pathname === "/dich-giay-to") {
+      window.history.replaceState(null, "", PAPERWORK_PATH);
+      setPathname(PAPERWORK_PATH);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -49,6 +55,7 @@ export default function App() {
   const isScribeTool = pathname === CLINICAL_NOTES_PATH;
   const isVisit = pathname === VISIT_PATH;
   const isDemo = pathname === DEMO_PATH;
+  const isPaperwork = pathname === PAPERWORK_PATH;
 
   useEffect(() => {
     if (isScribeTool) window.scrollTo(0, 0);
@@ -72,6 +79,7 @@ export default function App() {
 
   if (isVisit) return <VisitScreen backHref="/" />;
   if (isDemo) return <DemoHub backHref="/" />;
+  if (isPaperwork) return <PaperworkScreen backHref="/" />;
   return isScribeTool ? (
     <ScribeTool backHref="/" />
   ) : (

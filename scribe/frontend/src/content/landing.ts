@@ -40,14 +40,18 @@ export const LANDING = {
     docOrg: "Phòng khám đa khoa",
     docTitle: "Đơn thuốc",
     docMeta: ["Người bệnh: M. Reynolds", "Ngày: 11/08/2026", "Số: 2026/0431"],
+    // The two lines carrying a dose are held; the two that do not are resolved.
+    // That is the product rule, not an illustration of it — a clinician reading
+    // this sheet should recognise its own behaviour. A held row has no `en` at
+    // all, so the English is absent from the DOM rather than hidden by CSS.
     docRows: [
       {
         vi: "Amoxicillin 500 mg — Uống 1 viên, ngày 2 lần, sau ăn",
-        en: "Amoxicillin 500 mg — take 1 tablet, 2 times a day, after food",
+        held: true,
       },
       {
         vi: "Paracetamol 500 mg — Uống khi sốt trên 38,5 độ C",
-        en: "Paracetamol 500 mg — take when fever is above 38.5°C",
+        held: true,
       },
       {
         vi: "Không uống rượu trong thời gian dùng thuốc",
@@ -58,8 +62,12 @@ export const LANDING = {
         en: "Return for review after 5 days, or sooner if it gets worse",
       },
     ],
+    docHeldMark: "Giữ lại",
+    docHeldNote: "Dòng có liều thuốc",
     docFoot: "Bác sĩ xác nhận từng dòng trước khi người bệnh nhìn thấy.",
-    docSeal: "Bác sĩ đã xác nhận",
+    // Was "Bác sĩ đã xác nhận". Past tense contradicted the line beneath it,
+    // and now contradicts the two held rows on the same sheet.
+    docSeal: "Chờ bác sĩ xác nhận",
 
     problemLabel: "Vấn đề",
     problemTitle: "Nguy hiểm không nằm ở lúc trò chuyện.",
@@ -185,6 +193,9 @@ export const LANDING = {
     startBody:
       "Không cần cài đặt. Mở trên máy tính bảng hoặc điện thoại của phòng khám, micro chỉ bật khi bác sĩ bấm giữ.",
     startCta: "Bắt đầu ca khám",
+    // The page argues that harm concentrates on paper, and until CP-UX-19 every
+    // door it opened was a conversation. This is the paperwork door.
+    startPaperwork: "Dịch giấy tờ cho người bệnh",
     startScribe: "Hoặc chỉ tạo bệnh án từ tệp âm thanh",
     pilotSummary: "Dành cho cơ sở muốn thí điểm CarePath",
   },
@@ -216,11 +227,11 @@ export const LANDING = {
     docRows: [
       {
         vi: "Amoxicillin 500 mg — Uống 1 viên, ngày 2 lần, sau ăn",
-        en: "Amoxicillin 500 mg — take 1 tablet, 2 times a day, after food",
+        held: true,
       },
       {
         vi: "Paracetamol 500 mg — Uống khi sốt trên 38,5 độ C",
-        en: "Paracetamol 500 mg — take when fever is above 38.5°C",
+        held: true,
       },
       {
         vi: "Không uống rượu trong thời gian dùng thuốc",
@@ -231,8 +242,10 @@ export const LANDING = {
         en: "Return for review after 5 days, or sooner if it gets worse",
       },
     ],
+    docHeldMark: "Withheld",
+    docHeldNote: "Line carries a dose",
     docFoot: "The clinician confirms every line before the patient sees it.",
-    docSeal: "Clinician confirmed",
+    docSeal: "Awaiting clinician confirmation",
 
     problemLabel: "The problem",
     problemTitle: "The danger is not in the conversation.",
@@ -357,6 +370,7 @@ export const LANDING = {
     startBody:
       "Nothing to install. Open it on the clinic's tablet or phone; the microphone only runs while the clinician holds the button.",
     startCta: "Start a visit",
+    startPaperwork: "Translate paperwork for the patient",
     startScribe: "Or just draft a clinical note from an audio file",
     pilotSummary: "For clinics that want to pilot CarePath",
   },

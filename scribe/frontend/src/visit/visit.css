@@ -100,7 +100,7 @@
 .visit-start input:not([type]) {
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--line-strong);
-  border-radius: 0.4rem;
+  border-radius: var(--r-control);
   background: var(--input-bg);
   font: inherit;
 }
@@ -162,7 +162,7 @@
 
 .visit-turn {
   padding: 0.7rem 0.85rem;
-  border-radius: 0.6rem;
+  border-radius: var(--r-control);
   background: var(--tint);
   border: 1px solid transparent;
 }
@@ -236,7 +236,7 @@
   gap: 0.15rem;
   padding: 0.9rem 1rem;
   border: 2px dashed var(--line-strong);
-  border-radius: 0.5rem;
+  border-radius: var(--r-control);
   background: var(--surface);
   cursor: pointer;
   text-align: center;
@@ -319,7 +319,7 @@
   align-items: baseline;
   gap: 0.3rem;
   padding: 0.2rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   background: var(--surface);
   border: 1px solid var(--line-strong);
   font-size: 0.78rem;
@@ -360,7 +360,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border: 1px solid currentColor;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   padding: 0.1rem 0.5rem;
 }
 
@@ -386,7 +386,7 @@
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--line-strong);
-  border-radius: 0.4rem;
+  border-radius: var(--r-control);
   font: inherit;
 }
 
@@ -445,7 +445,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border: 1px solid currentColor;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   padding: 0.1rem 0.55rem;
 }
 
@@ -488,7 +488,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 0.12rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   color: var(--amber-text);
   background: color-mix(in srgb, var(--amber) 22%, transparent);
 }
@@ -514,7 +514,7 @@
   width: 100%;
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--line-strong);
-  border-radius: 0.4rem;
+  border-radius: var(--r-control);
   font: inherit;
 }
 
@@ -551,7 +551,7 @@
 
 .visit-mic {
   padding: 0.85rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--r-control);
   border: 2px solid var(--teal);
   background: var(--surface);
   color: var(--accent-ink);
@@ -575,7 +575,7 @@
   min-width: 0;
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--line-strong);
-  border-radius: 0.4rem;
+  border-radius: var(--r-control);
   background: var(--input-bg);
   font: inherit;
 }
@@ -648,7 +648,7 @@
 .visit-doc__missing,
 .visit-doc__allergies {
   padding: 0.7rem 0.85rem;
-  border-radius: 0.5rem;
+  border-radius: var(--r-control);
   background: var(--tint);
 }
 

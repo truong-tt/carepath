@@ -160,12 +160,17 @@ function DocumentPanel({
 
   const busy = phase.kind === "running";
 
+  // CP-UX-19 tried hiding a panel with neither control, on the reading that a
+  // heading with nothing to click looks broken. It is not broken — it is the
+  // page naming a capability and then refusing to fake it, which is the whole
+  // basis of this product's credibility. `demo-hub.spec.ts` holds that on
+  // purpose. Leaving the panel visible is the decision, not an oversight.
   return (
     <section className="d-panel" aria-label={panel.title}>
-      <div className="d-panel__head">
-        <span className="p-label">{panel.label}</span>
-        <h2>{panel.title}</h2>
-        <p className="d-panel__body">{panel.body}</p>
+      <div className="p-reg d-panel__head">
+        <span className="p-reg__mark p-mark">{panel.label}</span>
+        <h2 className="p-reg__vi">{panel.title}</h2>
+        <p className="p-reg__en d-panel__body">{panel.body}</p>
       </div>
 
       <div className="d-actions">
@@ -261,10 +266,10 @@ export default function DemoHub({ backHref = "/" }: { backHref?: string }) {
       </nav>
 
       <main className="p-wrap d-main">
-        <header className="d-head">
-          <span className="p-label">{DEMO.label}</span>
-          <h1>{DEMO.title}</h1>
-          <p className="p-lede">{DEMO.lede}</p>
+        <header className="p-reg d-head">
+          <span className="p-reg__mark p-mark">{DEMO.label}</span>
+          <h1 className="p-reg__vi">{DEMO.title}</h1>
+          <p className="p-reg__en p-lede">{DEMO.lede}</p>
         </header>
 
         {/* Limits before the first run, not in a footer after it. */}

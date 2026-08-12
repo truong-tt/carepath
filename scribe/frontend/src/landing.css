@@ -1,14 +1,32 @@
 /* =====================================================================
-   Landing surface — Vietnamese clinical print.
+   Landing surface — the comparison spine (CP-UX-18, DEC-0022).
 
-   The `--p-*` tokens and the dark-scheme overrides used to be defined here,
-   scoped under `.landing`, so that /kham-song-ngu/ would keep rendering in
-   the old teal system. That scoping was right for one demo and is debt now:
-   the two surfaces are one product. The tokens live in styles.css `:root`
-   and this file only composes with them.
+   The `--p-*` tokens live in styles.css `:root` and this file only composes
+   with them. What is local here is this surface's composition.
 
-   Kept local because they are about this surface's composition, not the
-   world: the document figure, the committed field, the results table.
+   THE SPINE. One vertical rule at a fixed grid column runs the page. The left
+   register carries the statement, the right register carries its resolution,
+   and the rule sits between them. For translated content the resolution is the
+   English; for argument content it is the elaboration or the evidence. The two
+   readings are the same shape, which is why the page reads as one instrument
+   rather than as eight sections.
+
+   And the reason it is worth the trouble: WITHHELD CONTENT IS THE RIGHT
+   REGISTER LEFT EMPTY. The absence has a location. A doctor scanning the right
+   column sees what is being held back without reading a word, and sees it in
+   the same place on the landing page, the demo hub and the visit screen.
+
+   Two rules keep that legible and both are binding:
+
+   1. The spine is drawn ONLY where two registers exist. Sections that carry a
+      single statement per row — the refusals, the limits — use the margin
+      column and one text column and no rule. So an empty right column can only
+      ever mean withheld, because a right column is only ever drawn when
+      something belongs in it.
+   2. Seal vermilion is spent only where the product withholds something. It
+      marks the EDGE of a gap and never fills one. Two seal rules that used to
+      sit on the limits block and the moments note are gone: neither is withheld
+      content, and spending the seal there was diluting the one thing it says.
    ===================================================================== */
 
 .landing {
@@ -25,66 +43,44 @@
   margin: 0;
 }
 
-/* Sized to the column it actually sits in, not to the viewport. The headline is
-   66 Vietnamese characters; at the old 5.75rem it ran to seven lines in a
-   580px column, which is not display type, it is a paragraph in disguise. */
 /* Leading is set by Vietnamese ink, not by Latin display-type habit. Measured in
    Be Vietnam Pro 800: the worst descender in this headline is `ệ` at 10px below
    the baseline, and the worst stacked ascender is `ấ` at 35px above it. Two
-   lines therefore need 45px of advance, which is 1.172 at any size.
-   `line-height: 0.94` gave 36px and overlapped by 8.9px — on a six-line
-   Vietnamese headline that is a collision, not tight tracking. 1.18 clears it
-   with a little to spare and still reads as display type. Do not lower this
-   without re-measuring: a value that looks fine in English breaks here. */
+   lines therefore need 45px of advance, which is 1.172 AT ANY SIZE — the ratio
+   is size-independent, so the sizes below may change while 1.18 may not.
+   `line-height: 0.94` gave 36px and overlapped by 8.9px. Do not lower this
+   without re-measuring with canvas actualBoundingBoxAscent/Descent on the real
+   string: a value that looks fine in English breaks here. */
 .landing h1 {
-  font-size: clamp(2.4rem, 4.6vw, 4rem);
+  font-size: clamp(2.35rem, 4.1vw, 3.6rem);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1.18;
 }
 
+/* No max-width: the register column governs the measure now, and a `ch` cap on
+   top of a column cap makes the heading narrower than its own cell for no
+   reason. */
 .landing h2 {
-  font-size: clamp(1.85rem, 3.6vw, 3.1rem);
+  font-size: clamp(1.7rem, 2.9vw, 2.4rem);
   font-weight: 800;
-  letter-spacing: -0.028em;
+  letter-spacing: -0.026em;
   line-height: 1.18;
-  max-width: 22ch;
 }
 
 .landing h3 {
-  font-size: 1.02rem;
+  font-size: 1.06rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
+  line-height: 1.35;
 }
 
 .landing p {
   margin: 0;
 }
 
-/* The form label: every official Vietnamese document has these. */
-.p-label {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--p-ink-faint);
-}
-
-.p-lede {
-  max-width: var(--p-measure);
-  font-size: clamp(1.02rem, 1.5vw, 1.2rem);
-  line-height: 1.62;
-  color: var(--p-ink-soft);
-}
-
 .landing section {
   scroll-margin-top: 4.5rem;
-}
-
-.p-wrap {
-  width: min(100% - 2.5rem, 78rem);
-  margin-inline: auto;
 }
 
 /* --- nav ------------------------------------------------------------- */
@@ -99,7 +95,7 @@
   padding: 0.7rem max(1.25rem, calc((100vw - 78rem) / 2));
   background: var(--p-blue);
   color: var(--p-on-blue);
-  border-bottom: 3px solid var(--p-seal);
+  border-bottom: 2px solid var(--p-seal);
 }
 
 .p-nav__brand {
@@ -161,35 +157,6 @@
   border-color: var(--p-on-blue);
 }
 
-.p-cta {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0.55rem 1.15rem;
-  font-weight: 700;
-  font-size: 0.92rem;
-  text-decoration: none;
-  color: var(--p-paper);
-  background: var(--p-seal);
-  border: 2px solid var(--p-seal);
-}
-
-.p-cta:hover {
-  background: var(--p-seal-ink);
-  border-color: var(--p-seal-ink);
-}
-
-.p-cta--ghost {
-  color: var(--p-ink);
-  background: transparent;
-  border-color: var(--p-ink);
-}
-
-.p-cta--ghost:hover {
-  color: var(--p-paper);
-  background: var(--p-ink);
-}
-
 .p-nav .p-cta {
   min-height: 2.25rem;
   padding-block: 0.35rem;
@@ -221,31 +188,26 @@
   }
 }
 
-/* --- the document: the first viewport -------------------------------- */
+/* --- the first viewport ----------------------------------------------
+   The claim occupies the left register. The document's rows straddle the spine
+   beneath it, so the visitor meets the structure and its meaning in one look:
+   Vietnamese on the left, English on the right, and two rows where the English
+   is simply not there. */
 
 .p-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: var(--p-gutter);
-  align-items: start;
   /* Held down deliberately: the whole hero, document included, has to fit a
      1440x800 laptop so the primary action never needs a scroll. */
-  padding-block: clamp(1.75rem, 3.2vw, 2.75rem);
+  padding-block: clamp(1.5rem, 2.6vw, 2.25rem) clamp(1.75rem, 3vw, 2.75rem);
 }
 
-@media (max-width: 64rem) {
-  .p-hero {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Sticky only where there is a second column to stay beside. In one column it
-   would pin the headline over the document the visitor is trying to read. */
-@media (min-width: 64.0625rem) {
-  .p-hero__claim {
-    position: sticky;
-    top: 5.5rem;
-  }
+/* The headline is the sheet's title block and is allowed the margin column:
+   66 Vietnamese characters in a half-width register runs to five lines, which
+   is a paragraph in disguise rather than display type. */
+.p-hero__claim {
+  grid-column: mark / en;
+  padding-right: var(--p-col-gap);
+  padding-bottom: clamp(1.25rem, 2.2vw, 2rem);
+  min-width: 0;
 }
 
 .p-hero h1 em {
@@ -254,9 +216,8 @@
 }
 
 .p-hero__body {
-  margin-top: 1.4rem;
-  max-width: 46ch;
-  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  margin-top: 1.15rem;
+  font-size: clamp(0.98rem, 1.25vw, 1.1rem);
   line-height: 1.6;
   color: var(--p-ink-soft);
 }
@@ -265,28 +226,47 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 1.8rem;
+  margin-top: 1.5rem;
 }
 
-.p-hero__doc {
-  display: grid;
-  gap: 0.65rem;
+/* The claim's own resolution cell: the first thing the visitor sees in the
+   right register is the caption naming what is about to appear there. */
+.p-hero__sheet {
+  align-self: end;
+  padding-bottom: clamp(1.25rem, 2.2vw, 2rem);
 }
 
-/* The prescription itself, rendered as the object it is. */
+.p-hero__sheet .p-mark {
+  margin-bottom: 0.9rem;
+}
+
+/* The claim sets its own `grid-column` and is defined after the register's
+   responsive block, so its collapse has to be stated here or the later
+   declaration wins and a line name that no longer exists in the template
+   silently creates an implicit column. */
+@media (max-width: 64rem) {
+  .p-hero__claim {
+    grid-column: vi / end;
+  }
+
+  .p-hero__sheet {
+    margin-top: 1.75rem;
+    padding-bottom: 1.1rem;
+  }
+}
+
+@media (max-width: 44rem) {
+  .p-hero__claim {
+    grid-column: 1;
+    padding-right: 0;
+  }
+}
+
+/* --- the document ---------------------------------------------------- */
+
 .p-doc {
-  --doc-pad: clamp(1rem, 2.2vw, 1.75rem);
   /* figure's UA margin is 1em 40px, which indented the document by 80px. */
-  margin: 0;
-  background: var(--p-paper);
-  border: var(--p-rule-strong);
-  box-shadow: 0.45rem 0.45rem 0 var(--p-blue-tint);
-}
-
-.p-doc__head {
-  padding: var(--doc-pad) var(--doc-pad) 0.85rem;
-  border-bottom: var(--p-rule-strong);
-  text-align: center;
+  margin: 0.5rem 0 0;
 }
 
 .p-doc__org {
@@ -300,8 +280,8 @@
 
 .p-doc__title {
   display: block;
-  margin-top: 0.3rem;
-  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  margin-top: 0.25rem;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -310,9 +290,8 @@
 .p-doc__meta {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.4rem 1.1rem;
-  margin-top: 0.45rem;
+  gap: 0.3rem 1.4rem;
+  margin-top: 0.4rem;
   font-size: 0.78rem;
   color: var(--p-ink-faint);
 }
@@ -323,65 +302,36 @@
   list-style: none;
 }
 
-.p-row {
-  display: grid;
-  grid-template-columns: 2.2rem 1fr;
-  gap: 0 0.75rem;
-  padding: 0.72rem var(--doc-pad);
-  border-bottom: var(--p-rule);
-}
-
-.p-row:last-child {
-  border-bottom: 0;
-}
-
-.p-row__no {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--p-ink-faint);
-  padding-top: 0.1rem;
+.p-doc .p-reg--ruled > * {
+  padding-block: 0.68rem 0.74rem;
 }
 
 .p-row__vi {
   /* 700, not 600: font-synthesis is none and 600 is not among the loaded
      weights, so it silently resolved to something else. */
   font-weight: 700;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-
-/* The mechanism, performed: English resolves beneath the Vietnamese. */
-.p-row__en {
-  display: block;
-  margin-top: 0.3rem;
-  padding-left: 0.7rem;
-  border-left: 2px solid var(--p-blue);
-  font-size: 0.94rem;
   line-height: 1.45;
-  color: var(--p-blue);
   overflow-wrap: anywhere;
 }
 
-@media (prefers-color-scheme: dark) {
-  .p-row__en {
-    color: #9cc0ee;
-    border-left-color: #9cc0ee;
-  }
+.p-row__en {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--p-blue-ink);
+  overflow-wrap: anywhere;
 }
 
-/* The one authored motion moment: the English resolves under each Vietnamese
-   line, in reading order, once. It is the product's mechanism performed — not
+/* The one authored motion moment: the English resolves out of the spine, in
+   reading order, once. It is the product's mechanism performed — not
    decoration, and not repeated anywhere else on the page. */
 /* Deliberately no opacity: the text is at its final colour on every frame, so
    the wipe cannot produce a half-blended foreground. axe samples whenever it
    samples, and a fading string reads as a contrast failure while it fades. */
 @keyframes p-resolve {
   from {
-    translate: 0 -0.4rem;
     clip-path: inset(0 100% 0 0);
   }
   to {
-    translate: 0 0;
     clip-path: inset(0 0 0 0);
   }
 }
@@ -400,29 +350,27 @@
   }
 }
 
+/* The seal, alone in the margin at the sheet's end — which is where a Vietnamese
+   official document carries its chop. Its wording used to read `Bác sĩ đã xác
+   nhận`, past tense, on a sheet with two lines still held. */
 .p-doc__foot {
-  display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.8rem var(--doc-pad);
-  border-top: var(--p-rule-strong);
-  background: var(--p-paper-2);
-  font-size: 0.82rem;
+  padding-top: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
   color: var(--p-ink-soft);
 }
 
-/* The seal. Every Vietnamese official document carries one. */
 .p-seal {
-  flex: none;
   display: grid;
   place-items: center;
-  width: 4.1rem;
-  height: 4.1rem;
-  padding: 0.3rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  padding: 0.25rem;
   border: 2px solid var(--p-seal);
   border-radius: 50%;
-  color: var(--p-seal);
-  font-size: 0.52rem;
+  color: var(--p-seal-ink);
+  font-size: 0.48rem;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.04em;
@@ -436,9 +384,11 @@
 .p-field {
   background: var(--p-blue);
   color: var(--p-on-blue);
+  border-block: 1px solid var(--p-field-edge);
 }
 
-.p-field h2 {
+.p-field h2,
+.p-field h3 {
   color: var(--p-on-blue);
 }
 
@@ -446,262 +396,113 @@
   color: var(--p-on-blue-soft);
 }
 
-.p-field .p-label {
-  color: var(--p-on-blue-soft);
-}
-
 .p-section {
-  padding-block: clamp(2.5rem, 4.5vw, 4.25rem);
+  padding-block: clamp(2.75rem, 4.8vw, 4.5rem);
 }
 
+/* More space above a heading than below it: the register's own gap does the
+   separating, so the head only needs to clear itself from the rows. */
 .p-section__head {
-  display: grid;
-  gap: 0.9rem;
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  margin-bottom: clamp(1.75rem, 3.2vw, 2.5rem);
 }
 
-/* --- the comparison: two figures, not three equal cards -------------- */
-
-.p-compare {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 2px solid var(--p-on-blue-soft);
+.p-section__head .p-lede {
+  padding-top: 0.4rem;
 }
 
-@media (max-width: 44rem) {
-  .p-compare {
-    grid-template-columns: 1fr;
-  }
-}
-
-.p-compare__side {
-  padding: 1.5rem 1.5rem 1.75rem 0;
-}
-
-.p-compare__side + .p-compare__side {
-  padding-left: 1.5rem;
-  border-left: 1px solid var(--p-on-blue-soft);
-}
-
-@media (max-width: 44rem) {
-  .p-compare__side + .p-compare__side {
-    padding-left: 0;
-    border-left: 0;
-    border-top: 1px solid var(--p-on-blue-soft);
-  }
-}
+/* --- the comparison: the two numbers on the spine --------------------
+   Two figures that only mean something next to each other, placed either side
+   of the rule that the whole page uses to mean "and here is the other one". */
 
 .p-compare__fig {
   display: block;
   /* Large, but never larger than the headline — the h1 stays the biggest type
      on the page, and an e2e assertion holds that. */
-  font-size: clamp(2.8rem, 7vw, 3.6rem);
+  font-size: clamp(2.6rem, 6vw, 3.4rem);
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 1.05;
   letter-spacing: -0.045em;
   font-variant-numeric: tabular-nums;
-}
-
-.p-compare__side--base .p-compare__fig {
   color: var(--p-on-blue-soft);
 }
 
-/* The seal colour, on the number that is the reason the product exists. */
-.p-compare__side--risk .p-compare__fig {
-  color: #ff9a86;
+/* The seal hue, on the number that is the reason the product exists. */
+.p-compare--risk .p-compare__fig {
+  color: var(--p-seal-on-field);
 }
 
 .p-compare__cap {
   display: block;
-  margin-top: 0.6rem;
-  max-width: 30ch;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  margin-top: 0.65rem;
+  font-size: 0.94rem;
+  line-height: 1.55;
   color: var(--p-on-blue-soft);
 }
 
 .p-note {
-  margin-top: 1.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--p-on-blue-soft);
-  max-width: var(--p-measure);
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--p-on-blue-soft);
 }
 
 .p-note b {
+  display: block;
   color: var(--p-on-blue);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* The citation for the comparison above. Journal convention: hanging indent,
    quieter than the notes, and it never wraps into the figure it credits. */
 .p-cite {
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
   max-width: var(--p-measure);
   padding-left: 1.5rem;
   text-indent: -1.5rem;
   font-size: 0.78rem;
   line-height: 1.55;
-  letter-spacing: 0.005em;
   color: var(--p-on-blue-soft);
 }
 
-/* --- the three moments: a timeline, ruled like a form ----------------- */
+/* --- registers that carry an argument -------------------------------- */
 
-.p-moments {
-  counter-reset: p-moment;
-  margin: 2rem 0 0;
+.p-list {
+  margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  border-top: var(--p-rule-strong);
 }
 
-.p-moments li {
-  counter-increment: p-moment;
-  padding: 1.35rem 1.25rem 1.5rem 0;
-  border-bottom: var(--p-rule);
+.p-list h3 {
+  margin-bottom: 0.35rem;
 }
 
-.p-moments li + li {
-  padding-left: 1.25rem;
-  border-left: var(--p-rule);
-}
-
-/* The ordinal carries the sequence; the heading carries the moment. */
-.p-moments h3::before {
-  content: counter(p-moment);
-  display: block;
-  margin-bottom: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
-  color: var(--p-seal-ink);
-}
-
-.p-moments h3 {
-  margin: 0 0 0.5rem;
-}
-
-.p-moments p {
-  max-width: 34ch;
+.p-list p {
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--p-ink-soft);
+}
+
+.p-field .p-list p {
+  color: var(--p-on-blue-soft);
 }
 
 .p-moments__note {
-  margin-top: 1.25rem;
-  padding-left: 0.9rem;
-  border-left: 3px solid var(--p-seal);
+  margin-top: 1.5rem;
   max-width: var(--p-measure);
-  font-weight: 600;
+  font-size: 1.02rem;
+  font-weight: 700;
   line-height: 1.6;
-}
-
-/* --- try it: three doors into the demo, on the committed field -------- */
-
-.p-try {
-  margin: 2rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  border-top: 2px solid var(--p-on-blue-soft);
-}
-
-.p-try li {
-  padding: 1.25rem 1.25rem 1.4rem 0;
-  border-bottom: 1px solid var(--p-on-blue-soft);
-}
-
-.p-try li + li {
-  padding-left: 1.25rem;
-  border-left: 1px solid var(--p-on-blue-soft);
-}
-
-.p-try h3 {
-  margin: 0 0 0.45rem;
-  color: var(--p-on-blue);
-}
-
-.p-try p {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--p-on-blue-soft);
 }
 
 .p-try__cta {
-  margin-top: 1.75rem;
+  margin-top: 1.9rem;
 }
 
-@media (max-width: 40rem) {
-  .p-moments li + li,
-  .p-try li + li {
-    padding-left: 0;
-    border-left: 0;
-  }
-}
-
-/* --- mechanism: numbered like a procedure ---------------------------- */
-
-.p-steps {
-  counter-reset: p-step;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 0;
-  border-top: var(--p-rule-strong);
-}
-
-.p-steps li {
-  counter-increment: p-step;
-  padding: 1.15rem 1.25rem 1.5rem 0;
-  border-right: var(--p-rule);
-  list-style: none;
-}
-
-.p-steps li:last-child {
-  border-right: 0;
-}
-
-@media (max-width: 52rem) {
-  .p-steps li {
-    padding-right: 0;
-    border-right: 0;
-    border-bottom: var(--p-rule);
-  }
-  .p-steps li:last-child {
-    border-bottom: 0;
-  }
-}
-
-.p-steps li::before {
-  content: counter(p-step, decimal-leading-zero);
-  display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
-  color: var(--p-seal);
-}
-
-.p-steps p {
-  margin-top: 0.4rem;
-  max-width: 34ch;
-  font-size: 0.94rem;
-  line-height: 1.55;
-  color: var(--p-ink-soft);
-}
-
-/* --- evidence: a results table, not cards ---------------------------- */
+/* --- evidence: a results table, aligned to the same spine ------------- */
 
 .p-table {
-  width: 100%;
+  width: calc(100% - var(--p-mark));
+  table-layout: fixed;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
@@ -716,10 +517,26 @@
 
 .p-table th,
 .p-table td {
-  padding: 0.7rem 0.9rem 0.7rem 0;
+  padding: 0.75rem 0.9rem 0.8rem 0;
   text-align: left;
   border-bottom: var(--p-rule);
   vertical-align: baseline;
+}
+
+/* The table starts where the registers start, and its metric column takes half
+   its width — so the boundary between metric and result falls exactly on the
+   page's spine, and the results table is the same instrument as everything
+   above it rather than a second one. */
+.p-table th:first-child,
+.p-table td:first-child {
+  width: 50%;
+}
+
+.p-table th:nth-child(2),
+.p-table td:nth-child(2) {
+  width: 9rem;
+  padding-left: var(--p-col-gap);
+  border-left: var(--p-spine);
 }
 
 .p-table thead th {
@@ -732,7 +549,7 @@
 }
 
 .p-table tbody th {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .p-table td:last-child {
@@ -743,83 +560,76 @@
 }
 
 .p-figure {
-  font-size: 1.3rem;
+  font-size: 1.28rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
+@media (max-width: 64rem) {
+  .p-table {
+    width: 100%;
+  }
+}
+
+@media (max-width: 44rem) {
+  .p-table th:first-child,
+  .p-table td:first-child,
+  .p-table th:nth-child(2),
+  .p-table td:nth-child(2) {
+    width: auto;
+  }
+
+  .p-table th:nth-child(2),
+  .p-table td:nth-child(2) {
+    padding-left: 0.85rem;
+  }
+}
+
+/* What has not been shown. This is not withheld content, so it carries no seal
+   — it used to, and that was spending the page's one meaningful colour on
+   something it does not mean. It is set as what it is: a statement of limits,
+   in the same margin-and-column shape as everything else. */
 .p-limits {
-  margin-top: 2rem;
-  padding: 1.1rem 1.25rem;
-  border: var(--p-rule);
-  border-left: 4px solid var(--p-seal);
-  background: var(--p-seal-tint);
-  max-width: var(--p-measure);
+  margin-top: 2.25rem;
+  padding-top: 1.15rem;
+  border-top: var(--p-rule-strong);
 }
 
 .p-limits h3 {
-  color: var(--p-seal-ink);
+  margin-bottom: 0.6rem;
 }
 
 .p-limits ul {
-  margin: 0.6rem 0 0;
-  padding-left: 1.1rem;
-  font-size: 0.93rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.94rem;
   line-height: 1.6;
   color: var(--p-ink-soft);
 }
 
-/* --- boundaries ------------------------------------------------------ */
-
-.p-refuse {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: var(--p-rule-strong);
+.p-limits li + li {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: var(--p-rule);
 }
 
-.p-refuse li {
-  padding: 1.1rem 1.25rem 1.4rem 0;
-  border-right: var(--p-rule);
-  font-size: 0.96rem;
-  line-height: 1.55;
-  color: var(--p-ink-soft);
-}
+/* --- boundaries: single statements, so no spine ---------------------- */
 
-.p-refuse li:last-child {
-  border-right: 0;
-}
-
-.p-refuse li::before {
-  content: "✕";
+.p-refuse__mark {
   display: block;
-  margin-bottom: 0.45rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--p-seal);
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--p-seal-ink);
 }
 
-@media (max-width: 52rem) {
-  .p-refuse li {
-    padding-right: 0;
-    border-right: 0;
-    border-bottom: var(--p-rule);
-  }
-  .p-refuse li:last-child {
-    border-bottom: 0;
-  }
+.p-refuse__text {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--p-ink);
 }
 
 /* --- start ----------------------------------------------------------- */
-
-.p-start {
-  display: grid;
-  gap: 1.4rem;
-  justify-items: start;
-}
 
 .p-start__actions {
   display: flex;
@@ -838,8 +648,7 @@
 }
 
 .p-pilot {
-  width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 1.6rem;
 }
 
 .p-pilot > summary {
@@ -860,8 +669,8 @@
 /* --- footer ---------------------------------------------------------- */
 
 .p-foot {
-  padding: 2.25rem max(1.25rem, calc((100vw - 78rem) / 2));
-  border-top: 3px solid var(--p-seal);
+  padding: 2.5rem max(1.25rem, calc((100vw - 78rem) / 2));
+  border-top: 2px solid var(--p-seal);
   background: var(--p-blue-deep);
   color: var(--p-on-blue);
   display: grid;
@@ -905,6 +714,9 @@
 }
 
 .p-nav a:focus-visible,
-.p-nav button:focus-visible {
+.p-nav button:focus-visible,
+.p-field a:focus-visible,
+.p-field button:focus-visible,
+.p-field summary:focus-visible {
   outline-color: var(--p-on-blue);
 }

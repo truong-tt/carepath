@@ -84,10 +84,10 @@ export default function ConversationPanel() {
 
   return (
     <section className="d-panel" aria-label={PANEL.title}>
-      <div className="d-panel__head">
-        <span className="p-label">{PANEL.label}</span>
-        <h2>{PANEL.title}</h2>
-        <p className="d-panel__body">{PANEL.body}</p>
+      <div className="p-reg d-panel__head">
+        <span className="p-reg__mark p-mark">{PANEL.label}</span>
+        <h2 className="p-reg__vi">{PANEL.title}</h2>
+        <p className="p-reg__en d-panel__body">{PANEL.body}</p>
       </div>
 
       <form
