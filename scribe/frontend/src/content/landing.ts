@@ -20,6 +20,7 @@ export const LANDING = {
     navAria: "Điều hướng chính",
     nav: [
       { href: "#problem", label: "Vấn đề" },
+      { href: "#try", label: "Thử ngay" },
       { href: "#how", label: "Cách hoạt động" },
       { href: "#evidence", label: "Bằng chứng" },
       { href: "#start", label: "Bắt đầu" },
@@ -72,16 +73,52 @@ export const LANDING = {
       figure: "49,1%",
       caption: "Người bệnh không thạo ngôn ngữ: cùng loại sự cố, gần gấp rưỡi khả năng gây tổn hại.",
     },
+    compareSource:
+      "Divi C, Koss RG, Schmaltz SP, Loeb JM. Language proficiency and adverse events in US hospitals: a pilot study. Int J Qual Health Care 2007;19(2):60–67.",
     problemNotes: [
       {
         lead: "52,4% so với 35,9%",
         body: "— tỉ lệ sự cố bắt nguồn từ lỗi giao tiếp. Nguyên nhân được nêu tên là dùng người nhà, bạn bè hoặc nhân viên không có chuyên môn làm phiên dịch.",
       },
       {
-        lead: "22,8 triệu lượt khách quốc tế năm 2025",
-        body: "— mức cao nhất từ trước tới nay, cùng khoảng 83.500–100.000 người nước ngoài đang cư trú tại Việt Nam.",
+        lead: "21,2 triệu lượt khách quốc tế năm 2025",
+        body: "— mức cao nhất từ trước tới nay theo Cục Thống kê, cùng 161.992 lao động nước ngoài có việc làm hợp pháp tại Việt Nam tính đến cuối năm 2024.",
       },
     ],
+
+    // The three moments the safety literature names. All three happen on paper,
+    // which is the whole argument for why an interpreter alone does not cover
+    // this. Stated as a sequence, because it is one: the interpreter is present
+    // for the first column and gone for the other two.
+    momentsLabel: "Thời điểm nguy hiểm",
+    momentsTitle: "Ba lúc dễ gây hại nhất đều diễn ra trên giấy.",
+    moments: [
+      {
+        when: "Đối chiếu thuốc",
+        body: "Người bệnh cầm đơn thuốc về nhà và tự đọc liều. Không ai còn ở đó để hỏi lại.",
+      },
+      {
+        when: "Lúc ra viện",
+        body: "Giấy ra viện ghi dấu hiệu cần quay lại ngay. Nếu không đọc được, người bệnh không biết khi nào phải quay lại.",
+      },
+      {
+        when: "Khi ký cam kết",
+        body: "Chữ ký nằm dưới một đoạn văn bản tiếng Việt. Đồng ý mà không hiểu thì không phải là đồng ý.",
+      },
+    ],
+    momentsNote:
+      "Phiên dịch viên có mặt lúc trò chuyện. Cả ba thời điểm trên đều xảy ra sau đó.",
+
+    tryLabel: "Thử ngay",
+    tryTitle: "Tự kiểm chứng, không cần tài khoản.",
+    tryBody:
+      "Chạy thử ngay trên trình duyệt, qua đúng bộ luật lâm sàng và bước xác nhận mà phòng khám dùng.",
+    tryItems: [
+      { title: "Ảnh đơn thuốc", body: "Đọc chữ trên đơn và dịch từng dòng." },
+      { title: "Giấy ra viện", body: "Chuyển thành bản tiếng Anh cho người bệnh." },
+      { title: "Câu hội thoại", body: "Xem dòng có liều thuốc bị giữ lại thế nào." },
+    ],
+    tryCta: "Mở bản thử",
 
     howLabel: "Cách hoạt động",
     howTitle: "Đọc — đối chiếu — bác sĩ xác nhận.",
@@ -106,8 +143,8 @@ export const LANDING = {
     evidenceBody:
       "Các con số về sự cố y khoa ở trên đến từ nghiên cứu an toàn người bệnh đã công bố, không phải kết quả của CarePath. Đây là lý do chúng tôi xây sản phẩm này, chưa phải bằng chứng rằng nó hiệu quả.",
     priceNote: {
-      lead: "Thị trường đã có giá.",
-      body: " Phiên dịch y tế theo ca ở Việt Nam khoảng 50 USD, tính từ lúc làm thủ tục đến khi ra viện. Dịch thuật công chứng hồ sơ y tế khoảng 25–100 USD mỗi trang, trả kết quả sau 24 giờ.",
+      lead: "Người thật vẫn tốt hơn — khi kịp có mặt.",
+      body: " Phiên dịch y tế ở Việt Nam khoảng 300.000–1.500.000 đồng mỗi giờ, chuyên khoa sâu 1,2–2,5 triệu, trọn ngày 2–5 triệu, và phải đặt trước. Dịch thuật công chứng khoảng 60.000–160.000 đồng mỗi trang, trả sau 24 giờ. Người bệnh thì rời phòng khám sau 20 phút. CarePath không thay thế phiên dịch viên; CarePath chỉ lấp những giờ không ai có mặt.",
     },
     tableCaption:
       "Bộ 50 câu kiểm thử chạy qua mô hình thật. Đây là kết quả kỹ thuật, không phải thử nghiệm lâm sàng.",
@@ -156,6 +193,7 @@ export const LANDING = {
     navAria: "Main navigation",
     nav: [
       { href: "#problem", label: "The problem" },
+      { href: "#try", label: "Try it" },
       { href: "#how", label: "How it works" },
       { href: "#evidence", label: "Evidence" },
       { href: "#start", label: "Start" },
@@ -208,16 +246,48 @@ export const LANDING = {
       figure: "49.1%",
       caption: "Patients with limited proficiency: the same events, close to half again as likely to cause harm.",
     },
+    compareSource:
+      "Divi C, Koss RG, Schmaltz SP, Loeb JM. Language proficiency and adverse events in US hospitals: a pilot study. Int J Qual Health Care 2007;19(2):60–67.",
     problemNotes: [
       {
         lead: "52.4% against 35.9%",
         body: "— the share of adverse events rooted in communication error. The named root cause is using family, friends or untrained staff as interpreters.",
       },
       {
-        lead: "22.8 million international arrivals in 2025",
-        body: "— the highest on record, alongside roughly 83,500–100,000 foreign residents in Vietnam.",
+        lead: "21.2 million international arrivals in 2025",
+        body: "— the highest on record per the General Statistics Office, alongside 161,992 foreign nationals in legal employment in Vietnam at the end of 2024.",
       },
     ],
+
+    momentsLabel: "The dangerous moments",
+    momentsTitle: "The three most harmful moments all happen on paper.",
+    moments: [
+      {
+        when: "Medication reconciliation",
+        body: "The patient takes the prescription home and reads the dose alone. Nobody is left to ask.",
+      },
+      {
+        when: "Discharge",
+        body: "The discharge sheet names the signs that mean come back now. Unreadable, it names nothing.",
+      },
+      {
+        when: "Informed consent",
+        body: "The signature sits under a paragraph of Vietnamese. Agreement without understanding is not consent.",
+      },
+    ],
+    momentsNote:
+      "An interpreter is there for the conversation. All three of these happen after it.",
+
+    tryLabel: "Try it",
+    tryTitle: "Check it yourself. No account needed.",
+    tryBody:
+      "Run it in the browser, through the same clinical rule set and the same confirmation step a clinic uses.",
+    tryItems: [
+      { title: "A prescription photo", body: "Read the Vietnamese and translate it line by line." },
+      { title: "A discharge sheet", body: "Turn it into English the patient can take home." },
+      { title: "A spoken line", body: "Watch a line carrying a dose get held back." },
+    ],
+    tryCta: "Open the demo",
 
     howLabel: "How it works",
     howTitle: "Read it, check it, let the clinician confirm it.",
@@ -245,8 +315,8 @@ export const LANDING = {
     evidenceBody:
       "The adverse-event figures above come from published patient-safety research, not from CarePath. They are why we built this, not proof that it works.",
     priceNote: {
-      lead: "The market already has a price.",
-      body: " A medical interpreter in Vietnam runs about $50 per case, covering admission through discharge. Certified medical document translation runs $25–100 per page with a 24-hour turnaround.",
+      lead: "A person is better — when a person gets there in time.",
+      body: " A medical interpreter in Vietnam runs 300,000–1,500,000 VND per hour, 1.2–2.5 million for deep specialisation, 2–5 million for a full day, and has to be booked ahead. Certified translation runs 60,000–160,000 VND per page with a 24-hour turnaround. The patient leaves the clinic in 20 minutes. CarePath does not replace an interpreter; it covers the hours when nobody is there.",
     },
     tableCaption:
       "A 50-case set run through the real model. These are engineering results, not a clinical trial.",

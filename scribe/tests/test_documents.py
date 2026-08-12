@@ -175,6 +175,54 @@ class EndpointTests(unittest.TestCase):
             transcript = client.get(f"/api/sessions/{visit_id}/transcript").json()
             self.assertEqual(len(transcript), len(turns))
 
+    def test_sample_header_reads_the_scripted_document_whatever_was_uploaded(self) -> None:
+        """The public demo's sample path, which the page labels as scripted.
+
+        `demo` mode never looks at the bytes. That is honest for a sample and
+        would be a fabrication for a visitor's own prescription, so the header
+        exists to make the distinction explicit at the call site.
+        """
+        with TestClient(app) as client:
+            visit_id = self._visit(client)
+            response = client.post(
+                f"/api/v1/visits/{visit_id}/documents",
+                files={"image": ("anything.png", io.BytesIO(PNG_1PX), "image/png")},
+                headers={"X-CarePath-Sample": "1"},
+            )
+
+            self.assertEqual(response.status_code, 200, response.text)
+            turns = response.json()
+            self.assertTrue(any("Amoxicillin" in turn["source_text"] for turn in turns))
+
+    def test_sample_mode_still_gates_the_risky_lines(self) -> None:
+        """Scripted translation, real gate. If the demo showed a dose straight
+        to the patient pane it would be advertising the opposite of the product.
+        """
+        with TestClient(app) as client:
+            visit_id = self._visit(client)
+            turns = client.post(
+                f"/api/v1/visits/{visit_id}/documents",
+                files={"image": ("anything.png", io.BytesIO(PNG_1PX), "image/png")},
+                headers={"X-CarePath-Sample": "1"},
+            ).json()
+
+            dosed = [
+                turn
+                for turn in turns
+                if any(span["kind"] == "dose_number" for span in turn["risk_spans"])
+            ]
+            self.assertTrue(dosed, "the scripted prescription must carry a dose line")
+            for turn in dosed:
+                self.assertEqual(turn["status"], "awaiting_confirm")
+
+    def test_without_the_header_the_configured_mode_still_applies(self) -> None:
+        """The header opts in. It must not become the default by accident: this
+        process runs PROVIDER_MODE=mock, which has no vision and fails closed.
+        """
+        with TestClient(app) as client:
+            visit_id = self._visit(client)
+            self.assertEqual(self._upload(client, visit_id).status_code, 502)
+
     def test_rejects_a_non_image_upload(self) -> None:
         with TestClient(app) as client:
             visit_id = self._visit(client)

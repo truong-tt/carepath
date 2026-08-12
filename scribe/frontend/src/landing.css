@@ -1,69 +1,20 @@
 /* =====================================================================
    Landing surface — Vietnamese clinical print.
 
-   Scoped entirely under .landing so nothing here reaches /kham-song-ngu/,
-   which shares :root with this file and must render exactly as rehearsed.
+   The `--p-*` tokens and the dark-scheme overrides used to be defined here,
+   scoped under `.landing`, so that /kham-song-ngu/ would keep rendering in
+   the old teal system. That scoping was right for one demo and is debt now:
+   the two surfaces are one product. The tokens live in styles.css `:root`
+   and this file only composes with them.
 
-   The world: đơn thuốc forms, commune-clinic wall charts, health-ministry
-   information sheets. Official form blue owns whole fields; seal vermilion
-   is reserved for the moments where the product withholds something, so it
-   keeps meaning inside the page what it means inside the product. Paper
-   white ground — the cream this page used before is the default this world
-   exists to refuse.
+   Kept local because they are about this surface's composition, not the
+   world: the document figure, the committed field, the results table.
    ===================================================================== */
 
 .landing {
-  /* --- ink and paper --- */
-  --p-paper: #ffffff;
-  --p-paper-2: #eef1f6;
-  --p-ink: #10141a;
-  --p-ink-soft: #414a57;
-  --p-ink-faint: #6b7686;
-
-  /* --- the committed field --- */
-  --p-blue: #0f2e5c;
-  --p-blue-deep: #081d3d;
-  --p-blue-tint: #dbe4f0;
-  --p-on-blue: #eef3fa;
-  --p-on-blue-soft: rgb(238 243 250 / 0.74);
-
-  /* --- the seal: withheld, gated, dangerous --- */
-  --p-seal: #c41e22;
-  --p-seal-ink: #96181b;
-  --p-seal-tint: #fbe6e6;
-
-  /* --- form geometry --- */
-  --p-rule: 1px solid #c3ccda;
-  --p-rule-strong: 2px solid var(--p-ink);
-  --p-gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --p-measure: 62ch;
-
   background: var(--p-paper);
   color: var(--p-ink);
-  /* No "Geist" in this stack. Geist is itself a font-display: swap web font,
-     so while Be Vietnam Pro was still loading the page fell back to a second
-     loading face and reflowed twice -- which is what the CI runner measured as
-     two separate shifts of the problem section. Fall back to the system. */
-  font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "tnum" 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .landing {
-    --p-paper: #0b1017;
-    --p-paper-2: #141b25;
-    --p-ink: #eef2f7;
-    --p-ink-soft: #b3bdcb;
-    --p-ink-faint: #8c97a6;
-    --p-blue: #1d4d8f;
-    --p-blue-deep: #060d16;
-    --p-blue-tint: #16253c;
-    --p-seal: #ff6b64;
-    --p-seal-ink: #ff8b84;
-    --p-seal-tint: #2a1416;
-    --p-rule: 1px solid #2b3646;
-    --p-rule-strong: 2px solid var(--p-ink);
-  }
 }
 
 /* --- type ------------------------------------------------------------ */
@@ -77,18 +28,26 @@
 /* Sized to the column it actually sits in, not to the viewport. The headline is
    66 Vietnamese characters; at the old 5.75rem it ran to seven lines in a
    580px column, which is not display type, it is a paragraph in disguise. */
+/* Leading is set by Vietnamese ink, not by Latin display-type habit. Measured in
+   Be Vietnam Pro 800: the worst descender in this headline is `ệ` at 10px below
+   the baseline, and the worst stacked ascender is `ấ` at 35px above it. Two
+   lines therefore need 45px of advance, which is 1.172 at any size.
+   `line-height: 0.94` gave 36px and overlapped by 8.9px — on a six-line
+   Vietnamese headline that is a collision, not tight tracking. 1.18 clears it
+   with a little to spare and still reads as display type. Do not lower this
+   without re-measuring: a value that looks fine in English breaks here. */
 .landing h1 {
   font-size: clamp(2.4rem, 4.6vw, 4rem);
   font-weight: 800;
   letter-spacing: -0.035em;
-  line-height: 0.94;
+  line-height: 1.18;
 }
 
 .landing h2 {
   font-size: clamp(1.85rem, 3.6vw, 3.1rem);
   font-weight: 800;
   letter-spacing: -0.028em;
-  line-height: 1.02;
+  line-height: 1.18;
   max-width: 22ch;
 }
 
@@ -574,6 +533,118 @@
 .p-note b {
   color: var(--p-on-blue);
   font-weight: 700;
+}
+
+/* The citation for the comparison above. Journal convention: hanging indent,
+   quieter than the notes, and it never wraps into the figure it credits. */
+.p-cite {
+  margin-top: 1.25rem;
+  max-width: var(--p-measure);
+  padding-left: 1.5rem;
+  text-indent: -1.5rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  letter-spacing: 0.005em;
+  color: var(--p-on-blue-soft);
+}
+
+/* --- the three moments: a timeline, ruled like a form ----------------- */
+
+.p-moments {
+  counter-reset: p-moment;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  border-top: var(--p-rule-strong);
+}
+
+.p-moments li {
+  counter-increment: p-moment;
+  padding: 1.35rem 1.25rem 1.5rem 0;
+  border-bottom: var(--p-rule);
+}
+
+.p-moments li + li {
+  padding-left: 1.25rem;
+  border-left: var(--p-rule);
+}
+
+/* The ordinal carries the sequence; the heading carries the moment. */
+.p-moments h3::before {
+  content: counter(p-moment);
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  color: var(--p-seal-ink);
+}
+
+.p-moments h3 {
+  margin: 0 0 0.5rem;
+}
+
+.p-moments p {
+  max-width: 34ch;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--p-ink-soft);
+}
+
+.p-moments__note {
+  margin-top: 1.25rem;
+  padding-left: 0.9rem;
+  border-left: 3px solid var(--p-seal);
+  max-width: var(--p-measure);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* --- try it: three doors into the demo, on the committed field -------- */
+
+.p-try {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  border-top: 2px solid var(--p-on-blue-soft);
+}
+
+.p-try li {
+  padding: 1.25rem 1.25rem 1.4rem 0;
+  border-bottom: 1px solid var(--p-on-blue-soft);
+}
+
+.p-try li + li {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--p-on-blue-soft);
+}
+
+.p-try h3 {
+  margin: 0 0 0.45rem;
+  color: var(--p-on-blue);
+}
+
+.p-try p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--p-on-blue-soft);
+}
+
+.p-try__cta {
+  margin-top: 1.75rem;
+}
+
+@media (max-width: 40rem) {
+  .p-moments li + li,
+  .p-try li + li {
+    padding-left: 0;
+    border-left: 0;
+  }
 }
 
 /* --- mechanism: numbered like a procedure ---------------------------- */

@@ -38,7 +38,25 @@ describe("LandingPage", () => {
     expect(screen.getByText(/49,1%/)).toBeInTheDocument();
     expect(screen.getByText(/29,5%/)).toBeInTheDocument();
     expect(screen.getByText(/52,4%/)).toBeInTheDocument();
-    expect(screen.getByText(/22,8 triệu/)).toBeInTheDocument();
+    expect(screen.getByText(/21,2 triệu/)).toBeInTheDocument();
+    expect(screen.getByText(/161\.992 lao động nước ngoài/)).toBeInTheDocument();
+  });
+
+  it("credits the comparison to the study it comes from", () => {
+    render(<LandingPage />);
+
+    // The 29,5%/49,1% pair is the strongest claim on the page and it is not
+    // ours. An uncredited figure is indistinguishable from an invented one.
+    expect(screen.getByText(/Int J Qual Health Care 2007;19\(2\)/)).toBeInTheDocument();
+  });
+
+  it("does not price-compete on numbers that are not true", () => {
+    render(<LandingPage />);
+
+    // Certified medical translation in Vietnam is 60-160k VND per page, not
+    // USD 25-100. The argument is time and coverage, not price.
+    expect(screen.queryByText(/25–100 USD/)).not.toBeInTheDocument();
+    expect(screen.getByText(/không thay thế phiên dịch viên/)).toBeInTheDocument();
   });
 
   it("keeps the evidence inside its limits", () => {
@@ -81,7 +99,7 @@ describe("LandingPage", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/49.1%/)).toBeInTheDocument();
-    expect(screen.getByText(/22.8 million/)).toBeInTheDocument();
+    expect(screen.getByText(/21.2 million/)).toBeInTheDocument();
   });
 
   it("shows the Vietnamese document with its English resolved beneath", () => {
@@ -95,10 +113,34 @@ describe("LandingPage", () => {
     expect(screen.getByText(/Bác sĩ xác nhận từng dòng/)).toBeInTheDocument();
   });
 
-  it("keeps the pilot form scoped to one interest", () => {
+  it("lets a clinic say which function it wants a pilot of", () => {
     render(<LandingPage />);
 
+    // The selector used to be hidden and pinned to "scribe", left over from the
+    // two-product site. This page leads with the bilingual visit, so a pilot
+    // enquiry was arriving tagged as the wrong product.
     fireEvent.click(screen.getByText("Dành cho cơ sở muốn thí điểm CarePath"));
-    expect(screen.queryByRole("combobox", { name: "Chức năng quan tâm" })).not.toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Chức năng quan tâm" })).toBeInTheDocument();
+  });
+
+  it("offers the demo from the landing page", () => {
+    render(<LandingPage />);
+
+    // The page's central claim is that CarePath reads Vietnamese paperwork, and
+    // until now a visitor had no way to check that without contacting anyone.
+    expect(screen.getByRole("link", { name: "Mở bản thử" })).toHaveAttribute(
+      "href",
+      "/thu-nghiem/",
+    );
+  });
+
+  it("names the three moments the harm evidence points at", () => {
+    render(<LandingPage />);
+
+    expect(screen.getByRole("heading", { name: "Đối chiếu thuốc" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Lúc ra viện" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Khi ký cam kết" })).toBeInTheDocument();
+    // The reason an interpreter alone does not cover this.
+    expect(screen.getByText(/Cả ba thời điểm trên đều xảy ra sau đó/)).toBeInTheDocument();
   });
 });

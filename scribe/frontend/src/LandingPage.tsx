@@ -124,12 +124,57 @@ export default function LandingPage() {
               </div>
             </div>
 
+            {/* The comparison is the strongest claim on the page and it is not
+                ours. It carries its citation next to it, not in a footer. */}
+            <p className="p-cite">{t.compareSource}</p>
+
             {t.problemNotes.map((note) => (
               <p className="p-note" key={note.lead}>
                 <b>{note.lead}</b>
                 {note.body}
               </p>
             ))}
+          </div>
+        </section>
+
+        {/* The argument the page was missing: an interpreter covers the
+            conversation, and all three of the moments the literature names
+            happen after it, on paper. Numbered as a sequence because it is
+            one — this is a timeline, not three features. */}
+        <section className="p-wrap p-section" id="moments" aria-labelledby="moments-title">
+          <div className="p-section__head">
+            <span className="p-label">{t.momentsLabel}</span>
+            <h2 id="moments-title">{t.momentsTitle}</h2>
+          </div>
+          <ol className="p-moments">
+            {t.moments.map((moment) => (
+              <li key={moment.when}>
+                <h3>{moment.when}</h3>
+                <p>{moment.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="p-moments__note">{t.momentsNote}</p>
+        </section>
+
+        <section className="p-field" id="try" aria-labelledby="try-title">
+          <div className="p-wrap p-section">
+            <div className="p-section__head">
+              <span className="p-label">{t.tryLabel}</span>
+              <h2 id="try-title">{t.tryTitle}</h2>
+              <p className="p-lede">{t.tryBody}</p>
+            </div>
+            <ul className="p-try">
+              {t.tryItems.map((item) => (
+                <li key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </li>
+              ))}
+            </ul>
+            <a className="p-cta p-try__cta" href="/thu-nghiem/">
+              {t.tryCta}
+            </a>
           </div>
         </section>
 
@@ -226,10 +271,14 @@ export default function LandingPage() {
               <details className="p-pilot">
                 <summary>{t.pilotSummary}</summary>
                 <div>
+                  {/* `interest="scribe"` was left over from the two-product
+                      site. This page is about the bilingual visit, and a pilot
+                      enquiry arriving tagged as the wrong product routes the
+                      lead wrong. The selector is visible again so the clinic
+                      says which one it wants. */}
                   <LeadForm
                     language="vi"
-                    interest="scribe"
-                    hideInterestField
+                    interest="both"
                     scenario={scenarios[0]}
                     clinic=""
                     specialty=""

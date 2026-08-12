@@ -63,12 +63,22 @@ class CombinedAppTests(unittest.TestCase):
                 self.assertEqual(snapshot["turns"], [])
 
     @unittest.skipUnless(SITE_DIST_DIR.is_dir(), "site build is not available")
-    def test_clinical_notes_route_serves_the_site_entrypoint(self) -> None:
-        with TestClient(app) as client:
-            response = client.get("/ghi-chep-lam-sang/")
+    def test_spa_routes_serve_the_site_entrypoint(self) -> None:
+        """Every client route needs a fallback here, not only on Vercel.
 
-        self.assertEqual(response.status_code, 200, response.text)
-        self.assertIn('id="root"', response.text)
+        This host serves the same bundle, so a route the app knows and this file
+        does not is a hard 404 on a link someone shared.
+        """
+        with TestClient(app) as client:
+            for path in (
+                "/ghi-chep-lam-sang/",
+                "/kham-song-ngu/",
+                "/thu-nghiem/",
+                "/thu-nghiem",
+            ):
+                response = client.get(path)
+                self.assertEqual(response.status_code, 200, f"{path}: {response.text[:200]}")
+                self.assertIn('id="root"', response.text, path)
 
     def test_public_interpreter_browser_paths_are_blocked(self) -> None:
         with TestClient(app) as client:

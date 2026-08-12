@@ -20,7 +20,7 @@ async function expectNoSeriousAxeViolations(page: Page) {
   ).toEqual([]);
 }
 
-test("keyboard-only visitor can submit Scribe pilot interest", async ({ page }) => {
+test("keyboard-only visitor can submit a pilot request", async ({ page }) => {
   let payload: Record<string, unknown> | undefined;
   await page.route("**/api/leads", async (route) => {
     payload = route.request().postDataJSON() as Record<string, unknown>;
@@ -42,8 +42,11 @@ test("keyboard-only visitor can submit Scribe pilot interest", async ({ page }) 
   await page.getByRole("button", { name: "Gửi yêu cầu thí điểm" }).click();
 
   await expect(page.getByText("Đã gửi yêu cầu thí điểm.")).toBeVisible();
-  expect(payload?.interest).toBe("scribe");
-  await expect(page.getByRole("combobox", { name: "Chức năng quan tâm" })).toHaveCount(0);
+  // Defaults to "both" and is selectable. It was pinned to "scribe" and hidden,
+  // left over from the two-product site, so every enquiry from a page about the
+  // bilingual visit arrived tagged as the other product.
+  expect(payload?.interest).toBe("both");
+  await expect(page.getByRole("combobox", { name: "Chức năng quan tâm" })).toBeVisible();
 });
 
 test("the landing page states the patient-safety problem, responsively", async ({ page }) => {
@@ -128,7 +131,7 @@ test("a non-Vietnamese reader can switch the whole page to English", async ({ pa
     }),
   ).toBeVisible();
   await expect(page.getByText(/49.1%/)).toBeVisible();
-  await expect(page.getByText(/22.8 million/)).toBeVisible();
+  await expect(page.getByText(/21.2 million/)).toBeVisible();
   // Limits travel with the claims.
   await expect(page.getByText(/not from CarePath/)).toBeVisible();
   await expect(page.getByText(/No clinical trial/)).toBeVisible();
@@ -260,6 +263,69 @@ test("keeps content static for a visitor who asked for reduced motion", async ({
 
   await context.close();
 });
+
+test("the served page describes the product it actually is", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4173/");
+
+  // Asserted on the served HTML, before and after hydration: the title used to
+  // be correct in index.html and then overwritten by JS with "Bớt gõ bệnh án",
+  // the retired Scribe-led product.
+  await expect(page).toHaveTitle(/Khám song ngữ cho người bệnh nước ngoài/);
+  await page.waitForLoadState("networkidle");
+  await expect(page).toHaveTitle(/Khám song ngữ cho người bệnh nước ngoài/);
+
+  const meta = (name: string) =>
+    page.locator(`meta[property="${name}"], meta[name="${name}"]`).first();
+  await expect(meta("og:url")).toHaveAttribute("content", /carepath-medicaltranslation/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    /carepath-medicaltranslation/,
+  );
+  await expect(meta("og:image")).toHaveAttribute("content", /\/og\.png$/);
+  await expect(meta("twitter:card")).toHaveAttribute("content", "summary_large_image");
+
+  // The card has to exist, not just be declared.
+  const og = await page.request.get("http://127.0.0.1:4173/og.png");
+  expect(og.status()).toBe(200);
+});
+
+// The landing and the tools ran two unrelated design systems in one bundle:
+// Be Vietnam Pro / navy / square on `/`, Geist / teal #0f766e / rounded on the
+// tool routes, sharing no token, with both font families shipping everywhere.
+// These assertions are what stops that forking again.
+for (const path of ["/", "/kham-song-ngu/", "/ghi-chep-lam-sang/"]) {
+  test(`renders ${path} in the one design world`, async ({ page }) => {
+    const requested: string[] = [];
+    page.on("request", (request) => requested.push(request.url()));
+
+    await page.goto(`http://127.0.0.1:4173${path}`);
+    await page.waitForLoadState("networkidle");
+
+    const world = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement);
+      return {
+        blue: root.getPropertyValue("--p-blue").trim(),
+        seal: root.getPropertyValue("--p-seal").trim(),
+        // The legacy names must resolve through the print palette, not to the
+        // teal literals they used to hold.
+        teal: root.getPropertyValue("--teal").trim(),
+        panelRadius: root.getPropertyValue("--r-panel").trim(),
+        bodyFont: getComputedStyle(document.body).fontFamily,
+      };
+    });
+
+    // Tokens are defined once, at the root, for every route.
+    expect(world.blue).toBe("#0f2e5c");
+    expect(world.seal).toBe("#c41e22");
+    expect(world.teal).toBe("#0f2e5c");
+    expect(world.panelRadius).toBe("0");
+    expect(world.bodyFont).toContain("Be Vietnam Pro");
+    expect(world.bodyFont).not.toContain("Geist");
+
+    // Not one Geist byte on any route.
+    expect(requested.filter((url) => /geist/i.test(url))).toEqual([]);
+  });
+}
 
 for (const colorScheme of ["light", "dark"] as const) {
   test(`keeps the main action readable in ${colorScheme} mode`, async ({ browser }) => {

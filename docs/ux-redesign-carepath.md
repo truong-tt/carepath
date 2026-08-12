@@ -7,6 +7,195 @@
 1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
 2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
 
+## Current priority update: public demo hub and one design world (CP-UX-17)
+
+### Current UX problem
+
+CP-UX-16 rebuilt the landing page. It did not make the product testable, and an
+audit of the live deployment at the new domain found the page is now asserting
+things that are either unprovable on the site or untrue.
+
+**Nothing on the public site works.** Both tool routes fail. `/ghi-chep-lam-sang/`
+renders **Mất kết nối máy chủ**. Root cause is not downtime: the HF Space is
+healthy (`/api/v1/health` → `200`, `llm_provider: ckey`, `asr_ready: true`), but
+its `CORS_ORIGINS` still lists only `https://carepath-omega.vercel.app`. The
+domain moved to `carepath-medicaltranslation.vercel.app`, so
+`_reject_disallowed_origin` (`scribe/carepath/main.py:123-128`) answers every
+browser call with `400 Disallowed CORS origin`. `vercel.json` has no `/api/*`
+rewrite, so every call is cross-origin and subject to that allow-list.
+
+**The hero's central claim has no proof on the page.** The `h1` promises that
+CarePath reads Vietnamese paperwork. The prescription in the hero is a hardcoded
+string in `src/content/landing.ts:38-61`. A real OCR endpoint exists —
+`POST /api/v1/visits/{id}/documents` — and the landing never calls it. A visitor
+cannot try the one thing the page is about.
+
+**Two public claims do not survive checking.**
+
+1. `Dịch thuật công chứng hồ sơ y tế khoảng 25–100 USD mỗi trang` is wrong by
+   10–20×. Certified medical translation in Vietnam is **60.000–160.000 VND per
+   page** including notarisation, about 2,30–6,10 USD. A clinic administrator
+   knows this figure, and one false number discounts the sourced ones next to it.
+2. `22,8 triệu lượt khách quốc tế năm 2025` is wrong. The General Statistics
+   Office figure is **21,2 triệu**.
+
+A third figure is not wrong but is weaker than the available one: `83.500–100.000
+người nước ngoài đang cư trú` against **161.992** foreign workers legally
+employed at end-2024 (149.195 permit holders plus 12.797 exempt).
+
+The 29,5% / 49,1% comparison is **correct** and is the strongest asset on the
+page, but it credits no source. It is Divi, Koss, Schmaltz & Loeb, *Language
+proficiency and adverse events in US hospitals: a pilot study*, Int J Qual Health
+Care 19(2), 2007.
+
+**The price argument is unwinnable and rests on the bad number.** Human
+translation in Vietnam is cheap. What it is not is *present*: notarised
+translation returns in 24 hours, and the patient leaves the clinic in 20 minutes.
+
+**Two design systems ship in one bundle.** `.landing` is Be Vietnam Pro, navy
+`#0f2e5c`, seal `#c41e22`, radius 0. `:root` — both tools — is Geist, teal
+`#0f766e`, ivory `#f4f1e8`, radius 0.5–0.75rem. They share no token. Crossing
+from `/` to `/kham-song-ngu/` is a complete visual break. Both font families load
+on every page: **16 webfont files**. CP-UX-16 scoped the tokens under `.landing`
+deliberately, so the visit screen would render as rehearsed; that scoping was
+correct then and is debt now.
+
+Two recent commits also did not achieve what they claim. *"drop Geist from the
+landing font stack"* — five Geist faces still download. *"preload the fonts the
+first viewport uses"* — all six preloads emit *"preloaded but not used"*.
+
+Metadata is stale and points at the retired domain: `<title>` still says
+`Bớt gõ bệnh án` (the previous Scribe-led product) against an `h1` about foreign
+patients; `meta description` describes the retired two-product site; `og:url` and
+`rel=canonical` are `carepath-omega.vercel.app`; there is no `og:image`.
+
+### Proposed flow
+
+**One world.** Commit to the document world and retire ivory/teal. `--p-*` moves
+from `.landing` scope to `:root` and becomes the only system; `styles.css` and
+`visit.css` are rethemed onto it, and Geist is deleted. The rule that keeps the
+world from turning decorative: **seal vermilion is spent only where the product
+withholds something**, nowhere else.
+
+**One AI path.** The public demo proxies the existing FastAPI. It does not
+re-implement OCR or translation. A second implementation in a Vercel function
+would route patient-visible output around the risk engine, which fails safety
+invariants 2 and 6 in `AGENTS.md`. The Vercel layer owns quota and abuse; the
+FastAPI owns clinical logic and remains the only gate.
+
+**Same origin, so the allow-list stops mattering.** `/api/*` is rewritten by
+Vercel to the Space. No `Origin` header, no CORS, no recurrence of this outage
+the next time a domain changes.
+
+**A demo a stranger can run.** `/thu-nghiem/` with three panels: a Vietnamese
+prescription photo, a discharge summary, and a two-way consultation. Each opens
+with a sample already answered, so the payoff is visible before the visitor
+decides to upload. Gated lines render in seal with `Chờ bác sĩ xác nhận` — the
+withholding *is* the demo, not a caveat under it.
+
+**A true competitive argument**, in this order: same-minute versus next-day;
+unplanned and after-hours encounters where no interpreter is booked; the paper
+that goes home in Vietnamese even from a bilingual international clinic; and
+per-encounter cost at volume stated in real VND (300k–1,5tr/hour general,
+1,2–2,5tr/hour medical, 2–5tr/day) — which is why district hospitals use family
+members, the exact failure Divi 2007 names. CarePath is a complement. The page
+already promises `Không thay thế phiên dịch viên khi người bệnh yêu cầu người
+thật`; that becomes a pillar rather than a footnote.
+
+### Affected routes/pages/components
+
+* `vercel.json` — `/api/*` and `/ws/*` rewrites to the Space; six SPA rewrites kept.
+* `scripts/validate-deploy-env.mjs` — must accept an empty `VITE_API_BASE` (same-origin); it currently hard-fails on it.
+* `src/styles.css` — `--p-*` promoted to `:root`; dead landing rules stripped.
+* `src/landing.css` — `.landing` token block removed; `h1` leading raised off `0.94`.
+* `src/visit/visit.css`, `src/scribe/ScribeTool.tsx` — rethemed onto `--p-*`.
+* `src/main.tsx`, `vite.config.ts`, `package.json` — Geist deleted; preload narrowed to two faces.
+* `src/content/landing.ts` — false figures corrected, price section rebuilt, Divi credited.
+* `src/LandingPage.tsx` — new `Thời điểm nguy hiểm` and `Thử ngay` sections; `LeadForm` interest un-stales.
+* `src/demo/DemoHub.tsx` (new) + panels — route `/thu-nghiem/`, pathname check in `App.tsx`.
+* `api/demo/document.ts`, `api/demo/turn.ts` (new) — quota, size caps, provider-mode header.
+* `scribe/carepath/main.py`, `interpreter/app/providers/registry.py` — per-request demo provider-mode override.
+* `src/assets/carepath.svg` — recoloured off the dead teal palette.
+* `index.html`, `public/sitemap.xml`, `public/robots.txt` — metadata, canonical, OG image, `/thu-nghiem/` allowed.
+* Deleted: `src/scribe/ScribeShowcase.tsx` and its test (unreachable — its only importer is its own test), empty `src/landing/`.
+
+### Vietnamese-first copy
+
+Corrections and one new section. Nothing is softened.
+
+Corrected: `21,2 triệu lượt khách quốc tế năm 2025`; `161.992 lao động nước ngoài
+có việc làm hợp pháp (cuối 2024)`; the `25–100 USD mỗi trang` sentence is deleted
+rather than restated. The comparison gains its citation.
+
+New — `Thời điểm nguy hiểm`, the three moments the literature names, all of which
+happen on paper: `đối chiếu thuốc`, `lúc ra viện`, `khi ký cam kết`.
+
+New — demo restrictions, stated in the UI rather than a footer: `5 lượt mỗi ngày`,
+`1 ảnh tối đa 4 MB`, `Không lưu ảnh, không lưu âm thanh, không lưu lời chép`,
+and `Kết quả demo — không dùng cho lâm sàng` on every output.
+
+The evidence table (100/100/100/98) is **unchanged** — those figures are
+consistent with DEC-0020 and are honest.
+
+### Implementation stories
+
+S0 process gate → S1 truth pass → S2 design system unification → S3a same-origin
+proxy → S3b demo quota → S4 demo hub → S5 landing rebuild → S6 metadata and OG.
+
+S3a is small and fixes a live outage; it does not depend on S1 or S2 and may land
+first if the site needs to work before the redesign completes.
+
+### Dependencies
+
+S4 requires S3a (nothing can call the API) and S3b (quota). S5 reuses S4's
+document panel for its interactive hero. S2 must precede S5 so the landing is
+rebuilt in the promoted tokens, not the scoped ones. S6 is last.
+
+### Acceptance criteria
+
+1. `/api/v1/health` returns `200` from `carepath-medicaltranslation.vercel.app`
+   with no `Origin` allow-list involved, and both tool routes work in production.
+2. No false figure remains on the page; every figure carries its source.
+3. `$25–100 mỗi trang` is absent, and the competitive section argues time and
+   coverage.
+4. One token system: `--p-*` resolves on `document.documentElement`, and no
+   Geist face is requested on any route.
+5. A visitor can run all three demo panels without an account, and sees the
+   restrictions before running them.
+6. A high-risk line never appears in a demo response body — only its gated
+   placeholder. Asserted in a test, not by inspection.
+7. `h1` leading no longer collides Vietnamese stacked diacritics.
+8. axe reports no serious violations on `/` and `/thu-nghiem/`, light and dark.
+9. Existing visit-screen e2e passes unchanged: no change to gate logic, TTS
+   eligibility, consent, or WebSocket behaviour.
+
+### Validation commands
+
+```bash
+cd scribe/frontend && npm run lint && npm test && npm run test:deploy-env && npm run build && npm run e2e && npm run build
+```
+```bash
+pytest && python scripts/smoke_backend.py && python scripts/build_term_artifacts.py --check
+```
+
+`npm run build` twice remains deliberate, for the reason recorded under CP-UX-16.
+
+### Risks and fallback behavior
+
+Vercel rewrites may not carry a WebSocket upgrade. Verified in S3a before the
+demo hub depends on it; fallback is that `/ws/*` keeps `VITE_API_BASE`
+cross-origin and the Space's `CORS_ORIGINS` gains the new domain for that path
+only.
+
+Retheming `visit.css` touches a hard-gated surface. S2 is token-only on that
+file — no logic, no markup — and the existing e2e must pass unchanged.
+
+Stripping `styles.css` risks the tool pages. Deleted in a separate commit from
+the retheme, with e2e between. CP-UX-16 recorded this as deferred debt (R1).
+
+Public demo abuse. Quota, size caps, and `PROVIDER_MODE=demo` keep public traffic
+off the paid `ckey` provider; the worst case is wasted CPU, not spend.
+
 ## Current priority update: landing page rebuilt in Vietnamese clinical print (CP-UX-16)
 
 ### Current UX problem

@@ -1,6 +1,6 @@
 # CarePath Unified Deploy
 
-Use `https://carepath-omega.vercel.app` as the public Scribe site. One Hugging
+Use `https://carepath-medicaltranslation.vercel.app` as the public Scribe site. One Hugging
 Face Space runs the Scribe tool at `/ghi-chep-lam-sang/`, the Scribe API at
 `/api/v1/*`, and the retained Interpreter API at `/api/*` + `/ws/*`.
 `/phien-dich-y-khoa/*` and `/console/*` are intentionally public 404s while
@@ -41,7 +41,7 @@ SOAP_RATE_LIMIT_PER_IP_HOUR=3
 SOAP_RATE_LIMIT_PER_IP_DAY=10
 SOAP_RATE_LIMIT_GLOBAL_DAY=100
 APP_ENV=prod
-CORS_ORIGINS=https://carepath-omega.vercel.app
+CORS_ORIGINS=https://carepath-medicaltranslation.vercel.app
 ```
 
 The interpreter defaults to mock mode, which returns `[vi->en] …` echoes. For
@@ -57,6 +57,20 @@ account configures both modules. Measured latency across 50 turns: median 15s,
 p90 54s, max 206s, so a live visitor waits. `PROVIDER_MODE=demo` is the
 offline scripted scenario for the pitch laptop, not for a public URL, because
 anything off-script falls back to a visible placeholder.
+
+The public demo hub at `/thu-nghiem/` is built for both cases and reads
+`GET /api/health` to decide what it may honestly offer:
+
+| `provider_mode` | What the hub shows |
+| --- | --- |
+| `ckey` | Everything: the scripted sample, own-document upload, and the two-way conversation. |
+| `demo` | The scripted sample only. Own-upload and the conversation panel are hidden, because in this mode `read_document` ignores the uploaded bytes and the canned map covers nothing a visitor would actually type. This is what makes `demo` safe on a public URL. |
+| `mock` or unreachable | Nothing runnable, and a notice saying so. It never invents output. |
+
+The sample path sends `X-CarePath-Sample: 1`, which forces scripted mode for
+that one request, so samples stay instant and free even on `ckey`. Own-uploads
+and conversation turns on `ckey` bill real tokens, capped at five runs per IP
+per day by the `/api/demo/*` functions.
 
 The `cloud` mode (Anthropic/OpenAI direct) additionally needs
 `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and a non-default `ADMIN_TOKEN`
@@ -108,7 +122,7 @@ curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
 ## Canonical Vercel site
 
 The `scribe/frontend/` directory is the static marketing deployment at
-`https://carepath-omega.vercel.app`:
+`https://carepath-medicaltranslation.vercel.app`:
 
 1. In the Vercel project settings, change **Root Directory** from the removed
    `apps/web-next` to `scribe/frontend` (framework/build/output come from
@@ -116,17 +130,36 @@ The `scribe/frontend/` directory is the static marketing deployment at
 2. Set these Vercel environment variables:
 
 ```text
-VITE_API_BASE=https://tranth3truong-carepath-api.hf.space
+VITE_API_BASE=
+VITE_WS_BASE=https://tranth3truong-carepath-api.hf.space
+DEMO_API_BASE=https://tranth3truong-carepath-api.hf.space
 VITE_LEAD_ENDPOINT=<optional lead endpoint>
 VITE_LEAD_EMAIL=<pilot contact email>
 ```
 
-3. Confirm the Space contains the Vercel origin configured above. Do not add
-   Vercel API or WebSocket rewrites; the Space owns those routes.
+`VITE_API_BASE` is **empty on purpose** (DEC-0021). `vercel.json` rewrites
+`/api/*` to the Space, so the browser calls its own origin and no
+`CORS_ORIGINS` entry stands between the site and the backend. Setting it to an
+absolute origin restores the cross-origin coupling that took both tool routes
+down when the domain moved to `carepath-medicaltranslation.vercel.app` while
+the Space still allowed only `carepath-omega.vercel.app`.
+
+`VITE_WS_BASE` is required whenever `VITE_API_BASE` is empty: a Vercel rewrite
+will not carry a websocket upgrade to an external host, so `/ws/*` still goes
+direct. That is safe — the origin check in `scribe/carepath/main.py` is HTTP
+middleware and never runs for a websocket scope.
+
+`DEMO_API_BASE` is read server-side by the `/api/demo/*` functions, so the API
+host no longer appears in the client bundle.
+
+3. Earlier guidance here said not to add Vercel API rewrites because the Space
+   owns those routes. That is superseded: the `/api/*` rewrite is what makes the
+   API same-origin. It excludes `/api/demo/*`, which are Vercel functions.
 
 The Vercel build runs `npm run validate:deploy` before compiling. It fails when
-`VITE_API_BASE` is missing or invalid, does not use HTTPS, contains a
-query/fragment, or is not the bare `/` pathname. It also fails when an SPA route
+`VITE_API_BASE` is set but invalid, does not use HTTPS, contains a
+query/fragment, or is not the bare `/` pathname; when both `VITE_API_BASE` and
+`VITE_WS_BASE` are empty; or when an SPA route
 in `src/App.tsx` has no matching rewrite in `vercel.json` — without one, a direct
 visit to that route is a hard 404. Local and combined-service builds still use
 same-origin fallbacks because the normal `npm run build` skips this

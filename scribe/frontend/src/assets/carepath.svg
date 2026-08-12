@@ -1,8 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 160" role="img" aria-labelledby="title description">
   <title id="title">CarePath</title>
   <desc id="description">Two speech paths meet at a central verification gate.</desc>
-  <path fill="#0f766e" d="M18 32h88v28H55v40h51v28H18z"/>
-  <path fill="#102a2e" d="M270 32h-88v28h51v68h37z"/>
-  <path fill="#f4f1e8" stroke="#102a2e" stroke-width="6" stroke-linejoin="round" d="m109 19 70 35v87l-70-35z"/>
-  <path fill="none" stroke="#0f766e" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" d="m126 76 14 14 25-31"/>
+  <!-- Theme-aware from inside the file: this ships through <img src>, so no
+       outer stylesheet can reach the paths. Without this the ink half of the
+       mark sat at #10141a on a #0b1017 ground and disappeared in dark mode. -->
+  <style>
+    .care { fill: #0f2e5c }
+    .path { fill: #10141a }
+    .gate { fill: #ffffff; stroke: #10141a }
+    .seal { stroke: #c41e22 }
+    @media (prefers-color-scheme: dark) {
+      .care { fill: #6f9fd8 }
+      .path { fill: #eef2f7 }
+      .gate { fill: #0b1017; stroke: #eef2f7 }
+      .seal { stroke: #ff6b64 }
+    }
+  </style>
+  <path class="care" d="M18 32h88v28H55v40h51v28H18z"/>
+  <path class="path" d="M270 32h-88v28h51v68h37z"/>
+  <path class="gate" stroke-width="6" stroke-linejoin="round" d="m109 19 70 35v87l-70-35z"/>
+  <path class="seal" fill="none" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" d="m126 76 14 14 25-31"/>
 </svg>

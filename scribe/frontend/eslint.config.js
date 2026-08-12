@@ -13,7 +13,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["scripts/**/*.mjs", "playwright.config.ts", "tests/**/*.ts"],
+    files: ["scripts/**/*.mjs", "playwright.config.ts", "tests/**/*.ts", "api/**/*.ts"],
     languageOptions: {
       globals: globals.node,
     },

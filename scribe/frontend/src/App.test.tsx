@@ -15,9 +15,11 @@ describe("Vietnamese-only public app", () => {
     render(<App />);
 
     expect(document.documentElement.lang).toBe("vi");
-    expect(document.title).toBe(
-      "CarePath | Bớt gõ bệnh án, thêm thời gian cho người bệnh",
-    );
+    // The app no longer writes the title: index.html owns it, so it is correct
+    // for a crawler and a link preview before any JS runs. This used to
+    // overwrite it from strings.ts with "Bớt gõ bệnh án", the retired
+    // Scribe-led product, contradicting the h1 directly below.
+    expect(document.title).not.toContain("Bớt gõ bệnh án");
     expect(
       screen.getByRole("heading", {
         name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",

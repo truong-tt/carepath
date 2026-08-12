@@ -4,6 +4,13 @@
   "buildCommand": "npm run validate:deploy && npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    {
+      "source": "/api/((?!demo/).*)",
+      "destination": "https://tranth3truong-carepath-api.hf.space/api/$1"
+    },
+    { "source": "/thu-nghiem", "destination": "/index.html" },
+    { "source": "/thu-nghiem/", "destination": "/index.html" },
+    { "source": "/thu-nghiem/:path*", "destination": "/index.html" },
     { "source": "/ghi-chep-lam-sang", "destination": "/index.html" },
     { "source": "/ghi-chep-lam-sang/", "destination": "/index.html" },
     { "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" },

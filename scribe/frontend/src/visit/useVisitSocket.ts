@@ -3,6 +3,14 @@ import type { VisitTurn } from "./types";
 
 const API_BASE: string = import.meta.env.VITE_API_BASE ?? "";
 
+// The websocket needs its own base. Vercel rewrites /api/* to the API host so
+// HTTP is same-origin and no CORS allow-list applies, but a rewrite will not
+// carry a websocket upgrade to an external host — so /ws/* still goes direct.
+// That is safe: the origin check in scribe/carepath/main.py is HTTP middleware
+// and never runs for a websocket scope. Verified against the live Space from
+// carepath-medicaltranslation.vercel.app: the socket opens.
+const WS_BASE: string = import.meta.env.VITE_WS_BASE ?? API_BASE;
+
 export type ConnectionState = "idle" | "connecting" | "open" | "closed";
 
 export interface VisitError {
@@ -11,7 +19,7 @@ export interface VisitError {
 }
 
 function socketUrl(visitId: string): string {
-  const base = API_BASE || window.location.origin;
+  const base = WS_BASE || window.location.origin;
   const url = new URL(`/ws/sessions/${visitId}`, base);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   return url.toString();

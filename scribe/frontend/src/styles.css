@@ -1,73 +1,131 @@
-/* CarePath demo site — clinical-trust design system.
+/* CarePath — one design world: Vietnamese clinical print.
  *
- * Tokens: brand palette stays fixed; semantic tokens swap per color scheme.
- * Radius rule: panels 0.75rem · controls 0.5rem · status chips pill.
- * Breakpoints: 1023px (laptop collapse) · 760px (phone collapse).
+ * The world: đơn thuốc forms, commune-clinic wall charts, health-ministry
+ * information sheets. Ink on paper. Official form blue owns whole fields. Seal
+ * vermilion is spent only where the product withholds something, so it means
+ * the same thing on the page as it does inside the product.
+ *
+ * This file used to hold a second, unrelated system — Geist, teal #0f766e on
+ * ivory #f4f1e8, 0.5–0.75rem radii — while the landing ran the print world
+ * scoped under `.landing`. Crossing from / to /kham-song-ngu/ was a complete
+ * visual break, and both font families shipped on every route. The `--p-*`
+ * tokens are now defined here once and the landing consumes them.
+ *
+ * The tool surfaces are rethemed by REDEFINITION, not by rewriting their rules:
+ * the semantic tokens below (--bg, --surface, --teal, --critical …) keep their
+ * names and their meanings and are repointed at the print palette. Two thousand
+ * lines of `.visit-*` and `.scribe-*` rules keep working untouched, which also
+ * keeps this off the risk-gate surfaces that FEATURE_INTAKE hard-gates.
+ *
+ * Radius rule: 0. This world is ruled forms, not cards.
  */
 
 :root {
   color-scheme: light dark;
-  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   font-synthesis: none;
 
-  /* brand */
-  --ink: #102a2e;
-  --ivory: #f4f1e8;
-  --teal: #0f766e;
-  --mist: #ddeae7;
-  --amber: #a86300;
-  --critical: #9b1c1c;
+  /* --- ink and paper --- */
+  --p-paper: #ffffff;
+  --p-paper-2: #eef1f6;
+  --p-ink: #10141a;
+  --p-ink-soft: #414a57;
+  --p-ink-faint: #6b7686;
 
-  /* semantic (light) */
-  --bg: var(--ivory);
-  --text: var(--ink);
-  --muted: color-mix(in srgb, var(--ink) 72%, var(--ivory));
-  --faint: color-mix(in srgb, var(--ink) 60%, var(--ivory));
-  --line: color-mix(in srgb, var(--ink) 16%, transparent);
-  --line-strong: color-mix(in srgb, var(--ink) 40%, transparent);
-  --surface: color-mix(in srgb, var(--ivory), white 50%);
-  --surface-2: var(--ivory);
-  --tint: color-mix(in srgb, var(--mist), transparent 45%);
-  --tint-section: var(--mist);
-  --accent-ink: #0d6a63;
-  --critical-text: var(--critical);
-  --amber-text: #704300;
-  --input-bg: white;
-  --nav-bg: rgb(244 241 232 / 0.92);
-  --shadow: 0 1rem 3rem rgb(16 42 46 / 0.09);
+  /* --- the committed field --- */
+  --p-blue: #0f2e5c;
+  --p-blue-deep: #081d3d;
+  --p-blue-tint: #dbe4f0;
+  --p-on-blue: #eef3fa;
+  --p-on-blue-soft: rgb(238 243 250 / 0.74);
+  /* Blue as INK on paper, which is not the same colour as blue as a FIELD.
+     --p-blue is a background: in dark mode it is a mid navy that sits at 2.3:1
+     against dark paper, so blue text and blue rules must use this instead. */
+  --p-blue-ink: #0f2e5c;
 
-  /* fixed dark panels (safety section, footer, evidence card) */
-  --deep: #102a2e;
-  --on-deep: #f4f1e8;
-  --on-deep-muted: rgb(244 241 232 / 0.72);
-  --accent-on-deep: #66d8cc;
+  /* --- the seal: withheld, gated, dangerous --- */
+  --p-seal: #c41e22;
+  --p-seal-ink: #96181b;
+  --p-seal-tint: #fbe6e6;
+
+  /* --- caution: flagged but not withheld. Distinct from the seal on purpose;
+         the visit screen uses these three tiers to show risk and collapsing
+         them would erase a safety distinction. --- */
+  --p-amber: #8a5200;
+  --p-amber-tint: #fbf0dc;
+
+  /* --- form geometry --- */
+  --p-rule: 1px solid #c3ccda;
+  --p-rule-strong: 2px solid var(--p-ink);
+  --p-gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --p-measure: 62ch;
+
+  /* --- legacy semantic names, repointed at the print world ---------------
+     Kept so the tool stylesheets need no edit. New work should use --p-*. */
+  --ink: var(--p-ink);
+  --ivory: var(--p-paper);
+  --teal: var(--p-blue);
+  --mist: var(--p-blue-tint);
+  --amber: var(--p-amber);
+  --critical: var(--p-seal);
+
+  --bg: var(--p-paper);
+  --text: var(--p-ink);
+  --muted: var(--p-ink-soft);
+  --faint: var(--p-ink-faint);
+  --line: #c3ccda;
+  --line-strong: var(--p-ink);
+  --surface: var(--p-paper);
+  --surface-2: var(--p-paper-2);
+  --tint: var(--p-blue-tint);
+  --tint-section: var(--p-paper-2);
+  --accent-ink: var(--p-blue);
+  --critical-text: var(--p-seal-ink);
+  --amber-text: var(--p-amber);
+  --input-bg: var(--p-paper);
+  --nav-bg: rgb(255 255 255 / 0.92);
+  /* Flat offset, not a blur: paper stacked on paper. */
+  --shadow: 0.45rem 0.45rem 0 var(--p-blue-tint);
+
+  /* fixed dark panels — the committed field */
+  --deep: var(--p-blue);
+  --on-deep: var(--p-on-blue);
+  --on-deep-muted: var(--p-on-blue-soft);
+  --accent-on-deep: #a9c6ec;
 
   /* geometry */
-  --container: 74rem;
-  --r-panel: 0.75rem;
-  --r-control: 0.5rem;
+  --container: 78rem;
+  --r-panel: 0;
+  --r-control: 0;
   --section-pad: clamp(4rem, 7vw, 6rem);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b2125;
-    --text: #e9efec;
-    --muted: rgb(233 239 236 / 0.76);
-    --faint: rgb(233 239 236 / 0.62);
-    --line: rgb(233 239 236 / 0.16);
-    --line-strong: rgb(233 239 236 / 0.42);
-    --surface: #122c31;
-    --surface-2: #0f272c;
-    --tint: rgb(221 234 231 / 0.07);
-    --tint-section: #133136;
-    --accent-ink: #6fd8cc;
-    --critical-text: #f2a0a0;
-    --amber-text: #ffce8a;
-    --input-bg: #0e252a;
-    --nav-bg: rgb(11 33 37 / 0.92);
-    --shadow: 0 1rem 3rem rgb(0 0 0 / 0.4);
-    --deep: #0e2a2f;
+    --p-paper: #0b1017;
+    --p-paper-2: #141b25;
+    --p-ink: #eef2f7;
+    --p-ink-soft: #b3bdcb;
+    --p-ink-faint: #8c97a6;
+    --p-blue: #1d4d8f;
+    --p-blue-deep: #060d16;
+    --p-blue-tint: #16253c;
+    --p-on-blue: #eef3fa;
+    --p-blue-ink: #a9c6ec;
+    --p-seal: #ff6b64;
+    --p-seal-ink: #ff8b84;
+    --p-seal-tint: #2a1416;
+    --p-amber: #f0b45c;
+    --p-amber-tint: #2a2013;
+    --p-rule: 1px solid #2b3646;
+    --p-rule-strong: 2px solid var(--p-ink);
+
+    --line: #2b3646;
+    --critical-text: var(--p-seal-ink);
+    --amber-text: var(--p-amber);
+    --nav-bg: rgb(11 16 23 / 0.92);
+    --shadow: 0.45rem 0.45rem 0 var(--p-blue-tint);
+    --accent-on-deep: #a9c6ec;
   }
 }
 

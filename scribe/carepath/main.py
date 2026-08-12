@@ -422,9 +422,29 @@ def synthesize_speech(payload: SpeechRequest) -> Response:
 ALLOWED_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 MAX_DOCUMENT_BYTES = 12 * 1024 * 1024
 
+# The public demo asks for the scripted document with this header. In `demo`
+# mode `read_document` returns canned lines and never looks at the bytes, which
+# is honest for a sample the page labels as one and would be a fabrication for a
+# visitor's own prescription -- so the header is set only on the sample path.
+#
+# Accepting it from anyone is safe by construction: it can only make the reply
+# LESS capable. It cannot read a real document, it cannot bypass the risk engine
+# or the clinician gate (both still run on every line in demo mode), and it
+# reveals nothing that is not already published on the page as the sample.
+SAMPLE_MODE_HEADER = "x-carepath-sample"
+
+
+def _document_settings(request: Request):
+    """Interpreter settings for this document read, honouring the sample header."""
+    settings = interpreter_settings()
+    if request.headers.get(SAMPLE_MODE_HEADER) == "1":
+        return settings.model_copy(update={"provider_mode": "demo"})
+    return settings
+
 
 @app.post("/api/v1/visits/{visit_id}/documents", include_in_schema=False)
 def read_visit_document(
+    request: Request,
     visit_id: str,
     db: InterpreterDBDep,
     image: UploadFile = File(...),
@@ -452,11 +472,15 @@ def read_visit_document(
     if not data:
         raise HTTPException(status_code=400, detail="Empty upload.")
 
-    settings = interpreter_settings()
+    settings = _document_settings(request)
     try:
         lines = read_document(settings, data, content_type or "image/jpeg")
     except Exception as exc:
-        logger.warning("document read failed error_class=%s", exc.__class__.__name__)
+        logger.warning(
+            "document read failed error_class=%s mode=%s",
+            exc.__class__.__name__,
+            settings.provider_mode,
+        )
         raise HTTPException(status_code=502, detail="Could not read the document.") from exc
 
     providers = get_interpreter_providers(settings)
@@ -594,6 +618,20 @@ if SITE_DIST_DIR.is_dir():
     @app.get("/kham-song-ngu", include_in_schema=False)
     @app.get("/kham-song-ngu/", include_in_schema=False)
     def bilingual_visit_page() -> FileResponse:
+        return FileResponse(SITE_DIST_DIR / "index.html")
+
+    @app.get("/thu-nghiem", include_in_schema=False)
+    @app.get("/thu-nghiem/", include_in_schema=False)
+    def public_demo_page() -> FileResponse:
+        """The public demo hub.
+
+        The quota endpoints under /api/demo/* are Vercel functions and do not
+        exist on this host, so an upload started here fails. The hub already
+        treats a failed call as a failure rather than substituting scripted
+        output, which is the behaviour that matters. Registering the route
+        anyway keeps a shared link from hard-404ing on whichever host it was
+        copied from.
+        """
         return FileResponse(SITE_DIST_DIR / "index.html")
 
     app.mount("/", StaticFiles(directory=SITE_DIST_DIR, html=True), name="site")
