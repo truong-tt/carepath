@@ -26,9 +26,16 @@ dev = [
 include = ["app*"]
 
 [tool.setuptools.package-data]
+# Every non-.py file the package reads at runtime via Path(__file__).parent must
+# be listed here. The Docker image does a real `pip install ./interpreter`, so
+# anything missing is simply absent in production while tests keep passing from
+# the source tree. demo_scenario.json was missing, which made PROVIDER_MODE=demo
+# and the public demo's sample path fail with 502 on the Space only.
+# tests/test_package_data.py fails the build if this list falls behind.
 app = [
   "glossary/data/*.csv",
   "risk/lexicons/*.json",
+  "providers/*.json",
 ]
 
 [tool.pytest.ini_options]
