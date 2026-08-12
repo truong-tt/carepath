@@ -45,3 +45,6 @@ scripts/bin/harness-cli.exe
 
 # Per-developer Claude Code permissions; .claude/launch.json is shared.
 .claude/settings.local.json
+
+# setuptools build output (pip wheel / pip install .)
+build/
