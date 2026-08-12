@@ -16,6 +16,9 @@
     { "source": "/ghi-chep-lam-sang/:path*", "destination": "/index.html" },
     { "source": "/kham-song-ngu", "destination": "/index.html" },
     { "source": "/kham-song-ngu/", "destination": "/index.html" },
-    { "source": "/kham-song-ngu/:path*", "destination": "/index.html" }
+    { "source": "/kham-song-ngu/:path*", "destination": "/index.html" },
+    { "source": "/dich-giay-to", "destination": "/index.html" },
+    { "source": "/dich-giay-to/", "destination": "/index.html" },
+    { "source": "/dich-giay-to/:path*", "destination": "/index.html" }
   ]
 }

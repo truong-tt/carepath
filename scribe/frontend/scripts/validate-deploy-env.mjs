@@ -1,4 +1,47 @@
-import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const here = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Every route the app answers must be rewritten to index.html by Vercel.
+ *
+ * There is no SPA fallback in vercel.json — each route is listed explicitly.
+ * `vite preview` DOES fall back, so the whole Playwright suite passes against a
+ * route that 404s in production. /dich-giay-to/ shipped exactly that way: the
+ * pathname check was added to App.tsx, 32 e2e tests went green, and the live
+ * URL returned 404: NOT_FOUND.
+ *
+ * This runs inside the Vercel build (`npm run validate:deploy && npm run
+ * build`), so a route with no rewrite fails the deploy instead of shipping.
+ */
+export function validateRouteRewrites({
+  appSource = readFileSync(join(here, "..", "src", "App.tsx"), "utf8"),
+  vercelConfig = JSON.parse(readFileSync(join(here, "..", "vercel.json"), "utf8")),
+} = {}) {
+  const errors = [];
+  // `const SOMETHING_PATH = "/slug/";` — the pattern App.tsx uses for routes.
+  const routes = [...appSource.matchAll(/_PATH\s*=\s*"(\/[^"]*)"/g)].map((match) => match[1]);
+  if (routes.length === 0) {
+    errors.push("No routes found in App.tsx; the route-parity check is not looking at anything.");
+  }
+
+  const sources = new Set((vercelConfig.rewrites ?? []).map((rule) => rule.source));
+  for (const route of routes) {
+    const bare = route.replace(/\/$/, "");
+    for (const required of [bare, `${bare}/`, `${bare}/:path*`]) {
+      if (!sources.has(required)) {
+        errors.push(`vercel.json has no rewrite for "${required}" (route ${route}).`);
+      }
+    }
+  }
+
+  if (errors.length) {
+    throw new Error(`Routes are not deployable:\n- ${errors.join("\n- ")}`);
+  }
+  return routes;
+}
 
 export function validateDeployEnv(env = process.env) {
   const errors = [];
@@ -58,7 +101,8 @@ export function validateDeployEnv(env = process.env) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     validateDeployEnv();
-    console.log("Vercel deployment environment is valid.");
+    const routes = validateRouteRewrites();
+    console.log(`Vercel deployment environment is valid. ${routes.length} routes are rewritten.`);
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

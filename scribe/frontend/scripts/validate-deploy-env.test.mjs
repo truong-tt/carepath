@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { validateDeployEnv } from "./validate-deploy-env.mjs";
+import { validateDeployEnv, validateRouteRewrites } from "./validate-deploy-env.mjs";
 
 const validEnv = {
   VITE_API_BASE: "https://carepath.hf.space",
@@ -63,6 +63,9 @@ test("Vercel runs validation before the production build", async () => {
     { source: "/kham-song-ngu", destination: "/index.html" },
     { source: "/kham-song-ngu/", destination: "/index.html" },
     { source: "/kham-song-ngu/:path*", destination: "/index.html" },
+    { source: "/dich-giay-to", destination: "/index.html" },
+    { source: "/dich-giay-to/", destination: "/index.html" },
+    { source: "/dich-giay-to/:path*", destination: "/index.html" },
   ]);
 });
 
@@ -110,4 +113,33 @@ test("every SPA route the app serves has a Vercel rewrite", async () => {
   for (const route of routes) {
     assert.ok(sources.has(route), `vercel.json has no rewrite for ${route}`);
   }
+});
+
+// The route-parity guarantee used to live only in this file, and Vercel never
+// runs this file. /dich-giay-to/ shipped with a pathname check, 32 green
+// Playwright tests and no rewrite, and returned 404 in production: `vite
+// preview` falls back to index.html, so no local run could see it. The check
+// now runs inside `npm run validate:deploy`, which Vercel does run, and these
+// two tests prove it fires rather than merely passing.
+test("the build-time route check accepts the shipped configuration", () => {
+  const routes = validateRouteRewrites();
+  assert.ok(routes.includes("/dich-giay-to/"), `expected the paperwork route, got ${routes}`);
+});
+
+test("the build-time route check fails a route with no rewrite", () => {
+  assert.throws(
+    () =>
+      validateRouteRewrites({
+        appSource: 'const NEW_PATH = "/chua-co-rewrite/";',
+        vercelConfig: { rewrites: [{ source: "/thu-nghiem/", destination: "/index.html" }] },
+      }),
+    /no rewrite for "\/chua-co-rewrite"/,
+  );
+});
+
+test("the build-time route check refuses to pass when it sees no routes", () => {
+  assert.throws(
+    () => validateRouteRewrites({ appSource: "// no routes here", vercelConfig: { rewrites: [] } }),
+    /not looking at anything/,
+  );
 });
