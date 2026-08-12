@@ -45,12 +45,27 @@ CORS_ORIGINS=https://carepath-medicaltranslation.vercel.app
 ```
 
 The interpreter defaults to mock mode, which returns `[vi->en] …` echoes. For
-`/kham-song-ngu/` to actually translate on the deployed Space, add one more
-secret:
+`/kham-song-ngu/` and `/dich-giay-to/` to actually translate on the deployed
+Space, add **two** more secrets:
 
 ```text
 PROVIDER_MODE=ckey
+ADMIN_TOKEN=<anything except change-me>
 ```
+
+`ADMIN_TOKEN` is not optional here and its absence is not a degraded mode: it is
+a **hard boot failure**. `validate_runtime_settings()`
+(`interpreter/app/main.py:19`) runs first inside `interpreter_lifespan`, which
+`scribe/carepath/main.py:98` wraps, so it gates the whole combined app — and it
+raises `RuntimeError` when `PROVIDER_MODE` is `ckey` **or** `cloud` while
+`ADMIN_TOKEN` is still its `change-me` default. Setting `PROVIDER_MODE=ckey`
+alone takes the Space down with *"Your space is in error"*, which reads like an
+infrastructure problem rather than a missing variable. Check the Space's build
+log: the message names the fix.
+
+Both must be Space **secrets**, not variables. A Hugging Face variable is
+visible to anyone who can see the Space; `ADMIN_TOKEN` guards `/api/admin/review`
+and `LLM_API_KEY` bills real tokens.
 
 It reuses `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` above — one CKey
 account configures both modules. Measured latency across 50 turns: median 15s,
@@ -73,8 +88,11 @@ and conversation turns on `ckey` bill real tokens, capped at five runs per IP
 per day by the `/api/demo/*` functions.
 
 The `cloud` mode (Anthropic/OpenAI direct) additionally needs
-`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and a non-default `ADMIN_TOKEN`
-(startup refuses `change-me` in cloud mode).
+`ANTHROPIC_API_KEY` and `OPENAI_API_KEY`. It needs a non-default `ADMIN_TOKEN`
+too, but so does `ckey` — this paragraph used to claim the requirement was
+cloud-only, and the code has always refused `change-me` in both
+(`interpreter/app/main.py:21`). That wording is what took the Space down the
+first time `PROVIDER_MODE=ckey` was set.
 
 The Vercel site uploads Scribe audio directly to the Space, so its exact origin
 must be present in `CORS_ORIGINS`. Add local Vite origins as comma-separated
