@@ -1,6 +1,13 @@
 /**
  * Shared plumbing for the public demo endpoints.
  *
+ * Importers must write `from "../_demo.js"`, with the extension, even though
+ * this file is TypeScript. Vercel compiles each api/ file separately and emits
+ * ESM, and Node's ESM resolver does not add extensions — an extensionless
+ * import deploys fine and then fails at runtime with ERR_MODULE_NOT_FOUND on
+ * the first request. Nothing in the local build catches it, because Vite and
+ * vitest both resolve extensionless specifiers happily.
+ *
  * These functions exist for one reason: quota and size limits on anonymous
  * traffic. They deliberately do NOT read documents or translate anything.
  * Re-implementing either here would produce patient-visible output that never

@@ -8,7 +8,7 @@ import {
   createSession,
   json,
   takeQuota,
-} from "../_demo";
+} from "../_demo.js";
 
 /**
  * Open a visit session for the two-way consultation demo.

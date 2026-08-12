@@ -10,7 +10,7 @@ import {
   json,
   readBody,
   takeQuota,
-} from "../_demo";
+} from "../_demo.js";
 
 // Raw body: the upload is forwarded verbatim to the real endpoint, so there is
 // nothing to parse here and nothing gained by buffering it twice.
