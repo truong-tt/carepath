@@ -5,11 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="CarePath chuẩn bị bản nháp ghi chú lâm sàng từ tệp âm thanh để bác sĩ kiểm tra. Phiên dịch trực tiếp đang phát triển và chưa mở trên web."
+      content="CarePath dịch buổi khám và đọc giấy tờ y tế tiếng Việt cho người bệnh nước ngoài — đơn thuốc, phiếu xét nghiệm, giấy ra viện. Nội dung có rủi ro được giữ lại cho tới khi bác sĩ xác nhận."
     />
-    <meta name="theme-color" content="#102a2e" />
+    <meta name="theme-color" content="#0f2e5c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>CarePath | Bớt gõ bệnh án, thêm thời gian cho người bệnh</title>
+
+    <!-- The same app is served from both Vercel and the Hugging Face Space.
+         Without this, the two are duplicate content and Google may index the
+         Space URL instead of the public one. -->
+    <link rel="canonical" href="https://carepath-omega.vercel.app/" />
+
+    <!-- Link previews. This link gets pasted into Zalo and Messenger far more
+         often than it gets searched for, and a bare URL reads as unfinished. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CarePath" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:url" content="https://carepath-omega.vercel.app/" />
+    <meta
+      property="og:title"
+      content="CarePath — Khám song ngữ cho người bệnh nước ngoài"
+    />
+    <meta
+      property="og:description"
+      content="Dịch buổi khám và đọc đơn thuốc tiếng Việt. Liều thuốc và tên thuốc dễ nhầm được giữ lại cho tới khi bác sĩ xác nhận."
+    />
+    <meta name="twitter:card" content="summary" />
+
+    <title>CarePath — Khám song ngữ cho người bệnh nước ngoài</title>
   </head>
   <body>
     <div id="root"></div>

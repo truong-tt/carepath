@@ -570,6 +570,18 @@ def blocked_interpreter_browser_path() -> PlainTextResponse:
     return PlainTextResponse("Not Found", status_code=404)
 
 
+@app.get("/robots.txt", include_in_schema=False)
+def space_robots() -> PlainTextResponse:
+    """Keep the Space out of search results.
+
+    This host serves the same app as the public site, so indexing it would make
+    the two duplicate content and could rank the API host instead. Registered
+    before the static mount so it wins over the bundled robots.txt, which names
+    the public origin.
+    """
+    return PlainTextResponse("User-agent: *\nDisallow: /\n")
+
+
 if SITE_DIST_DIR.is_dir():
     # SPA deep links. Both the trailing-slash and bare forms are registered:
     # without the bare form the request falls through to StaticFiles and 404s,

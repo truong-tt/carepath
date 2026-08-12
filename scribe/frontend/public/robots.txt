@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# The demo surfaces are live tools, not pages worth ranking, and the visit
+# screen starts a session. Crawlers should stay on the public landing.
+Disallow: /kham-song-ngu/
+Disallow: /ghi-chep-lam-sang/
+
+Sitemap: https://carepath-omega.vercel.app/sitemap.xml

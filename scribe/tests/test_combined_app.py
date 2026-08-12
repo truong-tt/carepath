@@ -82,6 +82,17 @@ class CombinedAppTests(unittest.TestCase):
         for response in responses:
             self.assertEqual(response.status_code, 404, response.text)
 
+    def test_this_host_asks_crawlers_to_stay_away(self) -> None:
+        # It serves the same app as the public site, so indexing it would make
+        # the two duplicate content. The bundled robots.txt names the public
+        # origin, so this route has to win over the static mount.
+        with TestClient(app) as client:
+            response = client.get("/robots.txt")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIn("Disallow: /", response.text)
+        self.assertNotIn("Sitemap", response.text)
+
 
 if __name__ == "__main__":
     unittest.main()
