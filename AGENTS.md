@@ -31,13 +31,46 @@ review protocol.
 
 ## Product UX contract
 
-CarePath must be Vietnamese-first.
+CarePath is one journey a foreign patient walks:
 
-The target users may include Vietnamese doctors who are not comfortable with English medical software terms. Therefore, the UI must explain workflows by user intent, not by English product names.
+```text
+Find care → Prepare → Visit → Verify → Paperwork → Follow-up
+```
+
+The tools are capabilities inside that journey. None of them is marketed as a
+product of its own. See `docs/decisions/0023-foreign-patient-care-navigator.md`.
+
+### Language is decided by audience, not globally
+
+**Patient-facing surfaces are English-first.** The primary user is a tourist or
+expat who does not read Vietnamese:
+
+* `/` — the homepage. English by default, full Vietnamese behind the toggle,
+  because a Vietnamese clinic owner also reads this page.
+* `/get-care/` and `/my-carepath/` — English. No toggle: a clinician has no
+  reason to open the patient's own journey, and shipping half-maintained
+  Vietnamese there would be worse than not offering it.
+* the patient column of the bilingual visit.
+
+Clinician-facing elements keep their Vietnamese **even when embedded in an
+English screen** — the gate card and risk labels inside `/get-care/` are
+Vietnamese, because the person acting on them is the clinician.
+
+**Clinician-facing surfaces are Vietnamese-first.** The clinician operates the
+safety gate and must read it fluently. No English primary labels here:
+
+* the gate card, risk labels and confirmation actions
+* the doctor column of `/kham-song-ngu/`
+* `/dich-giay-to/` clinician review, `/ghi-chep-lam-sang/`, `/thu-nghiem/`
+
+Vietnamese copy is never deleted to make room for English. Both languages stay,
+and `scripts/check-diacritics.mjs` stays in force.
+
+The target users include Vietnamese doctors who are not comfortable with English medical software terms. Therefore, clinician UI must explain workflows by user intent, not by English product names.
 
 ### Primary user-facing labels
 
-Use these as primary UI labels:
+On clinician surfaces, use these as primary UI labels:
 
 * `Ghi chép bệnh án AI`
 * `Phiên dịch khám bệnh trực tiếp`
@@ -47,10 +80,11 @@ Use these as primary CTAs:
 * `Bắt đầu ghi chép`
 * `Bắt đầu phiên dịch`
 
-Use this homepage framing:
+On the patient-facing homepage, the primary CTAs are:
 
 ```text
-Bạn muốn hỗ trợ việc gì hôm nay?
+I need medical care
+I already have a prescription
 ```
 
 ### Secondary/internal labels
@@ -70,7 +104,11 @@ Do not use `Scribe` or `Interpreter` as primary labels on user-facing screens.
 
 ### Required distinction between the two modules
 
-The landing page must make it obvious that these are two different workflows:
+This section applied when the landing page sold two products side by side. It no
+longer does: the homepage now presents one journey, and these two capabilities
+appear inside it. The wording below still governs how each capability explains
+itself **on its own screen**, where a clinician needs to know which one they are
+in and what it will and will not do.
 
 #### Ghi chép bệnh án AI
 

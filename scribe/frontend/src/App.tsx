@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import LandingPage from "./LandingPage";
 import DemoHub from "./demo/DemoHub";
+import GetCareScreen from "./journey/GetCareScreen";
+import MyCarePathScreen from "./journey/MyCarePathScreen";
 import PaperworkScreen from "./paperwork/PaperworkScreen";
 import ScribeTool from "./scribe/ScribeTool";
 import VisitScreen from "./visit/VisitScreen";
@@ -9,6 +11,10 @@ const CLINICAL_NOTES_PATH = "/ghi-chep-lam-sang/";
 const VISIT_PATH = "/kham-song-ngu/";
 const DEMO_PATH = "/thu-nghiem/";
 const PAPERWORK_PATH = "/dich-giay-to/";
+// The patient's two routes are English-slugged: the clinician's tools are named
+// in the clinician's language, and these are not the clinician's.
+const GET_CARE_PATH = "/get-care/";
+const MY_CAREPATH_PATH = "/my-carepath/";
 
 export default function App() {
   const [pathname, setPathname] = useState(() => window.location.pathname);
@@ -19,9 +25,14 @@ export default function App() {
   // "Bớt gõ bệnh án" from the retired Scribe-led site — so the served page
   // announced the previous product while the h1 described this one. The tab
   // title also has to be right before JS runs, for a share and for a crawler.
+  //
+  // The root language is a property of who the route is for, not of the app.
+  // The patient's routes are English and the clinic's tools are Vietnamese; the
+  // landing page sets its own from the toggle, overriding this on mount.
   useEffect(() => {
-    document.documentElement.lang = "vi";
-  }, []);
+    const patientSurface = ["/", GET_CARE_PATH, MY_CAREPATH_PATH].includes(pathname);
+    document.documentElement.lang = patientSurface ? "en" : "vi";
+  }, [pathname]);
 
   useEffect(() => {
     if (window.location.hash === "#/scribe" || pathname === "/ghi-chep-lam-sang") {
@@ -39,6 +50,14 @@ export default function App() {
     if (pathname === "/dich-giay-to") {
       window.history.replaceState(null, "", PAPERWORK_PATH);
       setPathname(PAPERWORK_PATH);
+    }
+    if (pathname === "/get-care") {
+      window.history.replaceState(null, "", GET_CARE_PATH);
+      setPathname(GET_CARE_PATH);
+    }
+    if (pathname === "/my-carepath") {
+      window.history.replaceState(null, "", MY_CAREPATH_PATH);
+      setPathname(MY_CAREPATH_PATH);
     }
   }, [pathname]);
 
@@ -80,6 +99,8 @@ export default function App() {
   if (isVisit) return <VisitScreen backHref="/" />;
   if (isDemo) return <DemoHub backHref="/" />;
   if (isPaperwork) return <PaperworkScreen backHref="/" />;
+  if (pathname === GET_CARE_PATH) return <GetCareScreen />;
+  if (pathname === MY_CAREPATH_PATH) return <MyCarePathScreen />;
   return isScribeTool ? (
     <ScribeTool backHref="/" />
   ) : (

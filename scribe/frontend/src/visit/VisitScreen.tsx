@@ -99,7 +99,13 @@ function EntityChips({ turn }: { turn: VisitTurn }) {
   );
 }
 
-function GateCard({
+/**
+ * Exported so the care journey renders the clinician's real gate rather than a
+ * picture of one. The journey passes a local `onConfirm`; everything else about
+ * the card — what it shows, what it withholds, how it words the warning — is
+ * this component and stays this component.
+ */
+export function GateCard({
   turn,
   onConfirm,
   onEscalate,
@@ -189,7 +195,31 @@ function GateCard({
   );
 }
 
-function TurnCard({ turn, side }: { turn: VisitTurn; side: "vi" | "en" }) {
+export function TurnCard({
+  turn,
+  side,
+  maskedLabel = "Đang chờ bác sĩ xác nhận…",
+  patientView = false,
+}: {
+  turn: VisitTurn;
+  side: "vi" | "en";
+  /**
+   * What a withheld cell says. Vietnamese by default: on this screen both
+   * columns are on the clinic's tablet and the clinician reads both. The care
+   * journey passes English for the patient's column, where the reader is the
+   * patient — a withholding notice the patient cannot read tells them their
+   * screen is broken rather than that they are being protected.
+   */
+  maskedLabel?: string;
+  /**
+   * True when this column is on the patient's own device rather than the
+   * clinic's tablet. Drops the recognition confidence and the risk chips:
+   * those are the clinician's instruments for deciding whether to release a
+   * line, they are labelled in the clinician's language, and a patient reading
+   * "94%" next to their own prescription learns nothing they can act on.
+   */
+  patientView?: boolean;
+}) {
   const showsSource = turn.src_lang.startsWith(side);
   const isDocument = turn.speaker === "document";
   // A column shows original speech when the turn was spoken in that language,
@@ -198,7 +228,7 @@ function TurnCard({ turn, side }: { turn: VisitTurn; side: "vi" | "en" }) {
   if (isGated(turn) && !showsSource) {
     return (
       <article className="visit-turn visit-turn--masked">
-        <p className="visit-turn__masked">Đang chờ bác sĩ xác nhận…</p>
+        <p className="visit-turn__masked">{maskedLabel}</p>
       </article>
     );
   }
@@ -214,12 +244,14 @@ function TurnCard({ turn, side }: { turn: VisitTurn; side: "vi" | "en" }) {
       {/* Documents are Vietnamese source in the Vietnamese column, so gating
           chips on "showing a translation" would hide them exactly where the
           extracted medicine and dose matter most. */}
-      {!showsSource || isDocument ? <EntityChips turn={turn} /> : null}
-      <p className="visit-turn__meta">
-        {confidencePercent(turn)}%
-        {turn.status === "corrected" ? " · bác sĩ đã sửa" : ""}
-        {turn.status === "confirmed" ? " · bác sĩ đã xác nhận" : ""}
-      </p>
+      {(!showsSource || isDocument) && !patientView ? <EntityChips turn={turn} /> : null}
+      {!patientView ? (
+        <p className="visit-turn__meta">
+          {confidencePercent(turn)}%
+          {turn.status === "corrected" ? " · bác sĩ đã sửa" : ""}
+          {turn.status === "confirmed" ? " · bác sĩ đã xác nhận" : ""}
+        </p>
+      ) : null}
     </article>
   );
 }

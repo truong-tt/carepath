@@ -27,8 +27,13 @@ test("keyboard-only visitor can submit a pilot request", async ({ page }) => {
     await route.fulfill({ status: 204, body: "" });
   });
   await page.goto("/");
+  // The pilot enquiry is the clinic's path, and the clinic reads Vietnamese.
+  // The page opens in English for the patient, so this journey starts with the
+  // toggle — and the form follows the page, rather than sitting in a second
+  // language inside an English section.
+  await page.getByRole("button", { name: "Chuyển sang tiếng Việt" }).click();
 
-  const pilot = page.getByText("Dành cho cơ sở muốn thí điểm CarePath");
+  const pilot = page.getByText("Thí điểm CarePath tại phòng khám của bạn");
   await tabTo(page, pilot);
   await page.keyboard.press("Enter");
 
@@ -64,7 +69,7 @@ test("the landing page states the patient-safety problem, responsively", async (
 
     const title = page.getByRole("heading", {
       level: 1,
-      name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
+      name: "Healthcare in Vietnam, without navigating it alone.",
     });
     await expect(title).toBeVisible();
     const lineCount = await title.evaluate((element) => {
@@ -80,13 +85,16 @@ test("the landing page states the patient-safety problem, responsively", async (
     await expect(page.getByRole("spinbutton", { name: "Số người bệnh mỗi ngày" })).toHaveCount(0);
 
     // Evidence, with its limits stated.
-    await expect(page.getByText(/49,1%/)).toBeVisible();
-    await expect(page.getByText(/không phải kết quả của CarePath/)).toBeVisible();
+    await expect(page.getByText(/49.1%/)).toBeVisible();
+    await expect(page.getByText(/not from CarePath/)).toBeVisible();
 
-    await expect(page.getByRole("link", { name: "Bắt đầu ca khám" }).first()).toHaveAttribute(
-      "href",
-      "/kham-song-ngu/",
-    );
+    // The patient's door is the primary action at every width.
+    await expect(
+      page.getByRole("link", { name: "I need medical care" }).first(),
+    ).toHaveAttribute("href", "/get-care/");
+    await expect(
+      page.getByRole("link", { name: "I already have a prescription" }).first(),
+    ).toHaveAttribute("href", "/dich-giay-to/");
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     if (viewport.width === 1440) {
@@ -151,25 +159,34 @@ test("the hero withholds the dose lines rather than hiding them", async ({ page 
   expect(geometry!.enLeft).toBeGreaterThanOrEqual(geometry!.viRight);
 });
 
-test("a non-Vietnamese reader can switch the whole page to English", async ({ page }) => {
+// The default flipped to English with the pivot (decision 0023). What this
+// test now protects is that flipping it did not leave the Vietnamese half as a
+// stub: a clinic owner switching to VI must get the whole page, figures,
+// limits and diacritics intact.
+test("a Vietnamese clinic reader gets the whole page, not a stub", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByText(/21.2 million/)).toBeVisible();
+  await expect(page.getByText(/No clinical trial/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Chuyển sang tiếng Việt" }).click();
 
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Foreign patients leave the clinic holding paper they cannot read.",
+      name: "Khám chữa bệnh ở Việt Nam, không phải tự xoay xở một mình.",
     }),
   ).toBeVisible();
-  await expect(page.getByText(/49.1%/)).toBeVisible();
-  await expect(page.getByText(/21.2 million/)).toBeVisible();
-  // Limits travel with the claims.
-  await expect(page.getByText(/not from CarePath/)).toBeVisible();
-  await expect(page.getByText(/No clinical trial/)).toBeVisible();
-
-  await page.getByRole("button", { name: "Chuyển sang tiếng Việt" }).click();
+  await expect(page.getByText(/49,1%/)).toBeVisible();
+  await expect(page.getByText(/21,2 triệu/)).toBeVisible();
+  // Limits travel with the claims, in both languages.
+  await expect(page.getByText(/không phải kết quả của CarePath/)).toBeVisible();
   await expect(page.getByText(/Chưa có thử nghiệm lâm sàng/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe("vi");
+
+  await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByText(/No clinical trial/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe("en");
 });
 
 test("clinical notes expose guidance and upload together, then return to the sample", async ({ page }) => {
@@ -210,7 +227,7 @@ test("clinical notes expose guidance and upload together, then return to the sam
   await page.getByRole("link", { name: "Xem cách hoạt động" }).click();
   await expect(page).toHaveURL(/\/#how$/);
   await expect(
-    page.getByRole("heading", { name: "Đọc — đối chiếu — bác sĩ xác nhận." }),
+    page.getByRole("heading", { name: "Read it, check it, let the clinician confirm it." }),
   ).toBeVisible();
   await page.goto("/ghi-chep-lam-sang/");
 
@@ -261,7 +278,7 @@ test.describe("touch navigation", () => {
     for (const width of [320, 390, 760, 900]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      const link = page.locator(".p-nav__links").getByRole("link", { name: "Bằng chứng" });
+      const link = page.locator(".p-nav__links").getByRole("link", { name: "Evidence" });
       await link.scrollIntoViewIfNeeded();
       const box = await link.boundingBox();
       expect(box).not.toBeNull();
@@ -302,9 +319,9 @@ test("the served page describes the product it actually is", async ({ page }) =>
   // Asserted on the served HTML, before and after hydration: the title used to
   // be correct in index.html and then overwritten by JS with "Bớt gõ bệnh án",
   // the retired Scribe-led product.
-  await expect(page).toHaveTitle(/Khám song ngữ cho người bệnh nước ngoài/);
+  await expect(page).toHaveTitle(/without navigating it alone/);
   await page.waitForLoadState("networkidle");
-  await expect(page).toHaveTitle(/Khám song ngữ cho người bệnh nước ngoài/);
+  await expect(page).toHaveTitle(/without navigating it alone/);
 
   const meta = (name: string) =>
     page.locator(`meta[property="${name}"], meta[name="${name}"]`).first();
@@ -364,7 +381,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     const context = await browser.newContext({ colorScheme });
     const page = await context.newPage();
     await page.goto("http://127.0.0.1:4173/");
-    await expect(page.getByRole("link", { name: "Bắt đầu ca khám" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "I need medical care" }).first()).toBeVisible();
     await expectNoSeriousAxeViolations(page);
     await context.close();
   });

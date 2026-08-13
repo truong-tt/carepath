@@ -415,6 +415,25 @@
   background: var(--p-ink);
 }
 
+/* The way back out of a tool, on the navy nav bar.
+ *
+ * This rule existed three times — `.paper .p-nav__back`, `.demo .p-nav__back`,
+ * and nowhere for a fourth surface — so the care journey's nav rendered with
+ * the UA's default link blue on navy at 1.42:1. Defined once, unscoped, beside
+ * the other nav primitives it belongs with. `margin-left: auto` is the demo
+ * hub's local need and stays local. */
+.p-nav__back {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--p-on-blue);
+  text-decoration: none;
+}
+
+.p-nav__back:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* The gap's edge. Nothing stands in for the withheld English — the string is
    absent from the DOM, not hidden — so what is marked here is the boundary of
    an absence and the reason for it. */

@@ -51,6 +51,13 @@ export const PAPERWORK = {
   print: "In bản này",
   again: "Đọc giấy tờ khác",
 
+  // The paperwork route is the one door a patient may arrive at directly, so it
+  // is also where an episode most often starts. Saving keeps the confirmed
+  // lines in this browser tab; nothing is uploaded anywhere.
+  saveCta: "Lưu vào hồ sơ của người bệnh",
+  savedCta: "Đã lưu vào hồ sơ",
+  openEpisode: "Mở hồ sơ (My CarePath)",
+
   // Every failure names what happened and what to do next. None of them ever
   // falls back to a scripted sample: showing canned output for a document the
   // clinician actually uploaded would be a fabrication about the one thing this

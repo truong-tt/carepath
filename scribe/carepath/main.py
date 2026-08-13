@@ -620,6 +620,28 @@ if SITE_DIST_DIR.is_dir():
     def bilingual_visit_page() -> FileResponse:
         return FileResponse(SITE_DIST_DIR / "index.html")
 
+    @app.get("/dich-giay-to", include_in_schema=False)
+    @app.get("/dich-giay-to/", include_in_schema=False)
+    def paperwork_page() -> FileResponse:
+        """The paperwork reader.
+
+        This was registered in vercel.json and never here, so the route worked
+        on Vercel and 404'd on this host from the day it shipped. The parity
+        check in scripts/validate-deploy-env.mjs only read vercel.json, which is
+        why nothing caught it; it now reads this file too.
+        """
+        return FileResponse(SITE_DIST_DIR / "index.html")
+
+    @app.get("/get-care", include_in_schema=False)
+    @app.get("/get-care/", include_in_schema=False)
+    def get_care_page() -> FileResponse:
+        return FileResponse(SITE_DIST_DIR / "index.html")
+
+    @app.get("/my-carepath", include_in_schema=False)
+    @app.get("/my-carepath/", include_in_schema=False)
+    def my_carepath_page() -> FileResponse:
+        return FileResponse(SITE_DIST_DIR / "index.html")
+
     @app.get("/thu-nghiem", include_in_schema=False)
     @app.get("/thu-nghiem/", include_in_schema=False)
     def public_demo_page() -> FileResponse:

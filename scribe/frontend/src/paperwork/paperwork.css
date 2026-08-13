@@ -26,18 +26,6 @@
   padding-block: clamp(1.75rem, 3.5vw, 3rem);
 }
 
-.paper .p-nav__back {
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--p-on-blue);
-  text-decoration: none;
-}
-
-.paper .p-nav__back:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
 .paper h1 {
   margin: 0;
   font-size: clamp(1.9rem, 3.2vw, 2.8rem);
@@ -312,6 +300,15 @@
 
 .paper__sheet-head {
   padding-bottom: 0.9rem;
+}
+
+/* Carrying the confirmed sheet into the patient's episode. Ghost buttons: this
+   is an offer, not the task — the task finished when the sheet appeared. */
+.paper__save {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1.5rem 0 0;
 }
 
 .paper__rows {

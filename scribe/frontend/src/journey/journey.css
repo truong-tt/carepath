@@ -1,0 +1,473 @@
+/* The care journey and the episode record.
+ *
+ * No new visual language. This composes the print world's primitives from
+ * styles.css — the register, the spine, the seal, `.p-cta` — and adds only the
+ * three things the journey genuinely needs and the landing page does not: a
+ * step rail, an intake form, and the episode's section stack.
+ *
+ * Radius stays 0. This world is ruled forms, not cards.
+ */
+
+.journey {
+  background: var(--p-paper);
+  color: var(--p-ink);
+}
+
+.j-main {
+  padding-block: clamp(1.75rem, 4vw, 3rem) clamp(3.5rem, 7vw, 5.5rem);
+}
+
+/* --- the step rail ------------------------------------------------------
+   A form's stage list, not a progress bar with a fill. The current step is
+   marked by the strong rule the register already uses for a field block's
+   opening edge, so it reads as "this is the open field". */
+
+.j-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0 1rem;
+  margin: 0 0 clamp(2rem, 4vw, 3rem);
+  padding: 0;
+  list-style: none;
+}
+
+.j-steps__item {
+  padding-top: 0.6rem;
+  border-top: 2px solid var(--line);
+  color: var(--p-ink-faint);
+}
+
+.j-steps__item.is-done {
+  border-top-color: var(--p-spine-line);
+  color: var(--p-ink-soft);
+}
+
+.j-steps__item.is-current {
+  border-top-color: var(--p-seal);
+  color: var(--p-ink);
+}
+
+.j-steps__ord {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.j-steps__label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+@media (max-width: 44rem) {
+  .j-steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0 0.4rem;
+  }
+
+  /* The labels stop fitting long before the rail stops being useful: five
+     numbered rules still say where you are. */
+  .j-steps__label {
+    display: none;
+  }
+
+  .j-steps__item.is-current .j-steps__label {
+    display: block;
+    font-size: 0.72rem;
+  }
+}
+
+.j-head {
+  margin-bottom: 1.5rem;
+}
+
+.j-head h1 {
+  margin: 0;
+}
+
+/* --- notes ---------------------------------------------------------------
+   Three registers of fine print, and they are not interchangeable:
+   `j-disclaim` is a boundary of the product, `j-curated` marks data or a run
+   as not-live, `j-fine` is ordinary supporting text. */
+
+.j-disclaim,
+.j-curated {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 0.95rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.j-disclaim {
+  border-left: 3px solid var(--p-ink);
+  background: var(--p-paper-2);
+  color: var(--p-ink-soft);
+}
+
+.j-curated {
+  border-left: 3px solid var(--p-seal);
+  background: var(--p-seal-tint);
+  color: var(--p-ink);
+}
+
+.j-curated a {
+  color: var(--p-seal-ink);
+  font-weight: 700;
+}
+
+.j-fine {
+  margin: 0.4rem 0 0;
+  color: var(--p-ink-faint);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.j-error {
+  margin: 0;
+  color: var(--critical-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.j-link {
+  margin-top: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--p-blue-ink);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+/* --- intake form --------------------------------------------------------- */
+
+.j-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-left: var(--p-mark);
+  padding-top: 1.5rem;
+  border-top: var(--p-rule-strong);
+}
+
+.j-field {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.j-field--wide {
+  grid-column: 1 / -1;
+}
+
+.j-field small {
+  color: var(--p-ink-faint);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.j-radios {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.j-radios legend {
+  padding: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.j-radio,
+.j-check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: start;
+  font-weight: 400;
+}
+
+.j-radio {
+  align-items: center;
+  padding-block: 0.2rem;
+}
+
+.j-radio input,
+.j-check input {
+  width: 1.1rem;
+  min-height: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  flex: none;
+}
+
+.j-check input {
+  margin-top: 0.35rem;
+}
+
+.j-check span {
+  font-weight: 700;
+}
+
+.j-check small {
+  display: block;
+  font-weight: 400;
+}
+
+.j-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
+
+.j-form .j-fine,
+.j-form .j-error {
+  grid-column: 1 / -1;
+}
+
+/* --- providers ----------------------------------------------------------- */
+
+.p-list.j-providers,
+.p-list.j-brief {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.j-providers h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.j-provider__focus {
+  margin: 0.25rem 0 0;
+  color: var(--p-ink-soft);
+  font-size: 0.9rem;
+}
+
+.j-provider__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.2rem 0.9rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.86rem;
+}
+
+.j-provider__facts dt {
+  color: var(--p-ink-faint);
+  font-weight: 600;
+}
+
+.j-provider__facts dd {
+  margin: 0;
+}
+
+.j-providers .p-cta {
+  margin-top: 0.8rem;
+}
+
+/* --- visit brief ---------------------------------------------------------
+   The patient's own words left of the spine, the clinician's Vietnamese right
+   of it — the same geometry the prescription uses on the landing page, for the
+   same reason: the pair is the point, not either column alone. */
+
+.j-brief__value {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.j-brief__vi-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--p-ink-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Not an error and not a withholding — the seal is not spent here. This is a
+   translation that has not happened yet, and saying so is more honest than
+   inventing Vietnamese the patient never approved. */
+.j-brief__pending {
+  margin: 0;
+  color: var(--p-ink-faint);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
+.j-brief textarea {
+  min-height: 3.5rem;
+}
+
+/* --- the visit stage ----------------------------------------------------- */
+
+.j-gatecount {
+  margin: 0 0 1.25rem var(--p-mark);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.j-gatecount.is-held {
+  color: var(--p-seal-ink);
+}
+
+.j-columns {
+  margin-top: 1.5rem;
+}
+
+.j-principle {
+  margin: 2rem 0 0 var(--p-mark);
+  padding: 1.1rem 1.25rem;
+  border-left: 3px solid var(--p-seal);
+  background: var(--p-paper-2);
+}
+
+.j-principle__claim {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+/* --- the episode record --------------------------------------------------- */
+
+.j-section {
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+}
+
+.j-section h2 {
+  margin: 0 0 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: var(--p-rule-strong);
+  font-size: 1.05rem;
+}
+
+.j-status {
+  display: inline-block;
+  margin: 0 0 1.25rem;
+  padding: 0.3rem 0.7rem;
+  border: 2px solid var(--p-blue-ink);
+  color: var(--p-blue-ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.j-status.is-escalated {
+  border-color: var(--p-seal);
+  color: var(--p-seal-ink);
+}
+
+.j-facts {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: 0.55rem 1.25rem;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.j-facts dt {
+  color: var(--p-ink-faint);
+  font-weight: 600;
+}
+
+.j-facts dd {
+  margin: 0;
+}
+
+.j-meds {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.j-meds li {
+  padding-block: 0.7rem;
+  border-bottom: var(--p-rule);
+  font-weight: 600;
+}
+
+.j-empty {
+  margin: 0;
+  color: var(--p-ink-faint);
+  font-style: italic;
+}
+
+/* --- escalation and privacy ---------------------------------------------- */
+
+.j-escalate {
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+  padding: 1.25rem;
+  border: 2px solid var(--p-seal);
+}
+
+.j-escalate h2 {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+.j-escalate__reasons {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+}
+
+.j-privacy {
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+  padding-top: 1.25rem;
+  border-top: var(--p-rule-strong);
+}
+
+.j-privacy h2 {
+  margin: 0 0 0.4rem;
+  border: 0;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+.j-privacy .p-cta {
+  margin-top: 0.9rem;
+}
+
+.j-emergency {
+  margin: 0.9rem 0 0;
+  font-weight: 700;
+}
+
+@media (max-width: 64rem) {
+  .j-form,
+  .j-gatecount,
+  .j-principle {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 44rem) {
+  .j-form {
+    grid-template-columns: 1fr;
+  }
+
+  .j-facts {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .j-facts dd {
+    margin-bottom: 0.6rem;
+  }
+}

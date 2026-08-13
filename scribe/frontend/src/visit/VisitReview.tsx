@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { patchEpisode } from "../episode/episode";
 import type { VisitNote } from "./types";
 import "./visit.css";
 
@@ -39,7 +40,31 @@ export default function VisitReview({
   backHref?: string;
 }) {
   const [copied, setCopied] = useState<"clinical" | "patient" | null>(null);
+  const [saved, setSaved] = useState(false);
   const { clinical_note: soap, patient_summary: summary } = note;
+
+  /**
+   * Carry the patient's half of this visit into their care episode.
+   *
+   * Only the patient summary, and only what the server already built from
+   * confirmed turns: `_confirmed_medication_lines` in scribe/carepath/main.py
+   * excludes anything the clinician did not release, so an unconfirmed line
+   * cannot arrive here. The SOAP note is deliberately left behind — that is the
+   * clinician's record, not the patient's copy.
+   */
+  const saveToEpisode = () => {
+    patchEpisode({
+      visitId: note.visit_id,
+      status: "post_visit",
+      source: "live",
+      confirmedMedications: (summary.medications ?? "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+      followUp: summary.follow_up || undefined,
+    });
+    setSaved(true);
+  };
 
   const copy = async (which: "clinical" | "patient") => {
     const text =
@@ -130,9 +155,25 @@ export default function VisitReview({
               </ul>
             </div>
           ) : null}
-          <button type="button" className="button button--secondary" onClick={() => copy("patient")}>
-            {copied === "patient" ? "Copied" : "Copy summary"}
-          </button>
+          <div className="visit-doc__actions">
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => copy("patient")}
+            >
+              {copied === "patient" ? "Copied" : "Copy summary"}
+            </button>
+            {/* The patient's own device keeps the episode; this is the visit
+                joining it. Nothing leaves the browser. */}
+            <button type="button" className="button button--secondary" onClick={saveToEpisode}>
+              {saved ? "Saved to My CarePath" : "Save to My CarePath"}
+            </button>
+            {saved ? (
+              <a className="button button--secondary" href="/my-carepath/">
+                Open My CarePath
+              </a>
+            ) : null}
+          </div>
         </section>
       </div>
 
