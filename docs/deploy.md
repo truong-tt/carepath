@@ -140,7 +140,19 @@ curl.exe -X POST http://127.0.0.1:7860/api/v1/soap-notes `
 ## Canonical Vercel site
 
 The `scribe/frontend/` directory is the static marketing deployment at
-`https://carepath-medicaltranslation.vercel.app`:
+`https://carepath-medicaltranslation.vercel.app`.
+
+**The project that serves that domain is `clearvisit`, not `carepath`.** The
+names do not match the domain and this has cost real debugging time. Under the
+`care-path-scribe` scope:
+
+| Project | Serves | State |
+| --- | --- | --- |
+| `clearvisit` | `carepath-medicaltranslation.vercel.app` | The live site. Root Directory is `scribe/frontend`. |
+| `carepath` | nothing | A duplicate whose Root Directory was left at the repo root, so `vercel build` scanned the whole repo, detected FastAPI and failed before any build command ran. Every deploy it made had failed for 17+ hours. Its Git integration was disconnected on 2026-08-13; it no longer builds on push. Reconnect with `vercel git connect` only after setting its Root Directory. |
+
+Before concluding a deploy is broken, check **which project** failed. A red
+check on a PR from `carepath` means nothing about the live site.
 
 1. In the Vercel project settings, change **Root Directory** from the removed
    `apps/web-next` to `scribe/frontend` (framework/build/output come from
@@ -154,6 +166,14 @@ DEMO_API_BASE=https://tranth3truong-carepath-api.hf.space
 VITE_LEAD_ENDPOINT=<optional lead endpoint>
 VITE_LEAD_EMAIL=<pilot contact email>
 ```
+
+**Set them for Preview as well as Production.** Vercel scopes environment
+variables per environment, and `npm run validate:deploy` runs on every build
+including branch previews. With `VITE_WS_BASE` set only for Production, a
+preview build fails with `VITE_WS_BASE is required when VITE_API_BASE is
+empty` — production is healthy, every PR is red, and the two look like the same
+failure. `VITE_API_BASE` stays unset in both, which the validator reads as the
+intended empty value.
 
 `VITE_API_BASE` is **empty on purpose** (DEC-0021). `vercel.json` rewrites
 `/api/*` to the Space, so the browser calls its own origin and no
