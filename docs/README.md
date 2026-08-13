@@ -7,11 +7,17 @@ relevant context rather than every document in the repository.
 
 - `product/` — accepted contracts for CarePath, Ghi chép bệnh án AI, and Phiên
   dịch khám bệnh trực tiếp.
-- `ux-redesign-carepath.md` — current Vietnamese-first UX implementation
-  backlog; required before UX or product-flow implementation.
-- `onboarding-ux-fix-tasks.md` — current visual onboarding execution backlog.
-- `../UI-FIX-PLAN.md` — current public-site issue plan.
-- `deploy.md` — Hugging Face Space deployment instructions.
+- `ux-redesign-carepath.md` — current UX implementation backlog; required
+  before UX or product-flow implementation.
+- `DEMO_RUNBOOK.md` — the pitch path, and what to say when questioned.
+- `deploy.md` — Vercel and Hugging Face Space deployment. Read it before
+  concluding a deploy is broken; the project names do not match the domain.
+
+Two backlogs were removed on 2026-08-13 rather than left to mislead:
+`onboarding-ux-fix-tasks.md` planned work on `interpreter/frontend/`, and
+`../UI-FIX-PLAN.md` targeted the landing page's GSAP/bento build. That frontend
+and every selector, file and route both documents named have since been
+deleted. Their history is in Git.
 
 ## Harness: Read for Daily Work
 
@@ -27,11 +33,16 @@ relevant context rather than every document in the repository.
 ## Harness: Read Only When Triggered
 
 - `TOOL_REGISTRY.md` — registering or using optional external tools.
-- `HARNESS_AUDIT.md`, `HARNESS_COMPONENTS.md`, and `HARNESS_MATURITY.md` —
-  audit, observability, maturity, or benchmark work.
+- `HARNESS_AUDIT.md` — the `harness-cli audit` drift and entropy checks.
 - `HARNESS_BACKLOG.md` and `IMPROVEMENT_PROTOCOL.md` — repeated Harness
   friction or process improvements.
 - `GLOSSARY.md` — extending shared Harness terminology.
+
+`HARNESS_COMPONENTS.md` and `HARNESS_MATURITY.md` were removed on 2026-08-13.
+Both described the upstream `repository-harness` project — its roadmap, its
+component taxonomy, and files such as `CONTRIBUTING.md` and `PHASE2.md` that
+have never existed here. CarePath consumes the harness as a prebuilt binary
+(DEC-0005), so neither document described anything in this repository.
 
 ## Evidence and History
 

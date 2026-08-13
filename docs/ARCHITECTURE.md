@@ -1,21 +1,37 @@
 # CarePath Architecture
 
-CarePath is one FastAPI deployment with two separately named clinical workflows.
-The combined entrypoint is `scribe/carepath/main.py`; it owns the Scribe API,
-imports the Interpreter routers from `interpreter/app`, and mounts both built Vite
-frontends after API routes.
+CarePath is **one product** — a care navigator for foreign patients — served by
+one FastAPI deployment over two backend modules. The combined entrypoint is
+`scribe/carepath/main.py`; it owns the Scribe API, imports the Interpreter
+routers from `interpreter/app`, and mounts the single built Vite frontend after
+the API routes.
 
 ## Product Boundaries
 
-| Workflow | Backend boundary | Browser surface |
+| Route | Backend it needs | Module |
 | --- | --- | --- |
-| Ghi chép bệnh án AI | `scribe/carepath`, `/api/v1/*` | `scribe/frontend/` at `/`, including `/ghi-chep-lam-sang/` |
-| Khám bệnh nhân nước ngoài | `interpreter/app`, `/api/*` and `/ws/*` | `scribe/frontend/` at `/kham-song-ngu/` |
+| `/` | none | — |
+| `/get-care/` | **none** — fully client-side | — |
+| `/my-carepath/` | **none** — fully client-side | — |
+| `/kham-song-ngu/` | `/api/*` + `/ws/*` | `interpreter/app` |
+| `/dich-giay-to/` | `/api/sessions`, `/api/turns/*/confirm`, `/api/v1/visits/*/documents` | both |
+| `/ghi-chep-lam-sang/` | `/api/v1/*` | `scribe/carepath` |
+| `/thu-nghiem/` | `/api/demo/*` (Vercel functions) + `/api/health` | interpreter, via the functions |
 
-Both browser surfaces now ship from `scribe/frontend/`. The separate interpreter
+Every browser surface ships from `scribe/frontend/`. The separate interpreter
 console was deleted when the bilingual visit replaced it; `/phien-dich-y-khoa/`
 and `/console/` return an explicit 404 for anyone holding an old link. The two
 API namespaces intentionally do not overlap.
+
+The two client-side routes are a deliberate architectural property, not an
+accident of what has been built so far: the pitch path must complete without a
+network, and `scribe/frontend/tests/journey.spec.ts` enforces it by aborting
+every request for the length of the run.
+
+A route is only deployable when it is registered on **both** hosts — a rewrite
+in `scribe/frontend/vercel.json` and a `FileResponse` in
+`scribe/carepath/main.py`. `npm run validate:deploy` fails the build otherwise.
+One registered on only Vercel 404'd on the Space for its whole life.
 
 `scribe/training/` is exclusively the Scribe's offline DARAG/GEC training and quality
 track. It does not train or serve the Interpreter. `interpreter/eval/` is a

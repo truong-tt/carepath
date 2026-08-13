@@ -1,29 +1,60 @@
 # CarePath
 
-A clinical AI suite for Vietnamese clinics with two distinct products and one
-principle: **the clinician stays in control.**
+**Healthcare in Vietnam, without navigating it alone.**
 
-- **Scribe** (`scribe/carepath`, routes `/api/v1/*`) — upload consultation
-  audio, get a Gipformer ONNX transcript with retrieval-assisted term
-  correction and a draft Vietnamese SOAP note for clinician review. Works
-  keyless with mock ASR + the offline LLM; production uses a CKey
-  OpenAI-compatible LLM.
-- **Interpreter** (`interpreter/app`, routes `/api/*` + `/ws/*`) — live
-  Vietnamese ↔ English interpreting with risk gating, read-back confirmation,
-  interpreter escalation, and an admin review page. Runs in deterministic
-  mock mode with zero API keys; cloud providers are a later track.
+CarePath is an AI-first care navigator for foreign tourists and expats seeking
+outpatient care in Vietnam. It is one journey, not a set of tools:
 
-Frontends, all served by the same API in production:
+```text
+Find care → Prepare → Visit → Verify → Paperwork → Follow-up
+```
 
-- `scribe/frontend/` — the public demo site (landing at `/`, working Scribe tool at
-  `/ghi-chep-lam-sang/`). Vietnamese-only onboarding, full diacritics enforced
-  at build time.
-  The bilingual visit for foreign patients lives here too, at
-  `/kham-song-ngu/`. There is no separate interpreter console; it was deleted
-  once the visit screen replaced it.
+The differentiator is the fourth step. A machine translation of a dose is still
+a machine translation of a dose, so anything carrying a drug name, a dose or an
+allergy is **withheld from the patient until a clinician confirms it**.
+Translation is not the safety mechanism; verification is.
 
-One FastAPI process serves both APIs and the public Scribe frontend. The executed
-unification plan and its review protocol are archived in `docs/history/`.
+## Who reads what
+
+Language follows the audience, not the company
+(`docs/decisions/0023-foreign-patient-care-navigator.md`):
+
+| Surface | Route | Language |
+| --- | --- | --- |
+| Homepage | `/` | English, full Vietnamese behind the toggle |
+| The care journey | `/get-care/` | English |
+| The care episode | `/my-carepath/` | English |
+| Bilingual visit | `/kham-song-ngu/` | Vietnamese clinician ↔ English patient |
+| Paperwork reader | `/dich-giay-to/` | Vietnamese — the clinician confirms each line |
+| Clinical notes | `/ghi-chep-lam-sang/` | Vietnamese |
+| Public demo hub | `/thu-nghiem/` | Vietnamese |
+
+Clinician-facing elements stay Vietnamese even inside an English screen: the
+person acting on a risk label is the clinician.
+
+`/get-care/` and `/my-carepath/` make **no network request at all**. The pitch
+completes on a venue network that does not exist, and
+`scribe/frontend/tests/journey.spec.ts` proves it by aborting every request for
+the whole run and then walking the journey end to end.
+
+## What runs underneath
+
+Two backend modules and one FastAPI process serve everything:
+
+- **`scribe/carepath`** (`/api/v1/*`) — consultation audio in, Gipformer ONNX
+  transcript with retrieval-assisted term correction, and a draft Vietnamese
+  SOAP note for clinician review. Works keyless with mock ASR + the offline
+  LLM; production uses a CKey OpenAI-compatible LLM.
+- **`interpreter/app`** (`/api/*` + `/ws/*`) — the risk engine, the clinician
+  confirmation state machine, read-back, escalation, and the document reader.
+  Runs deterministically in mock mode with zero API keys.
+
+`scribe/frontend/` is the only frontend. The separate interpreter console was
+deleted once the bilingual visit replaced it; `/phien-dich-y-khoa/` and
+`/console/` are deliberate 404s.
+
+The names are internal. On any user-facing screen they are capabilities inside
+the journey above, never products with their own marketing.
 
 ## Quickstart (keyless demo profile)
 
@@ -43,12 +74,12 @@ cd scribe/frontend; npm ci; npm run build; cd ../..
 uvicorn carepath.main:app --app-dir scribe --reload
 ```
 
-Then open `http://127.0.0.1:8000/` (demo site) or `/ghi-chep-lam-sang/` (Scribe
-tool). `GET /api/v1/health` and `GET /api/health` report both modules; public
-Interpreter browser paths return 404.
+Open `http://127.0.0.1:8000/`. `GET /api/v1/health` and `GET /api/health`
+report the two modules.
 
-For frontend development, run the Vite dev server instead
-(`npm run dev` in `scribe/frontend/`); the API skips a missing dist folder.
+For frontend work run the Vite dev server instead (`npm run dev` in
+`scribe/frontend/`); the API skips a missing dist folder. `/get-care/` and
+`/my-carepath/` need no backend at all.
 
 ## Tests
 
@@ -60,6 +91,25 @@ cd interpreter; pytest          # interpreter suite
 python interpreter/eval/run_eval.py --set interpreter/eval/fixtures/eval_starter.tsv --providers mock
 cd scribe/frontend; npm test; npm run build; npm run e2e
 ```
+
+`npm run build` is also the Vietnamese diacritics gate, and
+`npm run validate:deploy` checks that every SPA route is reachable on **both**
+hosts — Vercel and the Space. A route registered on only one 404s in production
+while every local test passes; that has happened.
+
+## Real providers
+
+- Scriber ASR: Gipformer ONNX downloads on first use (`ASR_PROVIDER=gipformer`,
+  the default). `scripts/setup_local.ps1` automates the venv + env setup.
+- Scriber LLM: `LLM_PROVIDER=ckey` + `LLM_API_KEY` (see `.env.ckey.example`).
+- Interpreter: `PROVIDER_MODE=mock` is keyless and deterministic. `demo` adds
+  the scripted document scenario; `ckey` reads real documents and additionally
+  requires a non-default `ADMIN_TOKEN` or the app refuses to boot.
+
+## Deploy
+
+`docs/deploy.md`. Two hosts, and the project names do not match the domain —
+read it before concluding a deploy is broken.
 
 ## Development Harness
 
@@ -82,30 +132,17 @@ per clone, classify the task, and record a trace after validation:
 
 `docs/product/` is the current CarePath contract, `docs/stories/` holds
 story-sized work, and `docs/decisions/` records durable tradeoffs. The
-historical plans remain context, not the default source of truth.
-
-## Real providers
-
-- Scriber ASR: Gipformer ONNX downloads on first use (`ASR_PROVIDER=gipformer`,
-  the default). `scripts/setup_local.ps1` automates the venv + env setup.
-- Scriber LLM: `LLM_PROVIDER=ckey` + `LLM_API_KEY` (see `.env.ckey.example`).
-- Interpreter: `PROVIDER_MODE=mock` is the supported mode today. The cloud
-  mode (`ANTHROPIC_API_KEY`/`OPENAI_API_KEY`) exists behind the provider
-  abstraction but is not wired into a deployment yet.
-
-## Deploy
-
-One Hugging Face Space (Docker) serves everything: see `docs/deploy.md`.
+historical plans in `docs/history/` remain context, not a source of truth.
 
 ## Repo map
 
-- `scribe/carepath` — scriber runtime API (ASR + retrieval + LLM serving)
+- `scribe/frontend/` — the whole public surface: landing, care journey, episode,
+  bilingual visit, paperwork reader, clinical notes, demo hub
+- `scribe/carepath/` — scriber runtime API (ASR + retrieval + LLM serving)
+- `interpreter/` — risk engine, confirmation state machine, safety eval
 - `shared/carepath_shared/terms/medical_terms.json` — canonical term source;
   regenerate its serving artifacts with `python scripts/build_term_artifacts.py`
-- `scribe/training/gec` — Scribe-only DARAG training/eval package (never imported by serving)
-- `interpreter/` — interpreter API, console, tests, and safety eval
-- `scribe/frontend/` — the public site; `scribe/tests/` — scriber + combined-app tests
-- `scribe/training/scripts`, `scribe/training/notebooks/` — Scribe-only GEC training pipeline;
-  `interpreter/eval/` remains the Interpreter safety harness; `docs/` — background + deploy
-- `docs/README.md` — task-first documentation map; `docs/history/` — preserved
-  build plans and unification review history
+- `scribe/training/` — Scribe-only GEC/SOAP training and eval, never imported
+  by serving code
+- `docs/README.md` — task-first documentation map
+- `docs/history/` — preserved build plans and unification review history
