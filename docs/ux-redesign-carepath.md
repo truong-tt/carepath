@@ -58,7 +58,7 @@ was bolted onto a live path.
 | `src/LandingPage.tsx` | EN default, journey section, Emma timeline, pilot CTA |
 | `src/App.tsx` | Two route consts + trailing-slash redirects |
 | `src/episode/episode.ts` | New. `CareEpisode` in `sessionStorage` |
-| `src/journey/*` | New. `GetCareScreen`, `MyCarePathScreen`, `providers.ts`, `scriptedVisit.ts` |
+| `src/journey/*` | New. `GetCareScreen`, `MyCarePathScreen`, `providers.ts`, `scripted.ts` |
 | `src/visit/VisitScreen.tsx` | Export `GateCard` and `TurnCard`; add save-to-episode on review |
 | `src/paperwork/PaperworkScreen.tsx` | Export `PatientSheet`; add save-to-episode |
 | `vercel.json`, `scribe/carepath/main.py` | Route parity for the two new routes |
