@@ -19,6 +19,12 @@
     { "source": "/kham-song-ngu/:path*", "destination": "/index.html" },
     { "source": "/dich-giay-to", "destination": "/index.html" },
     { "source": "/dich-giay-to/", "destination": "/index.html" },
-    { "source": "/dich-giay-to/:path*", "destination": "/index.html" }
+    { "source": "/dich-giay-to/:path*", "destination": "/index.html" },
+    { "source": "/get-care", "destination": "/index.html" },
+    { "source": "/get-care/", "destination": "/index.html" },
+    { "source": "/get-care/:path*", "destination": "/index.html" },
+    { "source": "/my-carepath", "destination": "/index.html" },
+    { "source": "/my-carepath/", "destination": "/index.html" },
+    { "source": "/my-carepath/:path*", "destination": "/index.html" }
   ]
 }

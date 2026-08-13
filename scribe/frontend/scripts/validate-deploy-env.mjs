@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Every route the app answers must be rewritten to index.html by Vercel.
+ * Every route the app answers must resolve to index.html on BOTH hosts.
  *
  * There is no SPA fallback in vercel.json — each route is listed explicitly.
  * `vite preview` DOES fall back, so the whole Playwright suite passes against a
@@ -13,12 +13,38 @@ const here = dirname(fileURLToPath(import.meta.url));
  * pathname check was added to App.tsx, 32 e2e tests went green, and the live
  * URL returned 404: NOT_FOUND.
  *
+ * The same app is also served by FastAPI from the Hugging Face Space, where the
+ * static mount 404s an unregistered deep link for the same reason. Checking
+ * only vercel.json is why /dich-giay-to/ then worked on Vercel and 404'd on the
+ * Space for its whole life. Both hosts are checked here now.
+ *
  * This runs inside the Vercel build (`npm run validate:deploy && npm run
- * build`), so a route with no rewrite fails the deploy instead of shipping.
+ * build`), so a route missing from either host fails the deploy.
  */
+/**
+ * The API host's route table, read from outside this package.
+ *
+ * Vercel's Root Directory is `scribe/frontend` but it clones the whole repo, so
+ * this resolves. If it ever does not, the build must still fail — a parity
+ * check that cannot see one of the two hosts is not checking parity — but it
+ * should fail saying so rather than throwing a bare ENOENT into a deploy log.
+ */
+function readApiSource() {
+  const path = join(here, "..", "..", "carepath", "main.py");
+  try {
+    return readFileSync(path, "utf8");
+  } catch {
+    throw new Error(
+      `Cannot read ${path}, so SPA routes cannot be checked against the API host. ` +
+        "This check needs the whole repository, not just scribe/frontend.",
+    );
+  }
+}
+
 export function validateRouteRewrites({
   appSource = readFileSync(join(here, "..", "src", "App.tsx"), "utf8"),
   vercelConfig = JSON.parse(readFileSync(join(here, "..", "vercel.json"), "utf8")),
+  apiSource = readApiSource(),
 } = {}) {
   const errors = [];
   // `const SOMETHING_PATH = "/slug/";` — the pattern App.tsx uses for routes.
@@ -28,11 +54,24 @@ export function validateRouteRewrites({
   }
 
   const sources = new Set((vercelConfig.rewrites ?? []).map((rule) => rule.source));
+  // `@app.get("/slug", include_in_schema=False)` — the pattern main.py uses.
+  const served = new Set(
+    [...apiSource.matchAll(/@app\.get\(\s*"(\/[^"]*)"/g)].map((match) => match[1]),
+  );
+
   for (const route of routes) {
     const bare = route.replace(/\/$/, "");
     for (const required of [bare, `${bare}/`, `${bare}/:path*`]) {
       if (!sources.has(required)) {
         errors.push(`vercel.json has no rewrite for "${required}" (route ${route}).`);
+      }
+    }
+    // The API host needs the bare and slash forms; it has no `:path*` concept.
+    // "/" is the static mount's own root and is never registered explicitly.
+    if (bare === "") continue;
+    for (const required of [bare, `${bare}/`]) {
+      if (!served.has(required)) {
+        errors.push(`scribe/carepath/main.py serves no "${required}" (route ${route}).`);
       }
     }
   }

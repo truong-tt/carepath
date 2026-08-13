@@ -1,4 +1,11 @@
-// Landing copy for the bilingual-visit product.
+// Landing copy for the care navigator.
+//
+// English is the default here and Vietnamese is behind the toggle, which is the
+// reverse of what this file shipped with. The reader who has to understand this
+// page in fifteen seconds is a foreign patient or someone judging whether the
+// product helps one; the Vietnamese clinic owner who also reads it is the second
+// audience, not the first. Neither language is dropped — see
+// docs/decisions/0023-foreign-patient-care-navigator.md.
 //
 // Kept local to this surface rather than added to strings.ts: that file is a
 // 1287-line PageCopy contract with a parity test, most of it unreferenced, and
@@ -19,22 +26,48 @@ export const LANDING = {
   vi: {
     navAria: "Điều hướng chính",
     nav: [
+      { href: "#journey", label: "Hành trình" },
       { href: "#problem", label: "Vấn đề" },
-      { href: "#try", label: "Thử ngay" },
       { href: "#how", label: "Cách hoạt động" },
       { href: "#evidence", label: "Bằng chứng" },
       { href: "#start", label: "Bắt đầu" },
     ],
-    navCta: "Bắt đầu ca khám",
+    navCta: "Tôi cần khám bệnh",
     langToggle: "EN",
     langToggleAria: "Switch to English",
 
-    heroLead: "Người bệnh nước ngoài rời phòng khám với tờ giấy ",
-    heroMark: "họ không đọc được.",
+    heroLead: "Khám chữa bệnh ở Việt Nam, ",
+    heroMark: "không phải tự xoay xở một mình.",
     heroBody:
-      "CarePath dịch cả buổi khám và cả giấy tờ — đơn thuốc, phiếu xét nghiệm, giấy ra viện — rồi giữ lại phần nguy hiểm cho tới khi bác sĩ xác nhận.",
-    heroPrimary: "Bắt đầu ca khám",
-    heroSecondary: "Xem vấn đề",
+      "CarePath đi cùng người bệnh nước ngoài từ lúc tìm phòng khám, chuẩn bị buổi khám, trao đổi với bác sĩ, tới lúc đọc hiểu giấy tờ và biết cần làm gì tiếp theo.",
+    heroPrimary: "Tôi cần khám bệnh",
+    heroSecondary: "Tôi đã có đơn thuốc",
+
+    // The spine of the product, stated once, in order. Every capability
+    // CarePath has appears as a step here and nowhere as a product of its own.
+    journeyLabel: "Một hành trình",
+    journeyTitle: "Sáu bước, một lần khám bệnh.",
+    journeySteps: [
+      { title: "Tìm nơi khám", body: "Chọn phòng khám phù hợp với vấn đề và ngôn ngữ của người bệnh." },
+      { title: "Chuẩn bị", body: "Bản tóm tắt song ngữ để bác sĩ đọc trước khi người bệnh mở lời." },
+      { title: "Khám", body: "Bác sĩ nói tiếng Việt, người bệnh nói tiếng Anh, dịch hai chiều." },
+      { title: "Xác nhận", body: "Dòng có liều thuốc hoặc dị ứng bị giữ lại tới khi bác sĩ duyệt." },
+      { title: "Giấy tờ", body: "Đơn thuốc, giấy ra viện, phiếu xét nghiệm — dịch từng dòng." },
+      { title: "Theo dõi", body: "Thuốc đã xác nhận, lịch tái khám, câu hỏi cho lần sau." },
+    ],
+    journeyNote:
+      "Đây là một sản phẩm, không phải bốn công cụ. Người bệnh không cần biết bên trong có gì.",
+
+    timelineLabel: "Một ca có thật",
+    timelineTitle: "Emma, khách du lịch ở Hà Nội.",
+    timeline: [
+      { when: "10:00", body: "Emma nổi mẩn đỏ ở hai cánh tay." },
+      { when: "10:15", body: "Tìm được vài phòng khám, nhưng không biết nơi nào tiếp được tiếng Anh." },
+      { when: "11:00", body: "Tới nơi, nhưng không giải thích được mình đang dùng thuốc gì." },
+      { when: "11:30", body: "Buổi khám kết thúc." },
+      { when: "11:35", body: "Cầm về một tờ đơn thuốc tiếng Việt." },
+    ],
+    timelineNote: "Đó là một vấn đề, không phải bốn bài toán dịch thuật riêng lẻ.",
 
     docLabel: "Ví dụ có thật",
     docOrg: "Phòng khám đa khoa",
@@ -118,15 +151,16 @@ export const LANDING = {
       "Phiên dịch viên có mặt lúc trò chuyện. Cả ba thời điểm trên đều xảy ra sau đó.",
 
     tryLabel: "Thử ngay",
-    tryTitle: "Tự kiểm chứng, không cần tài khoản.",
+    tryTitle: "Đi hết hành trình, không cần tài khoản.",
     tryBody:
-      "Chạy thử ngay trên trình duyệt, qua đúng bộ luật lâm sàng và bước xác nhận mà phòng khám dùng.",
+      "Chạy trọn ca của Emma ngay trên trình duyệt: tìm phòng khám, tóm tắt trước khám, buổi khám song ngữ, bước bác sĩ xác nhận, và đơn thuốc.",
     tryItems: [
-      { title: "Ảnh đơn thuốc", body: "Đọc chữ trên đơn và dịch từng dòng." },
-      { title: "Giấy ra viện", body: "Chuyển thành bản tiếng Anh cho người bệnh." },
-      { title: "Câu hội thoại", body: "Xem dòng có liều thuốc bị giữ lại thế nào." },
+      { title: "Tìm nơi khám", body: "Nhập vấn đề bằng lời của người bệnh." },
+      { title: "Bước xác nhận", body: "Xem dòng có liều thuốc bị giữ lại thế nào." },
+      { title: "Đơn thuốc", body: "Nhận bản tiếng Anh sau khi bác sĩ duyệt." },
     ],
-    tryCta: "Mở bản thử",
+    tryCta: "Đi thử hành trình",
+    trySecondary: "Hoặc thử đọc một ảnh giấy tờ thật",
 
     howLabel: "Cách hoạt động",
     howTitle: "Đọc — đối chiếu — bác sĩ xác nhận.",
@@ -189,36 +223,64 @@ export const LANDING = {
     ],
 
     startLabel: "Bắt đầu",
-    startTitle: "Bắt đầu một ca khám song ngữ.",
+    startTitle: "Bắt đầu từ chỗ bạn đang đứng.",
     startBody:
-      "Không cần cài đặt. Mở trên máy tính bảng hoặc điện thoại của phòng khám, micro chỉ bật khi bác sĩ bấm giữ.",
-    startCta: "Bắt đầu ca khám",
+      "Không cần cài đặt, không cần tài khoản. Người bệnh mở trên điện thoại của mình; phòng khám mở trên máy tính bảng, micro chỉ bật khi bác sĩ bấm giữ.",
+    startCta: "Tôi cần khám bệnh",
     // The page argues that harm concentrates on paper, and until CP-UX-19 every
     // door it opened was a conversation. This is the paperwork door.
-    startPaperwork: "Dịch giấy tờ cho người bệnh",
+    startPaperwork: "Tôi đã có đơn thuốc",
+    startVisit: "Dành cho phòng khám: bắt đầu ca khám song ngữ",
     startScribe: "Hoặc chỉ tạo bệnh án từ tệp âm thanh",
-    pilotSummary: "Dành cho cơ sở muốn thí điểm CarePath",
+    // The B2B wedge: a clinic that treats foreign patients without running an
+    // international-patient department. No pricing is stated anywhere on this
+    // page, because none of it has been validated with a paying clinic.
+    pilotSummary: "Thí điểm CarePath tại phòng khám của bạn",
   },
 
   en: {
     navAria: "Main navigation",
     nav: [
+      { href: "#journey", label: "The journey" },
       { href: "#problem", label: "The problem" },
-      { href: "#try", label: "Try it" },
       { href: "#how", label: "How it works" },
       { href: "#evidence", label: "Evidence" },
       { href: "#start", label: "Start" },
     ],
-    navCta: "Start a visit",
+    navCta: "I need medical care",
     langToggle: "VI",
     langToggleAria: "Chuyển sang tiếng Việt",
 
-    heroLead: "Foreign patients leave the clinic holding paper ",
-    heroMark: "they cannot read.",
+    heroLead: "Healthcare in Vietnam, ",
+    heroMark: "without navigating it alone.",
     heroBody:
-      "CarePath interprets the consultation and reads the paperwork — prescriptions, lab results, discharge sheets — then holds back anything dangerous until the clinician confirms it.",
-    heroPrimary: "Start a visit",
-    heroSecondary: "See the problem",
+      "Find care, prepare your visit, communicate with clinicians, understand your paperwork, and keep track of what happens next.",
+    heroPrimary: "I need medical care",
+    heroSecondary: "I already have a prescription",
+
+    journeyLabel: "One journey",
+    journeyTitle: "Six steps, one illness.",
+    journeySteps: [
+      { title: "Find care", body: "A clinic that matches what you described and the language you speak." },
+      { title: "Prepare", body: "A bilingual brief the clinician reads before you have to explain anything." },
+      { title: "Visit", body: "You speak English, the clinician speaks Vietnamese, both directions interpreted." },
+      { title: "Verify", body: "A dose, a drug name or an allergy is held until the clinician confirms it." },
+      { title: "Paperwork", body: "Prescription, discharge sheet, lab result — read line by line." },
+      { title: "Follow-up", body: "Confirmed medicines, when to come back, what to ask next time." },
+    ],
+    journeyNote:
+      "One product, not four tools. Nobody using it should have to know what is underneath.",
+
+    timelineLabel: "One real case",
+    timelineTitle: "Emma, a tourist in Hanoi.",
+    timeline: [
+      { when: "10:00", body: "Emma develops an itchy red rash on both arms." },
+      { when: "10:15", body: "She finds several clinics and cannot tell which one handles English." },
+      { when: "11:00", body: "She gets there and cannot explain which medicines she takes." },
+      { when: "11:30", body: "The consultation ends." },
+      { when: "11:35", body: "She leaves holding a prescription written in Vietnamese." },
+    ],
+    timelineNote: "That is one problem, not four separate translation problems.",
 
     docLabel: "A real example",
     docOrg: "General clinic",
@@ -292,15 +354,16 @@ export const LANDING = {
       "An interpreter is there for the conversation. All three of these happen after it.",
 
     tryLabel: "Try it",
-    tryTitle: "Check it yourself. No account needed.",
+    tryTitle: "Walk the whole journey. No account needed.",
     tryBody:
-      "Run it in the browser, through the same clinical rule set and the same confirmation step a clinic uses.",
+      "Run Emma's case in the browser: find a clinic, build the visit brief, sit through the bilingual consultation, watch the clinician release a dose, and take the prescription home in English.",
     tryItems: [
-      { title: "A prescription photo", body: "Read the Vietnamese and translate it line by line." },
-      { title: "A discharge sheet", body: "Turn it into English the patient can take home." },
-      { title: "A spoken line", body: "Watch a line carrying a dose get held back." },
+      { title: "Find care", body: "Describe the problem in your own words." },
+      { title: "The safety gate", body: "Watch a line carrying a dose get held back." },
+      { title: "The prescription", body: "Get the English only once the clinician confirms it." },
     ],
-    tryCta: "Open the demo",
+    tryCta: "Walk the journey",
+    trySecondary: "Or read a real document instead",
 
     howLabel: "How it works",
     howTitle: "Read it, check it, let the clinician confirm it.",
@@ -366,12 +429,16 @@ export const LANDING = {
     ],
 
     startLabel: "Start",
-    startTitle: "Start a bilingual visit.",
+    startTitle: "Start wherever you are.",
     startBody:
-      "Nothing to install. Open it on the clinic's tablet or phone; the microphone only runs while the clinician holds the button.",
-    startCta: "Start a visit",
-    startPaperwork: "Translate paperwork for the patient",
+      "Nothing to install, no account. A patient opens it on their own phone; a clinic opens it on a tablet, where the microphone only runs while the clinician holds the button.",
+    startCta: "I need medical care",
+    startPaperwork: "I already have a prescription",
+    startVisit: "For clinics: start a bilingual visit",
     startScribe: "Or just draft a clinical note from an audio file",
-    pilotSummary: "For clinics that want to pilot CarePath",
+    // The B2B wedge: a clinic treating foreign patients without an
+    // international-patient department. No price appears on this page — none
+    // has been validated with a paying clinic, and a made-up one is a claim.
+    pilotSummary: "Pilot CarePath at your clinic",
   },
 } as const;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PAPERWORK } from "../content/paperwork";
+import { addDocuments, type EpisodeDocument } from "../episode/episode";
 import { useDemoCapability } from "../demo/useDemoCapability";
 import DocumentCapture from "../visit/DocumentCapture";
 import DocumentReview from "../visit/DocumentReview";
@@ -36,6 +37,7 @@ export default function PaperworkScreen({ backHref }: { backHref: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const startedAt = useRef(0);
 
@@ -90,6 +92,29 @@ export default function PaperworkScreen({ backHref }: { backHref: string }) {
 
   const held = turns.filter(isGated);
   const released = turns.filter((turn) => !isGated(turn));
+
+  /**
+   * Put the confirmed lines in the patient's episode.
+   *
+   * Built from `released` for the same reason the sheet above is: a line the
+   * clinician has not confirmed is not in this list, so it cannot be carried
+   * anywhere. Nothing is uploaded — the episode is sessionStorage on whichever
+   * device is holding this screen.
+   */
+  const saveToEpisode = () => {
+    const lines: EpisodeDocument[] = released.map((turn) => ({
+      id: turn.id,
+      kind: "document",
+      vi: turn.source_text,
+      en: spokenText(turn),
+      isMedication: turn.risk_spans.some((span) =>
+        ["drug_name", "dose_number"].includes(span.kind),
+      ),
+      source: "live",
+    }));
+    addDocuments(lines);
+    setSaved(true);
+  };
 
   if (capability === "off") {
     return (
@@ -180,6 +205,19 @@ export default function PaperworkScreen({ backHref }: { backHref: string }) {
             />
 
             <PatientSheet turns={released} />
+
+            {released.length > 0 ? (
+              <p className="paper__save">
+                <button type="button" className="p-cta p-cta--ghost" onClick={saveToEpisode}>
+                  {saved ? PAPERWORK.savedCta : PAPERWORK.saveCta}
+                </button>
+                {saved ? (
+                  <a className="p-cta p-cta--ghost" href="/my-carepath/">
+                    {PAPERWORK.openEpisode}
+                  </a>
+                ) : null}
+              </p>
+            ) : null}
           </>
         )}
       </main>
@@ -214,6 +252,14 @@ function Chips({ turn }: { turn: VisitTurn }) {
   );
 }
 
+/** The four strings the sheet's chrome needs, so it can render in either language. */
+export interface SheetCopy {
+  sheetTitle: string;
+  sheetReady: (n: number) => string;
+  sheetEmpty: string;
+  sheetNote: string;
+}
+
 /**
  * The sheet the patient is actually handed.
  *
@@ -223,14 +269,26 @@ function Chips({ turn }: { turn: VisitTurn }) {
  * empty, at the same grid position it occupies on the landing page and the demo
  * hub. Held lines are not listed here at all: their absence from this sheet IS
  * the withholding.
+ *
+ * `copy` defaults to this route's Vietnamese chrome, because here the clinician
+ * is the reader. The care journey passes English: there the patient is holding
+ * the sheet, and a Vietnamese label on the one artefact they take home would
+ * repeat the exact problem this product exists to solve. The Vietnamese source
+ * lines are untouched in both cases.
  */
-function PatientSheet({ turns }: { turns: VisitTurn[] }) {
+export function PatientSheet({
+  turns,
+  copy = PAPERWORK,
+}: {
+  turns: VisitTurn[];
+  copy?: SheetCopy;
+}) {
   return (
     <section className="paper__sheet" aria-labelledby="sheet-title">
       <div className="p-reg paper__sheet-head">
-        <span className="p-reg__mark p-mark">{PAPERWORK.sheetTitle}</span>
+        <span className="p-reg__mark p-mark">{copy.sheetTitle}</span>
         <p className="p-reg__wide paper__fine">
-          {turns.length > 0 ? PAPERWORK.sheetReady(turns.length) : PAPERWORK.sheetEmpty}
+          {turns.length > 0 ? copy.sheetReady(turns.length) : copy.sheetEmpty}
         </p>
       </div>
 
@@ -251,7 +309,7 @@ function PatientSheet({ turns }: { turns: VisitTurn[] }) {
       ) : null}
 
       <p className="paper__fine paper__sheet-note" id="sheet-title">
-        {PAPERWORK.sheetNote}
+        {copy.sheetNote}
       </p>
     </section>
   );

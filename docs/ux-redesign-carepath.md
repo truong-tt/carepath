@@ -1,13 +1,88 @@
-# CarePath Vietnamese-first UX implementation stories
+# CarePath UX implementation stories
 
 **Status:** active UX implementation contract and backlog.
 
-**Objective:** make CarePath Vietnamese-first and make its two products unmistakably different:
+**Objective:** present CarePath as one journey a foreign patient walks —
+**Find care → Prepare → Visit → Verify → Paperwork → Follow-up** — with the
+clinician confirmation gate as the moment that journey exists to make legible.
 
-1. **CarePath Trợ lý ghi chép lâm sàng** — creates a clinician-reviewed draft from uploaded Vietnamese visit audio.
-2. **CarePath Phiên dịch y khoa Việt–Anh** — supports turn-by-turn conversation and blocks risky output until clinician confirmation.
+The earlier objective of this document was to make CarePath Vietnamese-first and
+to separate two products. That is superseded by
+`docs/decisions/0023-foreign-patient-care-navigator.md`: the language rule is now
+split by audience, and the tools are capabilities inside one journey rather than
+products with their own marketing.
 
-## Current priority update: a front door for the paperwork (CP-UX-19)
+## Current priority: the care navigator (CP-NAV-01)
+
+### 1. Current UX problem
+
+**The product is four doors and no path.**
+
+`/` argues, well and with sources, that harm concentrates on paper. It then
+offers `Bắt đầu ca khám`, `Dịch giấy tờ cho người bệnh` and `Hoặc chỉ tạo bệnh án
+từ tệp âm thanh` — three tools, in Vietnamese, to a reader the page has just
+described as a foreign patient who cannot read Vietnamese.
+
+Three specific failures:
+
+1. **Wrong reader.** The primary user is an English-speaking tourist or expat.
+   Every word of the default homepage is in a language they do not read.
+2. **No continuity.** A visit at `/kham-song-ngu/` and a prescription at
+   `/dich-giay-to/` share a backend session id and nothing a patient can see.
+   Nothing carries from one to the other, and nothing survives the visit.
+3. **No before and no after.** The product starts when the patient is already in
+   the consultation room. Finding a clinic and preparing for the visit — the two
+   stages where a foreign patient is most alone — are not represented at all.
+
+### 2. Proposed flow
+
+```
+/                 Home. One journey, English default, VI toggle.
+/get-care/        need → provider → Visit Brief → visit + gate → paperwork   [NEW]
+/my-carepath/     the episode: overview, brief, meds, documents, follow-up   [NEW]
+/kham-song-ngu/   live bilingual visit   (unchanged; can save into the episode)
+/dich-giay-to/    live paperwork reader  (unchanged; can save into the episode)
+/thu-nghiem/      demo hub               (unchanged)
+/ghi-chep-lam-sang/ scribe               (unchanged, no independent marketing)
+```
+
+`/get-care/` is both the product's first-run experience and the pitch demo. It is
+deterministic because every stage of it is client-side — not because a demo mode
+was bolted onto a live path.
+
+### 3. Affected routes, pages and components
+
+| File | Change |
+| --- | --- |
+| `src/content/landing.ts` | Rewritten around the journey; evidence, limits and the withheld-prescription figure kept |
+| `src/LandingPage.tsx` | EN default, journey section, Emma timeline, pilot CTA |
+| `src/App.tsx` | Two route consts + trailing-slash redirects |
+| `src/episode/episode.ts` | New. `CareEpisode` in `sessionStorage` |
+| `src/journey/*` | New. `GetCareScreen`, `MyCarePathScreen`, `providers.ts`, `scriptedVisit.ts` |
+| `src/visit/VisitScreen.tsx` | Export `GateCard` and `TurnCard`; add save-to-episode on review |
+| `src/paperwork/PaperworkScreen.tsx` | Export `PatientSheet`; add save-to-episode |
+| `vercel.json`, `scribe/carepath/main.py` | Route parity for the two new routes |
+
+No backend endpoint, schema, risk rule or consent flow changes.
+
+### 4. Copy
+
+Patient-facing copy is English with a Vietnamese toggle. Clinician-facing copy —
+the gate card, risk labels, the doctor column — stays Vietnamese, NFC-normalized,
+diacritics intact. See decision 0023.
+
+The Get Care screen states, before any input: CarePath does not diagnose and does
+not recommend treatment. Provider rows carry `Curated demo data · availability not
+live`. The escalation panel carries `Prototype — no coordinator is on call`.
+
+### 5. Acceptance criteria, validation and risks
+
+Carried in the story packet `docs/stories/CP-NAV-01-care-navigator.md` rather
+than duplicated here.
+
+---
+
+## Previous priority: a front door for the paperwork (CP-UX-19)
 
 ### 1. Current UX problem
 

@@ -188,10 +188,15 @@
 
 .visit-turn__text { margin: 0; overflow-wrap: anywhere; }
 
+/* --faint measured 4.02:1 against --tint, which is the background this line
+   actually sits on -- so the confidence figure and the "bác sĩ đã xác nhận"
+   mark were below AA on every turn card since they shipped. --muted clears it
+   at ~7.9:1. The faint token is fine on paper and was simply used on the wrong
+   surface here. */
 .visit-turn__meta {
   margin: 0.4rem 0 0;
   font-size: 0.78rem;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 /* Used by the typed-input labels and defined nowhere until now, so a label
@@ -634,6 +639,7 @@
 
 .visit-doc__body { margin: 0; display: grid; gap: 0.7rem; }
 
+.visit-doc__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
 .visit-doc__row { display: grid; gap: 0.15rem; }
 .visit-doc__row dt { font-weight: 700; font-size: 0.85rem; color: var(--accent-ink); }
 .visit-doc__row dd { margin: 0; overflow-wrap: anywhere; }

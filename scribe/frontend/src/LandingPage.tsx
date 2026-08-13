@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import logoUrl from "./assets/carepath.svg";
 import { LANDING, type Lang } from "./content/landing";
 import { copyFor } from "./content/strings";
@@ -7,6 +7,7 @@ import LeadForm from "./LeadForm";
 import "./landing.css";
 import { leadContact, zaloHref } from "./leads";
 
+const getCareHref = "/get-care/";
 const visitHref = "/kham-song-ngu/";
 const paperworkHref = "/dich-giay-to/";
 const scribeHref = "/ghi-chep-lam-sang/";
@@ -33,8 +34,16 @@ function RefuseMark() {
 }
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<Lang>("vi");
+  // English first: the primary reader is a foreign patient, or someone judging
+  // whether this helps one. Vietnamese is one click away and complete.
+  const [lang, setLang] = useState<Lang>("en");
   const t = LANDING[lang];
+
+  // The document root has to agree with what is on screen, or a screen reader
+  // announces English prose with Vietnamese phonemes.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
   const footer = copyFor("vi").footer;
   // A held row carries no `en` key at all, so the tuple is a union of two
   // shapes. Widened once here rather than narrowed at every use.
@@ -63,7 +72,7 @@ export default function LandingPage() {
           >
             {t.langToggle}
           </button>
-          <a className="p-cta" href={visitHref}>
+          <a className="p-cta" href={getCareHref}>
             {t.navCta}
           </a>
         </div>
@@ -83,10 +92,13 @@ export default function LandingPage() {
               </h1>
               <p className="p-hero__body">{t.heroBody}</p>
               <p className="p-hero__actions">
-                <a className="p-cta" href={visitHref}>
+                <a className="p-cta" href={getCareHref}>
                   {t.heroPrimary}
                 </a>
-                <a className="p-cta p-cta--ghost" href="#problem">
+                {/* The second door, not a second-class one. Someone already
+                    holding Vietnamese paper does not need the journey's first
+                    four steps and should not have to walk through them. */}
+                <a className="p-cta p-cta--ghost" href={paperworkHref}>
                   {t.heroSecondary}
                 </a>
               </p>
@@ -152,6 +164,31 @@ export default function LandingPage() {
           </figure>
         </section>
 
+        {/* The spine, immediately after the document. A visitor who has just
+            seen a withheld prescription line needs to know what surrounds it
+            before they are given evidence about it. Six numbered steps, not six
+            feature cards: the order is the argument. */}
+        <section className="p-wrap p-section" id="journey" aria-labelledby="journey-title">
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.journeyLabel}</span>
+            <h2 className="p-reg__wide" id="journey-title">
+              {t.journeyTitle}
+            </h2>
+          </div>
+          <ol className="p-list">
+            {t.journeySteps.map((step, index) => (
+              <li className="p-reg p-reg--ruled" key={step.title}>
+                <span className="p-reg__mark p-ord">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className="p-reg__vi">{step.title}</h3>
+                <p className="p-reg__en">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="p-moments__note p-indent">{t.journeyNote}</p>
+        </section>
+
         {/* One committed field, one comparison. Two numbers that only mean
             something next to each other belong either side of the rule the
             whole page uses to mean exactly that. */}
@@ -193,6 +230,27 @@ export default function LandingPage() {
                 ours. It carries its citation next to it, not in a footer. */}
             <p className="p-cite p-indent">{t.compareSource}</p>
           </div>
+        </section>
+
+        {/* The statistics say harm is likelier. The clock says what it looks
+            like from inside. One is evidence, the other is why anyone would
+            care — and neither works alone, so they sit next to each other. */}
+        <section className="p-wrap p-section" id="emma" aria-labelledby="emma-title">
+          <div className="p-reg p-section__head">
+            <span className="p-reg__mark p-mark">{t.timelineLabel}</span>
+            <h2 className="p-reg__wide" id="emma-title">
+              {t.timelineTitle}
+            </h2>
+          </div>
+          <ol className="p-list">
+            {t.timeline.map((beat) => (
+              <li className="p-reg p-reg--ruled" key={beat.when}>
+                <span className="p-reg__mark p-ord">{beat.when}</span>
+                <p className="p-reg__wide">{beat.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="p-moments__note p-indent">{t.timelineNote}</p>
         </section>
 
         {/* The argument the page was missing: an interpreter covers the
@@ -238,9 +296,14 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <a className="p-cta p-try__cta p-indent" href="/thu-nghiem/">
-              {t.tryCta}
-            </a>
+            <p className="p-try__cta p-indent">
+              <a className="p-cta" href={getCareHref}>
+                {t.tryCta}
+              </a>{" "}
+              <a className="p-cta p-cta--ghost" href="/thu-nghiem/">
+                {t.trySecondary}
+              </a>
+            </p>
           </div>
         </section>
 
@@ -352,7 +415,7 @@ export default function LandingPage() {
               <span className="p-reg__mark p-mark" aria-hidden="true" />
               <div className="p-reg__wide">
                 <div className="p-start__actions">
-                  <a className="p-cta" href={visitHref}>
+                  <a className="p-cta" href={getCareHref}>
                     {t.startCta}
                   </a>
                   {/* The page's whole argument is that harm concentrates on
@@ -361,6 +424,13 @@ export default function LandingPage() {
                       inside a started visit. This is the paperwork door. */}
                   <a className="p-cta p-cta--ghost" href={paperworkHref}>
                     {t.startPaperwork}
+                  </a>
+                  {/* The clinician's doors, named as the clinician's. They are
+                      not lesser products; they are for the other person in the
+                      room, and labelling them that way is what stops this page
+                      reading as four things for sale. */}
+                  <a className="p-cta p-cta--ghost" href={visitHref}>
+                    {t.startVisit}
                   </a>
                   <a className="p-cta p-cta--ghost" href={scribeHref}>
                     {t.startScribe}
@@ -375,7 +445,7 @@ export default function LandingPage() {
                         lead wrong. The selector is visible again so the clinic
                         says which one it wants. */}
                     <LeadForm
-                      language="vi"
+                      language={lang}
                       interest="both"
                       scenario={scenarios[0]}
                       clinic=""

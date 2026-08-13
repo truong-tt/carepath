@@ -1,11 +1,14 @@
 <!doctype html>
-<html lang="vi">
+<!-- English, because the landing page is now English by default and the root
+     language has to match what is on screen before JS runs. The Vietnamese
+     clinician surfaces set lang="vi" from App.tsx on navigation. -->
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="CarePath dịch buổi khám và đọc giấy tờ y tế tiếng Việt cho người bệnh nước ngoài — đơn thuốc, phiếu xét nghiệm, giấy ra viện. Nội dung có rủi ro được giữ lại cho tới khi bác sĩ xác nhận."
+      content="CarePath helps foreign patients in Vietnam find care, prepare for the visit, communicate with clinicians, and understand Vietnamese medical paperwork. Anything carrying a dose is withheld until the clinician confirms it."
     />
     <meta name="theme-color" content="#0f2e5c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -19,15 +22,16 @@
          often than it gets searched for, and a bare URL reads as unfinished. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="CarePath" />
-    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="vi_VN" />
     <meta property="og:url" content="https://carepath-medicaltranslation.vercel.app/" />
     <meta
       property="og:title"
-      content="CarePath — Khám song ngữ cho người bệnh nước ngoài"
+      content="CarePath — healthcare in Vietnam, without navigating it alone"
     />
     <meta
       property="og:description"
-      content="Dịch buổi khám và đọc đơn thuốc tiếng Việt. Liều thuốc và tên thuốc dễ nhầm được giữ lại cho tới khi bác sĩ xác nhận."
+      content="Find care, prepare your visit, understand your Vietnamese prescription. Doses and look-alike drug names are withheld until a clinician confirms them."
     />
     <meta
       property="og:image"
@@ -37,11 +41,11 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Đơn thuốc tiếng Việt với bản dịch tiếng Anh dưới mỗi dòng; dòng có liều thuốc được đánh dấu chờ bác sĩ xác nhận."
+      content="A Vietnamese prescription with the English beneath each line; the lines carrying a dose are marked as withheld until a clinician confirms them."
     />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <title>CarePath — Khám song ngữ cho người bệnh nước ngoài</title>
+    <title>CarePath — healthcare in Vietnam, without navigating it alone</title>
   </head>
   <body>
     <div id="root"></div>

@@ -52,21 +52,49 @@ test("Vercel runs validation before the production build", async () => {
     await readFile(new URL("../vercel.json", import.meta.url), "utf8"),
   );
   assert.equal(config.buildCommand, "npm run validate:deploy && npm run build");
-  const spa = config.rewrites.filter((rule) => rule.destination === "/index.html");
-  assert.deepEqual(spa, [
-    { source: "/thu-nghiem", destination: "/index.html" },
-    { source: "/thu-nghiem/", destination: "/index.html" },
-    { source: "/thu-nghiem/:path*", destination: "/index.html" },
-    { source: "/ghi-chep-lam-sang", destination: "/index.html" },
-    { source: "/ghi-chep-lam-sang/", destination: "/index.html" },
-    { source: "/ghi-chep-lam-sang/:path*", destination: "/index.html" },
-    { source: "/kham-song-ngu", destination: "/index.html" },
-    { source: "/kham-song-ngu/", destination: "/index.html" },
-    { source: "/kham-song-ngu/:path*", destination: "/index.html" },
-    { source: "/dich-giay-to", destination: "/index.html" },
-    { source: "/dich-giay-to/", destination: "/index.html" },
-    { source: "/dich-giay-to/:path*", destination: "/index.html" },
-  ]);
+});
+
+// This used to be a hardcoded list of every rewrite, which meant adding a route
+// failed here for the one reason that does not matter — the snapshot was stale
+// — while the check that matters already lives in validateRouteRewrites. Run
+// that against the real files instead, so this test needs no edit per route.
+test("every SPA route is deployable on both hosts", () => {
+  const routes = validateRouteRewrites();
+  assert.ok(routes.length >= 4, "route extraction found suspiciously few routes");
+  assert.ok(routes.includes("/get-care/"));
+});
+
+test("a route missing from the API host fails, not just a missing rewrite", () => {
+  // The failure mode this check exists for: /dich-giay-to/ was rewritten by
+  // Vercel and never served by FastAPI, so it worked on one host and 404'd on
+  // the other for its whole life.
+  assert.throws(
+    () =>
+      validateRouteRewrites({
+        appSource: 'const DEMO_PATH = "/only-on-vercel/";',
+        vercelConfig: {
+          rewrites: [
+            { source: "/only-on-vercel", destination: "/index.html" },
+            { source: "/only-on-vercel/", destination: "/index.html" },
+            { source: "/only-on-vercel/:path*", destination: "/index.html" },
+          ],
+        },
+        apiSource: "# no routes here",
+      }),
+    /main\.py serves no "\/only-on-vercel"/,
+  );
+});
+
+test("a route missing from vercel.json still fails", () => {
+  assert.throws(
+    () =>
+      validateRouteRewrites({
+        appSource: 'const DEMO_PATH = "/only-on-the-space/";',
+        vercelConfig: { rewrites: [] },
+        apiSource: '@app.get("/only-on-the-space")\n@app.get("/only-on-the-space/")',
+      }),
+    /vercel\.json has no rewrite/,
+  );
 });
 
 test("the API proxy does not swallow the demo functions", async () => {

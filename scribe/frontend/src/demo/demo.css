@@ -572,16 +572,11 @@
 
 /* --- nav -------------------------------------------------------------- */
 
+/* Colour and weight come from the shared `.p-nav__back` in styles.css. Only
+   the demo hub's own layout need is left here: its nav has no link list, so
+   the way out has to push itself to the end of the bar. */
 .demo .p-nav__back {
   margin-left: auto;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--p-on-blue);
-  text-decoration: none;
-}
-
-.demo .p-nav__back:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 560px) {

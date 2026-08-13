@@ -2,19 +2,22 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
-describe("Vietnamese-only public app", () => {
+describe("public app routing and language", () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     window.history.replaceState(null, "", "/");
-    document.documentElement.lang = "vi";
+    document.documentElement.lang = "en";
     document.title = "CarePath";
   });
 
-  it("always renders Vietnamese and exposes no language switch", () => {
+  it("meets the patient in English and keeps Vietnamese one click away", () => {
     localStorage.setItem("carepath-demo-language", "en");
     render(<App />);
 
-    expect(document.documentElement.lang).toBe("vi");
+    // The root language follows the audience of the route, not the company:
+    // this one is the patient's. See decision 0023.
+    expect(document.documentElement.lang).toBe("en");
     // The app no longer writes the title: index.html owns it, so it is correct
     // for a crawler and a link preview before any JS runs. This used to
     // overwrite it from strings.ts with "Bớt gõ bệnh án", the retired
@@ -22,15 +25,52 @@ describe("Vietnamese-only public app", () => {
     expect(document.title).not.toContain("Bớt gõ bệnh án");
     expect(
       screen.getByRole("heading", {
-        name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
+        name: "Healthcare in Vietnam, without navigating it alone.",
       }),
     ).toBeInTheDocument();
-    // The page now offers English so a non-Vietnamese judge or patient can read
-    // it; the document root stays vi because that is the clinic's language.
-    expect(screen.getByRole("button", { name: "Switch to English" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Chuyển sang tiếng Việt" }),
+    ).toBeInTheDocument();
     expect(
       document.querySelector('a[href*="phien-dich-y-khoa"], a[href*="console"]'),
     ).toBeNull();
+  });
+
+  it("serves the care journey and the episode as their own routes", () => {
+    window.history.replaceState(null, "", "/get-care/");
+    render(<App />);
+
+    expect(
+      screen.getByRole("heading", { name: "What do you need help with?" }),
+    ).toBeInTheDocument();
+    // Neither patient route may reach for the network or the microphone.
+    expect(document.querySelector("input[type=file]")).toBeNull();
+  });
+
+  it("shows an empty episode rather than an error when there is none", () => {
+    window.history.replaceState(null, "", "/my-carepath/");
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "No care episode yet" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start a care journey" })).toHaveAttribute(
+      "href",
+      "/get-care/",
+    );
+  });
+
+  it("keeps the clinician's routes Vietnamese", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ asr_ready: true, llm_ready: true }),
+      }),
+    );
+    window.history.replaceState(null, "", "/kham-song-ngu/");
+    render(<App />);
+
+    expect(document.documentElement.lang).toBe("vi");
+    vi.unstubAllGlobals();
   });
 
   it("replaces the legacy #/scribe route with the canonical clinical-note path", async () => {
@@ -80,7 +120,7 @@ describe("Vietnamese-only public app", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Người bệnh nước ngoài rời phòng khám với tờ giấy họ không đọc được.",
+        name: "Healthcare in Vietnam, without navigating it alone.",
       }),
     ).toBeInTheDocument();
     vi.unstubAllGlobals();

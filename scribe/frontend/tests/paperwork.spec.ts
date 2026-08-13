@@ -178,8 +178,10 @@ test("a backend that cannot read documents says so instead of offering to try", 
 
 test("the landing page offers the paperwork door", async ({ page }) => {
   await page.goto("http://127.0.0.1:4173/");
+  // Promoted to a hero CTA by the pivot: someone already holding Vietnamese
+  // paper should not have to walk the first four steps of the journey.
   await expect(
-    page.getByRole("link", { name: "Dịch giấy tờ cho người bệnh" }),
+    page.getByRole("link", { name: "I already have a prescription" }).first(),
   ).toHaveAttribute("href", "/dich-giay-to/");
 });
 
